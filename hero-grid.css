@@ -35,9 +35,9 @@
 @media(prefers-reduced-motion:reduce){.hero-reveal{display:none}}
 .hero-bg{inset:0;overflow:hidden;background:none;filter:none}.hero-bg img{position:absolute;left:0;top:-14.75%;width:107.08%;height:114.75%;max-width:none;object-fit:fill}
 .hero-shade{display:none}
-.hero-title{left:7.6563%;right:7.6563%;top:174px;z-index:4;font-size:clamp(56px,8.75vw,168px);line-height:.9;letter-spacing:1px;text-shadow:none}.hero-title span+span{margin-top:15px}
-.hero-services{left:5.2083%;top:52.9%;display:flex;flex-direction:column;gap:10px;padding:30px;font-family:var(--sans);font-size:18px;font-weight:400;line-height:1.2;letter-spacing:-.05em;font-synthesis:none;white-space:nowrap;background:rgba(0,0,0,.4);backdrop-filter:blur(2px)}.hero-services p{margin:0;font:inherit}
-.hero-description{left:69.2188%;right:auto;top:821px;bottom:auto;width:25.5729%;height:125px;margin:0;padding:28px 30px 30px;overflow:clip;border-left:0;color:#fff;font-family:var(--sans);font-size:18px;font-weight:400;line-height:1.2;letter-spacing:-.05em;font-synthesis:none;background:rgba(0,0,0,.4);backdrop-filter:blur(2px)}
+.hero-title{left:7.6563%;right:7.6563%;top:174px;z-index:4;font-size:clamp(56px,8.75vw,168px);line-height:.9;letter-spacing:1.68px;text-shadow:none}.hero-title span+span{margin-top:15px}
+.hero-services{left:5.2083%;top:52.9%;display:flex;flex-direction:column;gap:10px;padding:30px;font-family:var(--sans);font-size:18px;font-weight:400;line-height:1.2;letter-spacing:0;font-synthesis:none;white-space:nowrap;background:rgba(0,0,0,.4);backdrop-filter:blur(2px)}.hero-services p{margin:0;font:inherit}
+.hero-description{left:69.2188%;right:auto;top:820px;bottom:auto;width:25.5729%;height:126px;margin:0;padding:30px;overflow:clip;border-left:0;color:#fff;font-family:var(--sans);font-size:18px;font-weight:400;line-height:1.2;letter-spacing:0;font-synthesis:none;background:rgba(0,0,0,.4);backdrop-filter:blur(2px)}
 .grid-line{background-color:#858585;box-shadow:none;opacity:.55;filter:grayscale(1)}
 .grid-top{left:50%;top:95px;width:100%;height:2px;transform:translateX(-50%) rotate(180deg)}
 .grid-bottom{left:5.3125%;top:946px;width:89.4792%;height:2px;transform:rotate(180deg)}
@@ -53,7 +53,7 @@
 /* Responsive hero layouts based on Figma frames 1960:6327 (tablet) and 2221:10430 (mobile). */
 .hero-copy-group{display:contents}
 @media (min-width:601px) and (max-width:1199px){
-  .hero{box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;gap:48px;width:100%;height:clamp(667px,65.14vw,800px);min-height:667px;padding:120px clamp(24px,4.6875vw,48px) 48px}
+  .hero{box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;gap:48px;width:100%;height:clamp(689px,67.285vw,800px);min-height:689px;padding:120px clamp(24px,4.6875vw,48px) 48px}
   .hero-bg{inset:0;overflow:hidden}
   .hero-bg img{left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:center}
   .hero-grid{display:none}
@@ -61,9 +61,10 @@
   .hero-title span+span{margin-top:0}
   .hero-copy-group{position:relative;display:flex;flex-direction:column;gap:15px;width:100%}
   .hero-services,.hero-description{position:relative;inset:auto;transform:none;box-sizing:border-box;width:min(420px,100%);max-width:420px;height:auto;min-height:0;margin:0;padding:24px;overflow:visible;border:0;border-left:0;color:#fff;background:rgba(0,0,0,.4);backdrop-filter:blur(2px)}
-  .hero-services{display:flex;flex-direction:column;gap:10px;font-family:var(--sans);font-size:18px;font-weight:400;line-height:1.2;letter-spacing:-.9px;white-space:nowrap}
+  .hero-services{width:470px;max-width:100%}
+  .hero-services{display:flex;flex-direction:column;gap:10px;font-family:var(--sans);font-size:18px;font-weight:400;line-height:1.2;letter-spacing:0;white-space:nowrap}
   .hero-services p{margin:0;font:inherit}
-  .hero-description{font-family:var(--sans);font-size:18px;font-weight:400;line-height:1.2;letter-spacing:-.9px}
+  .hero-description{font-family:var(--sans);font-size:18px;font-weight:400;line-height:1.2;letter-spacing:0}
 }
 @media(max-width:600px){
   .topbar{position:relative;inset:auto}
