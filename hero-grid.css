@@ -91,11 +91,21 @@
   .hero-services,.hero-description{position:relative;inset:auto;transform:none;box-sizing:border-box;width:100%;max-width:420px;height:auto;min-height:0;margin:0;padding:8px;overflow:visible;border:0;border-left:0;color:#fff;background:rgba(0,0,0,.4);backdrop-filter:blur(2px)}
   .hero-services{display:flex;flex-direction:column;gap:10px;font-family:var(--sans);font-size:14px;font-weight:400;line-height:1.2;letter-spacing:0;white-space:normal}
   .hero-services li{margin:0;font:inherit}
-  .hero-services li:nth-child(1){width:min(187px,100%)}
-  .hero-services li:nth-child(2){width:min(299px,100%)}
-  .hero-services li:nth-child(3){width:min(291px,100%)}
+  .hero-services .hero__service-item{width:100%;max-width:none}
   .hero-description{font-family:var(--sans);font-size:16px;font-weight:400;line-height:1.2;letter-spacing:.16px}
 }
+
+/* Align the mobile hero blocks to the viewport content rail in Figma. */
+@media(max-width:600px){
+  .hero-copy-group{width:calc(100% + 24px);margin-left:-12px}
+  .hero-services-anchor{width:100%}
+  .hero-services-anchor .hero__services{width:100%;max-width:100%}
+  .hero-services,.hero-description{width:100%;max-width:420px}
+  .hero-services .hero__service-item{width:100%;max-width:none}
+  .hero-description{padding-top:7px}
+}
+@media (min-width:601px) and (max-width:1199px){.hero-description{padding-top:23px}}
+@media (min-width:1200px){.hero-description{padding-top:29px}}
 
 /* Header and expanded navigation from Figma frames 2253:9739, 1958:6987, 2221:10312. */
 .topbar{--menu-gutter:max(50px,calc((100vw - 1720px)/2))}
@@ -138,7 +148,7 @@
 
 @media (min-width:901px) and (max-width:1199px){
   .topbar{--menu-gutter:48px;padding-inline:48px}
-  .menu-toggle{right:100px}
+  .menu-toggle{right:48px;align-items:center}
   .menu-toggle{font-size:clamp(28px,3.2vw,36px)}
   .menu-drawer .nav{padding-inline:32px}
   .menu-social{gap:clamp(6px,1.3vw,15px)}
@@ -146,11 +156,13 @@
 }
 @media(max-width:900px){
   .topbar{--menu-gutter:clamp(18px,4.6875vw,48px);height:95px;padding:15px var(--menu-gutter)}
-  .menu-toggle{right:clamp(32px,16.13vw,100px)}
+  .menu-toggle{right:clamp(18px,4.6875vw,48px)}
   .brand>span{width:auto;font-size:clamp(14px,1.8vw,18px)}
   .menu-toggle{gap:5px;font-size:clamp(22px,3.6vw,32px)}
   .menu-icon{width:34px;height:24px}
   .menu-drawer .nav{width:100vw;padding:clamp(88px,14vh,118px) clamp(32px,16.13vw,100px) 20px clamp(20px,9.677vw,60px);gap:clamp(28px,8.1vw,50px)}
+  .menu-toggle{align-items:center}
+  .menu-drawer .nav{padding-left:clamp(20px,6vw,48px);padding-right:clamp(20px,6vw,48px)}
   .menu-nav-links{gap:clamp(24px,4.84vw,30px)}
   .menu-nav-links a{font-size:clamp(32px,7.75vw,48px)}
 }
@@ -190,7 +202,7 @@
   .topbar .brand{height:35px;gap:2px}
   .topbar .brand-mark{width:17px;height:21px}
   .topbar .brand>span{width:auto;font-size:6px;line-height:.95;letter-spacing:0}
-  .menu-toggle{top:9px;right:12px;align-items:center;gap:3px;font-size:13px;line-height:1;letter-spacing:-.5px}
+  .menu-toggle{top:11px;right:12px;align-items:center;gap:3px;font-size:13px;line-height:1;letter-spacing:-.5px}
   .menu-icon{width:14px;height:12px}
   .menu-icon i{height:1px}
   .menu-icon i:nth-child(1){top:1px}
@@ -198,9 +210,10 @@
   .menu-icon i:nth-child(3){top:9px}
   .menu-drawer.is-open .menu-icon i:nth-child(1),
   .menu-drawer.is-open .menu-icon i:nth-child(3){top:5px}
+  .menu-drawer .nav{padding-left:clamp(16px,9.6vw,40px);padding-right:clamp(16px,9.6vw,40px)}
   .hero{gap:42px;padding-top:48px}
   .hero-copy-group{gap:26px}
   .hero-services-anchor{width:100%}
-  .hero-services-anchor .hero__services{width:100%;max-width:100%}
+  .hero-services-anchor .hero__services{width:100%;max-width:420px}
   .hero-description{font-size:14px;letter-spacing:0}
 }
