@@ -95,6 +95,18 @@
   .hero-description{font-family:var(--sans);font-size:16px;font-weight:400;line-height:1.2;letter-spacing:.16px}
 }
 
+/* Align the mobile hero blocks to the viewport content rail in Figma. */
+@media(max-width:600px){
+  .hero-copy-group{width:calc(100% + 24px);margin-left:-12px}
+  .hero-services-anchor{width:100%}
+  .hero-services-anchor .hero__services{width:100%;max-width:100%}
+  .hero-services,.hero-description{width:100%;max-width:420px}
+  .hero-services .hero__service-item{width:100%;max-width:none}
+  .hero-description{padding-top:7px}
+}
+@media (min-width:601px) and (max-width:1199px){.hero-description{padding-top:23px}}
+@media (min-width:1200px){.hero-description{padding-top:29px}}
+
 /* Header and expanded navigation from Figma frames 2253:9739, 1958:6987, 2221:10312. */
 .topbar{--menu-gutter:max(50px,calc((100vw - 1720px)/2))}
 .menu-drawer{position:fixed;inset:0;z-index:60;display:block;pointer-events:none}
@@ -192,7 +204,10 @@
   .topbar .brand-mark{width:17px;height:21px}
   .topbar .brand>span{width:auto;font-size:6px;line-height:.95;letter-spacing:0}
   .menu-toggle{top:11px;right:12px;align-items:center;gap:3px;font-size:13px;line-height:1;letter-spacing:-.5px}
+<<<<<<< HEAD
   .menu-toggle>span:first-child{top:-.08em}
+=======
+>>>>>>> 23477bdca480ea501aa28caaef954e4000755081
   .menu-icon{width:14px;height:12px}
   .menu-icon i{height:1px}
   .menu-icon i:nth-child(1){top:1px}
