@@ -243,6 +243,7 @@ const setMenuOpen = (open) => {
   menuButton.setAttribute('aria-expanded', String(open));
   menuButton.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
   menuDrawer.classList.toggle('is-open', open);
+  document.documentElement.classList.toggle('menu-open', open);
   document.body.classList.toggle('menu-open', open);
 };
 

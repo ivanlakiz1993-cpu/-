@@ -99,7 +99,7 @@
 
 /* Header and expanded navigation from Figma frames 2253:9739, 1958:6987, 2221:10312. */
 .topbar{--menu-gutter:max(50px,calc((100vw - 1720px)/2))}
-.menu-drawer{position:fixed;inset:0;z-index:12;display:block;pointer-events:none}
+.menu-drawer{position:fixed;inset:0;z-index:60;display:block;pointer-events:none}
 .menu-drawer::before{position:absolute;inset:0;content:"";z-index:0;background:rgba(0,0,0,.58);opacity:0;visibility:hidden;transition:opacity .55s ease,visibility 0s linear .75s;pointer-events:none}
 .menu-toggle{position:absolute;top:35px;right:100px;z-index:3;display:flex;align-items:flex-start;gap:5px;padding:0;font-family:var(--display);font-size:36px;line-height:1.2;letter-spacing:0;text-transform:uppercase;pointer-events:auto}
 .menu-icon{position:relative;display:block;flex:none;width:41px;height:24px;max-width:none;overflow:visible}
@@ -107,7 +107,7 @@
 .menu-icon i:nth-child(1){top:2px}
 .menu-icon i:nth-child(2){top:11px}
 .menu-icon i:nth-child(3){top:20px}
-.menu-drawer .nav{position:absolute;inset:0 0 0 auto;z-index:1;display:flex;flex:initial;flex-direction:column;justify-content:space-between;gap:50px;width:min(760px,54vw);height:100%;min-width:0;min-height:0;padding:clamp(88px,14vh,118px) 100px 20px 60px;border:0;background:#070707;overflow-y:auto;opacity:0;visibility:hidden;transform:translate3d(100%,0,0);transition:transform .78s cubic-bezier(.76,0,.24,1),opacity .35s ease,visibility 0s linear .78s;pointer-events:none;will-change:transform}
+.menu-drawer .nav{position:fixed;inset:0 0 0 auto;z-index:1;display:flex;flex:initial;flex-direction:column;justify-content:space-between;gap:50px;width:min(760px,54vw);height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;min-width:0;min-height:0;padding:clamp(88px,14vh,118px) 100px 20px 60px;border:0;background:#070707;overflow-y:auto;overscroll-behavior:contain;opacity:0;visibility:hidden;transform:translate3d(100%,0,0);transition:transform .78s cubic-bezier(.76,0,.24,1),opacity .35s ease,visibility 0s linear .78s;pointer-events:none;will-change:transform}
 .menu-drawer.is-open{pointer-events:auto}
 .menu-drawer.is-open::before{opacity:1;visibility:visible;transition:opacity .55s ease,visibility 0s}
 .menu-drawer.is-open .nav{opacity:1;visibility:visible;transform:translate3d(0,0,0);transition:transform .78s cubic-bezier(.76,0,.24,1),opacity .35s ease,visibility 0s;pointer-events:auto}
@@ -145,6 +145,9 @@
   .topbar{--menu-gutter:48px;padding-inline:48px}
   .menu-toggle{right:100px}
   .menu-toggle{font-size:clamp(28px,3.2vw,36px)}
+  .menu-drawer .nav{padding-inline:32px}
+  .menu-social{gap:clamp(6px,1.3vw,15px)}
+  .menu-social__link{width:clamp(48px,6.7vw,80px);height:clamp(48px,6.7vw,80px)}
 }
 @media(max-width:900px){
   .topbar{--menu-gutter:clamp(18px,4.6875vw,48px);height:95px;padding:15px var(--menu-gutter)}
