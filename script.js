@@ -1,5 +1,7 @@
 const menuButton = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('#site-nav');
+const menuDrawer = document.querySelector('.menu-drawer');
+const menuIcon = document.querySelector('.menu-icon');
 
 const hero = document.querySelector('.hero');
 const heroReveal = document.querySelector('.hero-reveal');
@@ -238,17 +240,31 @@ if (hero && heroReveal && !window.matchMedia('(prefers-reduced-motion: reduce)')
   }
 }
 
-menuButton.addEventListener('click', () => {
-  const open = menuButton.getAttribute('aria-expanded') !== 'true';
+const setMenuOpen = (open) => {
   menuButton.setAttribute('aria-expanded', String(open));
-  navigation.classList.toggle('open', open);
+  menuButton.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+  menuDrawer.classList.toggle('is-open', open);
+  menuIcon.src = open ? menuIcon.dataset.openSrc : menuIcon.dataset.closedSrc;
+  document.body.classList.toggle('menu-open', open);
+};
+
+menuButton.addEventListener('click', () => {
+  setMenuOpen(menuButton.getAttribute('aria-expanded') !== 'true');
 });
 
 navigation.addEventListener('click', (event) => {
-  if (event.target.closest('a')) {
-    navigation.classList.remove('open');
-    menuButton.setAttribute('aria-expanded', 'false');
+  if (event.target.closest('a')) setMenuOpen(false);
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && menuButton.getAttribute('aria-expanded') === 'true') {
+    setMenuOpen(false);
+    menuButton.focus();
   }
+});
+
+document.addEventListener('pointerdown', (event) => {
+  if (menuButton.getAttribute('aria-expanded') === 'true' && !menuDrawer.contains(event.target)) setMenuOpen(false);
 });
 
 document.querySelector('.contact-form').addEventListener('submit', (event) => {
