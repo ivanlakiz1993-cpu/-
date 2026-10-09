@@ -204,10 +204,7 @@
   .topbar .brand-mark{width:17px;height:21px}
   .topbar .brand>span{width:auto;font-size:6px;line-height:.95;letter-spacing:0}
   .menu-toggle{top:11px;right:12px;align-items:center;gap:3px;font-size:13px;line-height:1;letter-spacing:-.5px}
-<<<<<<< HEAD
   .menu-toggle>span:first-child{top:-.08em}
-=======
->>>>>>> 23477bdca480ea501aa28caaef954e4000755081
   .menu-icon{width:14px;height:12px}
   .menu-icon i{height:1px}
   .menu-icon i:nth-child(1){top:1px}
