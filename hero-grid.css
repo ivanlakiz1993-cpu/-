@@ -174,3 +174,24 @@
   .menu-social__link--telegram img{width:68%;height:60%}
   .menu-social__max-icon{width:60%;height:60%}
 }
+
+/* Keep the logo and menu together above the page while scrolling. */
+.topbar{position:fixed;inset:0 0 auto;z-index:55;background:rgba(0,0,0,.9);backdrop-filter:blur(5px)}
+@media (min-width:601px) and (max-width:1199px){
+  .hero{height:clamp(667px,65.14vw,800px);min-height:667px}
+}
+@media(max-width:600px){
+  .topbar{--menu-gutter:12px;height:35px;padding:0 var(--menu-gutter)}
+  .topbar .brand{height:35px;gap:2px}
+  .topbar .brand-mark{width:17px;height:21px}
+  .topbar .brand>span{width:auto;font-size:6px;line-height:.95;letter-spacing:0}
+  .menu-toggle{top:9px;right:12px;align-items:center;gap:3px;font-size:13px;line-height:1;letter-spacing:-.5px}
+  .menu-icon{width:14px;height:12px}
+  .menu-icon i{height:1px}
+  .menu-icon i:nth-child(1){top:1px}
+  .menu-icon i:nth-child(2){top:5px}
+  .menu-icon i:nth-child(3){top:9px}
+  .menu-drawer.is-open .menu-icon i:nth-child(1),
+  .menu-drawer.is-open .menu-icon i:nth-child(3){top:5px}
+  .hero{padding-top:48px}
+}
