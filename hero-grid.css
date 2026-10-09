@@ -100,31 +100,26 @@
 /* Header and expanded navigation from Figma frames 2253:9739, 1958:6987, 2221:10312. */
 .topbar{--menu-gutter:max(50px,calc((100vw - 1720px)/2))}
 .menu-drawer{position:fixed;inset:0;z-index:60;display:block;pointer-events:none}
-.menu-drawer::before{position:absolute;inset:0;content:"";z-index:0;background:rgba(0,0,0,.58);opacity:0;visibility:hidden;transition:opacity .55s ease,visibility 0s linear .75s;pointer-events:none}
+.menu-drawer::before{position:absolute;inset:0;content:"";z-index:0;background:rgba(0,0,0,.58);opacity:1;visibility:hidden;transform:translate3d(100%,0,0);transition:transform .78s cubic-bezier(.76,0,.24,1),visibility 0s linear .78s;pointer-events:none}
 .menu-toggle{position:absolute;top:35px;right:100px;z-index:3;display:flex;align-items:flex-start;gap:5px;padding:0;font-family:var(--display);font-size:36px;line-height:1.2;letter-spacing:0;text-transform:uppercase;pointer-events:auto}
 .menu-icon{position:relative;display:block;flex:none;width:41px;height:24px;max-width:none;overflow:visible}
 .menu-icon i{position:absolute;left:0;display:block;width:100%;height:2px;border-radius:2px;background:currentColor;transform-origin:center;transition:top .42s cubic-bezier(.76,0,.24,1),transform .42s cubic-bezier(.76,0,.24,1),opacity .22s ease}
 .menu-icon i:nth-child(1){top:2px}
 .menu-icon i:nth-child(2){top:11px}
 .menu-icon i:nth-child(3){top:20px}
-.menu-drawer .nav{position:fixed;inset:0 0 0 auto;z-index:1;display:flex;flex:initial;flex-direction:column;justify-content:space-between;gap:50px;width:min(760px,54vw);height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;min-width:0;min-height:0;padding:clamp(88px,14vh,118px) 100px 20px 60px;border:0;background:#070707;overflow-y:auto;overscroll-behavior:contain;opacity:0;visibility:hidden;transform:translate3d(100%,0,0);transition:transform .78s cubic-bezier(.76,0,.24,1),opacity .35s ease,visibility 0s linear .78s;pointer-events:none;will-change:transform}
+.menu-drawer .nav{position:fixed;inset:0 0 0 auto;z-index:1;display:flex;flex:initial;flex-direction:column;justify-content:space-between;gap:50px;width:min(760px,54vw);height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;min-width:0;min-height:0;padding:clamp(88px,14vh,118px) 100px 20px 60px;border:0;background:#070707;overflow-y:auto;overscroll-behavior:contain;opacity:1;visibility:hidden;transform:translate3d(100%,0,0);transition:transform .78s cubic-bezier(.76,0,.24,1),visibility 0s linear .78s;pointer-events:none;will-change:transform}
 .menu-drawer.is-open{pointer-events:auto}
-.menu-drawer.is-open::before{opacity:1;visibility:visible;transition:opacity .55s ease,visibility 0s}
-.menu-drawer.is-open .nav{opacity:1;visibility:visible;transform:translate3d(0,0,0);transition:transform .78s cubic-bezier(.76,0,.24,1),opacity .35s ease,visibility 0s;pointer-events:auto}
+.menu-drawer.is-open::before{visibility:visible;transform:translate3d(0,0,0);transition:transform .78s cubic-bezier(.76,0,.24,1),visibility 0s}
+.menu-drawer.is-open .nav{visibility:visible;transform:translate3d(0,0,0);transition:transform .78s cubic-bezier(.76,0,.24,1),visibility 0s;pointer-events:auto}
 .menu-drawer.is-open .menu-toggle{align-self:flex-end;flex:none}
 .menu-drawer.is-open .menu-icon i:nth-child(1){top:11px;transform:rotate(45deg)}
 .menu-drawer.is-open .menu-icon i:nth-child(2){opacity:0;transform:scaleX(.25)}
 .menu-drawer.is-open .menu-icon i:nth-child(3){top:11px;transform:rotate(-45deg)}
 .menu-open .topbar{z-index:50;background:transparent;backdrop-filter:none}
 .menu-nav-links{display:flex;flex-direction:column;align-items:flex-start;gap:30px}
-.menu-nav-links a{color:#f4f4f4;font-family:var(--display);font-size:48px;font-weight:400;line-height:.9;letter-spacing:.48px;text-transform:uppercase;white-space:nowrap;opacity:0;transform:translate3d(28px,0,0);transition:color .2s ease,opacity .36s ease,transform .48s cubic-bezier(.2,.75,.25,1)}
-.menu-drawer.is-open .menu-nav-links a{opacity:1;transform:translate3d(0,0,0)}
-.menu-drawer.is-open .menu-nav-links a:nth-child(1){transition-delay:.18s,.18s,.18s}
-.menu-drawer.is-open .menu-nav-links a:nth-child(2){transition-delay:.23s,.23s,.23s}
-.menu-drawer.is-open .menu-nav-links a:nth-child(3){transition-delay:.28s,.28s,.28s}
-.menu-drawer.is-open .menu-nav-links a:nth-child(4){transition-delay:.33s,.33s,.33s}
-.menu-drawer.is-open .menu-nav-links a:nth-child(5){transition-delay:.38s,.38s,.38s}
-.menu-drawer.is-open .menu-nav-links a:nth-child(6){transition-delay:.43s,.43s,.43s}
+.menu-nav-links a{color:#f4f4f4;font-family:var(--display);font-size:48px;font-weight:400;line-height:.9;letter-spacing:.48px;text-transform:uppercase;white-space:nowrap;transition:color .2s ease}
+.menu-letter{display:inline-block;margin-right:.48px;opacity:0;filter:blur(6px);transform:translate3d(0,.38em,0) rotateX(-48deg);transform-origin:50% 100%;backface-visibility:hidden;transition:opacity .28s ease,filter .34s ease,transform .42s cubic-bezier(.2,.75,.25,1);transition-delay:0ms}
+.menu-drawer.is-open .menu-letter{opacity:1;filter:blur(0);transform:translate3d(0,0,0) rotateX(0);transition-delay:var(--letter-delay,0ms)}
 .menu-nav-links a:hover,.menu-nav-links a:focus-visible{color:#a5a5a5}
 .menu-social{display:flex;align-items:center;gap:15px;flex:none}
 .menu-social__link{position:relative;display:grid;place-items:center;flex:none;width:80px;height:80px;overflow:hidden;border:1.6px solid #6e6e6e;border-radius:8px;transition:border-color .2s ease}
@@ -139,7 +134,7 @@
 .menu-social__max-color{position:absolute;inset:-50.29%}
 .menu-social__max-color img{width:100%;height:100%;object-fit:fill}
 .menu-open{overflow:hidden}
-@media(prefers-reduced-motion:reduce){.menu-drawer::before,.menu-drawer .nav,.menu-icon i,.menu-nav-links a{transition-duration:.01ms!important;transition-delay:0ms!important}}
+@media(prefers-reduced-motion:reduce){.menu-drawer::before,.menu-drawer .nav,.menu-icon i,.menu-nav-links a,.menu-letter{transition-duration:.01ms!important;transition-delay:0ms!important}}
 
 @media (min-width:901px) and (max-width:1199px){
   .topbar{--menu-gutter:48px;padding-inline:48px}

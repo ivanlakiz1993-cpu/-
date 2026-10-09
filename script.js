@@ -2,6 +2,19 @@ const menuButton = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('#site-nav');
 const menuDrawer = document.querySelector('.menu-drawer');
 
+navigation.querySelectorAll('.menu-nav-links a').forEach((link, rowIndex) => {
+  const label = link.textContent.trim();
+  link.setAttribute('aria-label', label);
+  link.replaceChildren(...Array.from(label, (character, letterIndex) => {
+    const letter = document.createElement('span');
+    letter.className = 'menu-letter';
+    letter.setAttribute('aria-hidden', 'true');
+    letter.textContent = character;
+    letter.style.setProperty('--letter-delay', `${70 + rowIndex * 35 + letterIndex * 12}ms`);
+    return letter;
+  }));
+});
+
 const hero = document.querySelector('.hero');
 const heroReveal = document.querySelector('.hero-reveal');
 const benefitsSection = document.querySelector('.benefits');
