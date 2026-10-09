@@ -1,7 +1,6 @@
 const menuButton = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('#site-nav');
 const menuDrawer = document.querySelector('.menu-drawer');
-const menuIcon = document.querySelector('.menu-icon img');
 
 const hero = document.querySelector('.hero');
 const heroReveal = document.querySelector('.hero-reveal');
@@ -244,7 +243,6 @@ const setMenuOpen = (open) => {
   menuButton.setAttribute('aria-expanded', String(open));
   menuButton.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
   menuDrawer.classList.toggle('is-open', open);
-  menuIcon.src = open ? menuIcon.dataset.openSrc : menuIcon.dataset.closedSrc;
   document.body.classList.toggle('menu-open', open);
 };
 
