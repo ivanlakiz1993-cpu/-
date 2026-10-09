@@ -99,10 +99,10 @@
 
 /* Header and expanded navigation from Figma frames 2253:9739, 1958:6987, 2221:10312. */
 .topbar{--menu-gutter:max(50px,calc((100vw - 1720px)/2))}
-.menu-drawer{position:absolute;top:15px;right:100px;z-index:8;display:flex;flex-direction:column;align-items:flex-end;padding:20px;background:rgba(0,0,0,.6)}
+.menu-drawer{position:absolute;top:15px;right:100px;z-index:8;display:flex;flex-direction:column;align-items:flex-end;padding:20px 0;background:rgba(0,0,0,.6)}
 .menu-toggle{align-items:flex-start;gap:5px;padding:0;font-family:var(--display);font-size:36px;line-height:1.2;letter-spacing:0;text-transform:uppercase}
 .menu-icon{display:block;width:41px;height:24px;max-width:none;object-fit:contain}
-.menu-drawer.is-open{position:absolute;top:15px;right:var(--menu-gutter);width:min(500px,calc(100vw - var(--menu-gutter) - var(--menu-gutter)));height:min(843px,calc(100vh - 30px));padding:20px;gap:50px;align-items:stretch;background:#000;z-index:12;overflow:hidden}
+.menu-drawer.is-open{position:absolute;top:15px;right:var(--menu-gutter);width:min(800px,max(460px,42vw),calc(100vw - var(--menu-gutter) - var(--menu-gutter)));height:min(825px,calc(100vh - 30px));padding:20px 0;gap:50px;align-items:stretch;background:#000;z-index:12;overflow:hidden}
 .menu-drawer.is-open .menu-toggle{align-self:flex-end;flex:none}
 .menu-drawer .nav{position:static;display:none;flex:1;flex-direction:column;justify-content:space-between;gap:0;width:100%;height:auto;min-width:0;min-height:0;padding:0;border:0;background:transparent;overflow-y:auto}
 .menu-drawer.is-open .nav{display:flex}
@@ -117,8 +117,10 @@
 .menu-social__link--vk img{width:100%;height:100%}
 .menu-social__link--rutube img{height:33.6px}
 .menu-social__link--telegram img{width:43.2px;height:38.4px}
-.menu-social__link--max span{position:relative;display:block;width:38.4px;height:38.4px;mask-image:url("https://www.figma.com/api/mcp/asset/083b1cae-199f-49b7-9906-2a2b261a816f/329b3.svg"),url("https://www.figma.com/api/mcp/asset/083b1cae-199f-49b7-9906-2a2b261a816f/b9012.svg");mask-position:center;mask-size:contain;mask-repeat:no-repeat;-webkit-mask-image:url("https://www.figma.com/api/mcp/asset/083b1cae-199f-49b7-9906-2a2b261a816f/329b3.svg"),url("https://www.figma.com/api/mcp/asset/083b1cae-199f-49b7-9906-2a2b261a816f/b9012.svg");-webkit-mask-position:center;-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat}
-.menu-social__link--max span img{width:100%;height:100%;object-fit:cover}
+.menu-social__max-icon{position:relative;display:block;width:38.4px;height:38.4px;overflow:hidden}
+.menu-social__max-mask{position:absolute;inset:-20.93% -20.75% -21.09% -21.29%;mask-image:url("https://www.figma.com/api/mcp/asset/f7b28ece-6598-4d5d-bf1f-8243daa1e938/329b3.svg"),url("https://www.figma.com/api/mcp/asset/f7b28ece-6598-4d5d-bf1f-8243daa1e938/b9012.svg");mask-position:8.175px 8.037px,8.176px 8.137px;mask-size:38.4px 38.4px,38.356px 38.209px;mask-repeat:no-repeat;-webkit-mask-image:url("https://www.figma.com/api/mcp/asset/f7b28ece-6598-4d5d-bf1f-8243daa1e938/329b3.svg"),url("https://www.figma.com/api/mcp/asset/f7b28ece-6598-4d5d-bf1f-8243daa1e938/b9012.svg");-webkit-mask-position:8.175px 8.037px,8.176px 8.137px;-webkit-mask-size:38.4px 38.4px,38.356px 38.209px;-webkit-mask-repeat:no-repeat}
+.menu-social__max-color{position:absolute;inset:-50.29%}
+.menu-social__max-color img{width:100%;height:100%;object-fit:fill}
 .menu-open{overflow:hidden}
 
 @media (min-width:901px) and (max-width:1199px){
@@ -132,7 +134,7 @@
   .brand>span{width:auto;font-size:clamp(14px,1.8vw,18px)}
   .menu-toggle{gap:5px;font-size:clamp(22px,3.6vw,32px)}
   .menu-icon{width:34px;height:24px}
-  .menu-drawer.is-open{top:12px;right:100px;width:min(500px,calc(100vw - 100px - var(--menu-gutter)));height:min(843px,calc(100dvh - 24px));padding:20px;gap:36px}
+  .menu-drawer.is-open{top:12px;right:100px;width:min(800px,max(460px,42vw),calc(100vw - 100px - var(--menu-gutter)));height:min(825px,calc(100dvh - 24px));padding:20px 0;gap:36px}
   .menu-nav-links{gap:24px}
   .menu-nav-links a{font-size:clamp(32px,5.4vw,44px)}
 }
@@ -154,6 +156,5 @@
   .menu-social__link--vk img{width:100%;height:100%}
   .menu-social__link--rutube img{height:60%}
   .menu-social__link--telegram img{width:68%;height:60%}
-  .menu-social__link--max span{width:60%;height:60%}
-  .menu-social__link--max span img{width:100%;height:100%}
+  .menu-social__max-icon{width:60%;height:60%}
 }
