@@ -1,7 +1,7 @@
 const menuButton = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('#site-nav');
 const menuDrawer = document.querySelector('.menu-drawer');
-const menuIcon = document.querySelector('.menu-icon');
+const menuIcon = document.querySelector('.menu-icon img');
 
 const hero = document.querySelector('.hero');
 const heroReveal = document.querySelector('.hero-reveal');
@@ -254,6 +254,10 @@ menuButton.addEventListener('click', () => {
 
 navigation.addEventListener('click', (event) => {
   if (event.target.closest('a')) setMenuOpen(false);
+});
+
+menuDrawer.addEventListener('click', (event) => {
+  if (menuButton.getAttribute('aria-expanded') === 'true' && event.target === menuDrawer) setMenuOpen(false);
 });
 
 document.addEventListener('keydown', (event) => {
