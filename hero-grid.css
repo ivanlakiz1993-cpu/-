@@ -179,6 +179,11 @@
 .topbar{position:fixed;inset:0 0 auto;z-index:55;background:rgba(0,0,0,.9);backdrop-filter:blur(5px)}
 @media (min-width:601px) and (max-width:1199px){
   .hero{height:clamp(667px,65.14vw,800px);min-height:667px}
+  .hero-title{font-size:clamp(42px,7.8125vw,80px)}
+  .hero-services-anchor{width:min(524px,100%)}
+  .hero-services-anchor .hero__services{width:100%;max-width:100%}
+  .hero-services{width:100%;max-width:524px}
+  .hero-description{width:min(524px,100%);max-width:524px}
 }
 @media(max-width:600px){
   .topbar{--menu-gutter:12px;height:35px;padding:0 var(--menu-gutter)}
@@ -193,5 +198,9 @@
   .menu-icon i:nth-child(3){top:9px}
   .menu-drawer.is-open .menu-icon i:nth-child(1),
   .menu-drawer.is-open .menu-icon i:nth-child(3){top:5px}
-  .hero{padding-top:48px}
+  .hero{gap:42px;padding-top:48px}
+  .hero-copy-group{gap:26px}
+  .hero-services-anchor{width:100%}
+  .hero-services-anchor .hero__services{width:100%;max-width:100%}
+  .hero-description{font-size:14px;letter-spacing:0}
 }
