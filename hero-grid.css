@@ -136,14 +136,9 @@
 .menu-social__link{position:relative;display:grid;place-items:center;flex:none;width:80px;height:80px;overflow:hidden;border:1.6px solid #6e6e6e;border-radius:8px;transition:border-color .2s ease}
 .menu-social__link:hover,.menu-social__link:focus-visible{border-color:#f4f4f4}
 .menu-social__link img{display:block;width:38.4px;height:38.4px;max-width:none;object-fit:contain}
-.menu-social__link--vk{border:0;border-radius:0}
-.menu-social__link--vk img{width:100%;height:100%}
+.menu-social__link--vk img{width:53.36px;height:33.296px}
 .menu-social__link--rutube img{height:33.6px}
 .menu-social__link--telegram img{width:43.2px;height:38.4px}
-.menu-social__max-icon{position:relative;display:block;width:38.4px;height:38.4px;overflow:hidden}
-.menu-social__max-mask{position:absolute;inset:-20.93% -20.75% -21.09% -21.29%;mask-image:url("https://www.figma.com/api/mcp/asset/c4ca03ca-5b59-4cac-a785-f526a0ba6b54/329b3.svg"),url("https://www.figma.com/api/mcp/asset/c4ca03ca-5b59-4cac-a785-f526a0ba6b54/b9012.svg");mask-position:50.15% 49.34%,50.15% 50.26%;mask-size:70.08% 70.08%,70% 69.8%;mask-repeat:no-repeat;-webkit-mask-image:url("https://www.figma.com/api/mcp/asset/c4ca03ca-5b59-4cac-a785-f526a0ba6b54/329b3.svg"),url("https://www.figma.com/api/mcp/asset/c4ca03ca-5b59-4cac-a785-f526a0ba6b54/b9012.svg");-webkit-mask-position:50.15% 49.34%,50.15% 50.26%;-webkit-mask-size:70.08% 70.08%,70% 69.8%;-webkit-mask-repeat:no-repeat}
-.menu-social__max-color{position:absolute;inset:-50.29%}
-.menu-social__max-color img{width:100%;height:100%;object-fit:fill}
 .menu-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){.menu-drawer::before,.menu-drawer .nav,.menu-icon i,.menu-nav-links a,.menu-letter{transition-duration:.01ms!important;transition-delay:0ms!important}}
 
@@ -180,12 +175,11 @@
   .menu-nav-links{gap:clamp(15px,4vw,22px)}
   .menu-nav-links a{font-size:clamp(22px,7.5vw,36px)}
   .menu-social{gap:clamp(6px,2vw,8px)}
-  .menu-social__link{width:clamp(32px,12.8vw,52px);height:clamp(32px,12.8vw,52px);border-radius:7px}
+  .menu-social__link{width:44px;height:44px;border-radius:7px}
   .menu-social__link img{width:60%;height:60%}
-  .menu-social__link--vk img{width:100%;height:100%}
+  .menu-social__link--vk img{width:66.7%;height:auto}
   .menu-social__link--rutube img{height:60%}
   .menu-social__link--telegram img{width:68%;height:60%}
-  .menu-social__max-icon{width:60%;height:60%}
 }
 
 /* Keep the logo and menu together above the page while scrolling. */
@@ -212,10 +206,16 @@
   .menu-icon i:nth-child(3){top:9px}
   .menu-drawer.is-open .menu-icon i:nth-child(1),
   .menu-drawer.is-open .menu-icon i:nth-child(3){top:5px}
-  .menu-drawer .nav{padding-left:clamp(16px,9.6vw,40px);padding-right:clamp(16px,9.6vw,40px)}
+  .menu-drawer .nav{padding-left:14px;padding-right:14px}
   .hero{gap:42px;padding-top:48px}
   .hero-copy-group{gap:26px;width:100%;margin-left:0}
   .hero-services-anchor{width:100%}
   .hero-services-anchor .hero__services{width:100%;max-width:420px}
   .hero-description{font-size:14px;letter-spacing:0}
+}
+
+/* Clip only the desktop description backdrop below its upper grid rule. */
+@media(min-width:1200px){
+  .hero-description{background:transparent;backdrop-filter:none;isolation:isolate}
+  .hero-description::before{content:"";position:absolute;inset:1px 0 0;z-index:-1;background:rgba(0,0,0,.4);backdrop-filter:blur(2px);clip-path:inset(0);pointer-events:none}
 }
