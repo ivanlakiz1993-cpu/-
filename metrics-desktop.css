@@ -44,6 +44,22 @@
     background: rgba(0, 0, 0, .4);
   }
 
+  .metrics-desktop__particles {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+  }
+
+  .metrics-desktop.is-animated .metrics-desktop__particles {
+    display: block;
+  }
+
+  .metrics-desktop.is-animated .metrics-desktop__background img {
+    visibility: hidden;
+  }
+
   .metrics-desktop__copy {
     position: absolute;
     left: 5.208333%;
