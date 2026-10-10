@@ -49,7 +49,10 @@
   }
   function updateScroll(){
     const scroll=window.scrollY,entry=smooth((scroll-entryStart)/entryDistance);
-    intro.style.setProperty('--metrics-entry',String(entry));intro.style.setProperty('--hero-opacity',String(1-entry));
+    intro.style.setProperty('--hero-opacity','1');
+    intro.style.setProperty('--metrics-wipe-top',`${(1-entry)*100}%`);
+    intro.style.setProperty('--metrics-wipe-lines',String(Math.sin(Math.PI*entry)));
+    intro.style.setProperty('--metrics-wipe-content',String(smooth((entry-.45)/.55)));
     hero.inert=entry>.98;
     target=Math.max(0,Math.min(1,(scroll-sequenceStart)/sequenceDistance));
     if(scroll<=entryStart||scroll>=end){progress=target;compose();}
@@ -96,7 +99,7 @@
     stop();enabled=desktop.matches&&!reduced.matches&&!contextLost;
     root.classList.toggle('metrics-sequence',enabled);hero.inert=false;
     if(enabled)measure();
-    else {['--hero-opacity','--metrics-entry'].forEach(name=>intro.style.removeProperty(name));stage.classList.remove('is-rendered');}
+    else {['--hero-opacity','--metrics-wipe-top','--metrics-wipe-lines','--metrics-wipe-content'].forEach(name=>intro.style.removeProperty(name));stage.classList.remove('is-rendered');}
   }
   window.addEventListener('scroll',()=>{if(enabled){updateScroll();wake();}},{passive:true});
   window.addEventListener('resize',requestMeasure,{passive:true});
