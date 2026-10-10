@@ -70,7 +70,8 @@
     q.forEach((a,i)=>skinLine(`${name}-frame-${i}`,a,q[(i+1)%4],side,.9,.014));
   }
   for(const side of [-1,1]) {
-    windowPanel(`windscreen-${side}`,[[1.07,.12],[1.16,.87],[2.31,1.36],[2.54,.16]],side);
+    windowPanel(`windscreen-${side}`,[[1.07,.012],[1.16,.87],[2.31,1.36],[2.54,.016]],side);
+    skinLine(`windscreen-mullion-${side}`,[1.12,.46],[2.41,.69],side,.94,.018);
     windowPanel(`pilot-window-${side}`,[[.37,.65],[.94,.68],[1.42,1.43],[.37,1.46]],side);
     windowPanel(`cabin-window-front-${side}`,[[-.51,.63],[.20,.63],[.20,1.42],[-.51,1.42]],side);
     windowPanel(`cabin-window-rear-${side}`,[[-1.37,.68],[-.68,.64],[-.68,1.42],[-1.37,1.42]],side);
