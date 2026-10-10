@@ -30,19 +30,11 @@
   .metrics > .metrics-list,
   html.metrics-stair-motion .metrics > .metrics-stair-mask { display: none; }
 
-  html.metrics-sequence .intro-sequence > .hero {
-    position: sticky;
-    top: var(--hero-pin-top, 0px);
-    z-index: 1;
-    opacity: var(--hero-opacity, 1);
-  }
   html.metrics-sequence .metrics {
     position: relative;
     z-index: 2;
     height: var(--metrics-run-height);
-    margin-top: calc(-1 * var(--intro-hero-height));
     padding: 0;
-    background: transparent;
     pointer-events: none;
   }
   html.metrics-sequence .metrics-summary {
@@ -62,8 +54,6 @@
     overflow: hidden;
     isolation: isolate;
     background: #000;
-    transform: scale(var(--metrics-enter-scale, 0));
-    transform-origin: center center;
   }
   .metrics-desktop__frame {
     position: relative;
