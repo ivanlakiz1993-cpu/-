@@ -62,37 +62,8 @@
     overflow: hidden;
     isolation: isolate;
     background: #000;
-    clip-path: inset(var(--metrics-wipe-top, 100%) 0 0 0);
-  }
-  html.metrics-sequence .metrics-desktop__frame {
-    opacity: var(--metrics-wipe-content, 0);
-  }
-  .metrics-desktop__wipe {
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    pointer-events: none;
-    opacity: var(--metrics-wipe-lines, 0);
-  }
-  .metrics-desktop__wipe i {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    background: #fff;
-  }
-  .metrics-desktop__wipe i:nth-child(1) {
-    top: var(--metrics-wipe-top, 100%);
-    height: clamp(2px, .6vh, 7px);
-    background: #d1d1d1;
-  }
-  .metrics-desktop__wipe i:nth-child(2) {
-    top: calc(var(--metrics-wipe-top, 100%) + 13px);
-    height: clamp(8px, 2vh, 22px);
-  }
-  .metrics-desktop__wipe i:nth-child(3) {
-    top: calc(var(--metrics-wipe-top, 100%) + 40px);
-    height: clamp(2px, .5vh, 6px);
-    background: #bcbcbc;
+    transform: scale(var(--metrics-enter-scale, 0));
+    transform-origin: center center;
   }
   .metrics-desktop__frame {
     position: relative;
