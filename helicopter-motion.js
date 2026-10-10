@@ -10,9 +10,9 @@
   const renderer=window.HelicopterRenderer.create(canvas,model);
   if(!renderer)return;
   const desktop=matchMedia('(min-width: 901px)'),reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const root=document.documentElement,{sample,poses,matrix,lerp,smooth}=storyboard;
+  const root=document.documentElement,{sample,poses,matrix,lerp}=storyboard;
   let enabled=false,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
-  let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;
+  let sceneWidth=0,sceneHeight=0,entryStart=0,sequenceStart=0,sequenceDistance=0,end=0;
   let layoutWidth=0,layoutHeight=0,lastTime=0,rotorTime=0,lastScroll=NaN,target=0,progress=0;
   let state=sample(0);
   // Fit the airframe, not the spinning rotor envelope. This keeps the scale fixed
@@ -48,10 +48,7 @@
     });
   }
   function updateScroll(){
-    const scroll=window.scrollY,entry=smooth((scroll-entryStart)/entryDistance);
-    intro.style.setProperty('--hero-opacity','1');
-    intro.style.setProperty('--metrics-enter-scale',String(entry));
-    hero.inert=entry>.98;
+    const scroll=window.scrollY;
     target=Math.max(0,Math.min(1,(scroll-sequenceStart)/sequenceDistance));
     if(scroll<=entryStart||scroll>=end){progress=target;compose();}
     lastScroll=scroll;
@@ -83,12 +80,11 @@
     resizeFrame=0;if(!enabled)return;
     viewport=innerHeight;
     const heroHeight=hero.offsetHeight,introTop=intro.getBoundingClientRect().top+scrollY;
-    entryDistance=viewport*.8;sequenceDistance=viewport*4.8;
-    entryStart=introTop;sequenceStart=entryStart+entryDistance;
-    const runHeight=entryDistance+sequenceDistance+viewport*1.5;
-    end=introTop+runHeight;
-    intro.style.setProperty('--intro-hero-height',`${heroHeight}px`);
-    intro.style.setProperty('--hero-pin-top','0px');
+    sequenceDistance=viewport*4.8;
+    sequenceStart=introTop+heroHeight;
+    entryStart=sequenceStart-viewport;
+    const runHeight=sequenceDistance+viewport*1.5;
+    end=sequenceStart+runHeight;
     intro.style.setProperty('--metrics-run-height',`${runHeight}px`);
     updateScroll();progress=target;compose();wake();
   }
@@ -97,7 +93,7 @@
     stop();enabled=desktop.matches&&!reduced.matches&&!contextLost;
     root.classList.toggle('metrics-sequence',enabled);hero.inert=false;
     if(enabled)measure();
-    else {['--hero-opacity','--metrics-enter-scale'].forEach(name=>intro.style.removeProperty(name));stage.classList.remove('is-rendered');}
+    else {intro.style.removeProperty('--metrics-run-height');stage.classList.remove('is-rendered');}
   }
   window.addEventListener('scroll',()=>{if(enabled){updateScroll();wake();}},{passive:true});
   window.addEventListener('resize',requestMeasure,{passive:true});
