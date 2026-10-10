@@ -1,0 +1,21 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><base href="../"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="metrics-desktop.css"></head><body><section id="about" class="metrics wrap">
+      <h2 class="visually-hidden">Компания в цифрах</h2>
+      <div class="metrics-desktop" data-node-id="2276:25952">
+        <div class="metrics-desktop__background" aria-hidden="true">
+          <img src="assets/metrics-helicopter.png" alt="" decoding="async">
+          <canvas class="metrics-desktop__particles" aria-hidden="true"></canvas>
+        </div>
+        <div class="metrics-desktop__copy">
+          <p class="metrics-desktop__value">88 160</p>
+          <p class="metrics-desktop__label">кв. м общая площадь производства</p>
+        </div>
+      </div>
+      <div class="metrics-stair-mask" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="metrics-list">
+        <div class="metric"><p>Кв. м общая площадь производства</p><strong>1600</strong></div>
+        <div class="metric"><p>Год основания</p><strong>2010</strong></div>
+        <div class="metric"><p>Количество готовых изделий</p><strong>88 000</strong></div>
+        <div class="metric"><p>Сотрудников</p><strong>250</strong></div>
+        <div class="metric"><p>Выполненных контрактов</p><strong>425</strong></div>
+      </div>
+    </section><script src="helicopter-model.js"></script><script src="helicopter-motion.js"></script><div style="height:1256px"></div><pre id="model-check" style="position:fixed;bottom:0;left:0;color:white"></pre><script>const m=HelicopterModel;const valid=m.points.every(p=>[p.x,p.y,p.z,p.nx,p.ny,p.nz].every(Number.isFinite))&&m.meshes.every(s=>s.faces.every(f=>f.every(i=>i>=0&&i<s.vertices.length)));setTimeout(()=>{window.scrollTo({top:360,behavior:"instant"});document.getElementById("model-check").textContent=JSON.stringify({valid,points:m.points.length,parts:m.meshes.length,animated:document.querySelector(".metrics-desktop").classList.contains("is-animated")});},500);</script></body></html>
