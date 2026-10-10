@@ -9,7 +9,7 @@
   if(!intro||!hero||!sceneFrame||!canvas||!model||!storyboard||!window.HelicopterRenderer)return;
   const renderer=window.HelicopterRenderer.create(canvas,model);
   if(!renderer)return;
-  const desktop=matchMedia('(min-width: 901px)'),reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const root=document.documentElement,{sample,poses,matrix,lerp}=storyboard;
   let enabled=false,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
   let sceneWidth=0,sceneHeight=0,entryStart=0,sequenceStart=0,sequenceDistance=0,end=0;
@@ -90,14 +90,14 @@
   }
   function requestMeasure(){if(!resizeFrame)resizeFrame=requestAnimationFrame(measure);}
   function configure(){
-    stop();enabled=desktop.matches&&!reduced.matches&&!contextLost;
+    stop();enabled=!reduced.matches&&!contextLost;
     root.classList.toggle('metrics-sequence',enabled);hero.inert=false;
     if(enabled)measure();
     else {intro.style.removeProperty('--metrics-run-height');stage.classList.remove('is-rendered');}
   }
   window.addEventListener('scroll',()=>{if(enabled){updateScroll();wake();}},{passive:true});
   window.addEventListener('resize',requestMeasure,{passive:true});
-  desktop.addEventListener('change',configure);reduced.addEventListener('change',configure);
+  reduced.addEventListener('change',configure);
   document.addEventListener('visibilitychange',()=>{stop();wake();});
   canvas.addEventListener('webglcontextlost',()=>{contextLost=true;configure();});
   new MutationObserver(()=>{if(root.classList.contains('menu-open'))stop();else wake();}).observe(root,{attributes:true,attributeFilter:['class']});
