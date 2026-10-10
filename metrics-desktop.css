@@ -56,7 +56,10 @@ html.hero-split-active .hero-split {
 }
 .hero-split__half {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--hero-split-hero-height);
   will-change: transform;
 }
 .hero-split__half > .hero { height: var(--hero-split-hero-height); }
