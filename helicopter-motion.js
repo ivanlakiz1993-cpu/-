@@ -10,9 +10,11 @@
   const renderer=window.HelicopterRenderer.create(canvas,model);
   if(!renderer)return;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const root=document.documentElement,{sample,poses,matrix,lerp}=storyboard;
-  let enabled=false,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
-  let sceneWidth=0,sceneHeight=0,entryStart=0,sequenceStart=0,sequenceDistance=0,end=0;
+  const splitMedia=matchMedia('(min-width: 1200px)');
+  const root=document.documentElement,{sample,poses,matrix,lerp,smooth}=storyboard;
+  let enabled=false,splitEnabled=false,splitOverlay=null,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
+  let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;
+  let splitSeam=0,splitBottomTravel=0;
   let layoutWidth=0,layoutHeight=0,lastTime=0,rotorTime=0,lastScroll=NaN,target=0,progress=0;
   let state=sample(0);
   // Fit the airframe, not the spinning rotor envelope. This keeps the scale fixed
@@ -31,6 +33,22 @@
     return {scale,x:(bx+bw/2)*1920-(left+right)/2*scale,y:(by+bh/2)*pose.height-(top+bottom)/2*scale};
   });
   function stop(){cancelAnimationFrame(raf);raf=0;lastTime=0;}
+  function ensureSplitOverlay(){
+    if(splitOverlay)return;
+    splitOverlay=document.createElement('div');
+    splitOverlay.className='hero-split';
+    splitOverlay.setAttribute('aria-hidden','true');
+    for(const side of ['top','bottom']){
+      const half=document.createElement('div'),copy=hero.cloneNode(true);
+      half.className=`hero-split__half hero-split__half--${side}`;
+      copy.removeAttribute('aria-label');
+      copy.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
+      copy.querySelector('.hero-reveal')?.remove();
+      copy.inert=true;
+      half.append(copy);splitOverlay.append(half);
+    }
+    document.body.append(splitOverlay);
+  }
   function sizeFrame(){
     const width=Math.min(stage.clientWidth,viewport*1920/state.height),height=width*state.height/1920;
     if(Math.abs(width-sceneWidth)<.01&&Math.abs(height-sceneHeight)<.01)return;
@@ -49,6 +67,12 @@
   }
   function updateScroll(){
     const scroll=window.scrollY;
+    if(splitEnabled){
+      const opening=smooth((scroll-entryStart)/entryDistance);
+      splitOverlay.style.setProperty('--hero-split-top-offset',`${-opening*splitSeam}px`);
+      splitOverlay.style.setProperty('--hero-split-bottom-offset',`${opening*splitBottomTravel}px`);
+      splitOverlay.style.visibility=opening>=1?'hidden':'visible';
+    }
     target=Math.max(0,Math.min(1,(scroll-sequenceStart)/sequenceDistance));
     if(scroll<=entryStart||scroll>=end){progress=target;compose();}
     lastScroll=scroll;
@@ -56,7 +80,7 @@
   function draw(time){
     raf=0;if(!enabled||document.hidden)return;
     if(window.scrollY!==lastScroll)updateScroll();
-    if(window.scrollY<=entryStart||window.scrollY>=end||root.classList.contains('menu-open')){lastTime=0;return;}
+    if(window.scrollY<entryStart||window.scrollY>=end||root.classList.contains('menu-open')){lastTime=0;return;}
     const dt=lastTime?Math.min(50,time-lastTime):16.67;lastTime=time;rotorTime+=dt;
     // Short scrub smoothing removes wheel-event steps. It settles to the exact
     // scroll pose; there is no autonomous rotation or breathing of the airframe.
@@ -81,23 +105,37 @@
     viewport=innerHeight;
     const heroHeight=hero.offsetHeight,introTop=intro.getBoundingClientRect().top+scrollY;
     sequenceDistance=viewport*4.8;
-    sequenceStart=introTop+heroHeight;
-    entryStart=sequenceStart-viewport;
-    const runHeight=sequenceDistance+viewport*1.5;
-    end=sequenceStart+runHeight;
+    entryDistance=splitEnabled?viewport*.85:0;
+    entryStart=splitEnabled?introTop:introTop+heroHeight-viewport;
+    sequenceStart=splitEnabled?introTop+entryDistance:introTop+heroHeight;
+    const runHeight=entryDistance+sequenceDistance+viewport*1.5;
+    end=splitEnabled?introTop+runHeight:sequenceStart+runHeight;
+    if(splitEnabled){
+      const line=hero.querySelector('.grid-mid');
+      splitSeam=Math.max(0,Math.min(viewport-1,line.getBoundingClientRect().top-hero.getBoundingClientRect().top));
+      splitBottomTravel=viewport-splitSeam;
+      intro.style.setProperty('--intro-hero-height',`${heroHeight}px`);
+      splitOverlay.style.setProperty('--hero-split-y',`${splitSeam}px`);
+      splitOverlay.style.setProperty('--hero-split-hero-height',`${heroHeight}px`);
+    }
     intro.style.setProperty('--metrics-run-height',`${runHeight}px`);
     updateScroll();progress=target;compose();wake();
   }
   function requestMeasure(){if(!resizeFrame)resizeFrame=requestAnimationFrame(measure);}
   function configure(){
     stop();enabled=!reduced.matches&&!contextLost;
-    root.classList.toggle('metrics-sequence',enabled);hero.inert=false;
+    splitEnabled=enabled&&splitMedia.matches;
+    if(splitEnabled)ensureSplitOverlay();
+    root.classList.toggle('metrics-sequence',enabled);
+    root.classList.toggle('hero-split-active',splitEnabled);
+    hero.inert=false;
+    if(!splitEnabled)intro.style.removeProperty('--intro-hero-height');
     if(enabled)measure();
-    else {intro.style.removeProperty('--metrics-run-height');stage.classList.remove('is-rendered');}
+    else {intro.style.removeProperty('--metrics-run-height');intro.style.removeProperty('--intro-hero-height');stage.classList.remove('is-rendered');}
   }
   window.addEventListener('scroll',()=>{if(enabled){updateScroll();wake();}},{passive:true});
   window.addEventListener('resize',requestMeasure,{passive:true});
-  reduced.addEventListener('change',configure);
+  reduced.addEventListener('change',configure);splitMedia.addEventListener('change',configure);
   document.addEventListener('visibilitychange',()=>{stop();wake();});
   canvas.addEventListener('webglcontextlost',()=>{contextLost=true;configure();});
   new MutationObserver(()=>{if(root.classList.contains('menu-open'))stop();else wake();}).observe(root,{attributes:true,attributeFilter:['class']});
