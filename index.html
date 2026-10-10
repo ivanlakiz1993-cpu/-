@@ -8,7 +8,7 @@
   <title>СпецЭлектроника — промышленная электроника</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="hero-grid.css?v=20261009-hero-responsive-8">
-  <link rel="stylesheet" href="metrics-desktop.css?v=20261010-3d-layout-2">
+  <link rel="stylesheet" href="metrics-desktop.css?v=20261010-storyboard-1">
 </head>
 <body>
   <header class="topbar">
@@ -38,6 +38,7 @@
     </nav>
   </div>
   <main id="top">
+    <div class="intro-sequence">
     <section class="hero section-frame" aria-label="СпецЭлектроника">
       <div class="hero-bg"><img src="assets/hero-background.png" width="2752" height="1536" alt="" loading="eager" fetchpriority="high" decoding="async"></div><div class="hero-shade"></div>
       <div class="hero-title"><span>СПЕЦ</span><span>ЭЛЕКТРОНИКА</span></div>
@@ -76,17 +77,37 @@
       <div class="hero-reveal" aria-hidden="true"></div>
     </section>
 
-    <section id="about" class="metrics wrap">
-      <h2 class="visually-hidden">Компания в цифрах</h2>
-      <div class="metrics-desktop" data-node-id="2276:25952">
-        <div class="metrics-desktop__background" aria-hidden="true">
-          <canvas class="metrics-desktop__particles" aria-hidden="true"></canvas>
-        </div>
-        <div class="metrics-desktop__copy">
-          <p class="metrics-desktop__value">88 160</p>
-          <p class="metrics-desktop__label">кв. м общая площадь производства</p>
+    <section id="about" class="metrics wrap" aria-labelledby="metrics-heading">
+      <h2 id="metrics-heading" class="visually-hidden">Компания в цифрах</h2>
+      <div class="metrics-desktop" data-scene="1">
+        <div class="metrics-desktop__frame" aria-hidden="true">
+          <div class="metrics-desktop__background">
+            <canvas class="metrics-desktop__particles"></canvas>
+          </div>
+          <div class="metrics-desktop__copy metrics-desktop__copy--area" data-achievement="area" data-node-id="2325:2321">
+            <p class="metrics-desktop__value">88 160</p>
+            <p class="metrics-desktop__label">кв. м общая площадь производства</p>
+          </div>
+          <div class="metrics-desktop__copy metrics-desktop__copy--staff" data-achievement="staff" data-node-id="2277:25957">
+            <p class="metrics-desktop__value">250</p>
+            <p class="metrics-desktop__label">сотрудников</p>
+          </div>
+          <div class="metrics-desktop__copy metrics-desktop__copy--contracts" data-achievement="contracts" data-node-id="2277:26372">
+            <p class="metrics-desktop__value">425</p>
+            <p class="metrics-desktop__label">выполненных контрактов</p>
+          </div>
+          <div class="metrics-desktop__copy metrics-desktop__copy--founded" data-achievement="founded" data-node-id="2278:26378">
+            <p class="metrics-desktop__value">2010</p>
+            <p class="metrics-desktop__label">год основания</p>
+          </div>
         </div>
       </div>
+      <dl class="metrics-summary">
+        <div><dt>Кв. м общая площадь производства</dt><dd>88 160</dd></div>
+        <div><dt>Сотрудников</dt><dd>250</dd></div>
+        <div><dt>Выполненных контрактов</dt><dd>425</dd></div>
+        <div><dt>Год основания</dt><dd>2010</dd></div>
+      </dl>
       <div class="metrics-stair-mask" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="metrics-list">
         <div class="metric"><p>Кв. м общая площадь производства</p><strong>1600</strong></div>
@@ -96,6 +117,7 @@
         <div class="metric"><p>Выполненных контрактов</p><strong>425</strong></div>
       </div>
     </section>
+    </div>
 
     <section class="benefits wrap" aria-label="Преимущества компании">
       <div class="benefits-stage">
@@ -210,7 +232,8 @@
   </footer>
   <script src="script.js"></script>
   <script src="helicopter-model.js?v=20261010-3d-layout-2"></script>
-  <script src="helicopter-motion.js?v=20261010-3d-layout-2"></script>
+  <script src="helicopter-storyboard.js?v=20261010-storyboard-1"></script>
+  <script src="helicopter-motion.js?v=20261010-storyboard-1"></script>
 </body>
 </html>
 
