@@ -25,7 +25,7 @@
       gl_Position=vec4(clip,51./49.*d-100./49.,d);
     }`;
   const meshFragment=`
-    precision mediump float;
+    precision highp float;
     varying vec3 v_normal;varying float v_tone;
     void main(){
       vec3 n=normalize(v_normal);if(n.z<0.)n=-n;
@@ -38,7 +38,7 @@
     }`;
   const screenVertex=`attribute vec2 a_position;void main(){gl_Position=vec4(a_position,0.,1.);}`;
   const asciiFragment=`
-    precision mediump float;
+    precision highp float;
     uniform sampler2D u_scene,u_glyphs;
     uniform vec2 u_resolution,u_cell;
     void main(){
@@ -94,7 +94,7 @@
       const sceneTexture=texture(),glyphTexture=texture();
       const atlas=document.createElement('canvas');atlas.width=320;atlas.height=40;
       const ctx=atlas.getContext('2d');ctx.fillStyle='#000';ctx.fillRect(0,0,320,40);
-      ctx.fillStyle='#fff';ctx.font='28px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='#fff';ctx.font='40px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
       [...' .:-+*<>01'].forEach((char,i)=>ctx.fillText(char,i*32+16,20));
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
       gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,atlas);
