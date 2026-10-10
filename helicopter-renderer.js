@@ -33,7 +33,7 @@
       float diffuse=max(0.,dot(n,key));
       float rim=pow(1.-abs(n.z),2.2);
       float spec=pow(max(0.,dot(n,normalize(key+vec3(0.,0.,1.)))),26.);
-      float light=v_tone*(.20+.72*diffuse)+(.16*rim+.12*spec)*min(1.,v_tone*2.);
+      float light=v_tone*(.18+1.05*diffuse)+(.26*rim+.24*spec)*min(1.,v_tone*2.);
       gl_FragColor=vec4(vec3(clamp(light,0.,1.)),1.);
     }`;
   const screenVertex=`attribute vec2 a_position;void main(){gl_Position=vec4(a_position,0.,1.);}`;
@@ -45,13 +45,19 @@
       vec2 cell=floor(gl_FragCoord.xy/u_cell);
       vec2 uv=(cell+.5)*u_cell/u_resolution;
       float lum=texture2D(u_scene,uv).r;
+      // Preserve thin cockpit frames when reducing the lit mesh to a glyph grid.
+      vec2 tap=u_cell/u_resolution*.30;
+      lum=max(lum,.9*texture2D(u_scene,uv+vec2(tap.x,0.)).r);
+      lum=max(lum,.9*texture2D(u_scene,uv-vec2(tap.x,0.)).r);
+      lum=max(lum,.9*texture2D(u_scene,uv+vec2(0.,tap.y)).r);
+      lum=max(lum,.9*texture2D(u_scene,uv-vec2(0.,tap.y)).r);
       if(lum<.022){gl_FragColor=vec4(0.,0.,0.,1.);return;}
       float index=floor(clamp(lum*1.65,0.,.999)*10.);
       vec2 local=fract(gl_FragCoord.xy/u_cell);
       vec2 atlas=vec2((index+local.x)/10.,local.y);
       float glyph=texture2D(u_glyphs,atlas).r;
       float halo=texture2D(u_glyphs,atlas+vec2(.0015,0.)).r+texture2D(u_glyphs,atlas-vec2(.0015,0.)).r;
-      float ink=(glyph+.12*halo)*(.20+lum*.86);
+      float ink=(glyph+.16*halo)*(.24+lum*1.05);
       gl_FragColor=vec4(vec3(.91,.89,.84)*ink,1.);
     }`;
 
