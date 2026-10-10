@@ -1,0 +1,21 @@
+﻿<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><base href="../"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="metrics-desktop.css?v=2"><script>window.reviewErrors=[];window.addEventListener("error",e=>reviewErrors.push(e.message));</script></head><body><section id="about" class="metrics wrap">
+      <h2 class="visually-hidden">Компания в цифрах</h2>
+      <div class="metrics-desktop is-rendered" data-node-id="2276:25952">
+        <div class="metrics-desktop__background" aria-hidden="true">
+          <canvas class="metrics-desktop__particles" aria-hidden="true" width="1264" height="827"></canvas>
+        </div>
+        <div class="metrics-desktop__copy">
+          <p class="metrics-desktop__value">88 160</p>
+          <p class="metrics-desktop__label">кв. м общая площадь производства</p>
+        </div>
+      </div>
+      <div class="metrics-stair-mask" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="metrics-list">
+        <div class="metric"><p>Кв. м общая площадь производства</p><strong>1600</strong></div>
+        <div class="metric"><p>Год основания</p><strong>2010</strong></div>
+        <div class="metric"><p>Количество готовых изделий</p><strong>88 000</strong></div>
+        <div class="metric"><p>Сотрудников</p><strong>250</strong></div>
+        <div class="metric"><p>Выполненных контрактов</p><strong>425</strong></div>
+      </div>
+    </section><script src="helicopter-model.js?v=2"></script><script src="helicopter-motion.js?v=2"></script><pre id="check" style="position:fixed;bottom:0;font:12px monospace;color:white">{"errors":[],"overlapPixels":0,"totalPixels":66356,"canvasWidth":1264,"canvasHeight":827,"display":"block","canvasRect":{"x":0,"y":0,"width":1264,"height":826.859375,"top":0,"right":1264,"bottom":826.859375,"left":0},"images":0,"rendered":true,"points":32239,"valid":true}</pre><script>setTimeout(()=>{const stage=document.querySelector(".metrics-desktop"),canvas=stage.querySelector("canvas"),ctx=canvas.getContext("2d"),ratio=canvas.width/stage.clientWidth;const top=Math.floor((stage.querySelector(".metrics-desktop__copy").getBoundingClientRect().bottom-stage.getBoundingClientRect().top)*ratio);const data=ctx.getImageData(0,0,canvas.width,top).data;let overlap=0;for(let i=3;i<data.length;i+=4)if(data[i])overlap++;const m=HelicopterModel;document.getElementById("check").textContent=JSON.stringify({errors:reviewErrors,overlapPixels:overlap,totalPixels:ctx.getImageData(0,0,canvas.width,canvas.height).data.filter((v,i)=>i%4===3&&v>0).length,canvasWidth:canvas.width,canvasHeight:canvas.height,display:getComputedStyle(canvas).display,canvasRect:canvas.getBoundingClientRect().toJSON(),images:stage.querySelectorAll("img").length,rendered:stage.classList.contains("is-rendered"),points:m.points.length,valid:m.points.every(p=>[p.x,p.y,p.z,p.nx,p.ny,p.nz].every(Number.isFinite))});},1000);</script></body></html>
