@@ -43,6 +43,31 @@ html.metrics-sequence .metrics {
   color: #fff;
   pointer-events: none;
 }
+html.hero-split-active .intro-sequence > .hero { opacity: 0; pointer-events: none; }
+html.hero-split-active .metrics { margin-top: calc(-1 * var(--intro-hero-height)); }
+.hero-split { display: none; }
+html.hero-split-active .hero-split {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hero-split__half {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.hero-split__half > .hero { height: var(--hero-split-hero-height); }
+.hero-split__half--top {
+  clip-path: inset(0 0 calc(100% - var(--hero-split-y)) 0);
+  transform: translateY(var(--hero-split-top-offset, 0px));
+}
+.hero-split__half--bottom {
+  clip-path: inset(var(--hero-split-y) 0 0 0);
+  transform: translateY(var(--hero-split-bottom-offset, 0px));
+}
 html.metrics-sequence .metrics > .metrics-list,
 html.metrics-sequence .metrics > .metrics-stair-mask { display: none; }
 html.metrics-sequence .metrics-summary {
