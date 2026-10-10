@@ -24,24 +24,15 @@
   .metrics-desktop__background {
     position: absolute;
     inset: 0;
-    z-index: -1;
+    z-index: 0;
     pointer-events: none;
-  }
-
-  .metrics-desktop__background img {
-    position: absolute;
-    left: 9.95%;
-    top: 14.59%;
-    width: 83.05%;
-    height: 70.86%;
-    max-width: none;
   }
 
   .metrics-desktop__background::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, .4);
+    background: rgba(0, 0, 0, .18);
   }
 
   .metrics-desktop__particles {
@@ -52,16 +43,13 @@
     display: none;
   }
 
-  .metrics-desktop.is-animated .metrics-desktop__particles {
+  .metrics-desktop.is-rendered .metrics-desktop__particles {
     display: block;
-  }
-
-  .metrics-desktop.is-animated .metrics-desktop__background img {
-    visibility: hidden;
   }
 
   .metrics-desktop__copy {
     position: absolute;
+    z-index: 2;
     left: 5.208333%;
     top: 14.410828%;
     width: 78.541667%;
