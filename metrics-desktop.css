@@ -59,6 +59,7 @@
     gap: 2.604167cqw;
     font-family: var(--display);
     font-weight: 400;
+    color: #fff;
   }
 
   .metrics-desktop__value {

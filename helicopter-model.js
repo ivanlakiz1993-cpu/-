@@ -110,7 +110,10 @@
   }
   tube('tail-boom',[[-1.1,.12,.31,.31],[-2.1,.27,.21,.22],[-3.4,.44,.13,.13],[-4.65,.57,.07,.075]],100,24);
   for(const side of [-1,1]) {
-    ellipsoid(`engine-${side}`,[-.35,.88,side*.47],[.88,.29,.27],p=>p[0]>.3?.24:.65);
+    surface(`engine-${side}`,48,28,(u,v)=>{
+      const r=u<.15?.08+u:.235;
+      return [-1.12+u*1.64,.88+r*Math.cos(v*TAU),side*.47+r*Math.sin(v*TAU)];
+    },()=>.65);
     ellipsoid(`sponson-${side}`,[-.5,-.35,side*.83],[.85,.2,.2]);
     rod(`gear-front-${side}`,[1.0,-.43,side*.42],[.88,-1.1,side*.73],.045);
     rod(`gear-rear-${side}`,[-.95,-.4,side*.6],[-1.05,-1.1,side*.84],.045);
