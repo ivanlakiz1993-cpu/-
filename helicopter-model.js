@@ -29,12 +29,15 @@
     if(!name.startsWith('wheel-')) faces.forEach(face=>face.reverse());
     meshes.push({name,vertices,faces,group});
   }
-  function tube(name, stations, segments = 60, slices = 24, material, group) {
-    surface(name, segments, slices, (u,v) => {
+  function tube(name, stations, segments = 60, slices = 24, material, group, exponent=1) {
+    const sample=(u,v) => {
       const t = u*(stations.length-1), i = Math.min(stations.length-2,Math.floor(t)), f = t-i;
       const s = stations[i].map((n,j)=>n+(stations[i+1][j]-n)*f);
-      return [s[0],s[1]+s[2]*Math.cos(v*TAU),s[3]*Math.sin(v*TAU)];
-    }, material, group);
+      const c=Math.cos(v*TAU),sn=Math.sin(v*TAU);
+      return [s[0],s[1]+s[2]*Math.sign(c)*Math.abs(c)**exponent,s[3]*Math.sign(sn)*Math.abs(sn)**exponent];
+    };
+    surface(name, segments, slices, sample, material, group);
+    return sample;
   }
   function ellipsoid(name, center, radius, material) {
     surface(name,40,26,(u,v)=>{
@@ -55,10 +58,12 @@
     surface(name,Math.max(8,Math.ceil(l*32)),8,(u,v)=>a.map((q,i)=>q+d[i]*u+r*(n[i]*Math.cos(v*TAU)+m[i]*Math.sin(v*TAU))),()=>.95);
   }
 
-  tube('fuselage',[
-    [-1.65,0,.08,.08],[-1.2,0,.53,.53],[-.55,0,.76,.68],
-    [.4,0,.8,.7],[1.05,-.04,.72,.63],[1.55,-.14,.48,.48],[1.85,-.23,.08,.08]
-  ],110,64,(p,u,v)=>{
+  const bodyStations=[
+    [-1.65,0,.1,.12],[-1.25,0,.5,.52],[-.85,0,.7,.65],
+    [-.25,0,.73,.68],[.4,0,.73,.68],[.85,-.015,.68,.64],
+    [1.2,-.07,.57,.58],[1.55,-.19,.39,.48],[1.82,-.29,.23,.27],[1.9,-.3,.04,.06]
+  ];
+  const bodySample=tube('fuselage',bodyStations,150,72,(p,u,v)=>{
     const angle=v*TAU;
     const side=Math.abs(Math.sin(angle));
     // Dark cockpit glazing, passenger windows, brighter frames and door seams.
@@ -71,7 +76,38 @@
       return seam ? .95 : .18;
     }
     return Math.abs(p[0]+.95)<.025 || Math.abs(p[0]-.55)<.025 ? .9 : .62;
-  });
+  },'body',.62);
+  function bodyU(x) {
+    let i=bodyStations.findIndex((station,index)=>index<bodyStations.length-1 && x>=station[0] && x<=bodyStations[index+1][0]);
+    if(i<0)i=bodyStations.length-2;
+    return (i+(x-bodyStations[i][0])/(bodyStations[i+1][0]-bodyStations[i][0]))/(bodyStations.length-1);
+  }
+  // Surface-following window mullions and door outlines, on both sides.
+  for(const side of [-1,1]) {
+    for(const [name,x,a,b] of [
+      ['windshield-center',1.55,.08,1.42],['cockpit-pillar',1.05,.35,1.48],
+      ['cockpit-rear',.58,.4,1.6],['door-rear',-.95,.6,2.5],['door-front',.45,.6,2.5],
+      ['window-pillar',-.28,.65,1.4]
+    ]) {
+      surface(`${name}-${side}`,45,2,(u,v)=>{
+        const p=bodySample(bodyU(x+(v-.5)*.016),side*(a+(b-a)*u)/TAU);
+        return [p[0],p[1]*1.006,p[2]*1.006];
+      },()=>.97);
+    }
+    for(const [name,x1,x2,angle] of [
+      ['window-sill',-.95,1.55,1.43],['window-roof',-.95,1.05,.62],['door-bottom',-.95,.45,2.48]
+    ]) {
+      surface(`${name}-${side}`,75,2,(u,v)=>{
+        const p=bodySample(bodyU(x1+(x2-x1)*u),side*(angle+(v-.5)*.016)/TAU);
+        return [p[0],p[1]*1.006,p[2]*1.006];
+      },()=>.94);
+    }
+    // Circular engine intakes give the frontal view its characteristic twin openings.
+    surface(`engine-intake-${side}`,40,5,(u,v)=>{
+      const a=u*TAU,r=.21+v*.035;
+      return [.51,.88+r*Math.cos(a),side*.47+r*Math.sin(a)];
+    },()=>.9,'body',true);
+  }
   tube('tail-boom',[[-1.1,.12,.31,.31],[-2.1,.27,.21,.22],[-3.4,.44,.13,.13],[-4.65,.57,.07,.075]],100,24);
   for(const side of [-1,1]) {
     ellipsoid(`engine-${side}`,[-.35,.88,side*.47],[.88,.29,.27],p=>p[0]>.3?.24:.65);
