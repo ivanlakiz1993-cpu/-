@@ -34,10 +34,10 @@
     ];
   }
   const poses = [
-    { node:'2276:25952', rotation:orientation(-.48,.24), box:[.075,.12,.86,.79], height:1000 },
-    { node:'2277:26357', rotation:orientation(-Math.PI/2,.12), box:[-.08,.02,.91,.90], height:1000 },
-    { node:'2277:26369', rotation:orientation(0,Math.PI/2), box:[-.015,.055,.89,.88], height:1053 },
-    { node:'2278:26375', rotation:orientation(-Math.PI+.48,.18), box:[.13,.115,.77,.70], height:1053 }
+    { node:'2276:25952', rotation:orientation(-.48,.24), box:[.10,.19,.83,.66], height:1000 },
+    { node:'2277:26357', rotation:orientation(-Math.PI/2,.12), box:[-.10,.13,.90,.75], height:1000 },
+    { node:'2277:26369', rotation:orientation(0,Math.PI/2), box:[-.015,.16,.95,.68], height:1053 },
+    { node:'2278:26375', rotation:orientation(-Math.PI+.48,.18), box:[.13,.12,.77,.68], height:1053 }
   ];
   const transitions = [
     { start:.30, end:.47, from:0, to:1 },
@@ -57,14 +57,12 @@
       } else break;
     }
     const rotation = slerp(poses[from].rotation, poses[to].rotation, mix);
-    const achievement = [
-      ramp(progress,.12,.20) * (1-ramp(progress,.30,.395)),
-      ramp(progress,.375,.47) * (1-ramp(progress,.57,.665)),
-      ramp(progress,.645,.74) * (1-ramp(progress,.84,.915)),
-      ramp(progress,.895,.97)
-    ];
+    const entrances = [[.12,.20],[.375,.47],[.645,.74],[.895,.97]];
+    const exits = [[.30,.395],[.57,.665],[.84,.915],[2,3]];
+    const achievement = entrances.map(([a,b],i)=>ramp(progress,a,b)*(1-ramp(progress,...exits[i])));
+    const textY = entrances.map(([a,b],i)=>(1-ramp(progress,a,b))*65-ramp(progress,...exits[i])*80);
     const scene = progress < .12 ? 1 : progress < .385 ? 2 : progress < .655 ? 3 : progress < .905 ? 4 : 5;
-    return {progress,from,to,mix,rotation,matrix:matrix(rotation),achievement,scene,
+    return {progress,from,to,mix,rotation,matrix:matrix(rotation),achievement,textY,scene,
       height:lerp(poses[from].height,poses[to].height,mix)};
   }
   window.HelicopterStoryboard = {sample,poses,matrix,lerp,smooth};
