@@ -14,7 +14,7 @@
   const root=document.documentElement,{sample,poses,matrix,lerp,smooth}=storyboard;
   let enabled=false,splitEnabled=false,splitOverlay=null,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
   let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;
-  let splitSeam=0,splitBottomTravel=0;
+  let splitIntroTop=0,splitPreTravel=0,splitSeam=0,splitTopTravel=0,splitBottomTravel=0;
   let layoutWidth=0,layoutHeight=0,lastTime=0,rotorTime=0,lastScroll=NaN,target=0,progress=0;
   let state=sample(0);
   // Fit the airframe, not the spinning rotor envelope. This keeps the scale fixed
@@ -68,9 +68,10 @@
   function updateScroll(){
     const scroll=window.scrollY;
     if(splitEnabled){
+      const coverScroll=Math.max(0,Math.min(splitPreTravel,scroll-splitIntroTop));
       const opening=smooth((scroll-entryStart)/entryDistance);
-      splitOverlay.style.setProperty('--hero-split-top-offset',`${-opening*splitSeam}px`);
-      splitOverlay.style.setProperty('--hero-split-bottom-offset',`${opening*splitBottomTravel}px`);
+      splitOverlay.style.setProperty('--hero-split-top-offset',`${-coverScroll-opening*splitTopTravel}px`);
+      splitOverlay.style.setProperty('--hero-split-bottom-offset',`${-coverScroll+opening*splitBottomTravel}px`);
       splitOverlay.style.visibility=opening>=1?'hidden':'visible';
     }
     target=Math.max(0,Math.min(1,(scroll-sequenceStart)/sequenceDistance));
@@ -106,14 +107,18 @@
     const heroHeight=hero.offsetHeight,introTop=intro.getBoundingClientRect().top+scrollY;
     sequenceDistance=viewport*4.8;
     entryDistance=splitEnabled?viewport*.85:0;
-    entryStart=splitEnabled?introTop:introTop+heroHeight-viewport;
-    sequenceStart=splitEnabled?introTop+entryDistance:introTop+heroHeight;
-    const runHeight=entryDistance+sequenceDistance+viewport*1.5;
+    splitIntroTop=introTop;
+    splitPreTravel=splitEnabled?Math.max(0,heroHeight-viewport):0;
+    const splitHold=splitEnabled?viewport*.18:0;
+    entryStart=splitEnabled?introTop+splitPreTravel+splitHold:introTop+heroHeight-viewport;
+    sequenceStart=splitEnabled?entryStart+entryDistance:introTop+heroHeight;
+    const runHeight=splitPreTravel+splitHold+entryDistance+sequenceDistance+viewport*1.5;
     end=splitEnabled?introTop+runHeight:sequenceStart+runHeight;
     if(splitEnabled){
       const line=hero.querySelector('.grid-mid');
       splitSeam=Math.max(0,Math.min(viewport-1,line.getBoundingClientRect().top-hero.getBoundingClientRect().top));
-      splitBottomTravel=viewport-splitSeam;
+      splitTopTravel=Math.max(0,splitSeam-splitPreTravel);
+      splitBottomTravel=viewport-splitSeam+splitPreTravel;
       intro.style.setProperty('--intro-hero-height',`${heroHeight}px`);
       splitOverlay.style.setProperty('--hero-split-y',`${splitSeam}px`);
       splitOverlay.style.setProperty('--hero-split-hero-height',`${heroHeight}px`);
