@@ -10,7 +10,8 @@
   const renderer=window.HelicopterRenderer.create(canvas,model);
   if(!renderer)return;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const splitMedia=matchMedia('(min-width: 1200px)');
+  const splitMedia=matchMedia('(min-width: 1200px), (max-width: 600px)');
+  const mobileMedia=matchMedia('(max-width: 600px)');
   const root=document.documentElement,{sample,poses,matrix,lerp,smooth}=storyboard;
   let enabled=false,splitEnabled=false,splitOverlay=null,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
   let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;
@@ -43,6 +44,7 @@
       half.className=`hero-split__half hero-split__half--${side}`;
       copy.removeAttribute('aria-label');
       copy.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
+      copy.querySelector('.hero-reveal')?.remove();
       copy.inert=true;
       half.append(copy);splitOverlay.append(half);
     }
@@ -69,9 +71,18 @@
     if(splitEnabled){
       const coverScroll=Math.max(0,Math.min(splitPreTravel,scroll-splitIntroTop));
       const opening=smooth((scroll-entryStart)/entryDistance);
-      splitOverlay.style.setProperty('--hero-split-top-offset',`${-coverScroll-opening*splitTopTravel}px`);
-      splitOverlay.style.setProperty('--hero-split-bottom-offset',`${-coverScroll+opening*splitBottomTravel}px`);
-      splitOverlay.style.visibility=opening>=1?'hidden':'visible';
+      if(mobileMedia.matches){
+        const isOpening=scroll>entryStart&&opening<1;
+        if(isOpening)ensureSplitOverlay();
+        root.classList.toggle('hero-split-opening',isOpening);
+      }
+      if(splitOverlay){
+        splitOverlay.style.setProperty('--hero-split-y',`${splitSeam}px`);
+        splitOverlay.style.setProperty('--hero-split-hero-height',`${hero.offsetHeight}px`);
+        splitOverlay.style.setProperty('--hero-split-top-offset',`${-coverScroll-opening*splitTopTravel}px`);
+        splitOverlay.style.setProperty('--hero-split-bottom-offset',`${-coverScroll+opening*splitBottomTravel}px`);
+        splitOverlay.style.visibility=opening>=1?'hidden':'visible';
+      }
     }
     target=Math.max(0,Math.min(1,(scroll-sequenceStart)/sequenceDistance));
     if(scroll<=entryStart||scroll>=end){progress=target;compose();}
@@ -91,10 +102,11 @@
     }
     const a=calibrations[state.from],b=calibrations[state.to],unit=sceneWidth/1920;
     const arc=Math.sin(Math.PI*state.mix);
+    const mobile=mobileMedia.matches;
     renderer.render({matrix:state.matrix,
-      scale:lerp(a.scale,b.scale,state.mix)*unit*(1+arc*.12),
+      scale:lerp(a.scale,b.scale,state.mix)*unit*(1+arc*.12)*(mobile?1.1:1),
       centerX:lerp(a.x,b.x,state.mix)*unit,
-      centerY:lerp(a.y,b.y,state.mix)*unit-arc*sceneHeight*.035,
+      centerY:lerp(a.y,b.y,state.mix)*unit-arc*sceneHeight*.035+(mobile?sceneHeight*.08:0),
       angle:rotorTime*.0032});
     stage.classList.add('is-rendered');
     raf=requestAnimationFrame(draw);
@@ -108,19 +120,22 @@
     entryDistance=splitEnabled?viewport*.85:0;
     splitIntroTop=introTop;
     splitPreTravel=splitEnabled?Math.max(0,heroHeight-viewport):0;
-    const splitHold=splitEnabled?viewport*.18:0;
+    const splitHold=splitEnabled&&!mobileMedia.matches?viewport*.18:0;
     entryStart=splitEnabled?introTop+splitPreTravel+splitHold:introTop+heroHeight-viewport;
     sequenceStart=splitEnabled?entryStart+entryDistance:introTop+heroHeight;
     const runHeight=splitPreTravel+splitHold+entryDistance+sequenceDistance+viewport*1.5;
     end=splitEnabled?introTop+runHeight:sequenceStart+runHeight;
     if(splitEnabled){
       const line=hero.querySelector('.grid-mid');
-      splitSeam=Math.max(0,Math.min(viewport-1,line.getBoundingClientRect().top-hero.getBoundingClientRect().top));
+      const seam=mobileMedia.matches?heroHeight*.58:line.getBoundingClientRect().top-hero.getBoundingClientRect().top;
+      splitSeam=Math.max(0,Math.min(viewport-1,seam));
       splitTopTravel=Math.max(0,splitSeam-splitPreTravel);
       splitBottomTravel=viewport-splitSeam+splitPreTravel;
       intro.style.setProperty('--intro-hero-height',`${heroHeight}px`);
-      splitOverlay.style.setProperty('--hero-split-y',`${splitSeam}px`);
-      splitOverlay.style.setProperty('--hero-split-hero-height',`${heroHeight}px`);
+      if(splitOverlay){
+        splitOverlay.style.setProperty('--hero-split-y',`${splitSeam}px`);
+        splitOverlay.style.setProperty('--hero-split-hero-height',`${heroHeight}px`);
+      }
     }
     intro.style.setProperty('--metrics-run-height',`${runHeight}px`);
     updateScroll();progress=target;compose();wake();
@@ -129,9 +144,10 @@
   function configure(){
     stop();enabled=!reduced.matches&&!contextLost;
     splitEnabled=enabled&&splitMedia.matches;
-    if(splitEnabled)ensureSplitOverlay();
+    if(splitEnabled&&!mobileMedia.matches)ensureSplitOverlay();
     root.classList.toggle('metrics-sequence',enabled);
     root.classList.toggle('hero-split-active',splitEnabled);
+    root.classList.toggle('hero-split-opening',splitEnabled&&!mobileMedia.matches);
     hero.inert=false;
     if(!splitEnabled)intro.style.removeProperty('--intro-hero-height');
     if(enabled)measure();

@@ -161,6 +161,10 @@ html.metrics-sequence .metrics-desktop {
 }
 
 @media (max-width: 600px) {
+  html.hero-split-active .intro-sequence > .hero { position: relative; z-index: 3; opacity: 1; }
+  html.hero-split-active.hero-split-opening .intro-sequence > .hero { opacity: 0; }
+  html.hero-split-active .hero-split { display: none; }
+  html.hero-split-active.hero-split-opening .hero-split { display: block; }
   html.metrics-sequence .metrics-desktop { height: 120vw; }
   .metrics-desktop__frame { height: 120vw; }
   .metrics-desktop__background {
