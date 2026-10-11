@@ -205,3 +205,9 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
   .footer-social-links{flex-wrap:wrap}
   .footer-bottom{font-size:11px}
 }
+
+@media(min-width:901px){
+  /* Keep the testing card in view before the following section enters. */
+  .work::after{content:"";display:block;flex:none;height:120vh;margin-top:-50vh;pointer-events:none}
+  .project-cta{margin-top:100px;margin-bottom:100px}
+}
