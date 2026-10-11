@@ -150,6 +150,11 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   let scrollFrame = 0;
   let copyFrame = 0;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const syncBenefitMore = (index) => {
+    const isVisible = index === 2 || window.innerWidth <= 600;
+    benefitMore.hidden = !isVisible;
+    benefitMore.classList.toggle('is-visible', isVisible);
+  };
 
   const updateBenefitText = (index) => {
     const state = benefitStates[index];
@@ -160,7 +165,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     benefitTitle.textContent = state.title;
     benefitDescription.textContent = state.description;
     benefitCopy.dataset.state = String(index);
-    benefitMore.hidden = index !== 2;
+    benefitMore.hidden = index !== 2 && window.innerWidth > 600;
     benefitButtons.forEach((button, buttonIndex) => {
       const isActive = buttonIndex === index;
       button.classList.toggle('is-active', isActive);
@@ -169,7 +174,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     });
     copyFrame = window.requestAnimationFrame(() => {
       benefitCopy.classList.add('is-visible');
-      if (index === 2) benefitMore.classList.add('is-visible');
+      syncBenefitMore(index);
     });
   };
 
@@ -205,6 +210,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     } else {
       benefitsStage.style.removeProperty('--benefit-scale');
     }
+    syncBenefitMore(activeBenefit);
     requestBenefitUpdate();
   };
 
