@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="hero-grid.css?v=20261009-hero-responsive-8">
   <link rel="stylesheet" href="metrics-desktop.css?v=20261010-split-2">
+  <link rel="stylesheet" href="benefits.css?v=20261011-1">
 </head>
 <body>
   <header class="topbar">
@@ -121,21 +122,33 @@
 
     <section class="benefits wrap" aria-label="Преимущества компании">
       <div class="benefits-stage">
+        <div class="benefits-layout">
         <h2>Обращаясь к нам Вы получаете</h2>
-        <div class="benefit-copy is-visible" data-benefit-copy data-state="0" aria-live="polite">
-          <h3 data-benefit-title>Гарантийные обязательства</h3>
-          <p data-benefit-description>Полный комплект лицензий и сертификатов необходимых для разработки, производства и испытаний</p>
-        </div>
+        <ul class="benefit-list" aria-label="Наши преимущества">
+          <li class="benefit-item is-visible" data-benefit-item="0">
+            <h3>Гарантийные обязательства</h3>
+            <p>Полный комплект лицензий и сертификатов необходимых для разработки, производства и испытаний</p>
+          </li>
+          <li class="benefit-item" data-benefit-item="1">
+            <h3>Качественные услуги</h3>
+            <p>Используем современное оборудование, соблюдаем технические требования и обеспечиваем стабильное качество на всех этапах проекта</p>
+          </li>
+          <li class="benefit-item" data-benefit-item="2">
+            <h3>Полный цикл производства</h3>
+            <p>Выполняем все этапы работ — от разработки и изготовления печатных плат до сборки, тестирования и выпуска готового электронного модуля.</p>
+          </li>
+        </ul>
         <a class="benefit-more" href="#about" data-benefit-more hidden>ПОДРОБНЕЕ О НАС</a>
         <div class="benefit-art" data-benefit-art data-state="0" aria-hidden="true">
-          <img class="benefit-image benefit-image--guarantee is-active" src="https://www.figma.com/api/mcp/asset/949c519a-590f-4951-9b7a-e8845e70698e/50b94.png" alt="">
-          <img class="benefit-image benefit-image--quality" src="https://www.figma.com/api/mcp/asset/9499937c-97d1-4bc0-9cdf-ff21db3e4ca8/882f9.png" alt="">
-          <img class="benefit-image benefit-image--production" src="https://www.figma.com/api/mcp/asset/0313e576-f987-4e69-81a1-8c2d15bddfb3/b670d.png" alt="">
+          <img class="benefit-image benefit-image--guarantee is-active" src="assets/benefit-warranty.png" alt="">
+          <img class="benefit-image benefit-image--quality" src="assets/benefit-quality.png" alt="">
+          <img class="benefit-image benefit-image--production" src="assets/benefit-production.png" alt="">
         </div>
         <div class="benefit-progress" role="group" aria-label="Выбор преимущества">
           <button type="button" class="is-active" data-benefit-index="0" aria-label="Гарантийные обязательства" aria-current="step"></button>
           <button type="button" data-benefit-index="1" aria-label="Качественные услуги"></button>
           <button type="button" data-benefit-index="2" aria-label="Полный цикл производства"></button>
+        </div>
         </div>
       </div>
     </section>

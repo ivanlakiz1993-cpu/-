@@ -19,9 +19,7 @@ const hero = document.querySelector('.hero');
 const heroReveals = [...document.querySelectorAll('.hero-reveal')];
 const benefitsSection = document.querySelector('.benefits');
 const benefitsStage = document.querySelector('.benefits-stage');
-const benefitTitle = document.querySelector('[data-benefit-title]');
-const benefitDescription = document.querySelector('[data-benefit-description]');
-const benefitCopy = document.querySelector('[data-benefit-copy]');
+const benefitItems = [...document.querySelectorAll('[data-benefit-item]')];
 const benefitArt = document.querySelector('[data-benefit-art]');
 const benefitMore = document.querySelector('[data-benefit-more]');
 const benefitImages = [...document.querySelectorAll('.benefit-image')];
@@ -130,46 +128,23 @@ document.querySelectorAll('.project-cta__button, .submit').forEach((button) => {
   });
 });
 
-const benefitStates = [
-  {
-    title: 'Гарантийные обязательства',
-    description: 'Полный комплект лицензий и сертификатов необходимых для разработки, производства и испытаний',
-  },
-  {
-    title: 'Качественные услуги',
-    description: 'Используем современное оборудование, соблюдаем технические требования и обеспечиваем стабильное качество на всех этапах проекта',
-  },
-  {
-    title: 'Полный цикл производства',
-    description: 'Выполняем все этапы работ — от разработки и изготовления печатных плат до сборки, тестирования и выпуска готового электронного модуля.',
-  },
-];
-
-if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && benefitCopy && benefitArt) {
+if (benefitsSection && benefitsStage && benefitItems.length && benefitArt) {
   let activeBenefit = 0;
   let scrollFrame = 0;
-  let copyFrame = 0;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
   const updateBenefitText = (index) => {
-    const state = benefitStates[index];
-    window.cancelAnimationFrame(copyFrame);
-    benefitCopy.classList.remove('is-visible');
-    benefitMore.classList.remove('is-visible');
-    void benefitCopy.offsetWidth;
-    benefitTitle.textContent = state.title;
-    benefitDescription.textContent = state.description;
-    benefitCopy.dataset.state = String(index);
+    benefitItems.forEach((item, itemIndex) => {
+      item.classList.toggle('is-visible', itemIndex <= index);
+      item.classList.toggle('is-current', itemIndex === index);
+    });
     benefitMore.hidden = index !== 2;
+    benefitMore.classList.toggle('is-visible', index === 2);
     benefitButtons.forEach((button, buttonIndex) => {
       const isActive = buttonIndex === index;
       button.classList.toggle('is-active', isActive);
       if (isActive) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');
-    });
-    copyFrame = window.requestAnimationFrame(() => {
-      benefitCopy.classList.add('is-visible');
-      if (index === 2) benefitMore.classList.add('is-visible');
     });
   };
 
@@ -182,6 +157,8 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   const showBenefit = (index) => {
     if (index === activeBenefit) return;
     activeBenefit = index;
+    benefitsSection.dataset.state = String(index);
+    benefitsStage.dataset.state = String(index);
     updateBenefitText(index);
     setBenefitCard(index);
   };
@@ -190,7 +167,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     scrollFrame = 0;
     const sectionTop = benefitsSection.getBoundingClientRect().top + window.scrollY;
     const stageHeight = benefitsStage.offsetHeight || window.innerHeight;
-    const stateIndex = clamp(Math.floor((window.scrollY - sectionTop) / stageHeight), 0, benefitStates.length - 1);
+    const stateIndex = clamp(Math.floor((window.scrollY - sectionTop) / stageHeight), 0, benefitItems.length - 1);
     showBenefit(stateIndex);
   };
 
@@ -198,8 +175,14 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateBenefitFromScroll);
   };
 
+  const updateBenefitScale = () => {
+    const scale = Math.min(1, benefitsStage.clientWidth / 1720, window.innerHeight / 995);
+    benefitsStage.style.setProperty('--benefit-scale', String(scale));
+    requestBenefitUpdate();
+  };
+
   window.addEventListener('scroll', requestBenefitUpdate, { passive: true });
-  window.addEventListener('resize', requestBenefitUpdate, { passive: true });
+  window.addEventListener('resize', updateBenefitScale, { passive: true });
   benefitButtons.forEach((button) => {
     button.addEventListener('click', () => {
       const index = Number(button.dataset.benefitIndex);
@@ -207,6 +190,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
       window.scrollTo({ top: sectionTop + benefitsStage.offsetHeight * index, behavior: 'smooth' });
     });
   });
+  updateBenefitScale();
   updateBenefitFromScroll();
 }
 if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
