@@ -51,26 +51,24 @@ document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
 });
 
 const testingCard = document.querySelector('.card-testing');
-const workSection = document.querySelector('.work');
-if (testingCard && workSection) {
-  let updateQueued = false;
+const testingCardSlot = document.querySelector('.testing-card-slot');
+if (testingCard && testingCardSlot) {
   const updateTestingCard = () => {
-    updateQueued = false;
-    const sectionTop = workSection.getBoundingClientRect().top + window.scrollY;
-    const cardTop = sectionTop + testingCard.offsetTop;
-    const pinOffset = Math.max(20, (window.innerHeight - testingCard.offsetHeight) / 2);
+    const slot = testingCardSlot.getBoundingClientRect();
+    const pinOffset = Math.max(20, (window.innerHeight - testingCardSlot.offsetHeight) / 2);
     const holdDistance = Math.max(1200, window.innerHeight * 1.8);
-    const travel = Math.min(holdDistance, Math.max(0, window.scrollY - cardTop + pinOffset));
-    testingCard.style.transform = `translate3d(0, ${travel}px, 0)`;
+    const progress = pinOffset - slot.top;
+    testingCard.style.setProperty('--testing-hold-distance', `${holdDistance}px`);
+    testingCard.style.setProperty('--testing-pin-top', `${pinOffset}px`);
+    testingCard.style.setProperty('--testing-pin-left', `${slot.left}px`);
+    testingCard.style.setProperty('--testing-pin-width', `${slot.width}px`);
+    testingCard.style.setProperty('--testing-card-height', `${testingCardSlot.offsetHeight}px`);
+    testingCard.classList.toggle('is-pinned', progress >= 0 && progress < holdDistance);
+    testingCard.classList.toggle('is-released', progress >= holdDistance);
   };
-  const queueTestingCardUpdate = () => {
-    if (updateQueued) return;
-    updateQueued = true;
-    window.requestAnimationFrame(updateTestingCard);
-  };
-  window.addEventListener('scroll', queueTestingCardUpdate, { passive: true });
-  window.addEventListener('resize', queueTestingCardUpdate);
-  queueTestingCardUpdate();
+  window.addEventListener('scroll', updateTestingCard, { passive: true });
+  window.addEventListener('resize', updateTestingCard);
+  updateTestingCard();
 }
 
 const projectCtaVideo = document.querySelector('.project-cta__video');
