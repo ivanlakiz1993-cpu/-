@@ -50,77 +50,27 @@ document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
   });
 });
 
-const workStack = document.querySelector('.work');
-const workCards = workStack ? [...workStack.querySelectorAll('.work-card')] : [];
-if (workStack && workCards.length > 1) {
-  let wheelPauseActive = false;
-  let wheelPauseDistance = 0;
-  let wheelPauseTime = 0;
-  let wheelPauseLastEvent = 0;
-  let wheelPausePassed = false;
-
-  const getThirdCardPinPoint = () => {
-    const workTop = workStack.getBoundingClientRect().top + window.scrollY;
-    const styles = window.getComputedStyle(workStack);
-    const topPadding = Number.parseFloat(styles.paddingTop) || 0;
-    const gap = Number.parseFloat(styles.rowGap) || 0;
-    const pinOffset = Number.parseFloat(window.getComputedStyle(workCards.at(-1)).top) || 0;
-    const precedingCardsHeight = workCards.slice(0, -1).reduce((height, card) => height + card.offsetHeight, 0);
-    return workTop + topPadding + precedingCardsHeight + gap * (workCards.length - 1) - pinOffset;
+const testingCard = document.querySelector('.card-testing');
+const workSection = document.querySelector('.work');
+if (testingCard && workSection) {
+  let updateQueued = false;
+  const updateTestingCard = () => {
+    updateQueued = false;
+    const sectionTop = workSection.getBoundingClientRect().top + window.scrollY;
+    const cardTop = sectionTop + testingCard.offsetTop;
+    const pinOffset = Math.max(20, (window.innerHeight - testingCard.offsetHeight) / 2);
+    const holdDistance = Math.max(1200, window.innerHeight * 1.8);
+    const travel = Math.min(holdDistance, Math.max(0, window.scrollY - cardTop + pinOffset));
+    testingCard.style.transform = `translate3d(0, ${travel}px, 0)`;
   };
-
-  const scrollToPinPoint = (point) => {
-    const root = document.documentElement;
-    const previousBehavior = root.style.scrollBehavior;
-    root.style.scrollBehavior = 'auto';
-    window.scrollTo(0, point);
-    root.style.scrollBehavior = previousBehavior;
+  const queueTestingCardUpdate = () => {
+    if (updateQueued) return;
+    updateQueued = true;
+    window.requestAnimationFrame(updateTestingCard);
   };
-
-  window.addEventListener('wheel', (event) => {
-    const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
-    if (delta < 0) {
-      if (wheelPauseActive) {
-        wheelPauseActive = false;
-        wheelPauseDistance = 0;
-        wheelPauseTime = 0;
-        wheelPauseLastEvent = 0;
-        wheelPausePassed = false;
-      } else if (wheelPausePassed && window.scrollY < getThirdCardPinPoint()) {
-        wheelPausePassed = false;
-      }
-      return;
-    }
-    if (delta <= 0) return;
-
-    const pinPoint = getThirdCardPinPoint();
-    if (wheelPauseActive) {
-      const now = performance.now();
-      if (wheelPauseLastEvent) wheelPauseTime += Math.min(250, now - wheelPauseLastEvent);
-      wheelPauseLastEvent = now;
-      const pauseThreshold = Math.min(2400, Math.max(1200, window.innerHeight * 1.8));
-      wheelPauseDistance += delta;
-      if (wheelPauseTime < 2000 || wheelPauseDistance < pauseThreshold) {
-        event.preventDefault();
-        return;
-      }
-      wheelPauseActive = false;
-      wheelPausePassed = true;
-      wheelPauseDistance = 0;
-      wheelPauseTime = 0;
-      wheelPauseLastEvent = 0;
-      return;
-    }
-
-    if (!wheelPausePassed && window.scrollY + delta >= pinPoint && window.scrollY <= pinPoint + 1) {
-      event.preventDefault();
-      wheelPauseActive = true;
-      wheelPauseDistance = 0;
-      wheelPauseTime = 0;
-      wheelPauseLastEvent = 0;
-      scrollToPinPoint(pinPoint);
-    }
-  }, { passive: false });
+  window.addEventListener('scroll', queueTestingCardUpdate, { passive: true });
+  window.addEventListener('resize', queueTestingCardUpdate);
+  queueTestingCardUpdate();
 }
 
 const projectCtaVideo = document.querySelector('.project-cta__video');
