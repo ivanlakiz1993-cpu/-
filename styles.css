@@ -217,3 +217,21 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
 @media(hover:hover){.news-card:hover::after{transform:scale(1.06)}}
 .news-card:focus-visible::after{transform:scale(1.06)}
 @media(prefers-reduced-motion:reduce){.news-card::after{transition:none}}
+
+/* Services at the 1024px and 391px Figma layouts. */
+@media(max-width:1199px){
+  .work.wrap{width:100%;margin-inline:0}
+  .work{gap:15px;padding:0}
+  .work::after{display:none}
+  .work-card{position:relative;top:auto;flex:none;width:100%;height:384px;padding:24px 48px 30px;border-radius:5px}
+  .work-card-content{gap:30px}
+  .work-card h2{font-size:38px;line-height:.9;letter-spacing:.38px}
+  .work-card-services{gap:15px}
+  .work-card-mode{font-size:18px;line-height:1;letter-spacing:-.9px}
+  .card-testing{padding-top:50px}
+}
+@media(max-width:600px){
+  .work-card,.card-testing{padding:24px 12px 30px}
+  .card-production .work-card-bg img[data-card-background="prod-pcb"]{inset:0;width:100%;height:100%;object-fit:cover}
+  .card-testing .work-card-bg img.testing-image--climate{left:-87.48%;top:0;width:229.8%;height:100%;object-fit:fill;transform:scaleX(-1)}
+}
