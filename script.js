@@ -55,6 +55,8 @@ const workCards = workStack ? [...workStack.querySelectorAll('.work-card')] : []
 if (workStack && workCards.length > 1) {
   let wheelPauseActive = false;
   let wheelPauseDistance = 0;
+  let wheelPauseTime = 0;
+  let wheelPauseLastEvent = 0;
   let wheelPausePassed = false;
 
   const getThirdCardPinPoint = () => {
@@ -81,6 +83,8 @@ if (workStack && workCards.length > 1) {
       if (wheelPauseActive) {
         wheelPauseActive = false;
         wheelPauseDistance = 0;
+        wheelPauseTime = 0;
+        wheelPauseLastEvent = 0;
         wheelPausePassed = false;
       } else if (wheelPausePassed && window.scrollY < getThirdCardPinPoint()) {
         wheelPausePassed = false;
@@ -91,15 +95,20 @@ if (workStack && workCards.length > 1) {
 
     const pinPoint = getThirdCardPinPoint();
     if (wheelPauseActive) {
+      const now = performance.now();
+      if (wheelPauseLastEvent) wheelPauseTime += Math.min(250, now - wheelPauseLastEvent);
+      wheelPauseLastEvent = now;
       const pauseThreshold = Math.min(2400, Math.max(1200, window.innerHeight * 1.8));
-      if (wheelPauseDistance + delta < pauseThreshold) {
+      wheelPauseDistance += delta;
+      if (wheelPauseTime < 2000 || wheelPauseDistance < pauseThreshold) {
         event.preventDefault();
-        wheelPauseDistance += delta;
         return;
       }
       wheelPauseActive = false;
       wheelPausePassed = true;
       wheelPauseDistance = 0;
+      wheelPauseTime = 0;
+      wheelPauseLastEvent = 0;
       return;
     }
 
@@ -107,6 +116,8 @@ if (workStack && workCards.length > 1) {
       event.preventDefault();
       wheelPauseActive = true;
       wheelPauseDistance = 0;
+      wheelPauseTime = 0;
+      wheelPauseLastEvent = 0;
       scrollToPinPoint(pinPoint);
     }
   }, { passive: false });
