@@ -43,7 +43,6 @@
       half.className=`hero-split__half hero-split__half--${side}`;
       copy.removeAttribute('aria-label');
       copy.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
-      copy.querySelector('.hero-reveal')?.remove();
       copy.inert=true;
       half.append(copy);splitOverlay.append(half);
     }

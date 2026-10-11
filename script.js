@@ -16,7 +16,7 @@ navigation.querySelectorAll('.menu-nav-links a').forEach((link, rowIndex) => {
 });
 
 const hero = document.querySelector('.hero');
-const heroReveal = document.querySelector('.hero-reveal');
+const heroReveals = [...document.querySelectorAll('.hero-reveal')];
 const benefitsSection = document.querySelector('.benefits');
 const benefitsStage = document.querySelector('.benefits-stage');
 const benefitTitle = document.querySelector('[data-benefit-title]');
@@ -209,38 +209,42 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   });
   updateBenefitFromScroll();
 }
-if (hero && heroReveal && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const columns = 16;
   const rows = 9;
   const centerRow = (rows - 1) / 2;
   const centerColumn = (columns - 1) / 2;
   const maxDistance = Math.hypot(centerRow, centerColumn);
-  const tileEntries = [];
-  const tiles = document.createDocumentFragment();
-
-  for (let row = 0; row < rows; row += 1) {
-    for (let column = 0; column < columns; column += 1) {
+  const tileEntries = Array.from({ length: rows * columns }, (_, index) => ({
+    row: Math.floor(index / columns),
+    column: index % columns,
+    tiles: []
+  }));
+  heroReveals.forEach((reveal) => {
+    const tiles = document.createDocumentFragment();
+    tileEntries.forEach((entry) => {
       const tile = document.createElement('span');
       tile.className = 'hero-reveal__tile';
       tiles.append(tile);
-      tileEntries.push({ tile, row, column });
-    }
-  }
-
-  heroReveal.append(tiles);
+      entry.tiles.push(tile);
+    });
+    reveal.append(tiles);
+  });
 
   const startHeroReveal = () => {
     window.setTimeout(() => {
       requestAnimationFrame(() => {
-        tileEntries.forEach(({ tile, row, column }) => {
+        tileEntries.forEach(({ tiles, row, column }) => {
           const distance = Math.hypot(row - centerRow, column - centerColumn) / maxDistance;
           const randomOffset = Math.random() * 0.35;
           const delay = distance * 480 + randomOffset * 500;
-          tile.style.setProperty('--tile-delay', `${delay}ms`);
-          tile.classList.add('is-revealed');
+          tiles.forEach((tile) => {
+            tile.style.setProperty('--tile-delay', `${delay}ms`);
+            tile.classList.add('is-revealed');
+          });
         });
       });
-      window.setTimeout(() => heroReveal.remove(), 1900);
+      window.setTimeout(() => heroReveals.forEach((reveal) => reveal.remove()), 1900);
     }, 200);
   };
   const heroBackground = hero.querySelector('.hero-bg img');
