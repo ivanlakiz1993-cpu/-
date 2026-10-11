@@ -129,7 +129,7 @@ document.querySelectorAll('.project-cta__button, .submit').forEach((button) => {
 });
 
 if (benefitsSection && benefitsStage && benefitItems.length && benefitArt) {
-  let activeBenefit = 0;
+  let activeBenefit = -1;
   let scrollFrame = 0;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
