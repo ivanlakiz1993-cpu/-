@@ -80,3 +80,12 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
 .benefit-copy.is-visible::before{opacity:1}
 @media(prefers-reduced-motion:reduce){.benefit-copy::before{transition:none}}
 @media(max-width:600px){.benefit-copy{padding-left:19px}.benefit-copy::before{left:0}}
+@media(min-width:601px) and (max-width:900px){
+  .benefits-stage h2{top:calc(76px + 4vh);width:52%;font-size:clamp(36px,5vw,48px);line-height:1.04}
+  .benefit-copy,.benefit-copy[data-state="0"]{left:19px;top:58vh;width:calc(52% - 43px)}
+  .benefit-copy p{text-align:left}
+  .benefit-art{left:54%;right:0;top:18vh;width:46%;height:55vh}
+  .benefit-more{left:19px;top:80vh}
+  .benefit-progress{left:calc(54% - 38px);top:auto;bottom:8vh}
+}
+@media(max-width:900px){.benefit-progress{display:none}}
