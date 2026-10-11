@@ -29,19 +29,38 @@ const benefitButtons = [...document.querySelectorAll('[data-benefit-index]')];
 document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
   const images = [...card.querySelectorAll('[data-card-background]')];
   const modes = [...card.querySelectorAll('[data-card-mode]')];
+  let selectedState = card.dataset.defaultState;
+  let touchSelectionActive = false;
   const setState = (state) => {
     images.forEach((image) => image.classList.toggle('is-active', image.dataset.cardBackground === state));
   };
   const restoreState = () => {
+    if (touchSelectionActive) {
+      setState(selectedState);
+      return;
+    }
     const focusedMode = modes.find((mode) => mode === document.activeElement);
     const hoveredMode = modes.find((mode) => mode.matches(':hover'));
-    setState(focusedMode?.dataset.cardMode || hoveredMode?.dataset.cardMode || card.dataset.defaultState);
+    setState(focusedMode?.dataset.cardMode || hoveredMode?.dataset.cardMode || selectedState);
   };
 
   modes.forEach((button) => {
-    button.addEventListener('pointerenter', () => setState(button.dataset.cardMode));
+    button.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'touch') return;
+      touchSelectionActive = true;
+      selectedState = button.dataset.cardMode;
+      setState(selectedState);
+    });
+    button.addEventListener('pointerenter', (event) => {
+      if (event.pointerType === 'touch') return;
+      setState(button.dataset.cardMode);
+    });
     button.addEventListener('focus', () => setState(button.dataset.cardMode));
     button.addEventListener('pointerleave', (event) => {
+      if (event.pointerType === 'touch') {
+        restoreState();
+        return;
+      }
       const nextMode = event.relatedTarget?.closest?.('[data-card-mode]');
       if (nextMode && card.contains(nextMode)) setState(nextMode.dataset.cardMode);
       else restoreState();
