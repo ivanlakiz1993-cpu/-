@@ -91,7 +91,7 @@ if (workStack && workCards.length > 1) {
 
     const pinPoint = getThirdCardPinPoint();
     if (wheelPauseActive) {
-      const pauseThreshold = Math.min(800, Math.max(560, window.innerHeight * 0.75));
+      const pauseThreshold = Math.min(2400, Math.max(1200, window.innerHeight * 1.8));
       if (wheelPauseDistance + delta < pauseThreshold) {
         event.preventDefault();
         wheelPauseDistance += delta;
