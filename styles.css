@@ -62,14 +62,24 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
 .news-card--march span{white-space:nowrap}
 .news-card--forum{grid-column:1 / span 2;grid-row:2;height:355px;background-size:100% 166.25%;background-position:center 18.75%}
 .news-card--forum span{width:279px}
-.news-card--victory{background-image:url('https://www.figma.com/api/mcp/asset/4d589ec2-11f4-4170-af11-63f9e8812c93/b5233.png')}
-.news-card--lab{background-image:url('https://www.figma.com/api/mcp/asset/4d589ec2-11f4-4170-af11-63f9e8812c93/4a3e4.png')}
-.news-card--march{background-image:url('https://www.figma.com/api/mcp/asset/4d589ec2-11f4-4170-af11-63f9e8812c93/6a661.png')}
-.news-card--forum{background-image:url('https://www.figma.com/api/mcp/asset/4d589ec2-11f4-4170-af11-63f9e8812c93/d36ca.png')}
+.news-card--victory{background-image:url('assets/news-victory.png')}
+.news-card--lab{background-image:url('assets/news-laboratory.png')}
+.news-card--march{background-image:url('assets/news-womens-day.png')}
+.news-card--forum{background-image:url('assets/news-forum.png')}
 @media(max-width:900px){.news{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:260px 320px 320px 320px;gap:18px;padding-top:30px;padding-bottom:90px}.news-intro{grid-column:1 / -1;grid-row:1;height:auto;min-height:260px}.news-card--victory{grid-column:1;grid-row:2;height:320px}.news-card--lab{grid-column:2;grid-row:2 / span 2;height:658px}.news-card--march{grid-column:1;grid-row:3 / span 2;height:658px}.news-card--forum{grid-column:1 / -1;grid-row:4;height:320px}.news-card span{font-size:20px}.news-card--victory span{font-size:16px}.news-card--march span{white-space:normal}}
 @media(max-width:600px){.news{grid-template-columns:1fr;grid-template-rows:auto repeat(4,minmax(230px,60vw));gap:12px;padding-top:20px;padding-bottom:80px}.news-intro{grid-column:1;grid-row:1;min-height:280px;height:auto}.news-intro h2{font-size:45px}.news-intro p{font-size:14px;line-height:1.25;letter-spacing:-.45px}.all-news{font-size:17px}.news-card{grid-column:1!important;grid-row:auto!important;height:auto!important;min-height:230px;padding:16px;background-size:cover;background-position:center}.news-card span{font-size:18px;white-space:normal}.news-card--victory span{font-size:16px}}
 @media(max-width:900px){.news{grid-template-rows:260px repeat(4,320px)}.news-card--victory{grid-column:1;grid-row:2;height:320px}.news-card--lab{grid-column:2;grid-row:2;height:320px}.news-card--march{grid-column:1;grid-row:3;height:320px}.news-card--forum{grid-column:2;grid-row:3;height:320px}}
 @media(max-width:600px){.news{grid-template-rows:auto repeat(4,minmax(230px,60vw))}}
+
+@media(min-width:901px){
+  .news{padding-top:0;padding-bottom:0;margin-bottom:130px}
+  .news-intro{justify-content:flex-start;gap:50px}
+  .news-intro__copy{width:min(415px,calc(100% + 7.5px))}
+  .news-intro p{letter-spacing:0}
+  .news-card--lab{background-size:cover;background-position:center}
+  .news-card--forum{background-size:100% 159.69%;background-position:center 17.5%}
+  .news-card--forum span{width:auto;white-space:nowrap}
+}
 
 .all-news,.benefit-more{color:#fff;font-family:'Yandex Sans Text',Arial,sans-serif;font-weight:400;line-height:1.25;letter-spacing:-1.2px;text-decoration:underline;text-underline-position:from-font;text-underline-offset:5px;transition:color .18s ease,opacity .45s ease-in-out}
 .all-news:hover,.all-news:focus-visible,.all-news:active,.benefit-more:hover,.benefit-more:focus-visible,.benefit-more:active{color:#979797}
