@@ -89,7 +89,7 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
   .benefit-progress{left:calc(54% - 38px);top:auto;bottom:8vh}
 }
 @media(max-width:900px){.benefit-progress{display:none}}
-@media(min-width:768px) and (max-width:1199px){
+@media(min-width:601px) and (max-width:1199px){
   .benefits.wrap{width:100%;height:400vh;margin-top:0}
   .benefits-stage{--tablet-art-top:max(110px,calc(50% - 18.408vw));height:100vh}
   .benefits-stage h2{left:4.6875vw;top:var(--tablet-art-top);width:40.234375vw;font-size:clamp(30px,3.71094vw,38px);line-height:.9;letter-spacing:.38px}
@@ -98,9 +98,16 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
   .benefit-copy h3{font-size:18px;line-height:1.2;letter-spacing:0}
   .benefit-copy p{text-align:justify}
   .benefit-art{left:55.078125vw;right:auto;top:var(--tablet-art-top);width:40.234375vw;height:34.08203125vw}
-  .benefit-image--guarantee{object-fit:contain}
+  .benefit-art .benefit-image{object-fit:contain}
   .benefit-more{left:4.6875vw;top:calc(var(--tablet-art-top) + 34.08203125vw);font-size:clamp(20px,2.34375vw,24px)}
   .benefit-progress{display:none}
+}
+@media(min-width:601px) and (max-width:767px){
+  .benefits-stage h2{font-size:clamp(28px,4.2vw,32px)}
+  .benefit-copy,.benefit-copy[data-state="0"]{top:calc(var(--tablet-art-top) + max(9.5703vw,90px))}
+  .benefit-copy h3{font-size:clamp(16px,2.5vw,18px)}
+  .benefit-copy p{font-size:14px;line-height:1.25;text-align:left}
+  .benefit-more{top:calc(var(--tablet-art-top) + max(34.08203125vw,285px));font-size:18px}
 }
 @media(max-width:1199px){.benefits-layout{display:contents}}
 @media(min-width:1200px){
