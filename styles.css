@@ -211,3 +211,9 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
   .work::after{content:"";display:block;flex:none;height:120vh;margin-top:-50vh;pointer-events:none}
   .project-cta{margin-top:100px;margin-bottom:100px}
 }
+
+/* Zoom only the picture; the card itself clips it to the existing mask. */
+.news-card::after{content:"";position:absolute;z-index:-2;inset:0;border-radius:inherit;background-image:inherit;background-color:inherit;background-size:inherit;background-position:inherit;background-repeat:inherit;transform:scale(1);transform-origin:center;transition:transform .65s cubic-bezier(.22,1,.36,1);pointer-events:none}
+@media(hover:hover){.news-card:hover::after{transform:scale(1.06)}}
+.news-card:focus-visible::after{transform:scale(1.06)}
+@media(prefers-reduced-motion:reduce){.news-card::after{transition:none}}
