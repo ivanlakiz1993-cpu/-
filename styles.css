@@ -102,3 +102,9 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
   .benefit-more{left:4.6875vw;top:calc(var(--tablet-art-top) + 34.08203125vw);font-size:clamp(20px,2.34375vw,24px)}
   .benefit-progress{display:none}
 }
+@media(max-width:1199px){.benefits-layout{display:contents}}
+@media(min-width:1200px){
+  .benefits{height:400vh}
+  .benefits-stage{height:100vh}
+  .benefits-layout{position:absolute;left:50%;top:50%;width:1720px;height:995px;transform:translate(-50%,-50%) scale(var(--benefit-scale,1));transform-origin:center}
+}

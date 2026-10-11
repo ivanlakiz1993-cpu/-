@@ -198,8 +198,18 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateBenefitFromScroll);
   };
 
+  const updateBenefitScale = () => {
+    if (window.innerWidth >= 1200) {
+      const scale = Math.min(1, benefitsStage.clientWidth / 1720, benefitsStage.clientHeight / 995);
+      benefitsStage.style.setProperty('--benefit-scale', String(scale));
+    } else {
+      benefitsStage.style.removeProperty('--benefit-scale');
+    }
+    requestBenefitUpdate();
+  };
+
   window.addEventListener('scroll', requestBenefitUpdate, { passive: true });
-  window.addEventListener('resize', requestBenefitUpdate, { passive: true });
+  window.addEventListener('resize', updateBenefitScale, { passive: true });
   benefitButtons.forEach((button) => {
     button.addEventListener('click', () => {
       const index = Number(button.dataset.benefitIndex);
@@ -207,6 +217,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
       window.scrollTo({ top: sectionTop + benefitsStage.offsetHeight * index, behavior: 'smooth' });
     });
   });
+  updateBenefitScale();
   updateBenefitFromScroll();
 }
 if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
