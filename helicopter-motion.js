@@ -1,4 +1,4 @@
-/* Scroll controls the helicopter and achievements; time drives rotors and text decoding. */
+/* Scroll controls one helicopter/camera; elapsed time drives only its rotors. */
 (() => {
   const intro=document.querySelector('.intro-sequence');
   const hero=intro?.querySelector('.hero'),section=intro?.querySelector('.metrics');
@@ -18,54 +18,6 @@
   let splitIntroTop=0,splitPreTravel=0,splitSeam=0,splitTopTravel=0,splitBottomTravel=0;
   let layoutWidth=0,layoutHeight=0,lastTime=0,rotorTime=0,lastScroll=NaN,target=0,progress=0;
   let state=sample(0);
-  const scrambleRuns=copies.map(copy=>{
-    const value=copy.querySelector('.metrics-desktop__value');
-    const valueParts=[...value.querySelectorAll('span')];
-    const targets=(valueParts.length?valueParts:[value]).map(node=>({node,text:node.textContent,duration:600}));
-    const label=copy.querySelector('.metrics-desktop__label');
-    targets.push({node:label,text:label.textContent,duration:900});
-    return {startedAt:null,finished:false,targets};
-  });
-  const digits='0123456789',upper='АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ',lower=upper.toLowerCase();
-  function scrambleGlyph(character){
-    const pool=/\d/.test(character)?digits:/[А-ЯЁ]/.test(character)?upper:/[а-яё]/.test(character)?lower:null;
-    return pool?pool[Math.floor(Math.random()*pool.length)]:character;
-  }
-  function scrambleText(text,fraction){
-    const characters=[...text],letters=characters.filter(character=>/[\dА-ЯЁа-яё]/.test(character)).length;
-    const settled=Math.floor(fraction*letters);
-    let index=0;
-    return characters.map(character=>{
-      if(!/[\dА-ЯЁа-яё]/.test(character))return character;
-      return index++<settled?character:scrambleGlyph(character);
-    }).join('');
-  }
-  function resetScrambles(){
-    scrambleRuns.forEach(run=>{
-      run.startedAt=null;
-      run.finished=false;
-      run.targets.forEach(({node,text})=>{node.textContent=text;});
-    });
-  }
-  function updateScrambles(time){
-    scrambleRuns.forEach((run,index)=>{
-      if(state.achievement[index]<=.35){
-        if(run.startedAt!==null){
-          run.startedAt=null;
-          run.finished=false;
-          run.targets.forEach(({node,text})=>{node.textContent=text;});
-        }
-        return;
-      }
-      if(run.finished)return;
-      if(run.startedAt===null)run.startedAt=time;
-      const elapsed=time-run.startedAt;
-      run.targets.forEach(({node,text,duration})=>{
-        node.textContent=elapsed>=duration?text:scrambleText(text,elapsed/duration);
-      });
-      if(elapsed>=900)run.finished=true;
-    });
-  }
   // Fit the airframe, not the spinning rotor envelope. This keeps the scale fixed
   // during holds and lets blades cross the edges of close-ups, as in the reference.
   const calibrations=poses.map(pose=>{
@@ -113,7 +65,6 @@
       copy.style.opacity=String(state.achievement[i]);
       copy.style.setProperty('--copy-shift',`${state.textY[i]*sceneWidth/1920}px`);
     });
-    updateScrambles(performance.now());
   }
   function updateScroll(){
     const scroll=window.scrollY;
@@ -149,7 +100,6 @@
       if(Math.abs(progress-target)<.000015)progress=target;
       compose();
     }
-    updateScrambles(time);
     const a=calibrations[state.from],b=calibrations[state.to],unit=sceneWidth/1920;
     const arc=Math.sin(Math.PI*state.mix);
     const mobile=mobileMedia.matches;
@@ -201,7 +151,7 @@
     hero.inert=false;
     if(!splitEnabled)intro.style.removeProperty('--intro-hero-height');
     if(enabled)measure();
-    else {intro.style.removeProperty('--metrics-run-height');intro.style.removeProperty('--intro-hero-height');stage.classList.remove('is-rendered');resetScrambles();}
+    else {intro.style.removeProperty('--metrics-run-height');intro.style.removeProperty('--intro-hero-height');stage.classList.remove('is-rendered');}
   }
   window.addEventListener('scroll',()=>{if(enabled){updateScroll();wake();}},{passive:true});
   window.addEventListener('resize',requestMeasure,{passive:true});
