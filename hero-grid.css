@@ -129,7 +129,7 @@
 .menu-open .topbar{z-index:50;background:transparent;backdrop-filter:none}
 .menu-nav-links{display:flex;flex-direction:column;align-items:flex-start;gap:30px}
 .menu-nav-links a{color:#f4f4f4;font-family:var(--display);font-size:48px;font-weight:400;line-height:.9;letter-spacing:.48px;text-transform:uppercase;white-space:nowrap;transition:color .2s ease}
-.menu-letter{display:inline-block;margin-right:.48px;opacity:0;filter:blur(6px);transform:translate3d(0,.38em,0) rotateX(-48deg);transform-origin:50% 100%;backface-visibility:hidden;transition:opacity .28s ease,filter .34s ease,transform .42s cubic-bezier(.2,.75,.25,1);transition-delay:0ms}
+.menu-letter{display:inline-block;white-space:pre;margin-right:.48px;opacity:0;filter:blur(6px);transform:translate3d(0,.38em,0) rotateX(-48deg);transform-origin:50% 100%;backface-visibility:hidden;transition:opacity .28s ease,filter .34s ease,transform .42s cubic-bezier(.2,.75,.25,1);transition-delay:0ms}
 .menu-drawer.is-open .menu-letter{opacity:1;filter:blur(0);transform:translate3d(0,0,0) rotateX(0);transition-delay:var(--letter-delay,0ms)}
 .menu-nav-links a:hover,.menu-nav-links a:focus-visible{color:#a5a5a5}
 .menu-social{display:flex;align-items:center;gap:15px;flex:none}
