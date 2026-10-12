@@ -136,7 +136,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
         benefitCopy.classList.add('is-visible');
         syncBenefitMore(index);
       });
-    }, reducedBenefitMotion.matches ? 0 : 180);
+    }, reducedBenefitMotion.matches ? 0 : 460);
   };
 
   const setBenefitCard = (index) => {
@@ -190,11 +190,11 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
 }
 
 const textRevealSelector = [
-  '.benefits-stage h2', '[data-benefit-copy]',
-  '.work-card-content h2', '.work-card-mode',
-  '.project-cta__copy h2', '.project-cta__copy p', '.project-cta__button span',
-  '.news-intro h2', '.news-intro p', '.all-news', '.news-card > span',
-  '.contact-heading h2', '.contact-heading p', '.contact-form .consent > span', '.contact-form .submit span',
+  'main h2', '[data-benefit-copy]',
+  '.work-card-mode',
+  '.project-cta__copy p', '.project-cta__button span',
+  '.news-intro p', '.all-news', '.news-card > span',
+  '.contact-heading p', '.contact-form .consent > span', '.contact-form .submit span',
   '.footer-main h3', '.footer-nav a', '.footer-legal a', '.footer-contact-link',
   '.footer-contacts address', '.footer-bottom'
 ].join(',');
@@ -210,10 +210,11 @@ if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-mot
   }, { rootMargin: '0px 0px -6% 0px', threshold: 0.01 });
 
   document.querySelectorAll(textRevealSelector).forEach((element) => {
+    if (element.closest('.hero, .metrics')) return;
     const group = element.closest('article,section,footer') || element.parentElement;
     const order = groupCounts.get(group) || 0;
     groupCounts.set(group, order + 1);
-    element.style.setProperty('--text-reveal-delay', `${Math.min(order * 65, 220)}ms`);
+    element.style.setProperty('--text-reveal-delay', `${Math.min(order * 100, 300)}ms`);
     element.classList.add('text-reveal');
     textObserver.observe(element);
   });
