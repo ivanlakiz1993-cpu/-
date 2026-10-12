@@ -204,18 +204,31 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
   .footer-main{grid-template-columns:1fr 1fr;gap:40px 30px;padding-bottom:35px}
   .footer-bottom{padding-bottom:12px}
 }
+@media(min-width:601px) and (max-width:1199px){
+  .footer-main.wrap,.footer-bottom.wrap{width:calc(100% - 96px)}
+  .footer-main{grid-template-columns:minmax(0,415fr) minmax(0,463fr);grid-template-rows:200px auto;column-gap:50px;row-gap:50px;padding-top:30px;padding-bottom:48px}
+  .footer-brand{grid-column:1;grid-row:1}
+  .footer-menu{grid-column:2;grid-row:1}
+  .footer-social{grid-column:1;grid-row:2}
+  .footer-contacts{grid-column:2;grid-row:2}
+  .footer-nav a:last-child{display:none}
+  .footer-legal{margin-top:30px}
+}
 @media(max-width:600px){
-  .footer-main{grid-template-columns:1fr 1fr;gap:32px 16px;padding-top:28px}
-  .footer-brand{grid-column:1 / -1}
-  .footer-menu{grid-column:1}
-  .footer-contacts{grid-column:2}
-  .footer-social{grid-column:1 / -1}
-  .footer-main a,.footer-main address{font-size:12px}
-  .footer-contact-link{gap:2px;white-space:normal;overflow-wrap:anywhere}
+  .footer-main.wrap,.footer-bottom.wrap{width:calc(100% - 24px)}
+  .footer-main{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;gap:30px;padding-top:30px;padding-bottom:30px}
+  .footer-brand,.footer-menu,.footer-social,.footer-contacts{grid-column:1;grid-row:auto}
+  .footer-brand{gap:2px}
+  .footer-brand .brand-mark{width:23.4px;height:28.7px}
+  .footer-brand>span{width:74px;font-size:8px;line-height:.9}
+  .footer-nav a:last-child{display:none}
+  .footer-main a,.footer-main address{font-size:14px}
+  .footer-contact-link{gap:5px;white-space:nowrap}
   .footer-contact-link img{width:24px;height:24px}
   .footer-contacts address{white-space:normal}
-  .footer-social-links{flex-wrap:wrap}
-  .footer-bottom{font-size:11px}
+  .footer-social-links{flex-wrap:nowrap;gap:10px;margin-top:20px}
+  .footer-main .footer-social-link{width:50px;height:50px}
+  .footer-bottom{font-size:14px;padding-bottom:10px}
 }
 
 @media(min-width:901px){
