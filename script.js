@@ -26,6 +26,44 @@ const benefitArt = document.querySelector('[data-benefit-art]');
 const benefitMore = document.querySelector('[data-benefit-more]');
 const benefitImages = [...document.querySelectorAll('.benefit-image')];
 const benefitButtons = [...document.querySelectorAll('[data-benefit-index]')];
+const prepareTextLines = (element) => {
+  if (!element.querySelector('.text-reveal__word')) {
+    const hasFlexLayout = getComputedStyle(element).display.includes('flex');
+    [...element.childNodes].forEach((node) => {
+      if (node.nodeType !== Node.TEXT_NODE || !node.textContent.trim()) return;
+      const fragment = document.createDocumentFragment();
+      node.textContent.split(/(\s+)/u).forEach((part) => {
+        if (!part) return;
+        if (/^\s+$/u.test(part)) {
+          fragment.append(document.createTextNode(part));
+        } else {
+          const word = document.createElement('span');
+          word.className = 'text-reveal__word';
+          word.textContent = part;
+          fragment.append(word);
+        }
+      });
+      if (hasFlexLayout) {
+        const content = document.createElement('span');
+        content.className = 'text-reveal__content';
+        content.append(fragment);
+        node.replaceWith(content);
+      } else {
+        node.replaceWith(fragment);
+      }
+    });
+  }
+  let lastTop = -Infinity;
+  let line = -1;
+  element.querySelectorAll('.text-reveal__word').forEach((word) => {
+    const top = word.getBoundingClientRect().top;
+    if (Math.abs(top - lastTop) > 3) {
+      line++;
+      lastTop = top;
+    }
+    word.style.setProperty('--text-line-delay', `${Math.min(line * 420, 2100)}ms`);
+  });
+};
 document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
   const images = [...card.querySelectorAll('[data-card-background]')];
   const modes = [...card.querySelectorAll('[data-card-mode]')];
@@ -132,11 +170,19 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
       benefitDescription.textContent = state.description;
       benefitCopy.dataset.state = String(index);
       benefitMore.hidden = index !== 2 && window.innerWidth > 600;
+      [benefitTitle, benefitDescription].forEach((element) => {
+        element.classList.remove('is-revealed');
+        element.classList.add('text-reveal');
+        prepareTextLines(element);
+      });
+      void benefitTitle.offsetWidth;
       copyFrame = window.requestAnimationFrame(() => {
         benefitCopy.classList.add('is-visible');
+        benefitTitle.classList.add('is-revealed');
+        benefitDescription.classList.add('is-revealed');
         syncBenefitMore(index);
       });
-    }, reducedBenefitMotion.matches ? 0 : 460);
+    }, reducedBenefitMotion.matches ? 0 : 650);
   };
 
   const setBenefitCard = (index) => {
@@ -190,7 +236,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
 }
 
 const textRevealSelector = [
-  'main h2', '[data-benefit-copy]',
+  'main h2', '[data-benefit-title]', '[data-benefit-description]',
   '.work-card-mode',
   '.project-cta__copy p', '.project-cta__button span',
   '.news-intro p', '.all-news', '.news-card > span',
@@ -214,10 +260,14 @@ if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-mot
     const group = element.closest('article,section,footer') || element.parentElement;
     const order = groupCounts.get(group) || 0;
     groupCounts.set(group, order + 1);
-    element.style.setProperty('--text-reveal-delay', `${Math.min(order * 100, 300)}ms`);
+    element.style.setProperty('--text-reveal-delay', `${Math.min(order * 180, 540)}ms`);
     element.classList.add('text-reveal');
+    prepareTextLines(element);
     textObserver.observe(element);
   });
+  const refreshTextLines = () => document.querySelectorAll('.text-reveal').forEach(prepareTextLines);
+  window.addEventListener('resize', refreshTextLines, { passive: true });
+  document.fonts?.ready.then(refreshTextLines);
 }
 
 if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
