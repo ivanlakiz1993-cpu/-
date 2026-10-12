@@ -26,11 +26,15 @@ const benefitArt = document.querySelector('[data-benefit-art]');
 const benefitMore = document.querySelector('[data-benefit-more]');
 const benefitImages = [...document.querySelectorAll('.benefit-image')];
 const benefitButtons = [...document.querySelectorAll('[data-benefit-index]')];
+let requestTextReveal = () => {};
 const prepareTextLines = (element) => {
   if (!element.querySelector('.text-reveal__word')) {
-    const hasFlexLayout = getComputedStyle(element).display.includes('flex');
-    [...element.childNodes].forEach((node) => {
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+    while (walker.nextNode()) textNodes.push(walker.currentNode);
+    textNodes.forEach((node) => {
       if (node.nodeType !== Node.TEXT_NODE || !node.textContent.trim()) return;
+      const hasFlexLayout = getComputedStyle(node.parentElement).display.includes('flex');
       const fragment = document.createDocumentFragment();
       node.textContent.split(/(\s+)/u).forEach((part) => {
         if (!part) return;
@@ -53,16 +57,14 @@ const prepareTextLines = (element) => {
       }
     });
   }
-  let lastTop = -Infinity;
-  let line = -1;
+  let offset = 0;
   element.querySelectorAll('.text-reveal__word').forEach((word) => {
-    const top = word.getBoundingClientRect().top;
-    if (Math.abs(top - lastTop) > 3) {
-      line++;
-      lastTop = top;
-    }
-    word.style.setProperty('--text-line-delay', `${Math.min(line * 420, 2100)}ms`);
+    word.dataset.revealStart = String(offset);
+    word.dataset.revealLength = String(Array.from(word.textContent).length);
+    offset += Number(word.dataset.revealLength) + 1;
   });
+  element.dataset.revealLength = String(Math.max(1, offset - 1));
+  element.style.setProperty('--text-final-color', getComputedStyle(element).color);
 };
 document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
   const images = [...card.querySelectorAll('[data-card-background]')];
@@ -143,9 +145,9 @@ const benefitStates = [
 if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && benefitCopy && benefitArt) {
   let activeBenefit = 0;
   let scrollFrame = 0;
-  let copyFrame = 0;
-  let copyTimer = 0;
-  const reducedBenefitMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+
+
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const syncBenefitMore = (index) => {
     const isVisible = index === 2 || window.innerWidth <= 600;
@@ -155,36 +157,20 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
 
   const updateBenefitText = (index) => {
     const state = benefitStates[index];
-    window.cancelAnimationFrame(copyFrame);
-    window.clearTimeout(copyTimer);
-    benefitCopy.classList.remove('is-visible');
-    benefitMore.classList.remove('is-visible');
+    benefitTitle.textContent = state.title;
+    benefitDescription.textContent = state.description;
+    benefitCopy.dataset.state = String(index);
+    [benefitTitle, benefitDescription].forEach(prepareTextLines);
+    benefitCopy.classList.add('is-visible');
+    syncBenefitMore(index);
     benefitButtons.forEach((button, buttonIndex) => {
       const isActive = buttonIndex === index;
       button.classList.toggle('is-active', isActive);
       if (isActive) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');
     });
-    copyTimer = window.setTimeout(() => {
-      benefitTitle.textContent = state.title;
-      benefitDescription.textContent = state.description;
-      benefitCopy.dataset.state = String(index);
-      benefitMore.hidden = index !== 2 && window.innerWidth > 600;
-      [benefitTitle, benefitDescription].forEach((element) => {
-        element.classList.remove('is-revealed');
-        element.classList.add('text-reveal');
-        prepareTextLines(element);
-      });
-      void benefitTitle.offsetWidth;
-      copyFrame = window.requestAnimationFrame(() => {
-        benefitCopy.classList.add('is-visible');
-        benefitTitle.classList.add('is-revealed');
-        benefitDescription.classList.add('is-revealed');
-        syncBenefitMore(index);
-      });
-    }, reducedBenefitMotion.matches ? 0 : 650);
+    requestTextReveal();
   };
-
   const setBenefitCard = (index) => {
     benefitArt.dataset.state = String(index);
     benefitImages.forEach((image, imageIndex) => {
@@ -236,7 +222,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
 }
 
 const textRevealSelector = [
-  'main h2', '[data-benefit-title]', '[data-benefit-description]',
+  'main h2', 'main h3', '[data-benefit-description]', '[data-benefit-more]',
   '.work-card-mode',
   '.project-cta__copy p', '.project-cta__button span',
   '.news-intro p', '.all-news', '.news-card > span',
@@ -245,31 +231,61 @@ const textRevealSelector = [
   '.footer-contacts address', '.footer-bottom'
 ].join(',');
 
-if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  const groupCounts = new Map();
-  const textObserver = new IntersectionObserver((entries, observer) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      entry.target.classList.add('is-revealed');
-      observer.unobserve(entry.target);
-    });
-  }, { rootMargin: '0px 0px -6% 0px', threshold: 0.01 });
-
-  document.querySelectorAll(textRevealSelector).forEach((element) => {
-    if (element.closest('.hero, .metrics')) return;
-    const group = element.closest('article,section,footer') || element.parentElement;
-    const order = groupCounts.get(group) || 0;
-    groupCounts.set(group, order + 1);
-    element.style.setProperty('--text-reveal-delay', `${Math.min(order * 180, 540)}ms`);
+{
+  const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const targets = [...document.querySelectorAll(textRevealSelector)]
+    .filter((element) => !element.closest('.hero, .metrics'));
+  let revealFrame = 0;
+  targets.forEach((element) => {
     element.classList.add('text-reveal');
     prepareTextLines(element);
-    textObserver.observe(element);
   });
-  const refreshTextLines = () => document.querySelectorAll('.text-reveal').forEach(prepareTextLines);
-  window.addEventListener('resize', refreshTextLines, { passive: true });
-  document.fonts?.ready.then(refreshTextLines);
+  const updateTextReveal = () => {
+    revealFrame = 0;
+    const viewport = window.innerHeight;
+    const scroll = window.scrollY;
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - viewport);
+    targets.forEach((element) => {
+      const rect = element.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      let top = rect.top + scroll;
+      const stage = element.closest('.benefits-stage, .work-card');
+      if (stage) {
+        const section = stage.closest('.benefits, .work');
+        const sectionTop = section.getBoundingClientRect().top + scroll;
+        const stageTop = stage.matches('.work-card') ? stage.offsetTop : 0;
+        top = sectionTop + stageTop + rect.top - stage.getBoundingClientRect().top;
+      }
+      let start = top - viewport * .9;
+      let end = Math.min(top - viewport * .48, maxScroll);
+      const benefitState = Number(benefitArt?.dataset.state || 0);
+      if (benefitState > 0 && element.matches('[data-benefit-title], [data-benefit-description], [data-benefit-more]')) {
+        start = benefitsSection.getBoundingClientRect().top + scroll + benefitsStage.offsetHeight * benefitState;
+        end = start + benefitsStage.offsetHeight * .42;
+      }
+      const progress = motionPreference.matches ? 1 : Math.max(0, Math.min(1, (scroll - start) / Math.max(1, end - start)));
+      const total = Number(element.dataset.revealLength);
+      // A soft frontier crosses characters in reading order, including wrapped lines.
+      const frontier = progress * (total + 8) - 4;
+      element.querySelectorAll('.text-reveal__word').forEach((word) => {
+        const length = Number(word.dataset.revealLength);
+        const position = Number(word.dataset.revealStart);
+        const left = (frontier - position - 4) / length * 100;
+        const right = (frontier - position + 4) / length * 100;
+        const gradient = `linear-gradient(90deg,var(--text-final-color) ${left.toFixed(2)}%,#777 ${right.toFixed(2)}%)`;
+        if (word.style.backgroundImage !== gradient) word.style.backgroundImage = gradient;
+      });
+    });
+  };
+  requestTextReveal = () => {
+    if (!revealFrame) revealFrame = requestAnimationFrame(updateTextReveal);
+  };
+  window.addEventListener('scroll', requestTextReveal, { passive: true });
+  window.addEventListener('resize', requestTextReveal, { passive: true });
+  motionPreference.addEventListener('change', requestTextReveal);
+  document.fonts?.ready.then(requestTextReveal);
+  requestTextReveal();
 }
-
 if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const columns = 16;
   const rows = 9;
