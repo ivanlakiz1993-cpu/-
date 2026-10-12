@@ -276,3 +276,40 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
   .project-cta__copy p{width:100%;font-size:14px;line-height:1.2;letter-spacing:-.35px}
   .project-cta__button{bottom:60px;width:calc(100% - 24px);height:72px;font-size:24px}
 }
+
+/* News tablet and mobile layouts from Figma 2198:1912 / 2221:10361. */
+.news-cards{display:contents}
+@media(max-width:1199px){
+  .news.wrap{width:100%;margin-inline:0}
+  .news{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:357px 357px;gap:14px;padding:0;margin:0 0 90px}
+  .news-intro{grid-column:1;grid-row:1;height:357px;min-height:0;padding:0;justify-content:flex-start}
+  .news-intro__copy{width:100%;gap:20px}
+  .news-intro h2{font-size:40px;line-height:1;letter-spacing:.4px}
+  .news-intro p{max-width:440px;font-size:16px;line-height:1.2;letter-spacing:0}
+  .all-news{margin-top:54px;font-size:24px}
+  .news-card{height:357px;padding:20px;gap:12px}
+  .news-card span{font-size:16px;line-height:1.1;letter-spacing:-.5px}
+  .news-card__arrow{width:35px;height:35px}
+  .news-card--victory{grid-column:2;grid-row:1;padding:20px 10px}
+  .news-card--victory span{font-size:16px;white-space:normal}
+  .news-card--forum{grid-column:1 / -1;grid-row:2;background-size:cover;background-position:center}
+  .news-card--forum span{width:auto;white-space:normal}
+  .news-card--lab,.news-card--march{display:none}
+}
+@media(max-width:600px){
+  .news{grid-template-columns:minmax(0,1fr);grid-template-rows:190px 230px;gap:25px;padding:0;margin:0 0 80px;overflow:hidden}
+  .news-intro{grid-column:1;grid-row:1;height:190px;min-height:0}
+  .news-intro__copy{gap:18px}
+  .news-intro h2{font-size:40px;line-height:1;letter-spacing:.4px}
+  .news-intro p{font-size:14px;line-height:1.35;letter-spacing:0}
+  .all-news{margin-top:0;font-size:24px}
+  .news-cards{grid-column:1;grid-row:2;display:flex;gap:10px;width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .news-cards::-webkit-scrollbar{display:none}
+  .news-card{flex:0 0 316px;width:316px;height:230px;min-height:0;padding:10px;scroll-snap-align:start}
+  .news-card span,.news-card--victory span{font-size:16px;line-height:1.1;letter-spacing:-.5px;white-space:normal}
+  .news-card__arrow{width:35px;height:35px}
+  .news-card--victory{order:1}
+  .news-card--forum{order:2;background-size:cover;background-position:center}
+  .news-card--lab{display:flex;order:3}
+  .news-card--march{display:flex;order:4}
+}
