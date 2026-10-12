@@ -256,3 +256,23 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
   .card-production .work-card-bg img[data-card-background="prod-pcb"]{inset:0;width:100%;height:100%;object-fit:cover}
   .card-testing .work-card-bg img.testing-image--climate{left:-87.48%;top:0;width:229.8%;height:100%;object-fit:fill;transform:scaleX(-1)}
 }
+
+/* Project CTA tablet and mobile layouts from Figma 2194:9782 / 2221:10380. */
+@media(max-width:1199px){
+  .project-cta{height:407px;border-radius:0}
+  .project-cta__video,.project-cta__shade{top:65px;width:min(700px,100%);height:auto;aspect-ratio:1073/467}
+  .project-cta__fallback{top:215px;width:230px;height:230px}
+  .project-cta__copy{top:55px;width:calc(100% - 40px);gap:26px}
+  .project-cta__copy h2{font-size:40px;line-height:1}
+  .project-cta__copy p{width:min(580px,100%);font-size:16px;line-height:1.2;letter-spacing:-.4px}
+  .project-cta__button{bottom:60px;width:min(445px,calc(100% - 40px));height:72px;font-size:24px}
+}
+@media(max-width:600px){
+  .project-cta{height:454px}
+  .project-cta__video,.project-cta__shade{top:190px;width:100%;height:auto;aspect-ratio:1073/467}
+  .project-cta__fallback{top:267px;width:150px;height:150px}
+  .project-cta__copy{top:60px;width:calc(100% - 32px);gap:28px}
+  .project-cta__copy h2{font-size:36px;line-height:.9;letter-spacing:.36px}
+  .project-cta__copy p{width:100%;font-size:14px;line-height:1.2;letter-spacing:-.35px}
+  .project-cta__button{bottom:60px;width:calc(100% - 24px);height:72px;font-size:24px}
+}
