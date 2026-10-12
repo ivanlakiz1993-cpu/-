@@ -122,10 +122,7 @@
     const splitHold=splitEnabled&&!mobileMedia.matches?viewport*.18:0;
     entryStart=splitEnabled?introTop+splitPreTravel+splitHold:introTop+heroHeight-viewport;
     sequenceStart=splitEnabled?entryStart+entryDistance:introTop+heroHeight;
-    // Tablets need a brief settle after the final value, not the desktop's
-    // extra 1.5-screen spacer before the next section.
-    const afterSequence=innerWidth<=1199?viewport*.2:viewport*1.5;
-    const runHeight=splitPreTravel+splitHold+entryDistance+sequenceDistance+afterSequence;
+    const runHeight=splitPreTravel+splitHold+entryDistance+sequenceDistance+viewport*1.5;
     end=splitEnabled?introTop+runHeight:sequenceStart+runHeight;
     if(splitEnabled){
       const line=hero.querySelector('.grid-mid');
