@@ -330,9 +330,12 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
 /* Keep service cards fluid and preserve source image proportions on smaller screens. */
 .work-card{height:min(720px,calc(100svh - 40px))}
 @media(max-width:1199px){
-  .work-card{height:clamp(320px,52vh,400px)}
+  .work-card{height:clamp(360px,calc(100vh - 300px),720px);height:clamp(360px,calc(100svh - 300px),720px)}
   .work-card .work-card-bg img[data-card-background]{inset:0;width:100%;height:100%;object-fit:cover;transform:none}
   .card-testing .work-card-bg img.testing-image--climate[data-card-background]{transform:scaleX(-1)}
+}
+@media(max-width:600px){
+  .work-card{height:clamp(340px,calc(100vh - 400px),620px);height:clamp(340px,calc(100svh - 400px),620px)}
 }
 
 /* Tablet page gutters and section spacing from Figma 2135:3989. */
@@ -340,6 +343,7 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
   :root{--wrap:calc(100% - clamp(48px,9.375vw,100px))}
   .hero{height:clamp(700px,77vw,790px)}
   .work::after{display:none}
+  .news.wrap{width:var(--wrap);margin-inline:auto}
   .news{margin-bottom:60px}
   .contact{margin-bottom:60px}
 }
