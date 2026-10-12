@@ -242,9 +242,9 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
 /* Services at the 1024px and 391px Figma layouts. */
 @media(max-width:1199px){
   .work.wrap{width:100%;margin-inline:0}
-  .work{gap:15px;padding:0}
+  .work{gap:0;padding:0}
   .work::after{display:none}
-  .work-card{position:relative;top:auto;flex:none;width:100%;height:384px;padding:24px 48px 30px;border-radius:5px}
+  .work-card{position:relative;top:auto;flex:none;width:100%;height:400px;padding:24px 48px 30px;border-radius:5px}
   .work-card-content{gap:30px}
   .work-card h2{font-size:38px;line-height:.9;letter-spacing:.38px}
   .work-card-services{gap:15px}
