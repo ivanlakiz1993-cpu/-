@@ -107,7 +107,6 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   let scrollFrame = 0;
   let copyFrame = 0;
   let copyTimer = 0;
-  let imageFrame = 0;
   const reducedBenefitMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const syncBenefitMore = (index) => {
@@ -140,100 +139,18 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     }, reducedBenefitMotion.matches ? 0 : 180);
   };
 
-  const setBenefitCard = (index, previousIndex) => {
-    window.cancelAnimationFrame(imageFrame);
-    benefitArt.querySelector('.benefit-art__pixels')?.remove();
-    benefitImages.forEach((image) => {
-      image.classList.remove('is-active', 'is-leaving');
-      image.style.removeProperty('clip-path');
-      image.style.removeProperty('translate');
-    });
-    benefitArt.classList.remove('is-transitioning');
+  const setBenefitCard = (index) => {
     benefitArt.dataset.state = String(index);
-    const incoming = benefitImages[index];
-    const outgoing = benefitImages[previousIndex];
-    if (!incoming) return;
-    incoming.classList.add('is-active');
-    if (!outgoing || reducedBenefitMotion.matches) return;
-
-    outgoing.classList.add('is-leaving');
-    benefitArt.classList.add('is-transitioning');
-    const forward = index > previousIndex;
-    const width = benefitArt.clientWidth;
-    const height = benefitArt.clientHeight;
-    const square = Math.max(12, Math.round(width / 22));
-    const duration = 820;
-    const start = performance.now();
-    const pixels = document.createElement('div');
-    pixels.className = 'benefit-art__pixels';
-    const pixelTiles = [];
-    for (let column = 0; column < Math.ceil(width / square); column++) {
-      for (let row = -1; row <= 1; row++) {
-        if ((column * 5 + row * 7 + 12) % 4 === 0) continue;
-        const tile = document.createElement('span');
-        tile.style.left = `${column * square}px`;
-        tile.style.width = `${square}px`;
-        tile.style.height = `${square}px`;
-        tile.style.opacity = String(0.15 + ((column * 3 + row + 12) % 5) * 0.08);
-        tile.style.backgroundColor = (column + row) % 3 === 0 ? '#a8a8af' : '#54545e';
-        pixels.append(tile);
-        pixelTiles.push({ tile, column, row });
-      }
-    }
-    benefitArt.append(pixels);
-    const edgeAt = (x, progress) => {
-      const column = Math.floor(x / square);
-      const stagger = (((column * 13 + 5) % 7) - 3) * square * 0.32;
-      const travel = -3 * square + progress * (height + 6 * square);
-      const edge = forward ? travel + stagger : height - travel - stagger;
-      return Math.floor(edge / square) * square;
-    };
-    const clipImage = (image, showTop, progress) => {
-      const imageWidth = image.offsetWidth;
-      const imageHeight = image.offsetHeight;
-      const columns = Math.ceil(imageWidth / square);
-      const points = showTop
-        ? [`0px 0px`, `${imageWidth}px 0px`]
-        : [`0px ${imageHeight}px`, `${imageWidth}px ${imageHeight}px`];
-      for (let column = columns - 1; column >= 0; column--) {
-        const left = column * square;
-        const right = Math.min(imageWidth, left + square);
-        const y = edgeAt(image.offsetLeft + (left + right) / 2, progress) - image.offsetTop;
-        points.push(`${right}px ${y}px`, `${left}px ${y}px`);
-      }
-      image.style.clipPath = `polygon(${points.join(',')})`;
-    };
-    const animateImage = (now) => {
-      const progress = clamp((now - start) / duration, 0, 1);
-      const eased = progress * progress * (3 - 2 * progress);
-      clipImage(incoming, forward, eased);
-      clipImage(outgoing, !forward, eased);
-      pixelTiles.forEach(({ tile, column, row }) => {
-        tile.style.top = `${edgeAt((column + .5) * square, eased) + row * square}px`;
-      });
-      incoming.style.translate = `0 ${Math.round((1 - eased) * (forward ? -24 : 24))}px`;
-      outgoing.style.translate = `0 ${Math.round(eased * (forward ? 24 : -24))}px`;
-      if (progress < 1) {
-        imageFrame = window.requestAnimationFrame(animateImage);
-      } else {
-        outgoing.classList.remove('is-leaving');
-        benefitArt.classList.remove('is-transitioning');
-        pixels.remove();
-        benefitImages.forEach((image) => {
-          image.style.removeProperty('clip-path');
-          image.style.removeProperty('translate');
-        });
-      }
-    };
-    animateImage(start);
+    benefitImages.forEach((image, imageIndex) => {
+      image.classList.toggle('is-active', imageIndex === index);
+    });
   };
 
   const showBenefit = (index) => {
     if (index === activeBenefit) return;
-    const previousIndex = activeBenefit;
     activeBenefit = index;
     updateBenefitText(index);
-    setBenefitCard(index, previousIndex);
+    setBenefitCard(index);
   };
 
   const updateBenefitFromScroll = () => {
@@ -271,6 +188,37 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   updateBenefitScale();
   updateBenefitFromScroll();
 }
+
+const textRevealSelector = [
+  '.benefits-stage h2', '[data-benefit-copy]',
+  '.work-card-content h2', '.work-card-mode',
+  '.project-cta__copy h2', '.project-cta__copy p', '.project-cta__button span',
+  '.news-intro h2', '.news-intro p', '.all-news', '.news-card > span',
+  '.contact-heading h2', '.contact-heading p', '.contact-form .consent > span', '.contact-form .submit span',
+  '.footer-main h3', '.footer-nav a', '.footer-legal a', '.footer-contact-link',
+  '.footer-contacts address', '.footer-bottom'
+].join(',');
+
+if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const groupCounts = new Map();
+  const textObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-revealed');
+      observer.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -6% 0px', threshold: 0.01 });
+
+  document.querySelectorAll(textRevealSelector).forEach((element) => {
+    const group = element.closest('article,section,footer') || element.parentElement;
+    const order = groupCounts.get(group) || 0;
+    groupCounts.set(group, order + 1);
+    element.style.setProperty('--text-reveal-delay', `${Math.min(order * 65, 220)}ms`);
+    element.classList.add('text-reveal');
+    textObserver.observe(element);
+  });
+}
+
 if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const columns = 16;
   const rows = 9;
