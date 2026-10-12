@@ -441,9 +441,15 @@ document.addEventListener('pointerdown', (event) => {
   if (menuButton.getAttribute('aria-expanded') === 'true' && !menuDrawer.contains(event.target)) setMenuOpen(false);
 });
 
-document.querySelector('.contact-form').addEventListener('submit', (event) => {
+const contactForm = document.querySelector('.contact-form');
+contactForm.addEventListener('input', () => {
+  contactForm.classList.remove('is-submitted');
+  contactForm.querySelector('.form-feedback').textContent = '';
+});
+contactForm.addEventListener('submit', (event) => {
   event.preventDefault();
-  document.querySelector('.form-feedback').textContent = 'Спасибо! Форма готова к подключению к вашей почте или CRM.';
+  contactForm.classList.add('is-submitted');
+  contactForm.querySelector('.form-feedback').textContent = 'Спасибо! Форма готова к подключению к вашей почте или CRM.';
 });
 
 const metricsSection = document.querySelector('.metrics');

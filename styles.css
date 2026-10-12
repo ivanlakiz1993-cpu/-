@@ -231,6 +231,28 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
   .footer-bottom{font-size:14px;padding-bottom:10px}
 }
 
+/* Consultation form interaction states, following the Figma field styling. */
+.contact-form input:not([type=checkbox]),.contact-form textarea{
+  transition:border-color .2s ease,box-shadow .2s ease,color .2s ease,background-color .2s ease
+}
+.contact-form input:not([type=checkbox]):not(:placeholder-shown),.contact-form textarea:not(:placeholder-shown){color:#fff}
+.contact-form input:not([type=checkbox]):hover:not(:focus),.contact-form textarea:hover:not(:focus){border-color:#6e6e6e}
+.contact-form input:not([type=checkbox]):focus-visible,.contact-form textarea:focus-visible{
+  border-color:var(--orange);
+  box-shadow:0 0 0 1px #ff730d55;
+}
+.contact-form input:not([type=checkbox]):user-invalid,.contact-form textarea:user-invalid{
+  border-color:#e15b54;
+  box-shadow:0 0 0 1px #e15b5440;
+}
+.consent input[type=checkbox]:checked{box-shadow:0 0 0 1px #ff730d55}
+.consent input[type=checkbox]:user-invalid{border-color:#e15b54;box-shadow:0 0 0 2px #e15b5440}
+.submit:disabled{cursor:not-allowed;border-color:#6e6e6e;color:#979797;opacity:.65}
+.contact-form.is-submitted .form-feedback{color:#a7d7a9}
+@media(prefers-reduced-motion:reduce){
+  .contact-form input:not([type=checkbox]),.contact-form textarea,.consent input[type=checkbox]{transition:none}
+}
+
 @media(min-width:901px){
   /* Keep the testing card in view before the following section enters. */
   .work::after{content:"";display:block;flex:none;height:120vh;margin-top:-50vh;pointer-events:none}
