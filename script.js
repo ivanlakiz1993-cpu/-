@@ -470,15 +470,18 @@ if (metricsSection && 'IntersectionObserver' in window && !window.matchMedia('(p
   updateMetricsReveal();
 }
 
-// Ease discrete mouse-wheel steps across the page. Touchpads, touch scrolling and
-// reduced-motion preferences keep the browser's native scrolling behaviour.
+// Smooth and slow wheel input across the page. Touch scrolling and reduced-motion
+// preferences keep the browser's native scrolling behaviour.
 {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const wheelDistanceScale = .65;
+  const settlingTime = 210;
   let frame = 0;
   let position = window.scrollY;
   let destination = position;
   let previousTime = 0;
+  let activeSettlingTime = settlingTime;
 
   const stop = () => {
     cancelAnimationFrame(frame);
@@ -488,7 +491,7 @@ if (metricsSection && 'IntersectionObserver' in window && !window.matchMedia('(p
   const advance = (time) => {
     const elapsed = previousTime ? Math.min(50, time - previousTime) : 16.67;
     previousTime = time;
-    position += (destination - position) * (1 - Math.exp(-elapsed / 145));
+    position += (destination - position) * (1 - Math.exp(-elapsed / activeSettlingTime));
     if (Math.abs(destination - position) < .5) position = destination;
     window.scrollTo({ top: position, behavior: 'instant' });
     frame = position === destination ? 0 : requestAnimationFrame(advance);
@@ -496,17 +499,18 @@ if (metricsSection && 'IntersectionObserver' in window && !window.matchMedia('(p
   };
 
   window.addEventListener('wheel', (event) => {
-    if (reducedMotion.matches || !finePointer.matches || event.ctrlKey || event.metaKey ||
+    if (reducedMotion.matches || !finePointer.matches || event.ctrlKey || event.metaKey || !event.deltaY ||
         Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
-        (event.deltaMode === 0 && Math.abs(event.deltaY) < 35) ||
         event.target.closest('textarea, .menu-drawer') ||
         document.documentElement.classList.contains('menu-open')) return;
-    const distance = event.deltaY * (event.deltaMode === 1 ? 40 : event.deltaMode === 2 ? innerHeight : 1);
+    const distance = event.deltaY * (event.deltaMode === 1 ? 40 : event.deltaMode === 2 ? innerHeight : 1) * wheelDistanceScale;
     const limit = Math.max(0, document.documentElement.scrollHeight - innerHeight);
     if (!event.cancelable || !limit) return;
     event.preventDefault();
     if (!frame) position = destination = window.scrollY;
-    destination = Math.max(0, Math.min(limit, destination + distance));
+    activeSettlingTime = event.deltaMode === 0 && Math.abs(event.deltaY) < 35 ? 90 : settlingTime;
+    const maxLead = innerHeight * .9;
+    destination = Math.max(0, Math.min(limit, position + Math.max(-maxLead, Math.min(maxLead, destination + distance - position))));
     if (!frame) frame = requestAnimationFrame(advance);
   }, { passive: false });
 
