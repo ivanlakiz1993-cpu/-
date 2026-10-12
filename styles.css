@@ -160,8 +160,10 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
   .benefits-layout{position:absolute;left:50%;top:50%;width:1720px;height:995px;transform:translate(-50%,-50%) scale(var(--benefit-scale,1));transform-origin:center}
 }
 
-/* Images switch with the benefit state; only the accompanying copy animates. */
-.benefit-art .benefit-image{transition:none}
+/* Crossfade benefit images and ease the active pagination marker between states. */
+.benefit-art .benefit-image{transition:opacity .9s ease-in-out}
+.benefit-progress button{background:#686868;opacity:.68;transition:height .75s cubic-bezier(.4,0,.2,1),background-color .7s ease-in-out,opacity .7s ease-in-out}
+@media(prefers-reduced-motion:reduce){.benefit-art .benefit-image,.benefit-progress button{transition:none}}
 .benefit-copy h3,.benefit-copy p{transition:none}
 .text-reveal .text-reveal__word{font:inherit;letter-spacing:inherit;text-transform:inherit;margin:0;padding:0;color:transparent;background-image:linear-gradient(#777,#777);background-clip:text;-webkit-background-clip:text;box-decoration-break:clone;-webkit-box-decoration-break:clone;transition:none}
 .benefits .benefit-text-reveal .text-reveal__word{white-space:nowrap;color:inherit;background:none}
