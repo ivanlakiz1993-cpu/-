@@ -161,7 +161,7 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
 }
 
 /* Crossfade benefit images and ease the active pagination marker between states. */
-.benefit-art .benefit-image{transition:opacity .9s ease-in-out}
+.benefit-art .benefit-image{transition:opacity .72s ease-in-out}
 .benefit-progress button{background:#686868;opacity:.68;transition:height .75s cubic-bezier(.4,0,.2,1),background-color .7s ease-in-out,opacity .7s ease-in-out}
 @media(prefers-reduced-motion:reduce){.benefit-art .benefit-image,.benefit-progress button{transition:none}}
 .benefit-copy h3,.benefit-copy p{transition:none}
