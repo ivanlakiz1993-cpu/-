@@ -201,4 +201,51 @@ html.metrics-sequence .metrics-desktop {
     letter-spacing: .041026cqw;
     white-space: normal;
   }
+
+  /* On phones, show the full list instead of cycling through one value at a time. */
+  html.metrics-sequence .metrics {
+    height: auto;
+    min-height: 0;
+    margin: 0 auto;
+    padding: 48px 18px 64px;
+    pointer-events: auto;
+  }
+  html.metrics-sequence .metrics-desktop,
+  html.metrics-sequence .metrics-summary { display: none; }
+  html.metrics-sequence .metrics > .metrics-list {
+    display: block;
+    position: relative;
+  }
+  html.metrics-sequence .metrics > .metrics-stair-mask { display: none; }
+  html.metrics-sequence .metrics-list .metric {
+    min-height: 104px;
+    padding: 18px 0;
+    align-items: center;
+    border-color: #383838;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  html.metrics-sequence .metrics-list .metric:first-child { border-top: 1px solid #383838; }
+  html.metrics-sequence .metrics-list .metric p {
+    max-width: 52%;
+    color: #f4f4f4;
+    font-size: 13px;
+    line-height: 1.25;
+    letter-spacing: -.45px;
+    white-space: normal;
+  }
+  html.metrics-sequence .metrics-list .metric strong {
+    color: var(--orange);
+    font-size: clamp(43px,13vw,62px);
+  }
+  html.metrics-sequence .metrics.is-visible .metric {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  html.metrics-sequence .metrics.is-visible .metric:nth-child(1) { transition-delay: 0ms; }
+  html.metrics-sequence .metrics.is-visible .metric:nth-child(2) { transition-delay: 140ms; }
+  html.metrics-sequence .metrics.is-visible .metric:nth-child(3) { transition-delay: 280ms; }
+  html.metrics-sequence .metrics.is-visible .metric:nth-child(4) { transition-delay: 420ms; }
+  html.metrics-sequence .metrics.is-visible .metric:nth-child(5) { transition-delay: 560ms; }
 }

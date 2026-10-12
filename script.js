@@ -447,6 +447,15 @@ document.querySelector('.contact-form').addEventListener('submit', (event) => {
 });
 
 const metricsSection = document.querySelector('.metrics');
+if (metricsSection && window.matchMedia('(max-width: 600px)').matches && 'IntersectionObserver' in window) {
+  const revealMetrics = new IntersectionObserver((entries) => {
+    if (entries.some((entry) => entry.isIntersecting)) {
+      metricsSection.classList.add('is-visible');
+      revealMetrics.disconnect();
+    }
+  }, { threshold: 0.15 });
+  revealMetrics.observe(metricsSection);
+}
 if (metricsSection && 'IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const masks = [...metricsSection.querySelectorAll('.metrics-stair-mask i')];
   document.documentElement.classList.add('metrics-stair-motion');
