@@ -365,3 +365,6 @@
   .news{margin-bottom:60px}
   .contact{margin-bottom:60px}
 }
+
+/* Keep desktop service-card spacing proportional when the viewport narrows. */
+@media (min-width:1200px) and (max-width:1600px){.work{gap:clamp(96px,15vw,220px)}}
