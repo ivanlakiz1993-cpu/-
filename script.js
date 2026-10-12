@@ -325,11 +325,14 @@ const textRevealSelector = [
       if (!lines.length) return;
       let start = sequence.start;
       let end = Math.min(maxScroll, Math.max(sequence.end,
-        start + (sequence.elements.length > 1 ? viewport * .85 : 0)));
+        start + (sequence.elements.length > 1 ? viewport * .7 : 0)));
       if (group === benefitsStage) {
         const sectionTop = benefitsSection.getBoundingClientRect().top + scroll;
         start = sectionTop + (benefitState === 0 ? -viewport * .15 : benefitsStage.offsetHeight * benefitState);
         end = start + benefitsStage.offsetHeight * .9;
+      } else if (group.matches('.project-cta__copy, .news-intro__copy, .contact-heading')) {
+        const sectionTop = group.closest('section').getBoundingClientRect().top + scroll;
+        end = Math.min(end, sectionTop - viewport * .2);
       }
       const progress = motionPreference.matches ? 1 : clamp((scroll - start) / Math.max(1, end - start));
       lines.forEach((line, lineIndex) => {
