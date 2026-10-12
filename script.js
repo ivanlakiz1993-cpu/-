@@ -27,7 +27,7 @@ const benefitMore = document.querySelector('[data-benefit-more]');
 const benefitImages = [...document.querySelectorAll('.benefit-image')];
 const benefitButtons = [...document.querySelectorAll('[data-benefit-index]')];
 let requestTextReveal = () => {};
-const benefitRevealLetters = new WeakMap();
+let refreshTextRevealLayout = () => {};
 const prepareTextLines = (element) => {
   if (!element.querySelector('.text-reveal__word')) {
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
@@ -68,7 +68,6 @@ const prepareTextLines = (element) => {
   element.style.setProperty('--text-final-color', getComputedStyle(element).color);
   if (element.closest('.benefits')) {
     element.classList.add('benefit-text-reveal');
-    const letters = [];
     element.querySelectorAll('.text-reveal__word').forEach((word) => {
       if (!word.querySelector('.benefit-text__letter')) {
         word.replaceChildren(...Array.from(word.textContent, (character) => {
@@ -78,9 +77,7 @@ const prepareTextLines = (element) => {
           return letter;
         }));
       }
-      letters.push(...word.querySelectorAll('.benefit-text__letter'));
     });
-    benefitRevealLetters.set(element, letters);
   }
 };
 document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
@@ -100,6 +97,17 @@ document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
     const hoveredMode = modes.find((mode) => mode.matches(':hover'));
     setState(focusedMode?.dataset.cardMode || hoveredMode?.dataset.cardMode || selectedState);
   };
+
+  card.addEventListener('click', (event) => {
+    const mode = event.target.closest('[data-card-mode]');
+    if (mode) {
+      selectedState = mode.dataset.cardMode;
+    } else {
+      const currentIndex = modes.findIndex((button) => button.dataset.cardMode === selectedState);
+      selectedState = modes[(currentIndex + 1) % modes.length].dataset.cardMode;
+    }
+    setState(selectedState);
+  });
 
   modes.forEach((button) => {
     button.addEventListener('pointerdown', (event) => {
@@ -178,6 +186,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     benefitDescription.textContent = state.description;
     benefitCopy.dataset.state = String(index);
     [benefitTitle, benefitDescription].forEach(prepareTextLines);
+    refreshTextRevealLayout();
     benefitCopy.classList.add('is-visible');
     syncBenefitMore(index);
     benefitButtons.forEach((button, buttonIndex) => {
@@ -252,15 +261,44 @@ const textRevealSelector = [
   const targets = [...document.querySelectorAll(textRevealSelector)]
     .filter((element) => !element.closest('.hero, .metrics, .work-card, .news-card'));
   let revealFrame = 0;
+  let layoutDirty = true;
+  const linesByElement = new Map();
+  const clamp = (value) => Math.max(0, Math.min(1, value));
   targets.forEach((element) => {
     element.classList.add('text-reveal');
     prepareTextLines(element);
   });
+  const measureLines = (element) => {
+    const lines = [];
+    element.querySelectorAll('.text-reveal__word').forEach((word) => {
+      const y = word.getBoundingClientRect().top;
+      let line = lines[lines.length - 1];
+      if (!line || Math.abs(line.y - y) > 2) {
+        line = { y, length: 0, words: [] };
+        lines.push(line);
+      }
+      const length = Array.from(word.textContent).length;
+      line.words.push({ word, start: line.length, length, letters: [...word.querySelectorAll('.benefit-text__letter')] });
+      line.length += length + 1;
+    });
+    lines.forEach((line) => { line.length = Math.max(1, line.length - 1); });
+    return lines;
+  };
+  refreshTextRevealLayout = () => {
+    layoutDirty = true;
+    requestTextReveal();
+  };
   const updateTextReveal = () => {
     revealFrame = 0;
+    if (layoutDirty) {
+      targets.forEach((element) => linesByElement.set(element, measureLines(element)));
+      layoutDirty = false;
+    }
     const viewport = window.innerHeight;
     const scroll = window.scrollY;
     const maxScroll = Math.max(1, document.documentElement.scrollHeight - viewport);
+    const benefitState = Number(benefitArt?.dataset.state || 0);
+    const groups = new Map();
     targets.forEach((element) => {
       const rect = element.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
@@ -274,37 +312,44 @@ const textRevealSelector = [
       }
       let start = top - viewport * .9;
       let end = Math.min(top - viewport * .48, maxScroll);
-      const benefitState = Number(benefitArt?.dataset.state || 0);
-      if (benefitState > 0 && element.matches('[data-benefit-title], [data-benefit-description], [data-benefit-more]')) {
-        start = benefitsSection.getBoundingClientRect().top + scroll + benefitsStage.offsetHeight * benefitState;
-        end = start + benefitsStage.offsetHeight * .42;
+      let group = element.closest('.benefits-stage, .project-cta__copy, .news-intro__copy, .contact-heading, .footer-main > div') || element;
+      if (group === benefitsStage && benefitState > 0 && element === benefitsStage.querySelector('h2')) group = element;
+      if (!groups.has(group)) groups.set(group, { start, end, elements: [] });
+      const sequence = groups.get(group);
+      sequence.start = Math.min(sequence.start, start);
+      sequence.end = Math.max(sequence.end, end);
+      sequence.elements.push(element);
+    });
+    groups.forEach((sequence, group) => {
+      const lines = sequence.elements.flatMap((element) => linesByElement.get(element) || []);
+      if (!lines.length) return;
+      let start = sequence.start;
+      let end = Math.min(maxScroll, Math.max(sequence.end,
+        start + (sequence.elements.length > 1 ? viewport * .85 : 0)));
+      if (group === benefitsStage) {
+        const sectionTop = benefitsSection.getBoundingClientRect().top + scroll;
+        start = sectionTop + (benefitState === 0 ? -viewport * .15 : benefitsStage.offsetHeight * benefitState);
+        end = start + benefitsStage.offsetHeight * .9;
       }
-      const progress = motionPreference.matches ? 1 : Math.max(0, Math.min(1, (scroll - start) / Math.max(1, end - start)));
-      const letters = benefitRevealLetters.get(element);
-      if (letters) {
-        // Each glyph changes colour as a whole, with a soft three-letter overlap.
-        // Keep words intact for wrapping and follow the same order on reverse scroll.
-        const overlap = 3;
-        const frontier = progress * (letters.length + overlap - 1);
-        letters.forEach((letter, index) => {
-          const amount = Math.max(0, Math.min(1, (frontier - index) / overlap));
-          const ink = `${(amount * amount * (3 - 2 * amount) * 100).toFixed(2)}%`;
-          if (letter.style.getPropertyValue('--letter-ink') !== ink) {
-            letter.style.setProperty('--letter-ink', ink);
+      const progress = motionPreference.matches ? 1 : clamp((scroll - start) / Math.max(1, end - start));
+      lines.forEach((line, lineIndex) => {
+        // A line completes before the next starts, including between a heading and its copy.
+        const lineProgress = clamp(progress * lines.length - lineIndex);
+        const frontier = lineProgress * (line.length + 8) - 4;
+        line.words.forEach(({ word, start, length, letters }) => {
+          if (letters.length) {
+            letters.forEach((letter, index) => {
+              const amount = clamp((frontier - start - index) / 3);
+              const ink = `${(amount * amount * (3 - 2 * amount) * 100).toFixed(2)}%`;
+              if (letter.style.getPropertyValue('--letter-ink') !== ink) letter.style.setProperty('--letter-ink', ink);
+            });
+          } else {
+            const left = (frontier - start - 4) / length * 100;
+            const right = (frontier - start + 4) / length * 100;
+            const gradient = `linear-gradient(90deg,var(--text-final-color) ${left.toFixed(2)}%,#777 ${right.toFixed(2)}%)`;
+            if (word.style.backgroundImage !== gradient) word.style.backgroundImage = gradient;
           }
         });
-        return;
-      }
-      const total = Number(element.dataset.revealLength);
-      // A soft frontier crosses characters in reading order, including wrapped lines.
-      const frontier = progress * (total + 8) - 4;
-      element.querySelectorAll('.text-reveal__word').forEach((word) => {
-        const length = Number(word.dataset.revealLength);
-        const position = Number(word.dataset.revealStart);
-        const left = (frontier - position - 4) / length * 100;
-        const right = (frontier - position + 4) / length * 100;
-        const gradient = `linear-gradient(90deg,var(--text-final-color) ${left.toFixed(2)}%,#777 ${right.toFixed(2)}%)`;
-        if (word.style.backgroundImage !== gradient) word.style.backgroundImage = gradient;
       });
     });
   };
@@ -312,9 +357,9 @@ const textRevealSelector = [
     if (!revealFrame) revealFrame = requestAnimationFrame(updateTextReveal);
   };
   window.addEventListener('scroll', requestTextReveal, { passive: true });
-  window.addEventListener('resize', requestTextReveal, { passive: true });
+  window.addEventListener('resize', refreshTextRevealLayout, { passive: true });
   motionPreference.addEventListener('change', requestTextReveal);
-  document.fonts?.ready.then(requestTextReveal);
+  document.fonts?.ready.then(refreshTextRevealLayout);
   requestTextReveal();
 }
 if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -423,6 +468,53 @@ if (metricsSection && 'IntersectionObserver' in window && !window.matchMedia('(p
   window.addEventListener('scroll', requestMetricsRevealUpdate, { passive: true });
   window.addEventListener('resize', requestMetricsRevealUpdate);
   updateMetricsReveal();
+}
+
+// Ease discrete mouse-wheel steps across the page. Touchpads, touch scrolling and
+// reduced-motion preferences keep the browser's native scrolling behaviour.
+{
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+  let frame = 0;
+  let position = window.scrollY;
+  let destination = position;
+  let previousTime = 0;
+
+  const stop = () => {
+    cancelAnimationFrame(frame);
+    frame = 0;
+    previousTime = 0;
+  };
+  const advance = (time) => {
+    const elapsed = previousTime ? Math.min(50, time - previousTime) : 16.67;
+    previousTime = time;
+    position += (destination - position) * (1 - Math.exp(-elapsed / 145));
+    if (Math.abs(destination - position) < .5) position = destination;
+    window.scrollTo({ top: position, behavior: 'instant' });
+    frame = position === destination ? 0 : requestAnimationFrame(advance);
+    if (!frame) previousTime = 0;
+  };
+
+  window.addEventListener('wheel', (event) => {
+    if (reducedMotion.matches || !finePointer.matches || event.ctrlKey || event.metaKey ||
+        Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
+        (event.deltaMode === 0 && Math.abs(event.deltaY) < 35) ||
+        event.target.closest('textarea, .menu-drawer') ||
+        document.documentElement.classList.contains('menu-open')) return;
+    const distance = event.deltaY * (event.deltaMode === 1 ? 40 : event.deltaMode === 2 ? innerHeight : 1);
+    const limit = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+    if (!event.cancelable || !limit) return;
+    event.preventDefault();
+    if (!frame) position = destination = window.scrollY;
+    destination = Math.max(0, Math.min(limit, destination + distance));
+    if (!frame) frame = requestAnimationFrame(advance);
+  }, { passive: false });
+
+  ['pointerdown', 'touchstart', 'keydown', 'hashchange', 'popstate'].forEach((type) => {
+    window.addEventListener(type, stop, { passive: true });
+  });
+  reducedMotion.addEventListener('change', stop);
+  window.addEventListener('resize', stop, { passive: true });
 }
 
 
