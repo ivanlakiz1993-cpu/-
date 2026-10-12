@@ -27,6 +27,7 @@ const benefitMore = document.querySelector('[data-benefit-more]');
 const benefitImages = [...document.querySelectorAll('.benefit-image')];
 const benefitButtons = [...document.querySelectorAll('[data-benefit-index]')];
 let requestTextReveal = () => {};
+const benefitRevealLetters = new WeakMap();
 const prepareTextLines = (element) => {
   if (!element.querySelector('.text-reveal__word')) {
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
@@ -65,6 +66,22 @@ const prepareTextLines = (element) => {
   });
   element.dataset.revealLength = String(Math.max(1, offset - 1));
   element.style.setProperty('--text-final-color', getComputedStyle(element).color);
+  if (element.closest('.benefits')) {
+    element.classList.add('benefit-text-reveal');
+    const letters = [];
+    element.querySelectorAll('.text-reveal__word').forEach((word) => {
+      if (!word.querySelector('.benefit-text__letter')) {
+        word.replaceChildren(...Array.from(word.textContent, (character) => {
+          const letter = document.createElement('span');
+          letter.className = 'benefit-text__letter';
+          letter.textContent = character;
+          return letter;
+        }));
+      }
+      letters.push(...word.querySelectorAll('.benefit-text__letter'));
+    });
+    benefitRevealLetters.set(element, letters);
+  }
 };
 document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
   const images = [...card.querySelectorAll('[data-card-background]')];
@@ -264,6 +281,21 @@ const textRevealSelector = [
         end = start + benefitsStage.offsetHeight * .42;
       }
       const progress = motionPreference.matches ? 1 : Math.max(0, Math.min(1, (scroll - start) / Math.max(1, end - start)));
+      const letters = benefitRevealLetters.get(element);
+      if (letters) {
+        // Each glyph changes colour as a whole, with a soft three-letter overlap.
+        // Keep words intact for wrapping and follow the same order on reverse scroll.
+        const overlap = 3;
+        const frontier = progress * (letters.length + overlap - 1);
+        letters.forEach((letter, index) => {
+          const amount = Math.max(0, Math.min(1, (frontier - index) / overlap));
+          const ink = `${(amount * amount * (3 - 2 * amount) * 100).toFixed(2)}%`;
+          if (letter.style.getPropertyValue('--letter-ink') !== ink) {
+            letter.style.setProperty('--letter-ink', ink);
+          }
+        });
+        return;
+      }
       const total = Number(element.dataset.revealLength);
       // A soft frontier crosses characters in reading order, including wrapped lines.
       const frontier = progress * (total + 8) - 4;
