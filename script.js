@@ -239,11 +239,10 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
 }
 
 const textRevealSelector = [
-  'main h2', 'main h3', '[data-benefit-description]', '[data-benefit-more]',
-  '.work-card-mode',
-  '.project-cta__copy p', '.project-cta__button span',
-  '.news-intro p', '.all-news', '.news-card > span',
-  '.contact-heading p', '.contact-form .consent > span', '.contact-form .submit span',
+  'main h2', 'main h3', '[data-benefit-description]',
+  '.project-cta__copy p',
+  '.news-intro p',
+  '.contact-heading p', '.contact-form .consent > span',
   '.footer-main h3', '.footer-nav a', '.footer-legal a', '.footer-contact-link',
   '.footer-contacts address', '.footer-bottom'
 ].join(',');
@@ -251,7 +250,7 @@ const textRevealSelector = [
 {
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
   const targets = [...document.querySelectorAll(textRevealSelector)]
-    .filter((element) => !element.closest('.hero, .metrics'));
+    .filter((element) => !element.closest('.hero, .metrics, .work-card, .news-card'));
   let revealFrame = 0;
   targets.forEach((element) => {
     element.classList.add('text-reveal');
