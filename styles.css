@@ -160,6 +160,15 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
   .benefits-layout{position:absolute;left:50%;top:50%;width:1720px;height:995px;transform:translate(-50%,-50%) scale(var(--benefit-scale,1));transform-origin:center}
 }
 
+/* Square-edged vertical reveal for benefit cards. Image bounds stay unchanged at every breakpoint. */
+.benefit-art .benefit-image{transition:none}
+.benefit-art .benefit-image.is-leaving{opacity:1;z-index:1}
+.benefit-art .benefit-image.is-active{z-index:2}
+.benefit-art__pixels{position:absolute;inset:0;z-index:3;pointer-events:none}
+.benefit-art__pixels span{position:absolute;display:block;mix-blend-mode:screen}
+.benefit-progress button{transition:height .55s cubic-bezier(.22,1,.36,1),background-color .3s ease,opacity .3s ease}
+@media(prefers-reduced-motion:reduce){.benefit-progress button{transition:none}}
+
 /* Footer: Figma 1756:6495 */
 .footer{background:#121212;border-radius:10px 10px 0 0}
 .footer-main{min-height:0;padding-top:30px;padding-bottom:0;display:grid;align-items:start;gap:0}

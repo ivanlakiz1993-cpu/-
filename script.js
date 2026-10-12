@@ -106,6 +106,9 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   let activeBenefit = 0;
   let scrollFrame = 0;
   let copyFrame = 0;
+  let copyTimer = 0;
+  let imageFrame = 0;
+  const reducedBenefitMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const syncBenefitMore = (index) => {
     const isVisible = index === 2 || window.innerWidth <= 600;
@@ -116,36 +119,121 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   const updateBenefitText = (index) => {
     const state = benefitStates[index];
     window.cancelAnimationFrame(copyFrame);
+    window.clearTimeout(copyTimer);
     benefitCopy.classList.remove('is-visible');
     benefitMore.classList.remove('is-visible');
-    void benefitCopy.offsetWidth;
-    benefitTitle.textContent = state.title;
-    benefitDescription.textContent = state.description;
-    benefitCopy.dataset.state = String(index);
-    benefitMore.hidden = index !== 2 && window.innerWidth > 600;
     benefitButtons.forEach((button, buttonIndex) => {
       const isActive = buttonIndex === index;
       button.classList.toggle('is-active', isActive);
       if (isActive) button.setAttribute('aria-current', 'step');
       else button.removeAttribute('aria-current');
     });
-    copyFrame = window.requestAnimationFrame(() => {
-      benefitCopy.classList.add('is-visible');
-      syncBenefitMore(index);
-    });
+    copyTimer = window.setTimeout(() => {
+      benefitTitle.textContent = state.title;
+      benefitDescription.textContent = state.description;
+      benefitCopy.dataset.state = String(index);
+      benefitMore.hidden = index !== 2 && window.innerWidth > 600;
+      copyFrame = window.requestAnimationFrame(() => {
+        benefitCopy.classList.add('is-visible');
+        syncBenefitMore(index);
+      });
+    }, reducedBenefitMotion.matches ? 0 : 180);
   };
 
-  const setBenefitCard = (index) => {
-    const imageClass = ['benefit-image--guarantee', 'benefit-image--quality', 'benefit-image--production'][index];
+  const setBenefitCard = (index, previousIndex) => {
+    window.cancelAnimationFrame(imageFrame);
+    benefitArt.querySelector('.benefit-art__pixels')?.remove();
+    benefitImages.forEach((image) => {
+      image.classList.remove('is-active', 'is-leaving');
+      image.style.removeProperty('clip-path');
+      image.style.removeProperty('translate');
+    });
+    benefitArt.classList.remove('is-transitioning');
     benefitArt.dataset.state = String(index);
-    benefitImages.forEach((image) => image.classList.toggle('is-active', image.classList.contains(imageClass)));
+    const incoming = benefitImages[index];
+    const outgoing = benefitImages[previousIndex];
+    if (!incoming) return;
+    incoming.classList.add('is-active');
+    if (!outgoing || reducedBenefitMotion.matches) return;
+
+    outgoing.classList.add('is-leaving');
+    benefitArt.classList.add('is-transitioning');
+    const forward = index > previousIndex;
+    const width = benefitArt.clientWidth;
+    const height = benefitArt.clientHeight;
+    const square = Math.max(12, Math.round(width / 22));
+    const duration = 820;
+    const start = performance.now();
+    const pixels = document.createElement('div');
+    pixels.className = 'benefit-art__pixels';
+    const pixelTiles = [];
+    for (let column = 0; column < Math.ceil(width / square); column++) {
+      for (let row = -1; row <= 1; row++) {
+        if ((column * 5 + row * 7 + 12) % 4 === 0) continue;
+        const tile = document.createElement('span');
+        tile.style.left = `${column * square}px`;
+        tile.style.width = `${square}px`;
+        tile.style.height = `${square}px`;
+        tile.style.opacity = String(0.15 + ((column * 3 + row + 12) % 5) * 0.08);
+        tile.style.backgroundColor = (column + row) % 3 === 0 ? '#a8a8af' : '#54545e';
+        pixels.append(tile);
+        pixelTiles.push({ tile, column, row });
+      }
+    }
+    benefitArt.append(pixels);
+    const edgeAt = (x, progress) => {
+      const column = Math.floor(x / square);
+      const stagger = (((column * 13 + 5) % 7) - 3) * square * 0.32;
+      const travel = -3 * square + progress * (height + 6 * square);
+      const edge = forward ? travel + stagger : height - travel - stagger;
+      return Math.floor(edge / square) * square;
+    };
+    const clipImage = (image, showTop, progress) => {
+      const imageWidth = image.offsetWidth;
+      const imageHeight = image.offsetHeight;
+      const columns = Math.ceil(imageWidth / square);
+      const points = showTop
+        ? [`0px 0px`, `${imageWidth}px 0px`]
+        : [`0px ${imageHeight}px`, `${imageWidth}px ${imageHeight}px`];
+      for (let column = columns - 1; column >= 0; column--) {
+        const left = column * square;
+        const right = Math.min(imageWidth, left + square);
+        const y = edgeAt(image.offsetLeft + (left + right) / 2, progress) - image.offsetTop;
+        points.push(`${right}px ${y}px`, `${left}px ${y}px`);
+      }
+      image.style.clipPath = `polygon(${points.join(',')})`;
+    };
+    const animateImage = (now) => {
+      const progress = clamp((now - start) / duration, 0, 1);
+      const eased = progress * progress * (3 - 2 * progress);
+      clipImage(incoming, forward, eased);
+      clipImage(outgoing, !forward, eased);
+      pixelTiles.forEach(({ tile, column, row }) => {
+        tile.style.top = `${edgeAt((column + .5) * square, eased) + row * square}px`;
+      });
+      incoming.style.translate = `0 ${Math.round((1 - eased) * (forward ? -24 : 24))}px`;
+      outgoing.style.translate = `0 ${Math.round(eased * (forward ? 24 : -24))}px`;
+      if (progress < 1) {
+        imageFrame = window.requestAnimationFrame(animateImage);
+      } else {
+        outgoing.classList.remove('is-leaving');
+        benefitArt.classList.remove('is-transitioning');
+        pixels.remove();
+        benefitImages.forEach((image) => {
+          image.style.removeProperty('clip-path');
+          image.style.removeProperty('translate');
+        });
+      }
+    };
+    animateImage(start);
   };
 
   const showBenefit = (index) => {
     if (index === activeBenefit) return;
+    const previousIndex = activeBenefit;
     activeBenefit = index;
     updateBenefitText(index);
-    setBenefitCard(index);
+    setBenefitCard(index, previousIndex);
   };
 
   const updateBenefitFromScroll = () => {
