@@ -251,9 +251,7 @@ const textRevealSelector = [
   'main h2', 'main h3', '[data-benefit-description]',
   '.project-cta__copy p',
   '.news-intro p',
-  '.contact-heading p', '.contact-form .consent > span',
-  '.footer-main h3', '.footer-nav a', '.footer-legal a', '.footer-contact-link',
-  '.footer-contacts address', '.footer-bottom'
+  '.contact-heading p'
 ].join(',');
 
 {

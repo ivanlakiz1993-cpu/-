@@ -179,6 +179,7 @@ html.metrics-stair-motion .metrics-stair-mask i{display:block;width:100%;height:
 .footer-brand .brand-mark{width:53px;height:65px}
 .footer-brand>span{width:auto;font-size:18px;line-height:.9;letter-spacing:0}
 .footer-main a,.footer-main address{color:#fff;font-family:var(--sans);font-size:14px;font-weight:400;line-height:1.2}
+.footer a:hover,.footer a:focus-visible{color:var(--orange)}
 .footer-nav,.footer-legal,.footer-contact-links{display:flex;flex-direction:column;align-items:flex-start}
 .footer-nav,.footer-legal{gap:10px}
 .footer-legal{margin-top:30px}
