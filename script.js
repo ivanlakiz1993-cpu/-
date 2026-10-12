@@ -452,31 +452,6 @@ contactForm.addEventListener('submit', (event) => {
   contactForm.querySelector('.form-feedback').textContent = 'Спасибо! Форма готова к подключению к вашей почте или CRM.';
 });
 
-const metricsSection = document.querySelector('.metrics');
-if (metricsSection && 'IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  const masks = [...metricsSection.querySelectorAll('.metrics-stair-mask i')];
-  document.documentElement.classList.add('metrics-stair-motion');
-  let metricsFrame = 0;
-
-  const updateMetricsReveal = () => {
-    metricsFrame = 0;
-    masks.forEach((mask) => {
-      const maskTop = mask.getBoundingClientRect().top;
-      const maskHeight = Math.max(1, mask.getBoundingClientRect().height);
-      const stepProgress = Math.max(0, Math.min(1, (window.innerHeight - maskTop) / (maskHeight * 2)));
-      mask.style.setProperty('--stair-x', `${stepProgress * 101}%`);
-    });
-  };
-
-  const requestMetricsRevealUpdate = () => {
-    if (!metricsFrame) metricsFrame = window.requestAnimationFrame(updateMetricsReveal);
-  };
-
-  window.addEventListener('scroll', requestMetricsRevealUpdate, { passive: true });
-  window.addEventListener('resize', requestMetricsRevealUpdate);
-  updateMetricsReveal();
-}
-
 // Smooth and slow wheel input across the page. Reduced-motion preferences keep
 // the browser's native wheel scrolling behaviour.
 {
