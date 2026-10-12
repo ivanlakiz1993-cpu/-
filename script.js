@@ -526,7 +526,7 @@ if (metricsSection && 'IntersectionObserver' in window && !window.matchMedia('(p
 // replaces the much longer native fling without affecting taps or pinch zoom.
 {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const touchScale = .45;
+  const touchScale = .5175;
   let gesture = null;
   let glideFrame = 0;
   let glideVelocity = 0;
