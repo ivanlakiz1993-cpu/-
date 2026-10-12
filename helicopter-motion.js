@@ -10,7 +10,7 @@
   const renderer=window.HelicopterRenderer.create(canvas,model);
   if(!renderer)return;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const splitMedia=matchMedia('(min-width: 1200px), (max-width: 600px)');
+  const splitMedia=matchMedia('(min-width: 601px), (max-width: 600px)');
   const mobileMedia=matchMedia('(max-width: 600px)');
   const root=document.documentElement,{sample,poses,matrix,lerp,smooth}=storyboard;
   let enabled=false,splitEnabled=false,splitOverlay=null,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
