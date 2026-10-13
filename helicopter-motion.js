@@ -44,6 +44,9 @@
       half.className=`hero-split__half hero-split__half--${side}`;
       copy.removeAttribute('aria-label');
       copy.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
+      // The opening reveal belongs to the original cover only. Replaying its
+      // opaque tiles over a freshly cloned cover looks like a gray split.
+      copy.querySelector('.hero-reveal')?.remove();
       copy.inert=true;
       half.append(copy);splitOverlay.append(half);
     }
@@ -72,7 +75,6 @@
       const opening=smooth((scroll-entryStart)/entryDistance);
       if(mobileMedia.matches){
         const hasEntered=scroll>entryStart;
-        if(hasEntered)ensureSplitOverlay();
         root.classList.toggle('hero-split-opening',hasEntered);
       }
       if(splitOverlay){
@@ -126,7 +128,7 @@
     end=splitEnabled?introTop+runHeight:sequenceStart+runHeight;
     if(splitEnabled){
       const line=hero.querySelector('.grid-mid');
-      const seam=mobileMedia.matches?heroHeight*.58:line.getBoundingClientRect().top-hero.getBoundingClientRect().top;
+      const seam=line.getBoundingClientRect().top-hero.getBoundingClientRect().top;
       splitSeam=Math.max(0,Math.min(viewport-1,seam));
       splitTopTravel=Math.max(0,splitSeam-splitPreTravel);
       splitBottomTravel=viewport-splitSeam+splitPreTravel;
@@ -143,7 +145,7 @@
   function configure(){
     stop();enabled=!reduced.matches&&!contextLost;
     splitEnabled=enabled&&splitMedia.matches;
-    if(splitEnabled&&!mobileMedia.matches)ensureSplitOverlay();
+    if(splitEnabled)ensureSplitOverlay();
     root.classList.toggle('metrics-sequence',enabled);
     root.classList.toggle('hero-split-active',splitEnabled);
     root.classList.toggle('hero-split-opening',splitEnabled&&!mobileMedia.matches);
