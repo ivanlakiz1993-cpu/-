@@ -61,7 +61,7 @@
     renderer.resize(width,height,devicePixelRatio||1);
   }
   function compose(){
-    state=sample(progress);sizeFrame();
+    state=sample(progress,mobileMedia.matches);sizeFrame();
     stage.dataset.scene=String(state.scene);stage.dataset.progress=state.progress.toFixed(5);
     copies.forEach((copy,i)=>{
       copy.style.opacity=String(state.achievement[i]);

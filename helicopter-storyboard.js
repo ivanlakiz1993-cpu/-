@@ -45,7 +45,7 @@
     { start:.84, end:.97, from:2, to:3 }
   ];
 
-  function sample(value) {
+  function sample(value, stackAchievements = false) {
     const progress = clamp(value);
     let from = 0, to = 0, mix = 0;
     for (const transition of transitions) {
@@ -59,8 +59,8 @@
     const rotation = slerp(poses[from].rotation, poses[to].rotation, mix);
     const entrances = [[.12,.20],[.375,.47],[.645,.74],[.895,.97]];
     const exits = [[.30,.395],[.57,.665],[.84,.915],[2,3]];
-    const achievement = entrances.map(([a,b],i)=>ramp(progress,a,b)*(1-ramp(progress,...exits[i])));
-    const textY = entrances.map(([a,b],i)=>(1-ramp(progress,a,b))*65-ramp(progress,...exits[i])*80);
+    const achievement = entrances.map(([a,b],i)=>ramp(progress,a,b)*(stackAchievements?1:1-ramp(progress,...exits[i])));
+    const textY = entrances.map(([a,b],i)=>(1-ramp(progress,a,b))*65-(stackAchievements?0:ramp(progress,...exits[i])*80));
     const scene = progress < .12 ? 1 : progress < .385 ? 2 : progress < .655 ? 3 : progress < .905 ? 4 : 5;
     return {progress,from,to,mix,rotation,matrix:matrix(rotation),achievement,textY,scene,
       height:lerp(poses[from].height,poses[to].height,mix)};

@@ -140,8 +140,8 @@ html.metrics-sequence .metrics-desktop {
   html.hero-split-active.hero-split-opening .intro-sequence > .hero { opacity: 0; }
   html.hero-split-active .hero-split { display: none; }
   html.hero-split-active.hero-split-opening .hero-split { display: block; }
-  html.metrics-sequence .metrics-desktop { height: 120vw; }
-  .metrics-desktop__frame { height: 120vw; }
+  html.metrics-sequence .metrics-desktop { height: 157.4359vw; }
+  .metrics-desktop__frame { height: 157.4359vw; }
   .metrics-desktop__background {
     inset: auto;
     left: -7.2%;
@@ -172,5 +172,9 @@ html.metrics-sequence .metrics-desktop {
     letter-spacing: .041026cqw;
     white-space: normal;
   }
+  .metrics-desktop__copy--area { top:9.6%; }
+  .metrics-desktop__copy--staff { top:29.2%; }
+  .metrics-desktop__copy--contracts { top:48.8%; }
+  .metrics-desktop__copy--founded { top:68.4%; }
 
 }
