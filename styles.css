@@ -364,6 +364,7 @@
 @media (min-width:601px) and (max-width:1199px){
   :root{--wrap:calc(100% - clamp(48px,9.375vw,100px))}
   .hero{height:clamp(700px,77vw,790px)}
+  .work{gap:15px}
   .work::after{display:none}
   .news.wrap{width:var(--wrap);margin-inline:auto}
   .news{margin-bottom:60px}
