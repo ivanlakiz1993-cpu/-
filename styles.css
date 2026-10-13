@@ -385,3 +385,35 @@
 
 /* Keep desktop service-card spacing proportional when the viewport narrows. */
 @media (min-width:1200px) and (max-width:1600px){.work{gap:clamp(96px,15vw,220px)}}
+
+/* Consultation section tablet and mobile layouts from Figma 2199:1936 / 2221:10348. */
+@media (min-width:601px) and (max-width:1199px){
+  .contact.wrap{width:calc(100% - 96px);display:flex;flex-direction:column;gap:30px;min-height:0;margin:0 auto 60px;padding:0}
+  .contact-heading h2{width:auto;margin:0;font-size:38px;line-height:.9;letter-spacing:.38px}
+  .contact-heading h2 br{display:none}
+  .contact-heading>p{width:min(365px,100%);max-width:365px;margin:30px 0 0;font-size:16px;line-height:1.2}
+  .contact-form{width:100%;gap:8px}
+  .contact-form input:not([type=checkbox]),.contact-form textarea{height:48px;padding:15px;border-radius:10px;font-size:16px;line-height:1}
+  .form-row{display:flex;flex-direction:row;gap:8px}
+  .form-row label{flex:1;min-width:0;width:auto}
+  .contact-form .message,.contact-form textarea{height:162px;resize:none}
+  .consent{height:auto;min-height:22px;gap:10px;margin:7px 0;color:#fff;font-size:16px;line-height:1.2;white-space:normal}
+  .submit{width:100%;height:72px;padding:20px;border-radius:10px;font-size:24px;line-height:1.25;letter-spacing:-1.2px}
+  .contact-form .form-feedback:empty{display:none}
+}
+@media (max-width:600px){
+  .contact.wrap{width:calc(100% - 24px);display:flex;flex-direction:column;gap:30px;min-height:0;margin:0 12px 60px;padding:0}
+  .contact-heading h2{width:auto;margin:0;font-size:38px;line-height:.9;letter-spacing:.38px}
+  .contact-heading h2 br{display:block}
+  .contact-heading>p{width:100%;max-width:none;margin:30px 0 0;font-size:16px;line-height:1.2}
+  .contact-form{width:100%;gap:8px}
+  .contact-form input:not([type=checkbox]),.contact-form textarea{height:48px;padding:15px;border-radius:10px;font-size:16px;line-height:1}
+  .form-row{display:flex;flex-direction:column;gap:8px}
+  .form-row label{flex:none;width:100%}
+  .contact-form .message,.contact-form textarea{height:162px;resize:none}
+  .consent{height:auto;min-height:22px;align-items:flex-start;gap:10px;margin:7px 0;color:#fff;font-size:16px;line-height:1.2;white-space:normal}
+  .consent input[type=checkbox]{margin-top:1px}
+  .consent>span{min-width:0}
+  .submit{width:100%;height:56px;padding:12px;border-radius:10px;font-size:24px;line-height:1.25;letter-spacing:-1.2px}
+  .contact-form .form-feedback:empty{display:none}
+}
