@@ -231,15 +231,18 @@
 .contact-form input:not([type=checkbox]),.contact-form textarea{
   transition:border-color .2s ease,box-shadow .2s ease,color .2s ease,background-color .2s ease
 }
-.contact-form input:not([type=checkbox]):not(:placeholder-shown),.contact-form textarea:not(:placeholder-shown){color:#fff}
-.contact-form input:not([type=checkbox]):hover:not(:focus),.contact-form textarea:hover:not(:focus){border-color:#6e6e6e}
-.contact-form input:not([type=checkbox]):focus-visible,.contact-form textarea:focus-visible{
-  border-color:var(--orange);
-  box-shadow:0 0 0 1px #ff730d55;
+.contact-form input:not([type=checkbox]):not(:placeholder-shown),.contact-form textarea:not(:placeholder-shown){background:#121212;color:#fff}
+.contact-form input:not([type=checkbox]):hover:not(:focus),.contact-form textarea:hover:not(:focus){border-color:#6e6e6e;background:#121212}
+.contact-form input:not([type=checkbox]):focus,.contact-form textarea:focus{
+  border-color:#8a8a8a;
+  background:#000;
+  box-shadow:0 0 0 1px #6e6e6e;
 }
 .contact-form input:not([type=checkbox]):user-invalid,.contact-form textarea:user-invalid{
-  border-color:#e15b54;
-  box-shadow:0 0 0 1px #e15b5440;
+  border-color:#ff2424;
+  background:#000;
+  color:#ff2424;
+  box-shadow:none;
 }
 .consent input[type=checkbox]:checked{box-shadow:none}
 .consent input[type=checkbox]:user-invalid{border-color:#ff0000;background:#fff;box-shadow:none}
