@@ -457,8 +457,8 @@ contactForm.addEventListener('submit', (event) => {
 {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-  const wheelDistanceScale = .65;
-  const settlingTime = 210;
+  const wheelDistanceScale = .5;
+  const settlingTime = 280;
   let frame = 0;
   let position = window.scrollY;
   let destination = position;
@@ -507,7 +507,7 @@ contactForm.addEventListener('submit', (event) => {
 // replaces the much longer native fling without affecting taps or pinch zoom.
 {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const touchScale = .5175;
+  const touchScale = .46;
   let gesture = null;
   let glideFrame = 0;
   let glideVelocity = 0;
@@ -523,7 +523,7 @@ contactForm.addEventListener('submit', (event) => {
     glideTime = time;
     const before = window.scrollY;
     window.scrollTo({ top: before + glideVelocity * elapsed, behavior: 'instant' });
-    glideVelocity *= Math.exp(-elapsed / 220);
+    glideVelocity *= Math.exp(-elapsed / 180);
     if (Math.abs(glideVelocity) < .025 || Math.abs(window.scrollY - before) < .5) {
       stopGlide();
     } else {
