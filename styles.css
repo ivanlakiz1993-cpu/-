@@ -239,6 +239,18 @@
   box-shadow:0 0 0 1px #6e6e6e;
 }
 .contact-form input:not([type=checkbox]):focus:not(:placeholder-shown),.contact-form textarea:focus:not(:placeholder-shown){background:#121212;color:#fff}
+.contact-form input:not([type=checkbox]):-webkit-autofill,
+.contact-form input:not([type=checkbox]):-webkit-autofill:hover,
+.contact-form input:not([type=checkbox]):-webkit-autofill:focus,
+.contact-form textarea:-webkit-autofill,
+.contact-form textarea:-webkit-autofill:hover,
+.contact-form textarea:-webkit-autofill:focus{
+  -webkit-text-fill-color:#fff;
+  caret-color:#fff;
+  -webkit-box-shadow:0 0 0 1000px #121212 inset;
+  box-shadow:0 0 0 1000px #121212 inset;
+  transition:background-color 99999s ease-out 0s;
+}
 .contact-form input:not([type=checkbox]):user-invalid,.contact-form textarea:user-invalid{
   border-color:#ff2424;
   background:#000;
