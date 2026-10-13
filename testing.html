@@ -8,7 +8,7 @@
   <title>Испытания — СпецЭлектроника</title>
   <link rel="stylesheet" href="styles.css?v=20261013-testing-page-1">
   <link rel="stylesheet" href="hero-grid.css?v=20261013-hero-split-seam-3">
-  <link rel="stylesheet" href="testing-page.css?v=20261013-testing-page-1">
+  <link rel="stylesheet" href="testing-page.css?v=20261013-testing-effects-1">
 </head>
 <body class="testing-page">
   <header class="topbar">
@@ -42,12 +42,25 @@
   </div>
 
   <main id="top">
-    <section class="testing-cover" aria-labelledby="testing-title">
-      <img class="testing-cover__image" src="assets/equipment-cutout.png" width="1561" height="1008" alt="Оборудование для механических и климатических испытаний" fetchpriority="high" decoding="async">
-      <div class="testing-cover__copy">
-        <h1 id="testing-title">Аттестованная испытательная лаборатория</h1>
-        <p>Проводим механические и климатические испытания, помогаем подтвердить стойкость изделий к воздействиям и оформить результаты испытаний.</p>
-        <a class="testing-cover__button" href="index.html#contact"><span>Запрос на испытания</span></a>
+    <section class="testing-sequence" aria-labelledby="testing-title" data-testing-sequence>
+      <div class="testing-sequence__track">
+        <div class="testing-stage" data-scene="rain">
+          <div class="testing-stage__copy" aria-live="polite" aria-atomic="true">
+            <span class="testing-stage__step">Климатические испытания · 01 / 05</span>
+            <h1 id="testing-title">Испытание дождём</h1>
+            <p>Капли дождя ложатся на поверхность оборудования, проверяя его защиту от влаги.</p>
+            <a class="testing-cover__button" href="index.html#contact"><span>Запрос на испытания</span></a>
+          </div>
+          <div class="testing-stage__equipment" aria-label="Оборудование проходит испытание">
+            <img class="testing-stage__image" src="assets/equipment-cutout.png" width="1561" height="1008" alt="Оборудование для механических и климатических испытаний" fetchpriority="high" decoding="async">
+            <canvas class="testing-stage__effects" aria-hidden="true"></canvas>
+            <div class="testing-stage__heat" aria-hidden="true"></div>
+          </div>
+          <div class="testing-stage__caption" aria-hidden="true">ВЛАГОСТОЙКОСТЬ</div>
+          <div class="testing-stage__progress" role="group" aria-label="Этапы испытания">
+            <span class="is-active" aria-label="Дождь"></span><span aria-label="Роса"></span><span aria-label="Обледенение"></span><span aria-label="Высокая температура"></span><span aria-label="Вибрация"></span>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -92,6 +105,6 @@
     </div>
     <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
   </footer>
-  <script src="testing-page.js?v=20261013-testing-page-1"></script>
+  <script src="testing-page.js?v=20261013-testing-effects-1"></script>
 </body>
 </html>
