@@ -93,11 +93,19 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
     const scale=Math.max(.65,objectW/900);
     for(let i=0;i<Math.floor(drops.length*rainLevel);i++){const p=drops[i],r=(2+p.r*5)*scale;drop(ctx,p.x*objectW,p.y*objectH,r,.66+.18*Math.sin(time*.002+p.phase));}
     if(iceLevel>0){
-      ctx.save();ctx.globalCompositeOperation='source-over';ctx.fillStyle=`rgba(175,224,248,${.13*iceLevel})`;ctx.fillRect(0,0,objectW,objectH);ctx.restore();
+      ctx.save();ctx.globalCompositeOperation='source-over';ctx.fillStyle=`rgba(175,224,248,${.19*iceLevel})`;ctx.fillRect(0,0,objectW,objectH);
+      const frostEdges=[
+        [ctx.createLinearGradient(0,0,objectW*.24,0),0,0,objectW*.24,objectH],
+        [ctx.createLinearGradient(objectW,0,objectW*.76,0),objectW*.76,0,objectW*.24,objectH],
+        [ctx.createLinearGradient(0,0,0,objectH*.22),0,0,objectW,objectH*.22],
+        [ctx.createLinearGradient(0,objectH,0,objectH*.78),0,objectH*.78,objectW,objectH*.22]
+      ];
+      for(const [gradient,x,y,w,h] of frostEdges){gradient.addColorStop(0,`rgba(226,246,255,${.58*iceLevel})`);gradient.addColorStop(.38,`rgba(196,230,248,${.27*iceLevel})`);gradient.addColorStop(1,'rgba(190,226,248,0)');ctx.fillStyle=gradient;ctx.fillRect(x,y,w,h)}
+      ctx.restore();
       for(let i=0;i<Math.floor(frost.length*iceLevel);i++){
-        const p=frost[i],x=p.x*objectW,y=p.y*objectH,r=(3+(i%5)*1.2)*scale;
-        ctx.save();ctx.globalAlpha=.22+.56*iceLevel;ctx.strokeStyle=i%3?'rgba(215,244,255,.78)':'rgba(255,255,255,.9)';ctx.lineWidth=Math.max(.6,scale*.7);ctx.shadowColor='#b9e8ff';ctx.shadowBlur=4*scale;
-        for(let k=0;k<6;k++){const a=k*Math.PI/3+p.phase;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);ctx.moveTo(x+Math.cos(a)*r*.55,y+Math.sin(a)*r*.55);ctx.lineTo(x+Math.cos(a-.42)*r*.82,y+Math.sin(a-.42)*r*.82);ctx.moveTo(x+Math.cos(a)*r*.55,y+Math.sin(a)*r*.55);ctx.lineTo(x+Math.cos(a+.42)*r*.82,y+Math.sin(a+.42)*r*.82);ctx.stroke();}ctx.restore();
+        const p=frost[i],x=p.x*objectW,y=p.y*objectH,r=(7+(i%7)*2.4)*scale;
+        ctx.save();ctx.globalAlpha=.13+.34*iceLevel;ctx.strokeStyle=i%3?'rgba(215,244,255,.78)':'rgba(255,255,255,.9)';ctx.lineWidth=Math.max(.65,scale*.72);ctx.shadowColor='#b9e8ff';ctx.shadowBlur=4*scale;
+        for(let k=0;k<6;k++){const a=k*Math.PI/3+p.phase,ex=x+Math.cos(a)*r,ey=y+Math.sin(a)*r;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(ex,ey);for(const t of [.48,.72]){const bx=x+Math.cos(a)*r*t,by=y+Math.sin(a)*r*t,br=r*.2*(1-t*.35);for(const side of [-1,1]){ctx.moveTo(bx,by);ctx.lineTo(bx+Math.cos(a+side*.78)*br,by+Math.sin(a+side*.78)*br)}}ctx.stroke()}ctx.restore();
       }
     }
     ctx.save();ctx.globalCompositeOperation='destination-in';ctx.drawImage(maskCanvas,0,0,objectW,objectH);ctx.restore();
@@ -121,12 +129,15 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
     const shakeX=reduceMotion.matches?0:Math.sin(time*.068)*vibe*Math.min(4,objectW*.003);
     const shakeY=reduceMotion.matches?0:Math.sin(time*.091+1.2)*vibe*Math.min(2.5,objectW*.002);
     const aboutX = -433.5 * aboutShift;
-    const aboutY = (Math.max(100,height/2-382)+394.5-height/2)*aboutShift;
+    const aboutY = (394.5-height/2)*aboutShift;
     const aboutScale = 1+(Math.min(1143,width*1143/1920)/objectW-1)*aboutShift;
     equipment.style.setProperty('--equipment-x',`${aboutX+(a.x+(b.x-a.x)*blend)*objectW+shakeX}px`);
     equipment.style.setProperty('--equipment-y',`${aboutY+(a.y+(b.y-a.y)*blend)*objectH+shakeY}px`);
     equipment.style.setProperty('--equipment-scale',String(aboutScale*(a.s+(b.s-a.s)*blend)));
     equipment.style.setProperty('--equipment-rotate',`${a.r+(b.r-a.r)*blend}deg`);
+    const frostTurn = iceLevel;
+    equipment.style.setProperty('--equipment-tilt-x',`${-4.5*frostTurn}deg`);
+    equipment.style.setProperty('--equipment-tilt-y',`${7*frostTurn}deg`);
     stage.style.setProperty('--heat-opacity',String(heatLevel*(.72+.08*Math.sin(time*.006))));
     stage.style.setProperty('--ice-opacity',String(iceLevel*.86));
     drawSurface(time,rainLevel,iceLevel);drawAtmosphere(time,rainLevel,heatLevel,vibe);

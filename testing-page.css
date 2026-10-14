@@ -3,7 +3,7 @@
 .testing-about{display:none}
 @media(min-width:1001px){
   .testing-sequence__track{height:600svh}
-  .testing-about{display:block;position:absolute;z-index:4;top:max(100px,calc(50% - 382px));left:100px;right:100px;opacity:var(--about-opacity,0);transform:translateY(var(--about-y,24px));pointer-events:none;color:var(--text)}
+  .testing-about{display:block;position:absolute;z-index:4;top:0;left:100px;right:100px;opacity:var(--about-opacity,0);transform:translateY(var(--about-y,24px));pointer-events:none;color:var(--text)}
   .testing-about h2{margin:0 0 50px;font:400 64px/1 var(--sans);letter-spacing:.64px;color:#fff}
   .testing-about__content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:50px}
   .testing-about__text{display:flex;flex-direction:column;gap:15px;font:300 24px/1.1 var(--sans);color:#fff}
@@ -29,7 +29,7 @@
 .testing-stage__button>span{position:relative;z-index:1}
 .testing-stage__button:hover::before,.testing-stage__button:focus-visible::before{opacity:1}
 .testing-stage__atmosphere{position:absolute;z-index:0;inset:0;width:100%;height:100%;pointer-events:none}
-.testing-stage__equipment{position:absolute;z-index:1;left:calc(50% + 340px);top:50%;width:min(53.125vw,calc(67svh * 1.548),1020px);aspect-ratio:1020/659;transform:translate3d(calc(-50% + var(--equipment-x,0px)),calc(-50% + var(--equipment-y,0px)),0) scale(var(--equipment-scale,1)) rotate(var(--equipment-rotate,0deg));transform-origin:50% 55%;will-change:transform;pointer-events:none}
+.testing-stage__equipment{position:absolute;z-index:1;left:calc(50% + 340px);top:50%;width:min(53.125vw,calc(67svh * 1.548),1020px);aspect-ratio:1020/659;transform:perspective(1800px) translate3d(calc(-50% + var(--equipment-x,0px)),calc(-50% + var(--equipment-y,0px)),0) rotateX(var(--equipment-tilt-x,0deg)) rotateY(var(--equipment-tilt-y,0deg)) scale(var(--equipment-scale,1)) rotate(var(--equipment-rotate,0deg));transform-origin:50% 55%;will-change:transform;pointer-events:none}
 .testing-stage__image,.testing-stage__effects,.testing-stage__heat,.testing-stage__ice{position:absolute;inset:0;width:100%;height:100%}
 .testing-stage__image{z-index:1;object-fit:contain;filter:drop-shadow(0 26px 48px rgba(0,0,0,.42))}
 .testing-stage__heat,.testing-stage__ice{-webkit-mask:url("assets/equipment-cutout.png") center/100% 100% no-repeat;mask:url("assets/equipment-cutout.png") center/100% 100% no-repeat;pointer-events:none}
