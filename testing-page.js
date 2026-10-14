@@ -30,6 +30,7 @@ const equipment = stage?.querySelector('.testing-stage__equipment');
 const equipmentImage = stage?.querySelector('.testing-stage__image');
 const surfaceCanvas = stage?.querySelector('.testing-stage__effects');
 const atmosphereCanvas = stage?.querySelector('.testing-stage__atmosphere');
+const breadcrumb = stage?.querySelector('.testing-stage__breadcrumb');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const desktopTesting = matchMedia('(min-width: 1001px)');
 const aboutSection = stage?.querySelector('.testing-about');
@@ -42,8 +43,8 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
   const maskCanvas = document.createElement('canvas');
   const maskCtx = canvasContext(maskCanvas);
   let maskPixels = null, maskW = 0, maskH = 0;
-  let width = 1, height = 1, objectW = 1, objectH = 1, progress = 0, raf = 0, aboutShift = 0;
-  let drops = [], frost = [], rain = [], seed = 4099;
+  let width = 1, height = 1, objectW = 1, objectH = 1, progress = 0, raf = 0, aboutShift = 0, aboutOpacity = 0;
+  let drops = [], rain = [], seed = 4099;
   const random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
   const getMaskPoints = count => {
     const out = []; if (!maskPixels) return out;
@@ -61,7 +62,7 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
     maskCanvas.width = maskW; maskCanvas.height = maskH;
     maskCtx.clearRect(0,0,maskW,maskH); maskCtx.drawImage(equipmentImage,0,0,maskW,maskH);
     maskPixels = maskCtx.getImageData(0,0,maskW,maskH).data;
-    drops = getMaskPoints(360); frost = getMaskPoints(240);
+    drops = getMaskPoints(360);
   };
   const measure = () => {
     const dpr = Math.min(devicePixelRatio || 1, 1.6);
@@ -79,9 +80,12 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
     const timeline = clamp((scrollY-top) / Math.max(1,sequence.offsetHeight-stage.offsetHeight));
     progress = desktopTesting.matches ? clamp((timeline - .32) / .68) : timeline;
     aboutShift = desktopTesting.matches ? (reduceMotion.matches ? Number(timeline >= .12) : smooth(.015,.20,timeline)) : 0;
-    const aboutOpacity = desktopTesting.matches ? smooth(.09,.20,timeline)*(1-smooth(.32,.38,timeline)) : 0;
+    aboutOpacity = desktopTesting.matches ? smooth(.09,.20,timeline)*(1-smooth(.32,.38,timeline)) : 0;
     stage.style.setProperty('--about-opacity', String(aboutOpacity));
     stage.style.setProperty('--about-y', `${reduceMotion.matches ? 0 : (1-smooth(.09,.20,timeline))*24}px`);
+    const breadcrumbOpacity = 1-smooth(.035,.13,timeline);
+    stage.style.setProperty('--breadcrumb-opacity', String(breadcrumbOpacity));
+    if (breadcrumb) breadcrumb.inert = breadcrumbOpacity < .01;
     aboutSection?.setAttribute('aria-hidden', String(aboutOpacity < .01));
     const scene = Math.min(4,Math.floor(progress*4+1e-6));
     stage.dataset.scene = ['clear','rain','heat','frost','vibration'][scene];
@@ -96,27 +100,11 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
     ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(x,y,r*.68,r,-.16,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle='rgba(239,250,255,.64)';ctx.lineWidth=Math.max(.55,r*.1);ctx.beginPath();ctx.arc(x-r*.1,y-r*.12,r*.58,Math.PI*1.08,Math.PI*1.82);ctx.stroke();ctx.restore();
   };
-  const drawSurface = (time, rainLevel, iceLevel) => {
+  const drawSurface = (time, rainLevel) => {
     const ctx=canvasContext(surfaceCanvas);ctx.setTransform(surfaceCanvas.width/objectW,0,0,surfaceCanvas.height/objectH,0,0);ctx.clearRect(0,0,objectW,objectH);
     if (!maskPixels) return;
     const scale=Math.max(.65,objectW/900);
     for(let i=0;i<Math.floor(drops.length*rainLevel);i++){const p=drops[i],r=(2+p.r*5)*scale;drop(ctx,p.x*objectW,p.y*objectH,r,.66+.18*Math.sin(time*.002+p.phase));}
-    if(iceLevel>0){
-      ctx.save();ctx.globalCompositeOperation='source-over';ctx.fillStyle=`rgba(175,224,248,${.19*iceLevel})`;ctx.fillRect(0,0,objectW,objectH);
-      const frostEdges=[
-        [ctx.createLinearGradient(0,0,objectW*.24,0),0,0,objectW*.24,objectH],
-        [ctx.createLinearGradient(objectW,0,objectW*.76,0),objectW*.76,0,objectW*.24,objectH],
-        [ctx.createLinearGradient(0,0,0,objectH*.22),0,0,objectW,objectH*.22],
-        [ctx.createLinearGradient(0,objectH,0,objectH*.78),0,objectH*.78,objectW,objectH*.22]
-      ];
-      for(const [gradient,x,y,w,h] of frostEdges){gradient.addColorStop(0,`rgba(226,246,255,${.58*iceLevel})`);gradient.addColorStop(.38,`rgba(196,230,248,${.27*iceLevel})`);gradient.addColorStop(1,'rgba(190,226,248,0)');ctx.fillStyle=gradient;ctx.fillRect(x,y,w,h)}
-      ctx.restore();
-      for(let i=0;i<Math.floor(frost.length*iceLevel);i++){
-        const p=frost[i],x=p.x*objectW,y=p.y*objectH,r=(7+(i%7)*2.4)*scale;
-        ctx.save();ctx.globalAlpha=.13+.34*iceLevel;ctx.strokeStyle=i%3?'rgba(215,244,255,.78)':'rgba(255,255,255,.9)';ctx.lineWidth=Math.max(.65,scale*.72);ctx.shadowColor='#b9e8ff';ctx.shadowBlur=4*scale;
-        for(let k=0;k<6;k++){const a=k*Math.PI/3+p.phase,ex=x+Math.cos(a)*r,ey=y+Math.sin(a)*r;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(ex,ey);for(const t of [.48,.72]){const bx=x+Math.cos(a)*r*t,by=y+Math.sin(a)*r*t,br=r*.2*(1-t*.35);for(const side of [-1,1]){ctx.moveTo(bx,by);ctx.lineTo(bx+Math.cos(a+side*.78)*br,by+Math.sin(a+side*.78)*br)}}ctx.stroke()}ctx.restore();
-      }
-    }
     ctx.save();ctx.globalCompositeOperation='destination-in';ctx.drawImage(maskCanvas,0,0,objectW,objectH);ctx.restore();
   };
   const drawAtmosphere = (time, rainLevel, heatLevel, vibration) => {
@@ -128,7 +116,6 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
   const draw = time => {
     raf=0;if(document.visibilityState==='hidden')return;
     getProgress();const sceneT=progress*4,idx=Math.min(3,Math.floor(sceneT)),t=sceneT-idx;
-    const ramp=(center,half)=>smooth(center-half,center+half,progress);
     const rainLevel=smooth(.205,.265,progress)*(1-smooth(.385,.445,progress));
     const heatLevel=smooth(.445,.515,progress)*(1-smooth(.625,.695,progress));
     const iceLevel=smooth(.685,.755,progress)*(1-smooth(.865,.935,progress));
@@ -137,18 +124,20 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
     const blend=smooth(0,1,t),a=poses[idx],b=poses[idx+1];
     const shakeX=reduceMotion.matches?0:Math.sin(time*.068)*vibe*Math.min(4,objectW*.003);
     const shakeY=reduceMotion.matches?0:Math.sin(time*.091+1.2)*vibe*Math.min(2.5,objectW*.002);
-    const aboutX = -433.5 * aboutShift;
-    const aboutY = (394.5-height/2)*aboutShift;
+    const figmaScale = Math.min(width/1920,1);
+    const aboutX = -(Math.min(width*.1770833333,340) + 442.5*figmaScale) * aboutShift;
+    const aboutY = 66 * aboutShift;
+    const aboutScale = 1 - .228*aboutShift;
     equipment.style.setProperty('--equipment-x',`${aboutX+(a.x+(b.x-a.x)*blend)*objectW+shakeX}px`);
     equipment.style.setProperty('--equipment-y',`${aboutY+(a.y+(b.y-a.y)*blend)*objectH+shakeY}px`);
-    equipment.style.setProperty('--equipment-scale',String(a.s+(b.s-a.s)*blend));
-    equipment.style.setProperty('--equipment-rotate',`${a.r+(b.r-a.r)*blend}deg`);
-    const frostTurn = iceLevel;
-    equipment.style.setProperty('--equipment-tilt-x',`${-4.5*frostTurn}deg`);
-    equipment.style.setProperty('--equipment-tilt-y',`${7*frostTurn}deg`);
+    equipment.style.setProperty('--equipment-scale',String((a.s+(b.s-a.s)*blend)*aboutScale));
+    equipment.style.setProperty('--equipment-rotate',`${a.r+(b.r-a.r)*blend-1.2*aboutShift}deg`);
+    const frostOpacity = Math.max(aboutOpacity,iceLevel);
+    equipment.style.setProperty('--frost-opacity',String(frostOpacity));
+    equipment.style.setProperty('--equipment-tilt-x',`${-2.2*aboutShift-4.5*iceLevel}deg`);
+    equipment.style.setProperty('--equipment-tilt-y',`${3.4*aboutShift+7*iceLevel}deg`);
     stage.style.setProperty('--heat-opacity',String(heatLevel*(.72+.08*Math.sin(time*.006))));
-    stage.style.setProperty('--ice-opacity',String(iceLevel*.86));
-    drawSurface(time,rainLevel,iceLevel);drawAtmosphere(time,rainLevel,heatLevel,vibe);
+    drawSurface(time,rainLevel);drawAtmosphere(time,rainLevel,heatLevel,vibe);
     raf=requestAnimationFrame(draw);
   };
   const requestDraw=()=>{if(!raf)raf=requestAnimationFrame(draw);};
