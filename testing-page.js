@@ -15,6 +15,15 @@ menuDrawer?.addEventListener('click', event => { if (menuButton?.getAttribute('a
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && menuButton?.getAttribute('aria-expanded') === 'true') { setMenuOpen(false); menuButton.focus(); } });
 document.addEventListener('pointerdown', event => { if (menuButton?.getAttribute('aria-expanded') === 'true' && !menuDrawer?.contains(event.target)) setMenuOpen(false); });
 
+document.querySelectorAll('.testing-stage__button').forEach(button => {
+  button.addEventListener('pointermove', event => {
+    if (event.pointerType === 'touch') return;
+    const bounds = button.getBoundingClientRect();
+    button.style.setProperty('--cursor-x', `${((event.clientX - bounds.left) / bounds.width) * 100}%`);
+    button.style.setProperty('--cursor-y', `${((event.clientY - bounds.top) / bounds.height) * 100}%`);
+  });
+});
+
 const sequence = document.querySelector('[data-testing-sequence]');
 const stage = sequence?.querySelector('.testing-stage');
 const equipment = stage?.querySelector('.testing-stage__equipment');
