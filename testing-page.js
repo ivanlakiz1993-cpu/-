@@ -130,10 +130,9 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
     const shakeY=reduceMotion.matches?0:Math.sin(time*.091+1.2)*vibe*Math.min(2.5,objectW*.002);
     const aboutX = -433.5 * aboutShift;
     const aboutY = (394.5-height/2)*aboutShift;
-    const aboutScale = 1+(Math.min(1143,width*1143/1920)*1.3/objectW-1)*aboutShift;
     equipment.style.setProperty('--equipment-x',`${aboutX+(a.x+(b.x-a.x)*blend)*objectW+shakeX}px`);
     equipment.style.setProperty('--equipment-y',`${aboutY+(a.y+(b.y-a.y)*blend)*objectH+shakeY}px`);
-    equipment.style.setProperty('--equipment-scale',String(aboutScale*(a.s+(b.s-a.s)*blend)));
+    equipment.style.setProperty('--equipment-scale',String(a.s+(b.s-a.s)*blend));
     equipment.style.setProperty('--equipment-rotate',`${a.r+(b.r-a.r)*blend}deg`);
     const frostTurn = iceLevel;
     equipment.style.setProperty('--equipment-tilt-x',`${-4.5*frostTurn}deg`);
