@@ -1,0 +1,9 @@
+.mosaic-transition{
+  position:fixed;inset:0;z-index:2147483000;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:repeat(6,minmax(0,1fr));gap:clamp(2px,.24vw,5px);padding:0;background:#050505;pointer-events:none;overflow:hidden;isolation:isolate
+}
+.mosaic-transition__tile{
+  grid-row:var(--row);grid-column:var(--col)/span var(--span);background:#f2f2f0;opacity:0;transform:scale(.001);transform-origin:center;will-change:transform,opacity;transition:transform 430ms cubic-bezier(.76,0,.24,1),opacity 160ms linear;transition-delay:var(--delay,0ms)
+}
+.mosaic-enter .mosaic-transition__tile{opacity:1;transform:scale(1)}
+.mosaic-leave .mosaic-transition__tile{opacity:0;transform:scale(.001)}
+@media(prefers-reduced-motion:reduce){.mosaic-transition{display:none!important}}
