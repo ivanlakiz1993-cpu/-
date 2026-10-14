@@ -28,6 +28,8 @@ const sequence = document.querySelector('[data-testing-sequence]');
 const stage = sequence?.querySelector('.testing-stage');
 const equipment = stage?.querySelector('.testing-stage__equipment');
 const equipmentImage = stage?.querySelector('.testing-stage__image');
+const frostSource = stage?.querySelector('.testing-stage__frost-source');
+const frostCanvas = stage?.querySelector('.testing-stage__frost');
 const surfaceCanvas = stage?.querySelector('.testing-stage__effects');
 const atmosphereCanvas = stage?.querySelector('.testing-stage__atmosphere');
 const breadcrumb = stage?.querySelector('.testing-stage__breadcrumb');
@@ -36,13 +38,16 @@ const desktopTesting = matchMedia('(min-width: 1001px)');
 const aboutSection = stage?.querySelector('.testing-about');
 const heroCopy = stage?.querySelector('.testing-stage__copy');
 
-if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosphereCanvas) {
+if (sequence && stage && equipment && equipmentImage && frostSource && frostCanvas && surfaceCanvas && atmosphereCanvas) {
   const clamp = (v, min = 0, max = 1) => Math.max(min, Math.min(max, v));
   const smooth = (a, b, v) => { const t = clamp((v - a) / (b - a)); return t * t * (3 - 2 * t); };
   const canvasContext = canvas => canvas.getContext('2d');
   const maskCanvas = document.createElement('canvas');
   const maskCtx = canvasContext(maskCanvas);
+  const frostMaskCanvas = document.createElement('canvas');
+  const frostMaskCtx = canvasContext(frostMaskCanvas);
   let maskPixels = null, maskW = 0, maskH = 0;
+  let frostThresholds = null, frostSourcePixels = null, frostMaskData = null, frostFieldW = 0, frostFieldH = 0, frostRenderProgress = -1;
   let width = 1, height = 1, objectW = 1, objectH = 1, progress = 0, raf = 0, aboutShift = 0, aboutOpacity = 0;
   let drops = [], rain = [], seed = 4099;
   const random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
@@ -64,14 +69,87 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
     maskPixels = maskCtx.getImageData(0,0,maskW,maskH).data;
     drops = getMaskPoints(360);
   };
+  const createFrostField = () => {
+    if (!frostSource.complete || !frostSource.naturalWidth) return;
+    frostFieldW = 360;
+    frostFieldH = Math.round(frostFieldW * frostSource.naturalHeight / frostSource.naturalWidth);
+    frostMaskCanvas.width = frostFieldW;
+    frostMaskCanvas.height = frostFieldH;
+    frostMaskCtx.clearRect(0,0,frostFieldW,frostFieldH);
+    frostMaskCtx.drawImage(frostSource,0,0,frostFieldW,frostFieldH);
+    frostSourcePixels = frostMaskCtx.getImageData(0,0,frostFieldW,frostFieldH).data;
+
+    const count = frostFieldW * frostFieldH;
+    const distance = new Float32Array(count);
+    const diagonal = Math.SQRT2;
+    const far = 1e6;
+    let maxDistance = 0;
+    for (let i=0;i<count;i++) distance[i] = frostSourcePixels[i*4+3] < 20 ? 0 : far;
+
+    // A chamfer distance field lets the ice front advance from every cut edge and opening.
+    for (let y=0;y<frostFieldH;y++) for (let x=0;x<frostFieldW;x++) {
+      const i=y*frostFieldW+x;
+      let d=distance[i];
+      if(x>0)d=Math.min(d,distance[i-1]+1);
+      if(y>0)d=Math.min(d,distance[i-frostFieldW]+1);
+      if(x>0&&y>0)d=Math.min(d,distance[i-frostFieldW-1]+diagonal);
+      if(x<frostFieldW-1&&y>0)d=Math.min(d,distance[i-frostFieldW+1]+diagonal);
+      distance[i]=d;
+    }
+    for (let y=frostFieldH-1;y>=0;y--) for (let x=frostFieldW-1;x>=0;x--) {
+      const i=y*frostFieldW+x;
+      let d=distance[i];
+      if(x<frostFieldW-1)d=Math.min(d,distance[i+1]+1);
+      if(y<frostFieldH-1)d=Math.min(d,distance[i+frostFieldW]+1);
+      if(x<frostFieldW-1&&y<frostFieldH-1)d=Math.min(d,distance[i+frostFieldW+1]+diagonal);
+      if(x>0&&y<frostFieldH-1)d=Math.min(d,distance[i+frostFieldW-1]+diagonal);
+      distance[i]=d;
+      if(frostSourcePixels[i*4+3]>=20)maxDistance=Math.max(maxDistance,d);
+    }
+
+    frostThresholds = new Float32Array(count);
+    frostMaskData = frostMaskCtx.createImageData(frostFieldW,frostFieldH);
+    for (let y=0;y<frostFieldH;y++) for (let x=0;x<frostFieldW;x++) {
+      const i=y*frostFieldW+x;
+      if(frostSourcePixels[i*4+3]<2){frostThresholds[i]=1;continue;}
+      const nx=x/Math.max(1,frostFieldW-1), ny=y/Math.max(1,frostFieldH-1);
+      const inward=distance[i]/Math.max(1,maxDistance);
+      const fromColdEdges=.12*(.62*nx+.38*(1-ny));
+      const irregularity=.028*Math.sin(x*.071+Math.sin(y*.047)*1.8)+.019*Math.sin(y*.113-x*.039)+.012*Math.sin((x+y)*.173);
+      frostThresholds[i]=clamp(.018+inward*.82+fromColdEdges+irregularity,.008,.995);
+    }
+    frostRenderProgress=-1;
+  };
+  const drawFrost = amount => {
+    if (!frostThresholds || !frostSource.complete || !frostSource.naturalWidth) return;
+    const reveal=clamp(amount);
+    if(Math.abs(reveal-frostRenderProgress)<.0015)return;
+    frostRenderProgress=reveal;
+    const mask=frostMaskData;
+    for(let i=0;i<frostThresholds.length;i++){
+      const edge=frostThresholds[i];
+      const t=clamp((reveal-(edge-.024))/.048);
+      mask.data[i*4+3]=t*t*(3-2*t)*(frostSourcePixels[i*4+3]||0);
+    }
+    frostMaskCtx.putImageData(mask,0,0);
+    const ctx=canvasContext(frostCanvas);
+    ctx.setTransform(frostCanvas.width/objectW,0,0,frostCanvas.height/objectH,0,0);
+    ctx.clearRect(0,0,objectW,objectH);
+    if(reveal<=0)return;
+    ctx.drawImage(frostSource,0,0,objectW,objectH);
+    ctx.globalCompositeOperation='destination-in';
+    ctx.drawImage(frostMaskCanvas,0,0,objectW,objectH);
+    ctx.globalCompositeOperation='source-over';
+  };
   const measure = () => {
     const dpr = Math.min(devicePixelRatio || 1, 1.6);
     const s = stage.getBoundingClientRect(), o = {width:equipment.offsetWidth,height:equipment.offsetHeight};
     width = Math.max(1,s.width); height = Math.max(1,s.height); objectW = Math.max(1,o.width); objectH = Math.max(1,o.height);
-    for (const c of [surfaceCanvas,atmosphereCanvas]) {
-      const box = c === surfaceCanvas ? o : s;
+    for (const c of [surfaceCanvas,frostCanvas,atmosphereCanvas]) {
+      const box = c === surfaceCanvas || c === frostCanvas ? o : s;
       c.width = Math.max(1,Math.round(box.width*dpr)); c.height = Math.max(1,Math.round(box.height*dpr));
     }
+    frostRenderProgress=-1;
     rain = Array.from({length:Math.min(190,Math.ceil(width/8))},()=>({x:random()*width,y:random()*height,len:8+random()*24,speed:.35+random()*.8,phase:random()}));
     createMask();
   };
@@ -132,8 +210,7 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
     equipment.style.setProperty('--equipment-y',`${aboutY+(a.y+(b.y-a.y)*blend)*objectH+shakeY}px`);
     equipment.style.setProperty('--equipment-scale',String((a.s+(b.s-a.s)*blend)*aboutScale));
     equipment.style.setProperty('--equipment-rotate',`${a.r+(b.r-a.r)*blend-1.2*aboutShift}deg`);
-    const frostOpacity = Math.max(aboutOpacity,iceLevel);
-    equipment.style.setProperty('--frost-opacity',String(frostOpacity));
+    drawFrost(Math.max(aboutOpacity,iceLevel));
     equipment.style.setProperty('--equipment-tilt-x',`${-2.2*aboutShift-4.5*iceLevel}deg`);
     equipment.style.setProperty('--equipment-tilt-y',`${3.4*aboutShift+7*iceLevel}deg`);
     stage.style.setProperty('--heat-opacity',String(heatLevel*(.72+.08*Math.sin(time*.006))));
@@ -142,7 +219,9 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
   };
   const requestDraw=()=>{if(!raf)raf=requestAnimationFrame(draw);};
   equipmentImage.addEventListener('load',()=>{createMask();requestDraw();},{once:true});
+  frostSource.addEventListener('load',()=>{createFrostField();requestDraw();},{once:true});
   const observer=new ResizeObserver(()=>{measure();requestDraw();});observer.observe(stage);observer.observe(equipment);
   addEventListener('scroll',requestDraw,{passive:true});addEventListener('resize',()=>{measure();requestDraw();},{passive:true});document.addEventListener('visibilitychange',requestDraw);
   measure();getProgress();requestDraw();
+  if(frostSource.complete)createFrostField();
 }
