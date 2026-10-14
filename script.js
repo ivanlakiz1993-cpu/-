@@ -457,10 +457,17 @@ contactForm.addEventListener('input', () => {
 contactForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (contactSubmissionPending || contactSubmissionSucceeded) return;
+  if (window.location.protocol === 'file:') {
+    contactFeedback.textContent = 'Форма отправляется с опубликованного сайта по HTTPS. Откройте сайт по веб-адресу и попробуйте ещё раз.';
+    return;
+  }
 
   const formData = new FormData(contactForm);
   const payload = Object.fromEntries(formData.entries());
   payload._replyto = formData.get('email');
+  const formPageUrl = new URL(window.location.href);
+  formPageUrl.hash = '';
+  payload._url = formPageUrl.href;
 
   contactSubmissionPending = true;
   contactForm.setAttribute('aria-busy', 'true');
@@ -480,16 +487,14 @@ contactForm.addEventListener('submit', async (event) => {
     const result = await response.json();
 
     const submissionSucceeded = result.success === true || result.success === 'true';
-    if (!response.ok || !submissionSucceeded) {
-      throw new Error(result.message || 'Form submission failed');
-    }
+    if (!response.ok || !submissionSucceeded) throw new Error('FormSubmit did not accept the request');
 
     contactSubmissionSucceeded = true;
     contactForm.classList.add('is-submitted');
     contactFeedback.textContent = 'Заявка отправлена. Если это первая отправка, подтвердите адрес в письме от FormSubmit.';
   } catch (error) {
     contactSubmitButton.disabled = false;
-    contactFeedback.textContent = 'Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.';
+    contactFeedback.textContent = 'Не удалось связаться с формой. Проверьте соединение и подтвердите адрес в FormSubmit, если ещё не сделали этого.';
   } finally {
     contactSubmissionPending = false;
     contactForm.removeAttribute('aria-busy');
