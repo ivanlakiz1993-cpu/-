@@ -18,7 +18,7 @@
 .testing-sequence{position:relative;background:#000}
 .testing-sequence__track{height:500svh;position:relative}
 .testing-stage{position:sticky;top:0;isolation:isolate;height:100svh;min-height:560px;overflow:hidden;background:radial-gradient(ellipse at 68% 55%,#1a1a1c 0,#09090a 48%,#000 80%);--copy-opacity:1;--scene-progress:0}
-.testing-stage__breadcrumb{position:absolute;z-index:5;left:clamp(24px,5.2vw,100px);top:16px;display:flex;gap:8px;font:12px/1.2 "Yandex Sans Text",Arial,sans-serif;color:#979797}
+.testing-stage__breadcrumb{position:absolute;z-index:5;left:clamp(24px,5.2vw,100px);top:16px;display:flex;align-items:center;gap:3px;white-space:nowrap;font:12px/1.3 "Yandex Sans Text",Arial,sans-serif;color:#979797}
 .testing-stage__breadcrumb a{color:inherit;text-decoration:none}
 .testing-stage__copy{position:absolute;z-index:4;left:clamp(24px,5.2vw,100px);top:50%;width:min(38vw,650px);transform:translateY(-50%);display:grid;gap:30px;opacity:var(--copy-opacity);transition:opacity .2s linear}
 .testing-stage__copy h1{margin:0;font:400 clamp(38px,3.34vw,64px)/1 "Yandex Sans Text",Arial,sans-serif;letter-spacing:-.035em;max-width:680px}
