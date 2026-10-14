@@ -210,6 +210,7 @@ if (sequence && stage && equipment && equipmentImage && frostSource && frostCanv
     const shakeY=reduceMotion.matches?0:Math.sin(time*.091+1.2)*vibe*Math.min(2.5,objectW*.002);
     const depthScale=Math.min(objectW/868,1);
     const shakeZ=reduceMotion.matches?0:Math.sin(time*.057+2.1)*vibe*3;
+    const firstTwoSectionTurn=reduceMotion.matches?0:Math.sin(progress*Math.PI*4)*(1-smooth(.46,.52,progress));
     const figmaScale = Math.min(width/1920,1);
     const aboutX = -(Math.min(width*.1770833333,340) + 442.5*figmaScale) * aboutShift;
     const aboutY = 66 * aboutShift;
@@ -217,11 +218,11 @@ if (sequence && stage && equipment && equipmentImage && frostSource && frostCanv
     equipment.style.setProperty('--equipment-x',`${aboutX+(a.x+(b.x-a.x)*blend)*objectW+shakeX}px`);
     equipment.style.setProperty('--equipment-y',`${aboutY+(a.y+(b.y-a.y)*blend)*objectH+shakeY}px`);
     equipment.style.setProperty('--equipment-scale',String((a.s+(b.s-a.s)*blend)*aboutScale));
-    equipment.style.setProperty('--equipment-rotate',`${a.r+(b.r-a.r)*blend-1.2*aboutShift}deg`);
+    equipment.style.setProperty('--equipment-rotate',`${a.r+(b.r-a.r)*blend-1.2*aboutShift+.35*firstTwoSectionTurn}deg`);
     equipment.style.setProperty('--equipment-depth',`${(a.z+(b.z-a.z)*blend)*depthScale+shakeZ}px`);
     drawFrost(Math.max(aboutOpacity,iceLevel));
-    equipment.style.setProperty('--equipment-tilt-x',`${a.rx+(b.rx-a.rx)*blend-.6*aboutShift-.8*iceLevel}deg`);
-    equipment.style.setProperty('--equipment-tilt-y',`${a.ry+(b.ry-a.ry)*blend+1.2*aboutShift+1.2*iceLevel}deg`);
+    equipment.style.setProperty('--equipment-tilt-x',`${a.rx+(b.rx-a.rx)*blend-.6*aboutShift-.8*iceLevel+.55*firstTwoSectionTurn}deg`);
+    equipment.style.setProperty('--equipment-tilt-y',`${a.ry+(b.ry-a.ry)*blend+1.2*aboutShift+1.2*iceLevel+.8*firstTwoSectionTurn}deg`);
     stage.style.setProperty('--heat-opacity',String(heatLevel*(.72+.08*Math.sin(time*.006))));
     drawSurface(time,rainLevel);drawAtmosphere(time,rainLevel,heatLevel,vibe);
     raf=requestAnimationFrame(draw);
