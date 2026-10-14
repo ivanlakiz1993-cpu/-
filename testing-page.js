@@ -22,6 +22,9 @@ const equipmentImage = stage?.querySelector('.testing-stage__image');
 const surfaceCanvas = stage?.querySelector('.testing-stage__effects');
 const atmosphereCanvas = stage?.querySelector('.testing-stage__atmosphere');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const desktopTesting = matchMedia('(min-width: 1001px)');
+const aboutSection = stage?.querySelector('.testing-about');
+const heroCopy = stage?.querySelector('.testing-stage__copy');
 
 if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosphereCanvas) {
   const clamp = (v, min = 0, max = 1) => Math.max(min, Math.min(max, v));
@@ -30,7 +33,7 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
   const maskCanvas = document.createElement('canvas');
   const maskCtx = canvasContext(maskCanvas);
   let maskPixels = null, maskW = 0, maskH = 0;
-  let width = 1, height = 1, objectW = 1, objectH = 1, progress = 0, raf = 0;
+  let width = 1, height = 1, objectW = 1, objectH = 1, progress = 0, raf = 0, aboutShift = 0;
   let drops = [], frost = [], rain = [], seed = 4099;
   const random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
   const getMaskPoints = count => {
@@ -53,7 +56,7 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
   };
   const measure = () => {
     const dpr = Math.min(devicePixelRatio || 1, 1.6);
-    const s = stage.getBoundingClientRect(), o = equipment.getBoundingClientRect();
+    const s = stage.getBoundingClientRect(), o = {width:equipment.offsetWidth,height:equipment.offsetHeight};
     width = Math.max(1,s.width); height = Math.max(1,s.height); objectW = Math.max(1,o.width); objectH = Math.max(1,o.height);
     for (const c of [surfaceCanvas,atmosphereCanvas]) {
       const box = c === surfaceCanvas ? o : s;
@@ -64,10 +67,18 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
   };
   const getProgress = () => {
     const top = sequence.getBoundingClientRect().top + scrollY;
-    progress = clamp((scrollY-top) / Math.max(1,sequence.offsetHeight-stage.offsetHeight));
+    const timeline = clamp((scrollY-top) / Math.max(1,sequence.offsetHeight-stage.offsetHeight));
+    progress = desktopTesting.matches ? clamp((timeline - .32) / .68) : timeline;
+    aboutShift = desktopTesting.matches ? (reduceMotion.matches ? Number(timeline >= .12) : smooth(.015,.20,timeline)) : 0;
+    const aboutOpacity = desktopTesting.matches ? smooth(.09,.20,timeline)*(1-smooth(.32,.38,timeline)) : 0;
+    stage.style.setProperty('--about-opacity', String(aboutOpacity));
+    stage.style.setProperty('--about-y', `${reduceMotion.matches ? 0 : (1-smooth(.09,.20,timeline))*24}px`);
+    aboutSection?.setAttribute('aria-hidden', String(aboutOpacity < .01));
     const scene = Math.min(4,Math.floor(progress*4+1e-6));
     stage.dataset.scene = ['clear','rain','heat','frost','vibration'][scene];
-    stage.style.setProperty('--copy-opacity', String(1-smooth(.035,.13,progress)));
+    const copyOpacity = 1-smooth(.035,.13,timeline);
+    stage.style.setProperty('--copy-opacity', String(copyOpacity));
+    if (heroCopy) heroCopy.inert = copyOpacity < .01;
   };
   const drop = (ctx,x,y,r,a) => {
     ctx.save(); ctx.globalAlpha=a;
@@ -109,9 +120,12 @@ if (sequence && stage && equipment && equipmentImage && surfaceCanvas && atmosph
     const blend=smooth(0,1,t),a=poses[idx],b=poses[idx+1];
     const shakeX=reduceMotion.matches?0:Math.sin(time*.068)*vibe*Math.min(4,objectW*.003);
     const shakeY=reduceMotion.matches?0:Math.sin(time*.091+1.2)*vibe*Math.min(2.5,objectW*.002);
-    equipment.style.setProperty('--equipment-x',`${(a.x+(b.x-a.x)*blend)*objectW+shakeX}px`);
-    equipment.style.setProperty('--equipment-y',`${(a.y+(b.y-a.y)*blend)*objectH+shakeY}px`);
-    equipment.style.setProperty('--equipment-scale',String(a.s+(b.s-a.s)*blend));
+    const aboutX = -433.5 * aboutShift;
+    const aboutY = (Math.max(100,height/2-382)+394.5-height/2)*aboutShift;
+    const aboutScale = 1+(Math.min(1143,width*1143/1920)/objectW-1)*aboutShift;
+    equipment.style.setProperty('--equipment-x',`${aboutX+(a.x+(b.x-a.x)*blend)*objectW+shakeX}px`);
+    equipment.style.setProperty('--equipment-y',`${aboutY+(a.y+(b.y-a.y)*blend)*objectH+shakeY}px`);
+    equipment.style.setProperty('--equipment-scale',String(aboutScale*(a.s+(b.s-a.s)*blend)));
     equipment.style.setProperty('--equipment-rotate',`${a.r+(b.r-a.r)*blend}deg`);
     stage.style.setProperty('--heat-opacity',String(heatLevel*(.72+.08*Math.sin(time*.006))));
     stage.style.setProperty('--ice-opacity',String(iceLevel*.86));
