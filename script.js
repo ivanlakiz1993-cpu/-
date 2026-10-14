@@ -448,8 +448,19 @@ contactForm.addEventListener('input', () => {
 });
 contactForm.addEventListener('submit', (event) => {
   event.preventDefault();
+  const formData = new FormData(contactForm);
+  const emailBody = [
+    `Как к вам обращаться: ${formData.get('name')}`,
+    `Почта: ${formData.get('email')}`,
+    `Телефон: ${formData.get('phone') || 'не указан'}`,
+    '',
+    'Комментарий или вопрос:',
+    formData.get('message') || 'не указан'
+  ].join('\n');
+  const mailto = `mailto:gromf1493@mail.ru?subject=${encodeURIComponent('Заявка с сайта СпецЭлектроника')}&body=${encodeURIComponent(emailBody)}`;
   contactForm.classList.add('is-submitted');
-  contactForm.querySelector('.form-feedback').textContent = 'Спасибо! Форма готова к подключению к вашей почте или CRM.';
+  contactForm.querySelector('.form-feedback').textContent = 'Откроется почтовое приложение с подготовленной заявкой. Нажмите «Отправить».';
+  window.location.href = mailto;
 });
 
 // Smooth and slow wheel input across the page. Reduced-motion preferences keep
