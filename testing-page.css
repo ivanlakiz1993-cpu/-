@@ -29,7 +29,7 @@
 .testing-stage__button>span{position:relative;z-index:1}
 .testing-stage__button:hover::before,.testing-stage__button:focus-visible::before{opacity:1}
 .testing-stage__atmosphere{position:absolute;z-index:0;inset:0;width:100%;height:100%;pointer-events:none}
-.testing-stage__equipment{position:absolute;z-index:1;left:calc(50% + 340px);top:50%;width:min(53.125vw,calc(67svh * 1.548),1020px);aspect-ratio:1020/659;transform:perspective(1800px) translate3d(calc(-50% + var(--equipment-x,0px)),calc(-50% + var(--equipment-y,0px)),0) rotateX(var(--equipment-tilt-x,0deg)) rotateY(var(--equipment-tilt-y,0deg)) scale(var(--equipment-scale,1)) rotate(var(--equipment-rotate,0deg));transform-origin:50% 55%;will-change:transform;pointer-events:none}
+.testing-stage__equipment{position:absolute;z-index:1;left:calc(50% + 340px);top:50%;width:min(53.125vw,calc(67svh * 1.548),1020px);aspect-ratio:1020/659;transform:perspective(1500px) translate3d(calc(-50% + var(--equipment-x,0px)),calc(-50% + var(--equipment-y,0px)),var(--equipment-depth,0px)) rotateX(var(--equipment-tilt-x,0deg)) rotateY(var(--equipment-tilt-y,0deg)) scale(var(--equipment-scale,1)) rotate(var(--equipment-rotate,0deg));transform-origin:50% 55%;transform-style:preserve-3d;will-change:transform;pointer-events:none}
 .testing-stage__image,.testing-stage__frost,.testing-stage__effects,.testing-stage__heat{position:absolute;inset:0;width:100%;height:100%}
 .testing-stage__image{z-index:1;object-fit:contain;filter:drop-shadow(0 26px 48px rgba(0,0,0,.42))}
 .testing-stage__frost-source{position:absolute;inset:0;width:100%;height:100%;visibility:hidden;pointer-events:none}

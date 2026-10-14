@@ -198,10 +198,18 @@ if (sequence && stage && equipment && equipmentImage && frostSource && frostCanv
     const heatLevel=smooth(.445,.515,progress)*(1-smooth(.625,.695,progress));
     const iceLevel=smooth(.685,.755,progress)*(1-smooth(.865,.935,progress));
     const vibe=smooth(.9,1,progress);
-    const poses=[{x:0,y:0,s:1,r:0},{x:-.012,y:-.01,s:1.012,r:.25},{x:.01,y:.006,s:.995,r:-.22},{x:-.008,y:-.004,s:1.008,r:.12},{x:0,y:0,s:1,r:0}];
+    const poses=[
+      {x:0,y:0,s:1,r:0,z:0,rx:0,ry:0},
+      {x:-.012,y:-.01,s:1.012,r:.35,z:48,rx:-1.5,ry:2.4},
+      {x:.01,y:.006,s:.995,r:-.45,z:-32,rx:1.8,ry:-2.8},
+      {x:-.008,y:-.004,s:1.008,r:.3,z:68,rx:-2.2,ry:3.6},
+      {x:0,y:0,s:1,r:0,z:8,rx:.6,ry:-.8}
+    ];
     const blend=smooth(0,1,t),a=poses[idx],b=poses[idx+1];
     const shakeX=reduceMotion.matches?0:Math.sin(time*.068)*vibe*Math.min(4,objectW*.003);
     const shakeY=reduceMotion.matches?0:Math.sin(time*.091+1.2)*vibe*Math.min(2.5,objectW*.002);
+    const depthScale=Math.min(objectW/868,1);
+    const shakeZ=reduceMotion.matches?0:Math.sin(time*.057+2.1)*vibe*3;
     const figmaScale = Math.min(width/1920,1);
     const aboutX = -(Math.min(width*.1770833333,340) + 442.5*figmaScale) * aboutShift;
     const aboutY = 66 * aboutShift;
@@ -210,9 +218,10 @@ if (sequence && stage && equipment && equipmentImage && frostSource && frostCanv
     equipment.style.setProperty('--equipment-y',`${aboutY+(a.y+(b.y-a.y)*blend)*objectH+shakeY}px`);
     equipment.style.setProperty('--equipment-scale',String((a.s+(b.s-a.s)*blend)*aboutScale));
     equipment.style.setProperty('--equipment-rotate',`${a.r+(b.r-a.r)*blend-1.2*aboutShift}deg`);
+    equipment.style.setProperty('--equipment-depth',`${(a.z+(b.z-a.z)*blend)*depthScale+shakeZ}px`);
     drawFrost(Math.max(aboutOpacity,iceLevel));
-    equipment.style.setProperty('--equipment-tilt-x',`${-2.2*aboutShift-4.5*iceLevel}deg`);
-    equipment.style.setProperty('--equipment-tilt-y',`${3.4*aboutShift+7*iceLevel}deg`);
+    equipment.style.setProperty('--equipment-tilt-x',`${a.rx+(b.rx-a.rx)*blend-.6*aboutShift-.8*iceLevel}deg`);
+    equipment.style.setProperty('--equipment-tilt-y',`${a.ry+(b.ry-a.ry)*blend+1.2*aboutShift+1.2*iceLevel}deg`);
     stage.style.setProperty('--heat-opacity',String(heatLevel*(.72+.08*Math.sin(time*.006))));
     drawSurface(time,rainLevel);drawAtmosphere(time,rainLevel,heatLevel,vibe);
     raf=requestAnimationFrame(draw);
