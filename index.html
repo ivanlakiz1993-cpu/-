@@ -214,11 +214,13 @@
 
     <section id="contact" class="contact wrap">
       <div class="contact-heading"><h2>Нужна<br>консультация?</h2><p>Отправьте свой вопрос нам и получите индивидуальную консультацию специалиста</p></div>
-      <form class="contact-form">
+      <form class="contact-form" action="https://formsubmit.co/gromf1493@mail.ru" method="POST">
+        <input type="hidden" name="_subject" value="Заявка с сайта СпецЭлектроника">
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" hidden>
         <label class="form-field form-field--name"><span>Как к вам обращаться</span><input name="name" autocomplete="name" placeholder="Как Вам обращаться" required></label>
         <div class="form-row"><label class="form-field form-field--email"><span>Ваша почта</span><input name="email" type="email" autocomplete="email" placeholder="Ваша почта" required></label><label class="form-field form-field--phone"><span>Ваш телефон</span><input name="phone" type="tel" autocomplete="tel" placeholder="Ваш телефон"></label></div>
         <label class="form-field form-field--message message"><span>Комментарий или вопрос</span><textarea name="message" placeholder="Комментарий или вопрос" rows="4"></textarea></label>
-        <label class="consent"><input type="checkbox" required><span>Я соглашаюсь с <a class="consent-link" href="privacy-policy.html">политикой конфиденциальности</a> и <a class="consent-link" href="personal-data-processing.html">обработкой персональных данных</a></span></label>
+        <label class="consent"><input type="checkbox" name="consent" value="yes" required><span>Я соглашаюсь с <a class="consent-link" href="privacy-policy.html">политикой конфиденциальности</a> и <a class="consent-link" href="personal-data-processing.html">обработкой персональных данных</a></span></label>
         <button class="submit" type="submit"><span>Отправить</span></button><p class="form-feedback" aria-live="polite"></p>
       </form>
     </section>
@@ -267,7 +269,7 @@
   <script src="helicopter-renderer.js?v=20261010-ascii-3"></script>
   <script src="helicopter-storyboard.js?v=20261013-mobile-stats-stack-1"></script>
   <script src="helicopter-motion.js?v=20261013-mobile-stats-stack-1"></script>
-  <script src="script.js?v=20261015-mailto-form-1"></script>
+  <script src="script.js?v=20261015-formsubmit-1"></script>
 </body>
 </html>
 

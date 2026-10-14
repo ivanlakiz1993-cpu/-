@@ -442,25 +442,59 @@ document.addEventListener('pointerdown', (event) => {
 });
 
 const contactForm = document.querySelector('.contact-form');
+const contactSubmitButton = contactForm.querySelector('.submit');
+const contactSubmitLabel = contactSubmitButton.querySelector('span');
+const contactFeedback = contactForm.querySelector('.form-feedback');
+let contactSubmissionPending = false;
+let contactSubmissionSucceeded = false;
 contactForm.addEventListener('input', () => {
+  if (contactSubmissionPending) return;
+  contactSubmissionSucceeded = false;
   contactForm.classList.remove('is-submitted');
-  contactForm.querySelector('.form-feedback').textContent = '';
+  contactSubmitButton.disabled = false;
+  contactFeedback.textContent = '';
 });
-contactForm.addEventListener('submit', (event) => {
+contactForm.addEventListener('submit', async (event) => {
   event.preventDefault();
+  if (contactSubmissionPending || contactSubmissionSucceeded) return;
+
   const formData = new FormData(contactForm);
-  const emailBody = [
-    `Как к вам обращаться: ${formData.get('name')}`,
-    `Почта: ${formData.get('email')}`,
-    `Телефон: ${formData.get('phone') || 'не указан'}`,
-    '',
-    'Комментарий или вопрос:',
-    formData.get('message') || 'не указан'
-  ].join('\n');
-  const mailto = `mailto:gromf1493@mail.ru?subject=${encodeURIComponent('Заявка с сайта СпецЭлектроника')}&body=${encodeURIComponent(emailBody)}`;
-  contactForm.classList.add('is-submitted');
-  contactForm.querySelector('.form-feedback').textContent = 'Откроется почтовое приложение с подготовленной заявкой. Нажмите «Отправить».';
-  window.location.href = mailto;
+  const payload = Object.fromEntries(formData.entries());
+  payload._replyto = formData.get('email');
+
+  contactSubmissionPending = true;
+  contactForm.setAttribute('aria-busy', 'true');
+  contactSubmitButton.disabled = true;
+  contactSubmitLabel.textContent = 'Отправляем…';
+  contactFeedback.textContent = '';
+
+  try {
+    const response = await fetch('https://formsubmit.co/ajax/gromf1493@mail.ru', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json();
+
+    const submissionSucceeded = result.success === true || result.success === 'true';
+    if (!response.ok || !submissionSucceeded) {
+      throw new Error(result.message || 'Form submission failed');
+    }
+
+    contactSubmissionSucceeded = true;
+    contactForm.classList.add('is-submitted');
+    contactFeedback.textContent = 'Заявка отправлена. Если это первая отправка, подтвердите адрес в письме от FormSubmit.';
+  } catch (error) {
+    contactSubmitButton.disabled = false;
+    contactFeedback.textContent = 'Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.';
+  } finally {
+    contactSubmissionPending = false;
+    contactForm.removeAttribute('aria-busy');
+    contactSubmitLabel.textContent = 'Отправить';
+  }
 });
 
 // Smooth and slow wheel input across the page. Reduced-motion preferences keep
