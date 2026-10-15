@@ -140,7 +140,7 @@ if (sequence && stage && equipment) {
     const movement = desktop
       ? (reduceMotion.matches ? Number(transition >= 0.9) : smooth(0.05, 0.94, transition))
       : 0;
-    drawFrost(reduceMotion.matches ? Number(transition >= 0.9) : smooth(0.08, 0.92, transition));
+    drawFrost(desktop ? (reduceMotion.matches ? Number(transition >= 0.9) : smooth(0.08, 0.92, transition)) : 0);
     const aboutOpacity = desktop ? smooth(0.48, 0.68, transition) : 0;
     const copyOpacity = 1 - smooth(0.04, 0.17, progress);
     const breadcrumbOpacity = 1 - smooth(0.04, 0.17, progress);
