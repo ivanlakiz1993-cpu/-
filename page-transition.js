@@ -40,9 +40,9 @@
     const transparent = { opacity: 0, transform: 'scaleY(.9)' };
     const solid = { opacity: 1, transform: 'scaleY(1)' };
     const animation = tile.animate(cover ? [transparent, solid] : [solid, transparent], {
-      duration: cover ? 620 : 780,
-      delay: wave * 300,
-      easing: 'cubic-bezier(.22,1,.36,1)',
+      duration: cover ? 560 : 640,
+      delay: wave * 200,
+      easing: 'cubic-bezier(.16,1,.3,1)',
       fill: 'both'
     });
     animations.push(animation);
@@ -62,7 +62,7 @@
       );
       await Promise.race([
         Promise.allSettled([document.fonts.ready, ...images.map(image => image.decode())]),
-        new Promise(resolve => setTimeout(resolve, 1800))
+        new Promise(resolve => setTimeout(resolve, 400))
       ]);
       if (!root.isConnected) return;
       await animate(false);
