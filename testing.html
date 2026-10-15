@@ -64,7 +64,8 @@
       </div>
     </section>
     <section class="testing-equipment-showcase" aria-label="Корпус испытательного оборудования">
-      <img src="assets/testing-equipment-reflection.png" width="1719" height="830" alt="Корпус испытательного оборудования и его отражение на чёрной поверхности" loading="lazy" decoding="async">
+      <canvas class="testing-equipment-showcase__canvas" aria-hidden="true"></canvas>
+      <img class="testing-equipment-showcase__fallback" src="assets/testing-equipment-reflection.png" width="1719" height="830" alt="Корпус испытательного оборудования и его отражение на чёрной поверхности" loading="lazy" decoding="async">
     </section>
     <section class="testing-about" aria-labelledby="testing-about-title">
       <div class="testing-about__equipment" aria-hidden="true">
@@ -229,5 +230,6 @@
     <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
   </footer>
   <script src="testing-page.js?v=20261015-testing-sections-1731-3608-2461-4033"></script>
+  <script src="testing-equipment-3d.js?v=20261015-equipment-webgl-1"></script>
 </body>
 </html>
