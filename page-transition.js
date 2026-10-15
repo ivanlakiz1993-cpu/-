@@ -26,7 +26,13 @@
       tile.style.gridRow = String(row + 1);
       tile.style.gridColumn = (column + 1) + ' / span ' + span;
       root.append(tile);
-      cells.push({ tile, wave: (column + span / 2 + row * .55) / 15 });
+      const centerX = (column + span / 2 - 6) / 6;
+      const centerY = (row + .5 - 3) / 3;
+      cells.push({
+        tile,
+        coverWave: (column + span / 2 + row * .55) / 15,
+        revealWave: Math.hypot(centerX, centerY) / Math.SQRT2
+      });
       column += span;
     }
   }
@@ -36,13 +42,13 @@
     root.classList.remove('is-covered');
     navigating = false;
   };
-  const animate = cover => Promise.all(cells.map(({ tile, wave }) => {
+  const animate = cover => Promise.all(cells.map(({ tile, coverWave, revealWave }) => {
     const transparent = { opacity: 0, transform: 'scaleY(.9)' };
     const solid = { opacity: 1, transform: 'scaleY(1)' };
     const animation = tile.animate(cover ? [transparent, solid] : [solid, transparent], {
-      duration: cover ? 560 : 640,
-      delay: wave * 200,
-      easing: 'cubic-bezier(.16,1,.3,1)',
+      duration: cover ? 760 : 900,
+      delay: (cover ? coverWave : revealWave) * 300,
+      easing: 'cubic-bezier(.2,.75,.25,1)',
       fill: 'both'
     });
     animations.push(animation);
@@ -56,18 +62,9 @@
     root.classList.add('is-covered');
     document.documentElement.append(root);
     ready.then(async () => {
-      const images = [...document.images].filter(image =>
-        image.fetchPriority === 'high' ||
-        (image.loading !== 'lazy' && image.getBoundingClientRect().top < innerHeight)
-      );
-      await Promise.race([
-        Promise.allSettled([document.fonts.ready, ...images.map(image => image.decode())]),
-        new Promise(resolve => setTimeout(resolve, 400))
-      ]);
       if (!root.isConnected) return;
       await animate(false);
       reset();
-      document.dispatchEvent(new Event('site:page-entered'));
     });
   }
   const destinationFor = link => {
