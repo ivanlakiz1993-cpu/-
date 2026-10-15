@@ -17,7 +17,6 @@ document.addEventListener('pointerdown', event => { if (menuButton?.getAttribute
 
 const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
-  document.documentElement.classList.add('testing-motion-ready');
   const reveal = (elements, stagger = 0) => elements.forEach((element, index) => {
     if (!element || element.hasAttribute('data-scroll-reveal')) return;
     element.setAttribute('data-scroll-reveal', '');
@@ -58,6 +57,12 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -5% 0px' });
   document.querySelectorAll('[data-scroll-reveal]').forEach(element => revealObserver.observe(element));
+  document.documentElement.classList.add('testing-motion-ready');
+  window.setTimeout(() => {
+    if (!document.querySelector('.testing-stage__copy h1.is-visible')) {
+      document.documentElement.classList.remove('testing-motion-ready');
+    }
+  }, 1800);
 }
 
 document.querySelectorAll('.testing-stage__button').forEach(button => {

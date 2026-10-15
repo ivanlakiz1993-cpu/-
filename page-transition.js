@@ -63,8 +63,13 @@
     document.documentElement.append(root);
     ready.then(async () => {
       if (!root.isConnected) return;
-      await animate(false);
-      reset();
+      const failSafe = window.setTimeout(() => { if (root.isConnected) reset(); }, 1800);
+      try {
+        await animate(false);
+      } finally {
+        window.clearTimeout(failSafe);
+        if (root.isConnected) reset();
+      }
     });
   }
   const destinationFor = link => {
