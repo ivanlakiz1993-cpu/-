@@ -26,8 +26,6 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   revealGroup('.topbar .brand-mark, .topbar .brand > span, .menu-toggle > span, .menu-toggle .menu-icon > i', 75);
   revealGroup('.nav .menu-nav-links a, .nav .menu-social__link, .testing-stage__breadcrumb > *', 55);
   revealGroup('.testing-stage__copy h1, .testing-stage__copy p, .testing-stage__button, .testing-stage__equipment', 125);
-  revealGroup('.testing-equipment-showcase img');
-
   revealGroup('.testing-about h2, .testing-about__equipment', 80);
   revealGroup('.testing-about__text > *', 110);
   revealGroup('.testing-about__metric', 100);
@@ -41,7 +39,7 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
 
   revealGroup('.mechanical-tests h2', 80);
   revealGroup('.mechanical-tests__list li', 60);
-  revealGroup('.mechanical-tests__product img, .mechanical-tests__shaker img', 100);
+  revealGroup('.mechanical-tests__ambient img, .mechanical-tests__shaker img', 100);
   revealGroup('.mechanical-tests__equipment h3, .mechanical-tests__group h4, .mechanical-tests__group dl > div', 65);
 
   revealGroup('.testing-faq h2', 80);
@@ -224,10 +222,9 @@ if (climateCarousel) {
   const highTemperature = climateCarousel.querySelector('[data-climate-high-temp]');
   const lowTemperature = climateCarousel.querySelector('[data-climate-low-temp]');
   const humidityRow = climateCarousel.querySelector('[data-climate-humidity]');
-  const desktop = matchMedia('(min-width: 1101px)');
   const cameraSpecs = [
-    { title: 'Климатическая камера THCB -125', highTemperature: 'до 150 °C', lowTemperature: 'до −70 °C', humidity: false },
-    { title: 'Климатическая камера S-B-8200', highTemperature: 'до 210 °C', lowTemperature: 'до −80 °C', humidity: true }
+    { title: 'Климатическая камера S-B-8200', highTemperature: 'до 210 °C', lowTemperature: 'до −80 °C', humidity: true },
+    { title: 'Климатическая камера THCB-125', highTemperature: 'до 150 °C', lowTemperature: 'до −70 °C', humidity: false }
   ];
   let active = -1;
   let climateFrame = 0;
@@ -249,9 +246,8 @@ if (climateCarousel) {
   const updateClimateState = () => {
     climateFrame = 0;
     if (!track || !stage || products.length < 2 || cameras.length < 2) return;
-    const top = track.getBoundingClientRect().top + scrollY;
-    const scrollable = Math.max(1, track.offsetHeight - (desktop.matches ? stage.offsetHeight : innerHeight));
-    const progress = clamp((scrollY - top) / scrollable);
+    const bounds = stage.getBoundingClientRect();
+    const progress = clamp((innerHeight - bounds.top) / (bounds.height + innerHeight));
     showClimateState(progress >= 0.5 ? 1 : 0);
   };
 
@@ -263,6 +259,5 @@ if (climateCarousel) {
   climateObserver.observe(stage);
   addEventListener('scroll', scheduleClimateUpdate, { passive: true });
   addEventListener('resize', scheduleClimateUpdate, { passive: true });
-  desktop.addEventListener?.('change', scheduleClimateUpdate);
   scheduleClimateUpdate();
 }

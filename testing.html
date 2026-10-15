@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=20261013-contact-responsive-1">
   <link rel="stylesheet" href="hero-grid.css?v=20261013-hero-split-seam-3">
   <link rel="stylesheet" href="layout-gutters.css?v=20261012-figma-gutters-1">
-  <link rel="stylesheet" href="testing-page.css?v=20261015-testing-reveal-safeguard-1">
+  <link rel="stylesheet" href="testing-page.css?v=20261015-figma-1731-3601-current-1">
   <link rel="stylesheet" href="page-transition.css?v=20261014-mosaic-2">
   <script src="page-transition.js?v=20261015-mosaic-smooth-4"></script>
 </head>
@@ -63,9 +63,6 @@
         </div>
       </div>
     </section>
-    <section class="testing-equipment-showcase" aria-label="Корпус испытательного оборудования">
-      <img src="assets/testing-equipment-reflection.png" width="1719" height="830" alt="Корпус испытательного оборудования и его отражение на чёрной поверхности" loading="lazy" decoding="async">
-    </section>
     <section class="testing-about" aria-labelledby="testing-about-title">
       <div class="testing-about__equipment" aria-hidden="true">
         <img class="testing-about__equipment-base" src="assets/equipment-cutout.png" width="1561" height="1008" alt="" loading="lazy" decoding="async">
@@ -114,11 +111,11 @@
                   <li>Испытание на воздействие повышенной влажности воздуха</li>
                 </ul>
                 <div class="climate-tests__equipment">
-                  <h3 data-climate-camera-title>Климатическая камера THCB -125</h3>
+                  <h3 data-climate-camera-title>Климатическая камера S-B-8200</h3>
                   <dl>
-                    <div><dt>Повышенная температура:</dt><dd data-climate-high-temp>до 150 °C</dd></div>
-                    <div><dt>Пониженная температура:</dt><dd data-climate-low-temp>до −70 °C</dd></div>
-                    <div data-climate-humidity hidden><dt>Повышенная влажность:</dt><dd>до 100%</dd></div>
+                    <div><dt>Повышенная температура:</dt><dd data-climate-high-temp>до 210 °C</dd></div>
+                    <div><dt>Пониженная температура:</dt><dd data-climate-low-temp>до −80 °C</dd></div>
+                    <div data-climate-humidity><dt>Повышенная влажность:</dt><dd>до 100%</dd></div>
                     <div><dt>Полезный объём:</dt><dd>600 × 600 × 600 мм</dd></div>
                   </dl>
                 </div>
@@ -129,8 +126,8 @@
                   <span data-climate-page></span>
                 </div>
                 <div class="climate-tests__camera-stack">
-                  <img class="climate-tests__camera-photo is-active" data-climate-camera src="assets/figma-climate-camera-2585.png" width="1156" height="1186" alt="Климатическая камера THCB-125" fetchpriority="low" loading="lazy" decoding="async">
-                  <img class="climate-tests__camera-photo" data-climate-camera src="assets/figma-climate-camera.png" width="1010" height="1036" alt="Климатическая камера S-B-8200" loading="lazy" decoding="async">
+                  <img class="climate-tests__camera-photo is-active" data-climate-camera src="assets/figma-climate-camera.png" width="1010" height="1036" alt="Климатическая камера S-B-8200" fetchpriority="low" loading="lazy" decoding="async">
+                  <img class="climate-tests__camera-photo" data-climate-camera src="assets/figma-climate-camera-2585.png" width="1156" height="1186" alt="Климатическая камера THCB-125" loading="lazy" decoding="async">
                 </div>
               </div>
             </div>
@@ -153,11 +150,14 @@
               <li>Испытание на проверку отсутствия критических частот в заданном диапазоне</li>
               <li>Испытание на определение критических частот</li>
             </ul>
-            <figure class="mechanical-tests__product">
-              <img src="assets/testing-mechanical-product.png" width="1736" height="1122" alt="Металлический корпус электронного устройства" loading="lazy" decoding="async">
-            </figure>
+            <div class="mechanical-tests__ambient" aria-hidden="true">
+              <img src="assets/equipment-cutout.png" width="1561" height="1008" alt="" loading="lazy" decoding="async">
+            </div>
           </div>
           <div class="mechanical-tests__equipment-row">
+            <div class="mechanical-tests__ambient" aria-hidden="true">
+              <img src="assets/equipment-cutout.png" width="1561" height="1008" alt="" loading="lazy" decoding="async">
+            </div>
             <figure class="mechanical-tests__shaker">
               <img src="assets/testing-mechanical-shaker.jpg" width="1200" height="985" alt="Вибростенд для механических испытаний" loading="lazy" decoding="async">
             </figure>
@@ -251,6 +251,6 @@
     </div>
     <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
   </footer>
-  <script src="testing-page.js?v=20261015-testing-reveal-safeguard-1"></script>
+  <script src="testing-page.js?v=20261015-figma-1731-3601-current-1"></script>
 </body>
 </html>
