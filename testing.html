@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=20261013-contact-responsive-1">
   <link rel="stylesheet" href="hero-grid.css?v=20261013-hero-split-seam-3">
   <link rel="stylesheet" href="layout-gutters.css?v=20261012-figma-gutters-1">
-  <link rel="stylesheet" href="testing-page.css?v=20261015-keep-three-sections-1">
+  <link rel="stylesheet" href="testing-page.css?v=20261015-climate-scroll-3">
   <link rel="stylesheet" href="page-transition.css?v=20261014-mosaic-2">
   <script src="page-transition.js?v=20261015-mosaic-smooth-3"></script>
 </head>
@@ -81,35 +81,49 @@
           </section>
           <div class="testing-stage__equipment" role="img" aria-label="Корпус испытательного оборудования">
             <img class="testing-stage__image" src="assets/equipment-cutout.png" width="1561" height="1008" alt="Корпус испытательного оборудования" fetchpriority="high" decoding="async">
+            <img class="testing-stage__frost-source" src="assets/equipment-frost.png" width="1561" height="1007" alt="" aria-hidden="true" fetchpriority="low" decoding="async">
+            <canvas class="testing-stage__frost" aria-hidden="true"></canvas>
           </div>
         </div>
       </div>
     </section>
-    <section class="climate-tests" aria-labelledby="climate-tests-title">
-      <div class="climate-tests__inner">
-        <h2 id="climate-tests-title">Климатические испытания</h2>
-        <div class="climate-tests__body">
-          <img class="climate-tests__product" src="assets/figma-climate-product.png" width="3412" height="1919" alt="" aria-hidden="true" loading="lazy" decoding="async">
-          <div class="climate-tests__details">
-            <ul class="climate-tests__list" aria-label="Виды климатических испытаний">
-              <li>Испытание на воздействие повышенной температуры среды</li>
-              <li>Испытание на воздействие пониженной температуры среды</li>
-              <li>Испытание на воздействие изменения температуры среды</li>
-              <li>Испытание на воздействие повышенной влажности воздуха</li>
-            </ul>
-            <div class="climate-tests__equipment">
-              <h3>Климатическая камера S-B-8200</h3>
-              <dl>
-                <div><dt>Повышенная температура:</dt><dd>до 150 °C</dd></div>
-                <div><dt>Пониженная температура:</dt><dd>до −70 °C</dd></div>
-                <div><dt>Повышенная влажность:</dt><dd>до 100%</dd></div>
-                <div><dt>Полезный объём:</dt><dd>600 × 600 × 600 мм</dd></div>
-              </dl>
+    <section class="climate-tests" aria-labelledby="climate-tests-title" data-climate-carousel>
+      <div class="climate-tests__track" data-climate-track>
+        <div class="climate-tests__stage" data-climate-stage>
+          <div class="climate-tests__inner">
+            <h2 id="climate-tests-title">Климатические испытания</h2>
+            <div class="climate-tests__body">
+              <div class="climate-tests__product-stack" aria-hidden="true">
+                <img class="climate-tests__product-photo is-active" data-climate-product src="assets/equipment-cutout.png" width="1561" height="1008" alt="" loading="lazy" decoding="async">
+                <img class="climate-tests__product-photo" data-climate-product src="assets/equipment-frost.png" width="1561" height="1007" alt="" loading="lazy" decoding="async">
+              </div>
+              <div class="climate-tests__details">
+                <ul class="climate-tests__list" aria-label="Виды климатических испытаний">
+                  <li>Испытание на воздействие повышенной температуры среды</li>
+                  <li>Испытание на воздействие пониженной температуры среды</li>
+                  <li>Испытание на воздействие изменения температуры среды</li>
+                  <li>Испытание на воздействие повышенной влажности воздуха</li>
+                </ul>
+                <div class="climate-tests__equipment">
+                  <h3 data-climate-camera-title>Климатическая камера THCB -125</h3>
+                  <dl>
+                    <div><dt>Повышенная температура:</dt><dd>до 150 °C</dd></div>
+                    <div><dt>Пониженная температура:</dt><dd>до −70 °C</dd></div>
+                    <div><dt>Полезный объём:</dt><dd>600 × 600 × 600 мм</dd></div>
+                  </dl>
+                </div>
+              </div>
+              <div class="climate-tests__visuals">
+                <div class="climate-tests__pagination" aria-hidden="true">
+                  <span class="is-active" data-climate-page></span>
+                  <span data-climate-page></span>
+                </div>
+                <div class="climate-tests__camera-stack">
+                  <img class="climate-tests__camera-photo is-active" data-climate-camera src="assets/figma-climate-camera-2585.png" width="1156" height="1186" alt="Климатическая камера THCB-125" fetchpriority="low" loading="lazy" decoding="async">
+                  <img class="climate-tests__camera-photo" data-climate-camera src="assets/figma-climate-camera.png" width="1010" height="1036" alt="Климатическая камера S-B-8200" loading="lazy" decoding="async">
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="climate-tests__visuals">
-            <div class="climate-tests__pagination" aria-hidden="true"><span></span><i></i></div>
-            <img src="assets/figma-climate-camera.png" alt="Климатическая камера S-B-8200" width="1010" height="1036" loading="lazy" decoding="async">
           </div>
         </div>
       </div>
@@ -156,6 +170,6 @@
     </div>
     <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
   </footer>
-  <script src="testing-page.js?v=20261015-keep-three-sections-1"></script>
+  <script src="testing-page.js?v=20261015-climate-scroll-3"></script>
 </body>
 </html>
