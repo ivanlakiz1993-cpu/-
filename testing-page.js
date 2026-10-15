@@ -15,6 +15,51 @@ menuDrawer?.addEventListener('click', event => { if (menuButton?.getAttribute('a
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && menuButton?.getAttribute('aria-expanded') === 'true') { setMenuOpen(false); menuButton.focus(); } });
 document.addEventListener('pointerdown', event => { if (menuButton?.getAttribute('aria-expanded') === 'true' && !menuDrawer?.contains(event.target)) setMenuOpen(false); });
 
+const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
+  document.documentElement.classList.add('testing-motion-ready');
+  const reveal = (elements, stagger = 0) => elements.forEach((element, index) => {
+    if (!element || element.hasAttribute('data-scroll-reveal')) return;
+    element.setAttribute('data-scroll-reveal', '');
+    element.style.setProperty('--reveal-delay', `${Math.min(index * stagger, 420)}ms`);
+  });
+  const revealGroup = (selector, stagger = 0) => reveal([...document.querySelectorAll(selector)], stagger);
+  revealGroup('.topbar .brand-mark, .topbar .brand > span, .menu-toggle > span, .menu-toggle .menu-icon > i', 75);
+  revealGroup('.nav .menu-nav-links a, .nav .menu-social__link, .testing-stage__breadcrumb > *', 55);
+  revealGroup('.testing-stage__copy h1, .testing-stage__copy p, .testing-stage__button, .testing-stage__equipment', 125);
+  revealGroup('.testing-equipment-showcase img');
+
+  revealGroup('.testing-about h2, .testing-about__equipment', 80);
+  revealGroup('.testing-about__text > *', 110);
+  revealGroup('.testing-about__metric', 100);
+  revealGroup('.testing-about__number, .testing-about__label', 65);
+
+  revealGroup('.climate-tests h2', 80);
+  revealGroup('.climate-tests__product-stack, .climate-tests__visuals', 120);
+  revealGroup('.climate-tests__list li', 72);
+  revealGroup('.climate-tests__equipment h3, .climate-tests__equipment dl > div', 65);
+  revealGroup('.climate-tests__pagination span', 100);
+
+  revealGroup('.mechanical-tests h2', 80);
+  revealGroup('.mechanical-tests__list li', 60);
+  revealGroup('.mechanical-tests__product img, .mechanical-tests__shaker img', 100);
+  revealGroup('.mechanical-tests__equipment h3, .mechanical-tests__group h4, .mechanical-tests__group dl > div', 65);
+
+  revealGroup('.testing-faq h2', 80);
+  revealGroup('.testing-faq__item', 95);
+  revealGroup('.footer-brand .brand-mark, .footer-brand > span, .footer-nav a, .footer-legal a', 60);
+  revealGroup('.footer-contact-link, .footer-contacts address, .footer-social h3, .footer-social-link, .footer-bottom', 70);
+
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      revealObserver.unobserve(entry.target);
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -5% 0px' });
+  document.querySelectorAll('[data-scroll-reveal]').forEach(element => revealObserver.observe(element));
+}
+
 document.querySelectorAll('.testing-stage__button').forEach(button => {
   button.addEventListener('pointermove', event => {
     if (event.pointerType === 'touch') return;
