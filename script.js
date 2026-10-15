@@ -364,7 +364,7 @@ const textRevealSelector = [
   requestTextReveal();
 }
 if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  if (document.querySelector('.mosaic-transition')) {
+  if (window.siteMosaicIncoming || document.querySelector('.mosaic-transition')) {
     // The incoming page mosaic reveals the cover itself; a second black grid
     // here would stack over it and leave the destination looking blank.
     heroReveals.forEach((reveal) => reveal.remove());

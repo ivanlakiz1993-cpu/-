@@ -8,6 +8,7 @@
     entering = timestamp && Date.now() - timestamp < 15000;
   } catch {}
   if (reducedMotion.matches) return;
+  window.siteMosaicIncoming = Boolean(entering);
 
   const root = document.createElement('div');
   root.className = 'mosaic-transition';
@@ -39,31 +40,42 @@
   const reset = () => {
     root.remove();
     animations.splice(0).forEach(animation => animation.cancel());
+    cells.forEach(({ tile }) => {
+      tile.style.removeProperty('opacity');
+      tile.style.removeProperty('transform');
+    });
     root.classList.remove('is-covered');
     navigating = false;
   };
   const animate = cover => Promise.all(cells.map(({ tile, coverWave, revealWave }) => {
     const transparent = { opacity: 0, transform: 'scaleY(.9)' };
     const solid = { opacity: 1, transform: 'scaleY(1)' };
-    const animation = tile.animate(cover ? [transparent, solid] : [solid, transparent], {
-      duration: cover ? 760 : 900,
-      delay: (cover ? coverWave : revealWave) * 300,
-      easing: 'cubic-bezier(.2,.75,.25,1)',
-      fill: 'both'
-    });
+    if (typeof tile.animate !== 'function') {
+      tile.style.opacity = cover ? '1' : '0';
+      return Promise.resolve();
+    }
+    let animation;
+    try {
+      animation = tile.animate(cover ? [transparent, solid] : [solid, transparent], {
+        duration: cover ? 760 : 900,
+        delay: (cover ? coverWave : revealWave) * 300,
+        easing: 'cubic-bezier(.2,.75,.25,1)',
+        fill: 'both'
+      });
+    } catch {
+      tile.style.opacity = cover ? '1' : '0';
+      return Promise.resolve();
+    }
     animations.push(animation);
     return animation.finished.catch(() => {});
   }));
-  const ready = document.readyState === 'loading'
-    ? new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, { once: true }))
-    : Promise.resolve();
   if (entering) {
     // This script runs in the head, covering the destination before its first paint.
     root.classList.add('is-covered');
     document.documentElement.append(root);
-    ready.then(async () => {
+    requestAnimationFrame(async () => {
       if (!root.isConnected) return;
-      const failSafe = window.setTimeout(() => { if (root.isConnected) reset(); }, 1800);
+      const failSafe = window.setTimeout(() => { if (root.isConnected) reset(); }, 1400);
       try {
         await animate(false);
       } finally {
