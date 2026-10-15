@@ -171,9 +171,14 @@ if (climateCarousel) {
   const cameras = [...climateCarousel.querySelectorAll('[data-climate-camera]')];
   const pages = [...climateCarousel.querySelectorAll('[data-climate-page]')];
   const title = climateCarousel.querySelector('[data-climate-camera-title]');
+  const highTemperature = climateCarousel.querySelector('[data-climate-high-temp]');
+  const lowTemperature = climateCarousel.querySelector('[data-climate-low-temp]');
   const humidityRow = climateCarousel.querySelector('[data-climate-humidity]');
   const desktop = matchMedia('(min-width: 1101px)');
-  const cameraTitles = ['Климатическая камера THCB -125', 'Климатическая камера S-B-8200'];
+  const cameraSpecs = [
+    { title: 'Климатическая камера THCB -125', highTemperature: 'до 150 °C', lowTemperature: 'до −70 °C', humidity: false },
+    { title: 'Климатическая камера S-B-8200', highTemperature: 'до 210 °C', lowTemperature: 'до −80 °C', humidity: true }
+  ];
   let active = -1;
   let climateFrame = 0;
   const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
@@ -184,8 +189,11 @@ if (climateCarousel) {
     products.forEach((image, imageIndex) => image.classList.toggle('is-active', imageIndex === index));
     cameras.forEach((image, imageIndex) => image.classList.toggle('is-active', imageIndex === index));
     pages.forEach((page, pageIndex) => page.classList.toggle('is-active', pageIndex === index));
-    if (title) title.textContent = cameraTitles[index];
-    if (humidityRow) humidityRow.hidden = index !== 1;
+    const spec = cameraSpecs[index];
+    if (title) title.textContent = spec.title;
+    if (highTemperature) highTemperature.textContent = spec.highTemperature;
+    if (lowTemperature) lowTemperature.textContent = spec.lowTemperature;
+    if (humidityRow) humidityRow.hidden = !spec.humidity;
   };
 
   const updateClimateState = () => {

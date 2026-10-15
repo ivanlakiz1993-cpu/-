@@ -50,14 +50,14 @@
 .climate-tests__inner{position:relative;width:min(1720px,calc(100% - 100px));min-height:795px;margin-inline:auto}
 .climate-tests h2{margin:0;font:400 64px/1 var(--sans);letter-spacing:.64px;color:#fff}
 .climate-tests__body{position:relative;min-height:681px;margin-top:50px}
-.climate-tests__product-stack{position:absolute;z-index:0;left:calc(50% - 379.5px);top:calc(50% + 37px);width:min(759px,46vw);aspect-ratio:759/491;transform:translate(-50%,-50%);pointer-events:none}
+.climate-tests__product-stack{position:absolute;z-index:0;left:calc(50% - 379.5px);top:calc(50% + 36.5px);width:min(759px,46vw);aspect-ratio:759/491;transform:translate(-50%,-50%);pointer-events:none}
 .climate-tests__product-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .72s ease-in-out}
 .climate-tests__product-photo.is-active{opacity:1}
 .climate-tests__details{position:relative;z-index:2;width:min(860px,calc(100% - min(631px,48%) - 30px))}
 .climate-tests__list{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
-.climate-tests__list li{display:flex;align-items:center;min-height:66px;padding:20px 30px;border-radius:10px;background:#121212;font:400 18px/1.2 var(--sans);color:#f5f5f5}
+.climate-tests__list li{display:flex;align-items:flex-start;padding:20px 30px;border-radius:10px;background:#121212;font:400 18px/1.2 var(--sans);color:#f5f5f5}
 .climate-tests__equipment{display:flex;flex-direction:column;gap:50px;margin-top:30px;padding:30px;background:rgba(0,0,0,.6);overflow:hidden}
-.climate-tests__equipment h3{margin:0;font:400 48px/1.1 var(--sans);color:#fff}
+.climate-tests__equipment h3{margin:0;font:400 36px/1.1 var(--sans);color:#fff}
 .climate-tests__equipment dl{display:flex;flex-direction:column;gap:30px;margin:0;font:400 18px/1.2 var(--sans);color:#f5f5f5}
 .climate-tests__equipment dl>div{display:flex;align-items:center;justify-content:space-between;gap:20px}
 .climate-tests__equipment dl>div[hidden]{display:none}
