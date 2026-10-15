@@ -402,12 +402,18 @@ if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: r
     }, 200);
   };
   const heroBackground = hero.querySelector('.hero-bg img');
-  if (!heroBackground || heroBackground.complete) {
-    startHeroReveal();
-  } else {
-    heroBackground.addEventListener('load', startHeroReveal, { once: true });
-    heroBackground.addEventListener('error', startHeroReveal, { once: true });
-  }
+  const backgroundReady = !heroBackground
+    ? Promise.resolve()
+    : (heroBackground.complete
+      ? Promise.resolve()
+      : new Promise((resolve) => {
+        heroBackground.addEventListener('load', resolve, { once: true });
+        heroBackground.addEventListener('error', resolve, { once: true });
+      })).then(() => Promise.resolve(heroBackground.decode?.()).catch(() => {}));
+  const pageEntryReady = document.querySelector('.mosaic-transition')
+    ? new Promise((resolve) => document.addEventListener('site:page-entered', resolve, { once: true }))
+    : Promise.resolve();
+  Promise.all([backgroundReady, pageEntryReady]).then(startHeroReveal);
 }
 
 const setMenuOpen = (open) => {

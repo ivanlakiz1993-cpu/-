@@ -67,6 +67,7 @@
       if (!root.isConnected) return;
       await animate(false);
       reset();
+      document.dispatchEvent(new Event('site:page-entered'));
     });
   }
   const destinationFor = link => {
