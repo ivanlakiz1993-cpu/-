@@ -24,8 +24,8 @@
       float cx=cos(u_pitch),sx=sin(u_pitch);
       p.yz=mat2(cx,sx,-sx,cx)*p.yz;
       n.yz=mat2(cx,sx,-sx,cx)*n.yz;
-      float depth=10.5-p.z, f=4.9, aspect=u_resolution.x/u_resolution.y;
-      gl_Position=vec4(p.x*f/(depth*aspect),p.y*f/depth,(41.0/39.0)*depth-80.0/39.0,depth);
+      float depth=10.5-p.z, f=4.45, aspect=u_resolution.x/u_resolution.y;
+      gl_Position=vec4(p.x*f/aspect,p.y*f,(41.0/39.0)*depth-80.0/39.0,depth);
       v_normal=n;v_color=a_color;v_uv=a_uv;v_front=a_front;
       v_reflection=u_reflection;v_height=p.y;
     }`;
