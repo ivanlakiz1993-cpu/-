@@ -108,7 +108,8 @@
   document.addEventListener('click', async event => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey ||
         event.shiftKey || event.altKey || reducedMotion.matches) return;
-    const destination = destinationFor(event.target.closest('a[href]'));
+    const target = event.target instanceof Element ? event.target : event.composedPath().find(node => node instanceof Element);
+    const destination = destinationFor(target?.closest('a[href]'));
     if (!destination) return;
     event.preventDefault();
     if (navigating) return;
@@ -116,9 +117,11 @@
     navigating = true;
     prefetch(destination);
     document.documentElement.append(root);
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    if (!root.isConnected || !navigating) return;
     await animate(true);
     try { sessionStorage.setItem(enterKey, String(Date.now())); } catch {}
     location.assign(destination.href);
-  });
+  }, true);
   window.addEventListener('pageshow', event => { if (event.persisted) reset(); });
 })();

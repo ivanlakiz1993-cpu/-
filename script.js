@@ -99,6 +99,7 @@ document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
   };
 
   card.addEventListener('click', (event) => {
+    if (event.target.closest('a[href]')) return;
     const mode = event.target.closest('[data-card-mode]');
     if (mode) {
       selectedState = mode.dataset.cardMode;
