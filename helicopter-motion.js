@@ -44,9 +44,8 @@
       half.className=`hero-split__half hero-split__half--${side}`;
       copy.removeAttribute('aria-label');
       copy.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
-      // The opening reveal belongs to the original cover only. Replaying its
-      // opaque tiles over a freshly cloned cover looks like a gray split.
-      copy.querySelector('.hero-reveal')?.remove();
+      // Desktop hides the original cover and shows these split copies from the
+      // first frame, so keep the reveal layer on them as well.
       copy.inert=true;
       half.append(copy);splitOverlay.append(half);
     }
