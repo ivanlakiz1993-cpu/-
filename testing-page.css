@@ -2,7 +2,7 @@
 @font-face{font-family:Inter;src:url('assets/fonts/inter-variable.ttf') format('truetype');font-weight:100 900;font-style:normal;font-display:swap}
 .testing-about{display:none}
 @media(min-width:1001px){
-  .testing-about{display:block;position:absolute;z-index:4;top:0;left:var(--desktop-inset,clamp(24px,5.2083333333vw,100px));right:var(--desktop-inset,clamp(24px,5.2083333333vw,100px));opacity:var(--about-opacity,0);transform:translateY(var(--about-y,24px));pointer-events:none;color:var(--text)}
+  .testing-about{display:block;position:relative;z-index:4;top:auto;left:auto;right:auto;width:calc(100% - 200px);margin:0 auto;padding:calc(100svh + 100px) 0 100px;opacity:1;transform:none;pointer-events:none;color:var(--text)}
   .testing-about h2{margin:0 0 50px;font:400 64px/1 var(--sans);letter-spacing:.64px;color:#fff}
   .testing-about__content{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1fr);gap:clamp(24px,2.6041666667vw,50px)}
   .testing-about__text{display:flex;flex-direction:column;gap:15px;font:300 clamp(18px,1.25vw,24px)/1.1 var(--sans);color:#fff}
@@ -15,11 +15,11 @@
   .testing-about__label{margin:0;font:400 clamp(14px,.9375vw,18px)/1.2 var(--sans);color:#fff}
 }
 .testing-sequence{position:relative;background:#000}
-.testing-sequence__track{height:100svh;position:relative}
-.testing-stage{position:sticky;top:0;isolation:isolate;height:100svh;min-height:560px;overflow:hidden;background:#000;--copy-opacity:1}
-.testing-stage__breadcrumb{position:absolute;z-index:5;left:clamp(24px,5.2vw,100px);top:111px;display:flex;align-items:center;gap:3px;white-space:nowrap;font:12px/1.3 "Yandex Sans Text",Arial,sans-serif;color:#979797;opacity:var(--breadcrumb-opacity,1);transition:opacity .16s linear}
+.testing-sequence__track{position:relative}
+.testing-stage{position:relative;isolation:isolate;height:auto;min-height:100svh;overflow:visible;background:#000}
+.testing-stage__breadcrumb{position:absolute;z-index:5;left:clamp(24px,5.2vw,100px);top:111px;display:flex;align-items:center;gap:3px;white-space:nowrap;font:12px/1.3 "Yandex Sans Text",Arial,sans-serif;color:#979797;opacity:1}
 .testing-stage__breadcrumb a{color:inherit;text-decoration:none}
-.testing-stage__copy{position:absolute;z-index:4;left:clamp(24px,5.2vw,100px);top:50%;width:min(38vw,650px);transform:translateY(-50%);display:grid;gap:30px;opacity:var(--copy-opacity);transition:opacity .2s linear}
+.testing-stage__copy{position:absolute;z-index:4;left:clamp(24px,5.2vw,100px);top:50%;width:min(38vw,650px);transform:translateY(-50%);display:grid;gap:30px;opacity:1}
 .testing-stage__copy h1{margin:0;font:400 clamp(38px,3.34vw,64px)/1 "Yandex Sans Text",Arial,sans-serif;letter-spacing:-.035em;max-width:680px}
 .testing-stage__copy p{margin:0;font:300 clamp(17px,1.25vw,24px)/1.1 "Yandex Sans Text",Arial,sans-serif;max-width:610px;color:#eee}
 .testing-stage__button{position:relative;display:grid;place-items:center;width:min(100%,445px);min-height:92px;padding:16px 24px;border:1px solid #ff730d;border-radius:10px;background:rgba(0,0,0,.4);backdrop-filter:blur(3.6px);color:#fff;text-decoration:none;font:500 18px/1.1 "Yandex Sans Text",Arial,sans-serif;transition:background .25s ease,color .25s ease}
@@ -33,8 +33,8 @@
 .testing-stage__frost-source{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;visibility:hidden}
 .testing-stage__frost{position:absolute;inset:0;z-index:2;width:100%;height:100%;pointer-events:none}
 @media(max-width:1000px){.testing-stage__breadcrumb{top:92px;left:clamp(24px,5.2vw,100px)}.testing-stage__copy{width:43vw}.testing-stage__equipment{left:62%;width:min(55vw,calc(56svh * 1.548),680px)}.testing-stage__copy h1{font-size:clamp(36px,5.4vw,54px)}.testing-stage__copy p{font-size:18px}.testing-stage__button{min-height:72px}}
-@media(max-width:650px){.testing-sequence__track{height:100svh}.testing-stage{min-height:520px}.testing-stage__breadcrumb{top:86px;left:20px}.testing-stage__copy{top:22%;left:20px;transform:none;width:calc(100% - 40px);gap:18px}.testing-stage__copy h1{font-size:clamp(34px,9vw,48px);max-width:520px}.testing-stage__copy p{font-size:16px;max-width:480px}.testing-stage__button{width:100%;min-height:62px;font-size:15px}.testing-stage__equipment{left:50%;top:67%;width:min(112vw,calc(48svh * 1.548),620px)}}
-@media(min-width:1001px){.testing-sequence__track{height:300svh}.testing-stage{background:#000}.testing-stage__breadcrumb{left:100px;gap:3px}.testing-stage__copy{left:100px;top:145px;transform:none;width:calc(100% - 200px);gap:30px}.testing-stage__copy h1{font-size:64px;letter-spacing:.01em;max-width:1200px}.testing-stage__copy p{font-size:24px;max-width:700px}.testing-stage__button{margin-top:10px;font:400 24px/1.25 "Yandex Sans Text",Arial,sans-serif;letter-spacing:-.05em}.testing-stage__equipment{left:calc(50% + min(17.708333vw,340px));top:calc(50% + 84px);width:min(45.208333vw,868px);aspect-ratio:868/561}.testing-stage__image{filter:none}}
+@media(max-width:650px){.testing-stage{min-height:520px}.testing-stage__breadcrumb{top:86px;left:20px}.testing-stage__copy{top:22%;left:20px;transform:none;width:calc(100% - 40px);gap:18px}.testing-stage__copy h1{font-size:clamp(34px,9vw,48px);max-width:520px}.testing-stage__copy p{font-size:16px;max-width:480px}.testing-stage__button{width:100%;min-height:62px;font-size:15px}.testing-stage__equipment{left:50%;top:67%;width:min(112vw,calc(48svh * 1.548),620px)}}
+@media(min-width:1001px){.testing-stage{background:#000}.testing-stage__breadcrumb{left:100px;gap:3px}.testing-stage__copy{left:100px;top:145px;transform:none;width:calc(100% - 200px);gap:30px}.testing-stage__copy h1{font-size:64px;letter-spacing:.01em;max-width:1200px}.testing-stage__copy p{font-size:24px;max-width:700px}.testing-stage__button{margin-top:10px;font:400 24px/1.25 "Yandex Sans Text",Arial,sans-serif;letter-spacing:-.05em}.testing-stage__equipment{left:calc(50% + min(17.708333vw,340px));top:calc(50svh + 84px);width:min(45.208333vw,868px);aspect-ratio:868/561}.testing-stage__image{filter:none}}
 @media(prefers-reduced-motion:reduce){.testing-stage__equipment{will-change:auto}.testing-stage__button,.testing-stage__button::before{transition:none}}
 
 /* Climate tests section — Figma 2585:2013 */

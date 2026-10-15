@@ -29,9 +29,6 @@ const stage = sequence?.querySelector('.testing-stage');
 const equipment = stage?.querySelector('.testing-stage__equipment');
 const frostSource = equipment?.querySelector('.testing-stage__frost-source');
 const frostCanvas = equipment?.querySelector('.testing-stage__frost');
-const breadcrumb = stage?.querySelector('.testing-stage__breadcrumb');
-const aboutSection = stage?.querySelector('.testing-about');
-const heroCopy = stage?.querySelector('.testing-stage__copy');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const desktopTesting = matchMedia('(min-width: 1001px)');
 
@@ -132,42 +129,18 @@ if (sequence && stage && equipment) {
 
   const update = () => {
     frame = 0;
-    const sequenceTop = sequence.getBoundingClientRect().top + scrollY;
-    const scrollRange = Math.max(1, sequence.offsetHeight - stage.offsetHeight);
-    const progress = clamp((scrollY - sequenceTop) / scrollRange);
-    const transition = clamp(progress * 2);
+    const progress = clamp(-stage.getBoundingClientRect().top / Math.max(1, innerHeight));
     const desktop = desktopTesting.matches;
-    const movement = desktop
-      ? (reduceMotion.matches ? Number(transition >= 0.9) : smooth(0.05, 0.94, transition))
-      : 0;
-    drawFrost(desktop ? (reduceMotion.matches ? Number(transition >= 0.9) : smooth(0.08, 0.92, transition)) : 0);
-    const aboutOpacity = desktop ? smooth(0.48, 0.68, transition) : 0;
-    const copyOpacity = 1 - smooth(0.04, 0.17, progress);
-    const breadcrumbOpacity = 1 - smooth(0.04, 0.17, progress);
+    const rotationProgress = reduceMotion.matches ? Number(progress >= 0.9) : smooth(0, 1, progress);
+    drawFrost(desktop ? (reduceMotion.matches ? Number(progress >= 0.9) : progress) : 0);
 
-    stage.style.setProperty('--about-opacity', String(aboutOpacity));
-    stage.style.setProperty('--about-y', (reduceMotion.matches ? 0 : 24 * (1 - smooth(0.4, 0.72, transition))) + 'px');
-    stage.style.setProperty('--copy-opacity', String(copyOpacity));
-    stage.style.setProperty('--breadcrumb-opacity', String(breadcrumbOpacity));
-
-    const figmaScale = Math.min(window.innerWidth / 1920, 1);
-    const equipmentX = desktop
-      ? -(Math.min(window.innerWidth * 0.1770833333, 340) + 442.5 * figmaScale) * movement
-      : 0;
-    equipment.style.setProperty('--equipment-x', equipmentX + 'px');
-    equipment.style.setProperty('--equipment-y', (66 * movement) + 'px');
-    equipment.style.setProperty('--equipment-scale', String(1 - 0.228 * movement));
-    equipment.style.setProperty('--equipment-rotate', (-1.2 * movement) + 'deg');
+    equipment.style.setProperty('--equipment-x', '0px');
+    equipment.style.setProperty('--equipment-y', '0px');
+    equipment.style.setProperty('--equipment-scale', '1');
+    equipment.style.setProperty('--equipment-rotate', '0deg');
     equipment.style.setProperty('--equipment-depth', '0px');
-    equipment.style.setProperty('--equipment-tilt-x', '0deg');
+    equipment.style.setProperty('--equipment-tilt-x', (40 * rotationProgress) + 'deg');
     equipment.style.setProperty('--equipment-tilt-y', '0deg');
-
-    if (breadcrumb) breadcrumb.inert = breadcrumbOpacity < 0.01;
-    if (heroCopy) heroCopy.inert = copyOpacity < 0.01;
-    if (aboutSection) {
-      aboutSection.setAttribute('aria-hidden', String(aboutOpacity < 0.01));
-      aboutSection.inert = aboutOpacity < 0.01;
-    }
   };
   const scheduleUpdate = () => {
     if (!frame) frame = requestAnimationFrame(update);
