@@ -27,8 +27,9 @@ document.querySelectorAll('.testing-stage__button').forEach(button => {
 const sequence = document.querySelector('[data-testing-sequence]');
 const stage = sequence?.querySelector('.testing-stage');
 const equipment = stage?.querySelector('.testing-stage__equipment');
-const frostSource = equipment?.querySelector('.testing-stage__frost-source');
-const frostCanvas = equipment?.querySelector('.testing-stage__frost');
+const aboutSection = document.querySelector('.testing-about');
+const frostSource = aboutSection?.querySelector('.testing-about__frost-source');
+const frostCanvas = aboutSection?.querySelector('.testing-about__frost');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const desktopTesting = matchMedia('(min-width: 1001px)');
 
@@ -132,7 +133,10 @@ if (sequence && stage && equipment) {
     const progress = clamp(-stage.getBoundingClientRect().top / Math.max(1, innerHeight));
     const desktop = desktopTesting.matches;
     const rotationProgress = reduceMotion.matches ? Number(progress >= 0.9) : smooth(0, 1, progress);
-    drawFrost(desktop ? (reduceMotion.matches ? Number(progress >= 0.9) : progress) : 0);
+    const aboutProgress = desktop && aboutSection?.offsetHeight
+      ? clamp((innerHeight - aboutSection.getBoundingClientRect().top) / (innerHeight + aboutSection.offsetHeight))
+      : 0;
+    drawFrost(desktop ? (reduceMotion.matches ? Number(aboutProgress >= 0.9) : aboutProgress) : 0);
 
     equipment.style.setProperty('--equipment-x', '0px');
     equipment.style.setProperty('--equipment-y', '0px');
@@ -149,6 +153,7 @@ if (sequence && stage && equipment) {
   observer.observe(sequence);
   observer.observe(stage);
   observer.observe(equipment);
+  if (aboutSection) observer.observe(aboutSection);
   addEventListener('scroll', scheduleUpdate, { passive: true });
   addEventListener('resize', scheduleUpdate, { passive: true });
   desktopTesting.addEventListener?.('change', scheduleUpdate);
@@ -166,6 +171,7 @@ if (climateCarousel) {
   const cameras = [...climateCarousel.querySelectorAll('[data-climate-camera]')];
   const pages = [...climateCarousel.querySelectorAll('[data-climate-page]')];
   const title = climateCarousel.querySelector('[data-climate-camera-title]');
+  const humidityRow = climateCarousel.querySelector('[data-climate-humidity]');
   const desktop = matchMedia('(min-width: 1101px)');
   const cameraTitles = ['Климатическая камера THCB -125', 'Климатическая камера S-B-8200'];
   let active = -1;
@@ -179,6 +185,7 @@ if (climateCarousel) {
     cameras.forEach((image, imageIndex) => image.classList.toggle('is-active', imageIndex === index));
     pages.forEach((page, pageIndex) => page.classList.toggle('is-active', pageIndex === index));
     if (title) title.textContent = cameraTitles[index];
+    if (humidityRow) humidityRow.hidden = index !== 1;
   };
 
   const updateClimateState = () => {
