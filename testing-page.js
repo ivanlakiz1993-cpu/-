@@ -317,7 +317,7 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
   const surfaceHeight = rainSurface.height;
   const surfaceCorners = [[14, 270], [862, 12], [1218, 172], [262, 462]];
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const rainStreaks = Array.from({ length: 130 }, () => ({
+  const rainStreaks = Array.from({ length: 165 }, () => ({
     x: Math.random(), y: Math.random(), length: 7 + Math.random() * 12,
     speed: 0.55 + Math.random() * 0.55, alpha: 0.08 + Math.random() * 0.14
   }));
@@ -334,6 +334,63 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     return t * t * (3 - 2 * t);
   };
   const mixRain = (start, end, amount) => start + (end - start) * amount;
+
+  // Reconstruct two orthogonal lid tangents from its photographed edges.
+  // Keeping their depth components lets gravity respond to the same rotation
+  // that is applied to the product, instead of prescribing a fixed diagonal.
+  const unitEdge = (x, y) => {
+    const length = Math.hypot(x, y);
+    return { x: x / length, y: y / length };
+  };
+  const [lidBackLeft, lidBackRight, lidFrontRight, lidFrontLeft] = surfaceCorners;
+  const lidLongEdge = unitEdge(
+    lidBackRight[0] - lidBackLeft[0] + lidFrontRight[0] - lidFrontLeft[0],
+    lidBackRight[1] - lidBackLeft[1] + lidFrontRight[1] - lidFrontLeft[1]
+  );
+  const lidDepthEdge = unitEdge(
+    lidFrontLeft[0] - lidBackLeft[0] + lidFrontRight[0] - lidBackRight[0],
+    lidFrontLeft[1] - lidBackLeft[1] + lidFrontRight[1] - lidBackRight[1]
+  );
+  const projectedDepth = 0.55;
+  const edgeDot = lidLongEdge.x * lidDepthEdge.x + lidLongEdge.y * lidDepthEdge.y;
+  const projectedLength = Math.sqrt((1 - projectedDepth ** 2) /
+    (1 - projectedDepth ** 2 + projectedDepth ** 2 * edgeDot ** 2));
+  const lidU = {
+    x: lidLongEdge.x * projectedLength,
+    y: lidLongEdge.y * projectedLength,
+    z: Math.sqrt(1 - projectedLength ** 2)
+  };
+  const lidV = {
+    x: lidDepthEdge.x * projectedDepth,
+    y: lidDepthEdge.y * projectedDepth,
+    z: -Math.sqrt(1 - projectedDepth ** 2)
+  };
+
+  const surfaceGravity = (rotationX, rotationY, rotationZ) => {
+    const rx = rotationX * Math.PI / 180;
+    const ry = rotationY * Math.PI / 180;
+    const rz = rotationZ * Math.PI / 180;
+    const rotate = vector => {
+      // CSS rotateY(...) rotateX(...) rotateZ(...): Z is applied first.
+      const x = vector.x * Math.cos(rz) - vector.y * Math.sin(rz);
+      const y = vector.x * Math.sin(rz) + vector.y * Math.cos(rz);
+      const tiltedY = y * Math.cos(rx) - vector.z * Math.sin(rx);
+      const tiltedZ = y * Math.sin(rx) + vector.z * Math.cos(rx);
+      return {
+        x: x * Math.cos(ry) + tiltedZ * Math.sin(ry),
+        y: tiltedY,
+        z: -x * Math.sin(ry) + tiltedZ * Math.cos(ry)
+      };
+    };
+    // Gravity points down the screen. Its dot products with the rotated
+    // tangents give the downhill components in the product's own coordinates.
+    const along = rotate(lidU).y;
+    const across = rotate(lidV).y;
+    return {
+      x: along * lidU.x + across * lidV.x,
+      y: along * lidU.y + across * lidV.y
+    };
+  };
 
   const resizeRainCanvas = () => {
     const bounds = rainAmbient.getBoundingClientRect();
@@ -379,6 +436,8 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
       radius: size / surfaceScale,
       maxRadius: 13 / surfaceScale,
       speed: 5 + size * 2.1,
+      vx: 0,
+      vy: 0,
       life: 160 + Math.random() * 380,
       age: reducedMotion ? 5 : 0,
       pause: 2 + Math.random() * 4 + Math.max(0, 5 - size),
@@ -398,13 +457,35 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     // Project the contact patch onto the lid. A dark, filled asymmetric body
     // and two short reflections replace the upright, luminous bubble outline.
     surfaceContext.scale(radius * drop.shape, radius * 0.46);
+    const localVx = (drop.vx * Math.cos(drop.angle) + drop.vy * Math.sin(drop.angle)) / drop.shape;
+    const localVy = (-drop.vx * Math.sin(drop.angle) + drop.vy * Math.cos(drop.angle)) / 0.46;
+    const localSpeed = Math.hypot(localVx, localVy);
+    const stretch = Math.min(0.85, localSpeed / 70);
+    const flowX = localSpeed > 0.001 ? localVx / localSpeed : 0;
+    const flowY = localSpeed > 0.001 ? localVy / localSpeed : 0;
+    const deformPoint = (px, py) => {
+      if (stretch < 0.001) return [px, py];
+      const along = px * flowX + py * flowY;
+      const across = -px * flowY + py * flowX;
+      const rear = clampRain(-along);
+      const leading = clampRain((along + 1) / 2);
+      // The rounded head advances, while the pinned rear narrows and lags.
+      // This deforms the water itself; it does not paint a trail on the metal.
+      const shifted = along + stretch * (0.18 + leading * 0.34 - rear * 0.55);
+      const narrowed = across * (1 - stretch * rear * 0.35);
+      return [flowX * shifted - flowY * narrowed, flowY * shifted + flowX * narrowed];
+    };
+    const moveTo = (px, py) => surfaceContext.moveTo(...deformPoint(px, py));
+    const curveTo = (ax, ay, bx, by, cx, cy) => surfaceContext.bezierCurveTo(
+      ...deformPoint(ax, ay), ...deformPoint(bx, by), ...deformPoint(cx, cy)
+    );
     const outline = () => {
       surfaceContext.beginPath();
-      surfaceContext.moveTo(-1, -0.04);
-      surfaceContext.bezierCurveTo(-1.05, -0.62, -0.48, -1.04, 0.08, -0.94);
-      surfaceContext.bezierCurveTo(0.7, -1, 1.08, -0.4, 1.02, 0.13);
-      surfaceContext.bezierCurveTo(1.01, 0.71, 0.39, 1.01, -0.14, 0.89);
-      surfaceContext.bezierCurveTo(-0.72, 0.94, -1.06, 0.48, -1, -0.04);
+      moveTo(-1, -0.04);
+      curveTo(-1.05, -0.62, -0.48, -1.04, 0.08, -0.94);
+      curveTo(0.7, -1, 1.08, -0.4, 1.02, 0.13);
+      curveTo(1.01, 0.71, 0.39, 1.01, -0.14, 0.89);
+      curveTo(-0.72, 0.94, -1.06, 0.48, -1, -0.04);
       surfaceContext.closePath();
     };
     surfaceContext.save();
@@ -426,18 +507,19 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
 
     // A reflection has a finite footprint, rather than circling the whole bead.
     surfaceContext.beginPath();
-    surfaceContext.moveTo(-0.71, -0.33);
-    surfaceContext.bezierCurveTo(-0.51, -0.73, -0.08, -0.79, 0.27, -0.57);
-    surfaceContext.bezierCurveTo(-0.07, -0.6, -0.42, -0.39, -0.71, -0.33);
+    moveTo(-0.71, -0.33);
+    curveTo(-0.51, -0.73, -0.08, -0.79, 0.27, -0.57);
+    curveTo(-0.07, -0.6, -0.42, -0.39, -0.71, -0.33);
     surfaceContext.fillStyle = 'rgba(235,239,236,.55)';
     surfaceContext.fill();
     surfaceContext.beginPath();
-    surfaceContext.ellipse(-0.47, -0.54, 0.16, 0.1, -0.15, 0, Math.PI * 2);
+    const [glintX, glintY] = deformPoint(-0.47, -0.54);
+    surfaceContext.ellipse(glintX, glintY, 0.16, 0.1, -0.15, 0, Math.PI * 2);
     surfaceContext.fillStyle = 'rgba(255,255,255,.86)';
     surfaceContext.fill();
     surfaceContext.beginPath();
-    surfaceContext.moveTo(0.36, 0.76);
-    surfaceContext.bezierCurveTo(0.64, 0.7, 0.79, 0.56, 0.88, 0.35);
+    moveTo(0.36, 0.76);
+    curveTo(0.64, 0.7, 0.79, 0.56, 0.88, 0.35);
     surfaceContext.lineWidth = Math.min(0.18, 0.75 / radius);
     surfaceContext.strokeStyle = 'rgba(232,237,232,.45)';
     surfaceContext.stroke();
@@ -461,6 +543,8 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
         const area = firstArea + secondArea;
         first.x = (first.x * firstArea + second.x * secondArea) / area;
         first.y = (first.y * firstArea + second.y * secondArea) / area;
+        first.vx = (first.vx * firstArea + second.vx * secondArea) / area;
+        first.vy = (first.vy * firstArea + second.vy * secondArea) / area;
         first.radius = Math.min(first.maxRadius, Math.sqrt(area));
         first.age = Math.max(first.age, second.age);
         first.pause = Math.min(first.pause, 0.65);
@@ -496,9 +580,13 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     const sectionProgress = clampRain((window.innerHeight - rect.top) / (window.innerHeight + rect.height));
     const rotationProgress = smoothRain(0.02, 0.9, sectionProgress);
     const motionScale = reducedMotion ? 0.35 : 1;
-    rainEquipment.style.setProperty('--testing-rotate-y', `${(28 * rotationProgress * motionScale).toFixed(2)}deg`);
-    rainEquipment.style.setProperty('--testing-rotate-x', `${(10 * rotationProgress * motionScale).toFixed(2)}deg`);
-    rainEquipment.style.setProperty('--testing-rotate-z', `${(-1.5 * rotationProgress * motionScale).toFixed(2)}deg`);
+    const rotationY = 28 * rotationProgress * motionScale;
+    const rotationX = 10 * rotationProgress * motionScale;
+    const rotationZ = -1.5 * rotationProgress * motionScale;
+    rainEquipment.style.setProperty('--testing-rotate-y', `${rotationY.toFixed(2)}deg`);
+    rainEquipment.style.setProperty('--testing-rotate-x', `${rotationX.toFixed(2)}deg`);
+    rainEquipment.style.setProperty('--testing-rotate-z', `${rotationZ.toFixed(2)}deg`);
+    const gravity = surfaceGravity(rotationX, rotationY, rotationZ);
     const rainIntensity = smoothRain(0.025, 0.2, sectionProgress) * (1 - smoothRain(0.78, 0.96, sectionProgress));
     const wetness = smoothRain(0.035, 0.18, sectionProgress) * (1 - smoothRain(0.9, 0.99, sectionProgress));
     const dt = Math.min(0.05, Math.max(0, (now - previousRainTime) / 1000));
@@ -549,16 +637,24 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
 
       if (!reducedMotion) mergeSurfaceDrops();
       for (const drop of surfaceDrops) {
-        if (!reducedMotion) drop.age += dt;
-        if (!reducedMotion && drop.pause > 0) drop.pause -= dt;
-        else if (!reducedMotion) {
-          const dy = drop.speed * dt;
-          const dx = dy * (1.42 + drop.drift + Math.sin(drop.pathPhase) * 0.1);
+        if (!reducedMotion) {
+          drop.age += dt;
+          const pinned = drop.pause > 0;
+          if (pinned) drop.pause -= dt;
+          const wander = Math.sin(drop.pathPhase) * drop.drift;
+          const mobility = pinned ? 0 : drop.speed * 5.5;
+          const targetVx = (gravity.x - gravity.y * wander) * mobility;
+          const targetVy = (gravity.y + gravity.x * wander) * mobility;
+          const response = 1 - Math.exp(-dt * 6);
+          drop.vx += (targetVx - drop.vx) * response;
+          drop.vy += (targetVy - drop.vy) * response;
+          const dx = drop.vx * dt;
+          const dy = drop.vy * dt;
           drop.x += dx;
           drop.y += dy;
-          drop.life -= dy;
-          drop.pathPhase += dt * 3.4;
-          if (Math.random() < 0.01) drop.pause = 0.12 + Math.random() * 0.36;
+          drop.life -= Math.hypot(dx, dy);
+          drop.pathPhase += dt * 1.5;
+          if (!pinned && Math.random() < dt * 0.6) drop.pause = 0.12 + Math.random() * 0.36;
         }
         drawSurfaceDrop(drop);
       }
