@@ -17,6 +17,20 @@ document.addEventListener('pointerdown', event => { if (menuButton?.getAttribute
 
 const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 
+// A hard reload of this long sticky page should restart at the cover, while
+// browser back/forward navigation keeps its normal scroll restoration.
+const testingNavigation = performance.getEntriesByType?.('navigation')?.[0];
+if (testingNavigation?.type === 'reload') {
+  const supportsScrollRestoration = 'scrollRestoration' in history;
+  if (supportsScrollRestoration) history.scrollRestoration = 'manual';
+  const resetReloadPosition = () => {
+    scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (supportsScrollRestoration) history.scrollRestoration = 'auto';
+  };
+  scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  addEventListener('pageshow', resetReloadPosition, { once: true });
+}
+
 // Keep wheel and touch scrolling as smooth as on the homepage without snapping
 // the browser abruptly to section boundaries.
 {
