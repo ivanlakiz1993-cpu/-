@@ -57,7 +57,7 @@
     let animation;
     try {
       animation = tile.animate(cover ? [transparent, solid] : [solid, transparent], {
-        duration: cover ? 760 : 900,
+        duration: 760,
         delay: (cover ? coverWave : revealWave) * 300,
         easing: 'cubic-bezier(.2,.75,.25,1)',
         fill: 'both'
@@ -70,36 +70,19 @@
     return animation.finished.catch(() => {});
   }));
   if (entering) {
-    // Cover immediately, then reveal as soon as the destination's first screen exists.
+    // Keep the destination covered from its first paint, then start the matching reveal immediately.
     root.classList.add('is-covered');
     document.documentElement.append(root);
-    let revealStarted = false;
-    let readyObserver;
-    const revealIncoming = () => {
-      if (revealStarted) return;
-      revealStarted = true;
-      readyObserver?.disconnect();
-      requestAnimationFrame(async () => {
-        if (!root.isConnected) return;
-        const failSafe = window.setTimeout(() => { if (root.isConnected) reset(); }, 4000);
-        try {
-          await animate(false);
-        } finally {
-          window.clearTimeout(failSafe);
-          if (root.isConnected) reset();
-        }
-      });
-    };
-    const firstScreenExists = () => document.querySelector('.hero, .testing-stage__image');
-    if (document.readyState === 'loading' && !firstScreenExists()) {
-      readyObserver = new MutationObserver(() => {
-        if (firstScreenExists()) revealIncoming();
-      });
-      readyObserver.observe(document.documentElement, { childList: true, subtree: true });
-      document.addEventListener('DOMContentLoaded', revealIncoming, { once: true });
-    } else {
-      revealIncoming();
-    }
+    requestAnimationFrame(async () => {
+      if (!root.isConnected) return;
+      const failSafe = window.setTimeout(() => { if (root.isConnected) reset(); }, 1400);
+      try {
+        await animate(false);
+      } finally {
+        window.clearTimeout(failSafe);
+        if (root.isConnected) reset();
+      }
+    });
   }
   const destinationFor = link => {
     if (!link || link.hasAttribute('download') || (link.target && link.target.toLowerCase() !== '_self')) return null;
