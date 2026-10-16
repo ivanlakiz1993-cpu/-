@@ -372,62 +372,103 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
   const makeSurfaceDrop = () => {
     const point = pointOnSurface();
     const surfaceScale = Math.max(0.2, rainSurface.getBoundingClientRect().width / surfaceWidth);
+    const size = 1.8 + Math.pow(Math.random(), 2.1) * 7.2;
     return {
       x: point.x,
       y: point.y,
-      radius: (3.5 + Math.random() * 3.8) / surfaceScale,
-      speed: 18 + Math.random() * 34,
+      radius: size / surfaceScale,
+      maxRadius: 13 / surfaceScale,
+      speed: 5 + size * 2.1,
       life: 160 + Math.random() * 380,
-      pause: 1.2 + Math.random() * 2.4,
+      age: reducedMotion ? 5 : 0,
+      pause: 2 + Math.random() * 4 + Math.max(0, 5 - size),
       drift: (Math.random() - 0.5) * 0.16,
       pathPhase: Math.random() * Math.PI * 2,
-      angle: -0.24 + (Math.random() - 0.5) * 0.18
+      shape: 0.88 + Math.random() * 0.24,
+      angle: -0.29 + (Math.random() - 0.5) * 0.05
     };
   };
 
   const drawSurfaceDrop = drop => {
-    const { x, y, radius } = drop;
+    const { x, y } = drop;
+    const radius = drop.radius * (0.4 + smoothRain(0, 1.2, drop.age) * 0.6);
     surfaceContext.save();
     surfaceContext.translate(x, y);
     surfaceContext.rotate(drop.angle);
-
-    // Defined meniscus, transparent body and compact highlights read as a
-    // bead sitting on metal. There is no magnified/blurred image underneath.
-    surfaceContext.beginPath();
-    surfaceContext.ellipse(0, radius * 0.1, radius * 0.78, radius * 0.9, 0, 0, Math.PI * 2);
-    surfaceContext.fillStyle = 'rgba(0,0,0,.34)';
+    // Project the contact patch onto the lid. A dark, filled asymmetric body
+    // and two short reflections replace the upright, luminous bubble outline.
+    surfaceContext.scale(radius * drop.shape, radius * 0.46);
+    const outline = () => {
+      surfaceContext.beginPath();
+      surfaceContext.moveTo(-1, -0.04);
+      surfaceContext.bezierCurveTo(-1.05, -0.62, -0.48, -1.04, 0.08, -0.94);
+      surfaceContext.bezierCurveTo(0.7, -1, 1.08, -0.4, 1.02, 0.13);
+      surfaceContext.bezierCurveTo(1.01, 0.71, 0.39, 1.01, -0.14, 0.89);
+      surfaceContext.bezierCurveTo(-0.72, 0.94, -1.06, 0.48, -1, -0.04);
+      surfaceContext.closePath();
+    };
+    surfaceContext.save();
+    surfaceContext.translate(0.04, 0.19);
+    outline();
+    surfaceContext.fillStyle = 'rgba(0,0,0,.48)';
     surfaceContext.fill();
+    surfaceContext.restore();
 
-    const body = surfaceContext.createRadialGradient(-radius * 0.27, -radius * 0.38, radius * 0.04, 0, 0, radius * 1.08);
-    body.addColorStop(0, 'rgba(255,255,255,.48)');
-    body.addColorStop(0.16, 'rgba(245,247,246,.2)');
-    body.addColorStop(0.56, 'rgba(204,209,207,.08)');
-    body.addColorStop(0.82, 'rgba(255,255,255,.2)');
-    body.addColorStop(0.94, 'rgba(238,241,239,.62)');
-    body.addColorStop(1, 'rgba(14,16,16,.78)');
-    surfaceContext.beginPath();
-    surfaceContext.ellipse(0, 0, radius * 0.72, radius, 0, 0, Math.PI * 2);
+    const body = surfaceContext.createLinearGradient(-0.2, -1, 0.2, 1);
+    body.addColorStop(0, 'rgba(4,6,5,.72)');
+    body.addColorStop(0.28, 'rgba(15,19,17,.38)');
+    body.addColorStop(0.63, 'rgba(38,43,40,.2)');
+    body.addColorStop(0.88, 'rgba(111,119,114,.3)');
+    body.addColorStop(1, 'rgba(8,11,9,.65)');
+    outline();
     surfaceContext.fillStyle = body;
     surfaceContext.fill();
 
-    surfaceContext.lineWidth = Math.max(0.65, radius * 0.085);
-    surfaceContext.strokeStyle = 'rgba(12,14,14,.72)';
-    surfaceContext.stroke();
+    // A reflection has a finite footprint, rather than circling the whole bead.
     surfaceContext.beginPath();
-    surfaceContext.ellipse(-radius * 0.035, -radius * 0.045, radius * 0.65, radius * 0.91, 0, Math.PI * 1.08, Math.PI * 1.82);
-    surfaceContext.lineWidth = Math.max(0.5, radius * 0.07);
-    surfaceContext.strokeStyle = 'rgba(255,255,255,.58)';
-    surfaceContext.stroke();
-
-    surfaceContext.beginPath();
-    surfaceContext.ellipse(-radius * 0.25, -radius * 0.38, radius * 0.2, radius * 0.085, -0.38, 0, Math.PI * 2);
-    surfaceContext.fillStyle = 'rgba(255,255,255,.94)';
+    surfaceContext.moveTo(-0.71, -0.33);
+    surfaceContext.bezierCurveTo(-0.51, -0.73, -0.08, -0.79, 0.27, -0.57);
+    surfaceContext.bezierCurveTo(-0.07, -0.6, -0.42, -0.39, -0.71, -0.33);
+    surfaceContext.fillStyle = 'rgba(235,239,236,.55)';
     surfaceContext.fill();
     surfaceContext.beginPath();
-    surfaceContext.arc(-radius * 0.39, -radius * 0.49, Math.max(0.45, radius * 0.055), 0, Math.PI * 2);
-    surfaceContext.fillStyle = 'rgba(255,255,255,.82)';
+    surfaceContext.ellipse(-0.47, -0.54, 0.16, 0.1, -0.15, 0, Math.PI * 2);
+    surfaceContext.fillStyle = 'rgba(255,255,255,.86)';
     surfaceContext.fill();
+    surfaceContext.beginPath();
+    surfaceContext.moveTo(0.36, 0.76);
+    surfaceContext.bezierCurveTo(0.64, 0.7, 0.79, 0.56, 0.88, 0.35);
+    surfaceContext.lineWidth = Math.min(0.18, 0.75 / radius);
+    surfaceContext.strokeStyle = 'rgba(232,237,232,.45)';
+    surfaceContext.stroke();
     surfaceContext.restore();
+  };
+
+  const mergeSurfaceDrops = () => {
+    for (let i = 0; i < surfaceDrops.length; i++) {
+      const first = surfaceDrops[i];
+      if (first.life <= 0) continue;
+      for (let j = i + 1; j < surfaceDrops.length; j++) {
+        const second = surfaceDrops[j];
+        if (second.life <= 0) continue;
+        const dx = second.x - first.x;
+        const dy = second.y - first.y;
+        const along = dx * Math.cos(first.angle) + dy * Math.sin(first.angle);
+        const across = (-dx * Math.sin(first.angle) + dy * Math.cos(first.angle)) / 0.46;
+        if (Math.hypot(along, across) > (first.radius + second.radius) * 0.64) continue;
+        const firstArea = first.radius ** 2;
+        const secondArea = second.radius ** 2;
+        const area = firstArea + secondArea;
+        first.x = (first.x * firstArea + second.x * secondArea) / area;
+        first.y = (first.y * firstArea + second.y * secondArea) / area;
+        first.radius = Math.min(first.maxRadius, Math.sqrt(area));
+        first.age = Math.max(first.age, second.age);
+        first.pause = Math.min(first.pause, 0.65);
+        first.speed = Math.min(44, Math.max(first.speed, second.speed) * 1.12);
+        second.life = 0;
+      }
+    }
+    surfaceDrops = surfaceDrops.filter(drop => drop.life > 0);
   };
 
   const clearRainCanvases = () => {
@@ -498,7 +539,7 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
       surfaceContext.closePath();
       surfaceContext.clip();
 
-      const desiredDrops = Math.min(38, Math.round(38 * wetness));
+      const desiredDrops = Math.min(72, Math.round(72 * wetness));
       const initialDrops = Math.min(desiredDrops, Math.ceil(desiredDrops * 0.2));
       while (surfaceDrops.length < initialDrops) surfaceDrops.push(makeSurfaceDrop());
       if (surfaceDrops.length < desiredDrops && !reducedMotion && Math.random() < dt * 18) {
@@ -506,7 +547,9 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
       }
       while (reducedMotion && surfaceDrops.length < desiredDrops) surfaceDrops.push(makeSurfaceDrop());
 
+      if (!reducedMotion) mergeSurfaceDrops();
       for (const drop of surfaceDrops) {
+        if (!reducedMotion) drop.age += dt;
         if (!reducedMotion && drop.pause > 0) drop.pause -= dt;
         else if (!reducedMotion) {
           const dy = drop.speed * dt;
