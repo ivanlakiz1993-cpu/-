@@ -255,8 +255,8 @@
 .testing-stage__copy p{width:min(561px,100%);max-width:700px;font-size:18px;line-height:1.2;font-weight:400;letter-spacing:0}
 .testing-stage__button{width:min(445px,100%);min-height:92px;margin:0;padding:20px 24px;font:400 24px/1.25 "Yandex Sans Text",Arial,sans-serif;letter-spacing:-.05em}
 .testing-stage__button-label--compact{display:none}
-.testing-stage__equipment{left:50%;top:calc(50% + 62.5px);width:min(48.7vw,935px);aspect-ratio:935/604;transform:translate(-50%,-50%);transform-style:flat;will-change:auto}
-.testing-stage__image{opacity:.5;filter:none}
+.testing-stage__equipment{left:50%;top:calc(50% + 62.5px);width:min(48.7vw,935px);aspect-ratio:935/604;transform:translate(-50%,-50%);transform-style:flat;will-change:auto;opacity:1}
+.testing-stage__image{opacity:1;filter:none;object-fit:contain}
 @media(max-width:1100px){
   .testing-stage{height:519px;min-height:519px}
   .testing-stage__content{top:50px;left:clamp(24px,4.6875vw,48px);right:clamp(24px,4.6875vw,48px);gap:30px}
@@ -279,41 +279,3 @@
   .testing-stage__equipment{left:50%;top:calc(50% + 72.5px);width:min(92.3077vw,360px);aspect-ratio:360/233}
 }
 @media(prefers-reduced-motion:reduce){.testing-stage__equipment{will-change:auto}}
-
-/* Locally built CSS 3D enclosure: front, top, side and individual connectors. */
-.testing-stage__equipment{perspective:1400px;perspective-origin:50% 50%;opacity:.5}
-.testing-device{--device-depth:min(30vw,550px);--device-depth-half:min(15vw,275px);--device-height:clamp(160px,14vw,270px);--device-height-half:clamp(80px,7vw,135px);position:absolute;left:50%;top:52%;width:84%;height:var(--device-height);transform:translate(-50%,-50%) rotateX(-35deg) rotateY(-20deg);transform-style:preserve-3d}
-.testing-device__face{position:absolute;box-sizing:border-box;backface-visibility:hidden}
-.testing-device__face--front{inset:0;border:2px solid #858585;border-radius:5px;background:linear-gradient(160deg,#303033 0%,#111113 42%,#080809 100%);box-shadow:inset 0 2px 3px #aaa,inset 0 -8px 14px #000,0 8px 14px #050505;transform:translateZ(var(--device-depth-half))}
-.testing-device__face--front::before{content:"";position:absolute;inset:3px;border:1px solid rgba(255,255,255,.12);border-radius:3px;pointer-events:none}
-.testing-device__face--top{top:50%;left:0;width:100%;height:var(--device-depth);border:2px solid #76767a;border-radius:8px;background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px),linear-gradient(145deg,#363639 0%,#1a1a1d 52%,#09090a 100%);box-shadow:inset 0 0 24px rgba(255,255,255,.07),0 0 8px rgba(0,0,0,.9);transform:translateY(-50%) rotateX(90deg) translateZ(var(--device-height-half))}
-.testing-device__face--side{top:0;left:0;width:var(--device-depth);height:100%;border:2px solid #77777a;border-radius:5px;background:linear-gradient(90deg,#09090a,#29292c 18%,#18181b 100%);box-shadow:inset 0 0 18px #000;transform:rotateY(-90deg) translateZ(var(--device-depth-half))}
-.testing-device__face--side i{position:absolute;left:15%;right:15%;height:2px;border-radius:2px;background:linear-gradient(90deg,#080809,#737377 45%,#151517);box-shadow:0 2px 2px #050505}
-.testing-device__face--side i:nth-child(1){top:28%}.testing-device__face--side i:nth-child(2){top:39%}.testing-device__face--side i:nth-child(3){top:50%}.testing-device__face--side i:nth-child(4){top:61%}
-.testing-device__label,.testing-device__port-name{position:absolute;color:#d6d6d7;font:500 clamp(5px,.55vw,10px)/1 "Yandex Sans Text",Arial,sans-serif;letter-spacing:.025em;white-space:nowrap;text-shadow:0 1px 2px #000}
-.testing-device__label{top:20%}.testing-device__label--input{left:11%}.testing-device__label--output{left:29%}.testing-device__label--power{left:45%}.testing-device__label--control{left:62%}.testing-device__label--sensors{left:80%}.testing-device__label--switch{left:91%}
-.testing-device__socket,.testing-device__power-port,.testing-device__serial-port,.testing-device__switch{position:absolute;top:38%;display:grid;place-items:center}
-.testing-device__socket{width:8.2%;aspect-ratio:1;border:3px solid #c5c5c7;border-radius:50%;background:radial-gradient(circle at 35% 27%,#f4f4f5 0,#a6a6a8 18%,#555559 43%,#d7d7d8 55%,#333337 69%,#0b0b0c 72%);box-shadow:0 3px 5px #000,inset 0 1px 2px #fff}
-.testing-device__socket::before{content:"";position:absolute;inset:21%;border:2px solid #88888b;border-radius:50%;background:radial-gradient(circle at 40% 35%,#363639,#09090a 65%);box-shadow:inset 0 2px 3px #000}
-.testing-device__socket i{position:absolute;z-index:1;width:5%;aspect-ratio:1;border-radius:50%;background:#e1ba70;box-shadow:0 0 2px #f1d599}
-.testing-device__socket i:nth-child(1){top:39%;left:39%}.testing-device__socket i:nth-child(2){top:39%;right:39%}.testing-device__socket i:nth-child(3){bottom:39%;left:39%}.testing-device__socket i:nth-child(4){bottom:39%;right:39%}.testing-device__socket i:nth-child(5){top:49%;left:49%}
-.testing-device__socket--input{left:10%}.testing-device__socket--output{left:28%}.testing-device__socket--sensor{left:80%;width:7.8%}
-.testing-device__power-port{left:44%;width:9%;height:26%;border:3px solid #b8b8ba;border-radius:9%;background:linear-gradient(135deg,#080809,#414145 35%,#080809 78%);box-shadow:0 2px 4px #000,inset 0 1px 2px #eee}
-.testing-device__power-port i{width:42%;height:43%;border-radius:2px;background:linear-gradient(90deg,#050506,#29292c);box-shadow:inset 0 0 3px #000}
-.testing-device__serial-port{left:61%;width:11%;height:25%;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(2,1fr);gap:4%;padding:1%;border:3px solid #d0d0d1;border-radius:18% 18% 28% 28%;background:linear-gradient(145deg,#e0e0e1,#77777a 34%,#252528 75%);box-shadow:0 2px 4px #000,inset 0 1px 2px #fff}
-.testing-device__serial-port i{width:70%;aspect-ratio:1;border-radius:50%;background:#111113;box-shadow:inset 0 1px 2px #000}
-.testing-device__switch{right:4%;width:5%;height:28%;border:3px solid #aaa;border-radius:5px;background:linear-gradient(90deg,#080809,#47474a,#080809);box-shadow:0 2px 4px #000,inset 0 0 4px #000}
-.testing-device__switch i{width:53%;height:56%;border-radius:2px;background:linear-gradient(90deg,#999,#e4e4e5 45%,#888);box-shadow:0 1px 3px #000}
-.testing-device__port-name{top:77%;font-size:clamp(5px,.52vw,9px);color:#bcbcbf}
-.testing-device__port-name--input{left:11%}.testing-device__port-name--output{left:29%}.testing-device__port-name--power{left:42%}.testing-device__port-name--control{left:63%}.testing-device__port-name--sensors{left:80%}
-.testing-device__screw{position:absolute;z-index:2;width:2.5%;aspect-ratio:1;border:1px solid #d1d1d2;border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff,#888 38%,#28282a 72%);box-shadow:0 1px 3px #000}
-.testing-device__screw::after{content:"";position:absolute;left:24%;top:46%;width:52%;height:1px;background:#28282a;transform:rotate(-34deg)}
-.testing-device__screw--top-left{left:8%;top:15%}.testing-device__screw--top-center{left:49%;top:12%}.testing-device__screw--top-right{right:8%;top:16%}.testing-device__screw--rear-left{left:24%;bottom:13%}.testing-device__screw--rear-right{right:24%;bottom:13%}
-.testing-device__screw--front-left{left:2%;top:12%}.testing-device__screw--front-right{right:2%;top:12%}
-@media(max-width:1100px){
-  .testing-device{--device-depth:min(30vw,310px);--device-depth-half:min(15vw,155px);--device-height:clamp(130px,17vw,180px);--device-height-half:clamp(65px,8.5vw,90px);width:84%;top:52%;transform:translate(-50%,-50%) rotateX(-35deg) rotateY(-20deg)}
-}
-@media(max-width:650px){
-  .testing-device{--device-depth:min(47vw,184px);--device-depth-half:min(23.5vw,92px);--device-height:clamp(120px,36vw,140px);--device-height-half:clamp(60px,18vw,70px);width:84%;top:50%;transform:translate(-50%,-50%) rotateX(-35deg) rotateY(-20deg)}
-  .testing-device__label,.testing-device__port-name{font-size:5px}
-}
