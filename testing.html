@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=20261016-menu-alignment-2">
   <link rel="stylesheet" href="hero-grid.css?v=20261013-hero-split-seam-3">
   <link rel="stylesheet" href="layout-gutters.css?v=20261012-figma-gutters-1">
-  <link rel="stylesheet" href="testing-page.css?v=20261016-testing-hero-product-2">
+  <link rel="stylesheet" href="testing-page.css?v=20261016-shared-device-2">
   <link rel="stylesheet" href="page-transition.css?v=20261016-entry-ready-2">
   <script src="page-transition.js?v=20261016-entry-ready-2"></script>
 </head>
@@ -47,7 +47,13 @@
   </div>
 
   <main id="top">
-    <section class="testing-sequence" aria-label="Испытания" data-testing-sequence>
+    <div class="testing-journey" data-testing-journey>
+      <div class="testing-journey__visual" aria-hidden="true">
+        <div class="testing-stage__equipment" data-testing-equipment>
+          <img class="testing-stage__image" src="assets/equipment-cutout.png" alt="">
+        </div>
+      </div>
+      <section class="testing-sequence" aria-label="Испытания" data-testing-sequence>
       <div class="testing-sequence__track">
         <div class="testing-stage">
           <div class="testing-stage__breadcrumb"><a href="index.html#top">Главная</a><span>/</span><span>Испытания</span></div>
@@ -61,19 +67,10 @@
               <span class="testing-stage__button-label testing-stage__button-label--compact">ОБСУДИТЬ ПРОЕКТ</span>
             </a>
           </div>
-
-          <div class="testing-stage__equipment">
-            <img class="testing-stage__image" src="assets/equipment-cutout.png" alt="Корпус оборудования для испытаний">
-          </div>
         </div>
       </div>
-    </section>
-    <section class="testing-about" aria-labelledby="testing-about-title">
-      <div class="testing-about__equipment" aria-hidden="true">
-        <img class="testing-about__equipment-base" src="assets/equipment-cutout.png" width="1561" height="1008" alt="" loading="lazy" decoding="async">
-        <img class="testing-about__frost-source" src="assets/equipment-frost.png" width="1561" height="1007" alt="" loading="lazy" decoding="async">
-        <canvas class="testing-about__frost"></canvas>
-      </div>
+      </section>
+      <section class="testing-about" aria-labelledby="testing-about-title">
       <h2 id="testing-about-title">О лаборатории</h2>
       <div class="testing-about__content">
         <div class="testing-about__text">
@@ -97,7 +94,8 @@
           </div>
         </div>
       </div>
-    </section>
+      </section>
+    </div>
     <section class="climate-tests" aria-labelledby="climate-tests-title" data-climate-carousel>
       <div class="climate-tests__track" data-climate-track>
         <div class="climate-tests__stage" data-climate-stage>
@@ -256,6 +254,6 @@
     </div>
     <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
   </footer>
-  <script src="testing-page.js?v=20261016-entry-ready-2"></script>
+  <script src="testing-page.js?v=20261016-shared-device-2"></script>
 </body>
 </html>

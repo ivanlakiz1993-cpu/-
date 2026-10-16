@@ -1,10 +1,5 @@
 .testing-page{min-width:320px;overflow-x:hidden;background:#000;color:#fff}
 .testing-about{position:relative;z-index:2;width:100%;max-width:1920px;min-height:620px;margin:150px auto 0;padding:0 clamp(24px,5.2083333333vw,100px);color:var(--text)}
-.testing-about__equipment{position:absolute;z-index:0;left:50%;top:calc(50% + 8px);width:min(48.7vw,935px);aspect-ratio:935/604;transform:translate(-50%,-50%);pointer-events:none}
-.testing-about__equipment-base,.testing-about__frost-source,.testing-about__frost{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
-.testing-about__equipment-base{opacity:.5}
-.testing-about__frost-source{visibility:hidden}
-.testing-about__frost{pointer-events:none}
 .testing-about h2{position:relative;z-index:1;margin:0 0 50px;font:400 64px/1 var(--sans);letter-spacing:.64px;color:#fff}
 .testing-about__content{position:relative;z-index:1;display:flex;min-height:506px;flex-direction:column;justify-content:space-between;gap:36px}
 .testing-about__text{position:relative;z-index:1;width:min(860px,100%);display:flex;flex-direction:column;gap:15px;font:400 18px/1.2 var(--sans);color:#fff}
@@ -279,3 +274,42 @@
   .testing-stage__equipment{left:50%;top:calc(50% + 72.5px);width:min(92.3077vw,360px);aspect-ratio:360/233}
 }
 @media(prefers-reduced-motion:reduce){.testing-stage__equipment{will-change:auto}}
+
+/* One shared product visual stays centered while the hero and laboratory copy scroll past it. */
+.testing-page{overflow-x:clip}
+.testing-journey{position:relative;isolation:isolate;overflow:clip;background:#000}
+.testing-journey__visual{position:sticky;z-index:1;top:0;display:grid;width:100%;height:100svh;margin-bottom:-100svh;place-items:center;pointer-events:none}
+.testing-journey__visual .testing-stage__equipment{position:relative;inset:auto;left:auto;top:auto;width:min(48.7vw,935px);max-width:calc(100% - 24px);height:auto;aspect-ratio:935/604;transform:none;transform-origin:center;transform-style:flat;will-change:auto;opacity:.5}
+.testing-journey__visual .testing-stage__image{opacity:1;filter:none;object-fit:contain}
+.testing-sequence,.testing-stage{background:transparent}
+.testing-sequence,.testing-about{position:relative;z-index:2}
+.testing-about{min-height:calc(100svh - 95px);margin:0 auto;padding-top:70px;padding-bottom:40px}
+.testing-about__content{min-height:506px}
+
+@media(max-width:1100px){
+  .testing-journey__visual .testing-stage__equipment{width:min(48.4375vw,496px)}
+  .testing-about{min-height:calc(100svh - 95px);padding:58px var(--wrap) 30px}
+  .testing-about h2{font-size:38px;line-height:.9;margin-bottom:30px}
+  .testing-about__content{min-height:0;gap:34px}
+  .testing-about__metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:16px}
+  .testing-about__metric-row{display:contents}
+  .testing-about__metric,.testing-about__metric--experience,.testing-about__metric--repeat{min-height:190px;padding:15px}
+  .testing-about__number{font-size:clamp(76px,10.75vw,110px)}
+  .testing-about__label{font-size:16px;line-height:1.2}
+}
+@media(max-width:900px){
+  .testing-about{min-height:calc(100svh - 76px)}
+}
+@media(max-width:600px){
+  .testing-journey__visual .testing-stage__equipment{width:min(92.3077vw,360px);max-width:calc(100% - 24px)}
+  .testing-about{min-height:calc(100svh - 70px);padding:48px 12px 24px}
+  .testing-about h2{margin-bottom:24px;font-size:38px;line-height:.9}
+  .testing-about__content{gap:24px}
+  .testing-about__text{font-size:16px;line-height:1.2}
+  .testing-about__metrics{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+  .testing-about__metric-row{display:contents}
+  .testing-about__metric,.testing-about__metric--experience,.testing-about__metric--repeat{width:100%;min-height:0;flex-direction:column;justify-content:flex-start;padding:15px;border-radius:10px;align-items:center;gap:10px}
+  .testing-about__metric--wide{flex-basis:auto}
+  .testing-about__number{width:100%;font-size:110px;line-height:.9;text-align:center}
+  .testing-about__label,.testing-about__metric--experience .testing-about__label{width:100%;max-width:none;font-size:16px;line-height:1.2;text-align:center}
+}
