@@ -288,9 +288,10 @@
 
 @media(max-width:1100px){
   .testing-journey__visual .testing-stage__equipment{width:min(48.4375vw,496px)}
-  .testing-about{min-height:calc(100svh - 95px);padding:58px var(--wrap) 30px}
+  .testing-about{min-height:calc(100svh - 95px);padding:58px clamp(24px,4.6875vw,48px) 30px}
   .testing-about h2{font-size:38px;line-height:.9;margin-bottom:30px}
   .testing-about__content{min-height:0;gap:34px}
+  .testing-about__text{max-width:633px}
   .testing-about__metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:16px}
   .testing-about__metric-row{display:contents}
   .testing-about__metric,.testing-about__metric--experience,.testing-about__metric--repeat{min-height:190px;padding:15px}
@@ -299,6 +300,13 @@
 }
 @media(max-width:900px){
   .testing-about{min-height:calc(100svh - 76px)}
+}
+@media(min-width:601px) and (max-width:740px){
+  .testing-about__metrics{display:flex;flex-direction:column;align-items:stretch}
+  .testing-about__metric-row{display:contents}
+  .testing-about__metric,.testing-about__metric--experience,.testing-about__metric--repeat{min-height:0;align-items:center;padding:15px}
+  .testing-about__number{font-size:100px;text-align:center}
+  .testing-about__label{font-size:16px;text-align:center}
 }
 @media(max-width:600px){
   .testing-journey__visual .testing-stage__equipment{width:min(92.3077vw,360px);max-width:calc(100% - 24px)}
