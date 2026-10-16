@@ -370,10 +370,11 @@ if (rainSection && rainSurface && rainAmbient) {
 
   const makeSurfaceDrop = () => {
     const point = pointOnSurface();
+    const surfaceScale = Math.max(0.2, rainSurface.getBoundingClientRect().width / surfaceWidth);
     return {
       x: point.x,
       y: point.y,
-      radius: 2.4 + Math.random() * 4.4,
+      radius: (4 + Math.random() * 4) / surfaceScale,
       speed: 18 + Math.random() * 34,
       life: 160 + Math.random() * 380,
       pause: 0
@@ -424,7 +425,7 @@ if (rainSection && rainSurface && rainAmbient) {
 
     const sectionProgress = clampRain((window.innerHeight - rect.top) / (window.innerHeight + rect.height));
     const rainIntensity = smoothRain(0.025, 0.2, sectionProgress) * (1 - smoothRain(0.78, 0.96, sectionProgress));
-    const wetness = smoothRain(0.12, 0.4, sectionProgress) * (1 - smoothRain(0.84, 0.99, sectionProgress));
+    const wetness = smoothRain(0.035, 0.18, sectionProgress) * (1 - smoothRain(0.9, 0.99, sectionProgress));
     const dt = Math.min(0.05, Math.max(0, (now - previousRainTime) / 1000));
     previousRainTime = now;
 
@@ -466,7 +467,9 @@ if (rainSection && rainSurface && rainAmbient) {
       surfaceContext.closePath();
       surfaceContext.clip();
 
-      const desiredDrops = Math.min(34, Math.round(34 * wetness));
+      const desiredDrops = Math.min(38, Math.round(38 * wetness));
+      const initialDrops = Math.min(desiredDrops, Math.ceil(desiredDrops * 0.2));
+      while (surfaceDrops.length < initialDrops) surfaceDrops.push(makeSurfaceDrop());
       if (surfaceDrops.length < desiredDrops && !reducedMotion && Math.random() < dt * 18) {
         surfaceDrops.push(makeSurfaceDrop());
       }
