@@ -25,7 +25,7 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   const revealGroup = (selector, stagger = 0) => reveal([...document.querySelectorAll(selector)], stagger);
   revealGroup('.topbar .brand-mark, .topbar .brand > span, .menu-toggle > span, .menu-toggle .menu-icon > i', 75);
   revealGroup('.nav .menu-nav-links a, .nav .menu-social__link, .testing-stage__breadcrumb > *', 55);
-  revealGroup('.testing-stage__copy h1, .testing-stage__copy p, .testing-stage__button, .testing-stage__equipment', 125);
+  revealGroup('.testing-stage__copy h1, .testing-stage__copy p, .testing-stage__button', 125);
   revealGroup('.testing-about h2, .testing-about__equipment', 80);
   revealGroup('.testing-about__text > *', 110);
   revealGroup('.testing-about__metric', 100);
@@ -83,10 +83,6 @@ const desktopTesting = matchMedia('(min-width: 1001px)');
 
 if (sequence && stage && equipment) {
   const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
-  const smooth = (start, end, value) => {
-    const t = clamp((value - start) / (end - start));
-    return t * t * (3 - 2 * t);
-  };
   const frostContext = frostCanvas?.getContext('2d', { alpha: true });
   const frost = { width: 520, height: 336, source: null, distances: null, maxDistance: 1, pixels: null, lastStep: -1 };
   let frame = 0;
@@ -178,21 +174,11 @@ if (sequence && stage && equipment) {
 
   const update = () => {
     frame = 0;
-    const progress = clamp(-stage.getBoundingClientRect().top / Math.max(1, innerHeight));
     const desktop = desktopTesting.matches;
-    const rotationProgress = reduceMotion.matches ? Number(progress >= 0.9) : smooth(0, 1, progress);
     const aboutProgress = desktop && aboutSection?.offsetHeight
       ? clamp((innerHeight - aboutSection.getBoundingClientRect().top) / (innerHeight + aboutSection.offsetHeight))
       : 0;
     drawFrost(desktop ? (reduceMotion.matches ? Number(aboutProgress >= 0.9) : aboutProgress) : 0);
-
-    equipment.style.setProperty('--equipment-x', '0px');
-    equipment.style.setProperty('--equipment-y', '0px');
-    equipment.style.setProperty('--equipment-scale', '1');
-    equipment.style.setProperty('--equipment-rotate', '0deg');
-    equipment.style.setProperty('--equipment-depth', '0px');
-    equipment.style.setProperty('--equipment-tilt-x', (40 * rotationProgress) + 'deg');
-    equipment.style.setProperty('--equipment-tilt-y', '0deg');
   };
   const scheduleUpdate = () => {
     if (!frame) frame = requestAnimationFrame(update);

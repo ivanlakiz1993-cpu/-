@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=20261015-mosaic-home-exit-fix-1">
   <link rel="stylesheet" href="hero-grid.css?v=20261013-hero-split-seam-3">
   <link rel="stylesheet" href="layout-gutters.css?v=20261012-figma-gutters-1">
-  <link rel="stylesheet" href="testing-page.css?v=20261015-figma-1731-3601-current-1">
+  <link rel="stylesheet" href="testing-page.css?v=20261016-testing-hero-responsive-1">
   <link rel="stylesheet" href="page-transition.css?v=20261016-mosaic-home-entry-1">
   <script src="page-transition.js?v=20261016-mosaic-home-entry-1"></script>
 </head>
@@ -51,14 +51,51 @@
       <div class="testing-sequence__track">
         <div class="testing-stage">
           <div class="testing-stage__breadcrumb"><a href="index.html#top">Главная</a><span>/</span><span>Испытания</span></div>
-          <div class="testing-stage__copy">
-            <h1>Аттестованная испытательная лаборатория</h1>
-            <p>Проводим механические и климатические испытания, помогаем подтвердить стойкость изделий к воздействиям и оформить результаты испытаний.</p>
-            <a class="testing-stage__button" href="index.html#contact"><span>ЗАПРОС НА ИСПЫТАНИЯ</span></a>
+          <div class="testing-stage__content">
+            <div class="testing-stage__copy">
+              <h1>Аттестованная испытательная лаборатория</h1>
+              <p>Проводим механические и климатические испытания, помогаем подтвердить стойкость изделий к воздействиям и оформить результаты испытаний.</p>
+            </div>
+            <a class="testing-stage__button" href="index.html#contact">
+              <span class="testing-stage__button-label testing-stage__button-label--desktop">ЗАПРОС НА ИСПЫТАНИЯ</span>
+              <span class="testing-stage__button-label testing-stage__button-label--compact">ОБСУДИТЬ ПРОЕКТ</span>
+            </a>
           </div>
 
-          <div class="testing-stage__equipment" role="img" aria-label="Корпус испытательного оборудования">
-            <img class="testing-stage__image" src="assets/equipment-cutout.png" width="1561" height="1008" alt="Корпус испытательного оборудования" fetchpriority="high" decoding="async">
+          <div class="testing-stage__equipment" role="img" aria-label="Трёхмерная модель корпуса испытательного оборудования">
+            <div class="testing-device" aria-hidden="true">
+              <div class="testing-device__face testing-device__face--top">
+                <i class="testing-device__screw testing-device__screw--top-left"></i>
+                <i class="testing-device__screw testing-device__screw--top-center"></i>
+                <i class="testing-device__screw testing-device__screw--top-right"></i>
+                <i class="testing-device__screw testing-device__screw--rear-left"></i>
+                <i class="testing-device__screw testing-device__screw--rear-right"></i>
+              </div>
+              <div class="testing-device__face testing-device__face--side">
+                <i></i><i></i><i></i><i></i>
+              </div>
+              <div class="testing-device__face testing-device__face--front">
+                <span class="testing-device__label testing-device__label--input">ВХОД</span>
+                <span class="testing-device__label testing-device__label--output">ВЫХОД</span>
+                <span class="testing-device__label testing-device__label--power">ПИТАНИЕ</span>
+                <span class="testing-device__label testing-device__label--control">УПРАВЛЕНИЕ</span>
+                <span class="testing-device__label testing-device__label--sensors">ДАТЧИКИ</span>
+                <span class="testing-device__label testing-device__label--switch">ПИТАНИЕ</span>
+                <span class="testing-device__socket testing-device__socket--input"><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="testing-device__socket testing-device__socket--output"><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="testing-device__power-port"><i></i></span>
+                <span class="testing-device__serial-port"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="testing-device__socket testing-device__socket--sensor"><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="testing-device__switch"><i></i></span>
+                <span class="testing-device__port-name testing-device__port-name--input">RS-485</span>
+                <span class="testing-device__port-name testing-device__port-name--output">RS-485</span>
+                <span class="testing-device__port-name testing-device__port-name--power">~220 В&nbsp; 50 Гц</span>
+                <span class="testing-device__port-name testing-device__port-name--control">RS-232</span>
+                <span class="testing-device__port-name testing-device__port-name--sensors">ВХОД 1-4</span>
+                <i class="testing-device__screw testing-device__screw--front-left"></i>
+                <i class="testing-device__screw testing-device__screw--front-right"></i>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -251,6 +288,6 @@
     </div>
     <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
   </footer>
-  <script src="testing-page.js?v=20261015-figma-1731-3601-current-1"></script>
+  <script src="testing-page.js?v=20261016-testing-hero-responsive-1"></script>
 </body>
 </html>
