@@ -281,6 +281,9 @@
 .testing-journey__visual{position:sticky;z-index:1;top:0;display:grid;width:100%;height:100svh;margin-bottom:-100svh;place-items:center;pointer-events:none}
 .testing-journey__visual .testing-stage__equipment{position:relative;inset:auto;left:auto;top:auto;width:min(48.7vw,935px);max-width:calc(100% - 24px);height:auto;aspect-ratio:935/604;transform:none;transform-origin:center;transform-style:flat;will-change:auto;opacity:.5}
 .testing-journey__visual .testing-stage__image{opacity:1;filter:none;object-fit:contain}
+.testing-journey__visual .testing-stage__equipment{z-index:1}
+.testing-rain__ambient{position:absolute;z-index:2;inset:0;display:block;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .16s linear}
+.testing-rain__surface{position:absolute;z-index:2;inset:0;display:block;width:100%;height:100%;opacity:0;mix-blend-mode:screen;pointer-events:none;transition:opacity .16s linear}
 .testing-sequence,.testing-stage{background:transparent}
 .testing-sequence,.testing-about{position:relative;z-index:2}
 .testing-about{min-height:620px;margin:0 auto;padding-top:0;padding-bottom:0}

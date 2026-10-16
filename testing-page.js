@@ -304,6 +304,216 @@ document.querySelectorAll('.testing-stage__button').forEach(button => {
   });
 });
 
+// Scroll-linked rain is limited to the second section. The shared product stays
+// in its sticky visual while the overlays are clipped to its top face.
+const rainSection = document.querySelector('.testing-about');
+const rainSurface = document.querySelector('[data-rain-surface]');
+const rainAmbient = document.querySelector('[data-rain-ambient]');
+if (rainSection && rainSurface && rainAmbient) {
+  const surfaceContext = rainSurface.getContext('2d');
+  const ambientContext = rainAmbient.getContext('2d');
+  const surfaceWidth = rainSurface.width;
+  const surfaceHeight = rainSurface.height;
+  const surfaceCorners = [[14, 270], [862, 12], [1218, 172], [262, 462]];
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rainStreaks = Array.from({ length: 180 }, () => ({
+    x: Math.random(), y: Math.random(), length: 12 + Math.random() * 28,
+    speed: 0.42 + Math.random() * 0.52, alpha: 0.12 + Math.random() * 0.2
+  }));
+  let surfaceDrops = [];
+  let ambientWidth = 0;
+  let ambientHeight = 0;
+  let rainDpr = 1;
+  let rainFrame = 0;
+  let previousRainTime = performance.now();
+
+  const clampRain = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
+  const smoothRain = (start, end, value) => {
+    const t = clampRain((value - start) / (end - start));
+    return t * t * (3 - 2 * t);
+  };
+  const mixRain = (start, end, amount) => start + (end - start) * amount;
+
+  const resizeRainCanvas = () => {
+    const bounds = rainAmbient.getBoundingClientRect();
+    rainDpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    ambientWidth = Math.max(1, bounds.width);
+    ambientHeight = Math.max(1, bounds.height);
+    rainAmbient.width = Math.round(ambientWidth * rainDpr);
+    rainAmbient.height = Math.round(ambientHeight * rainDpr);
+    ambientContext.setTransform(rainDpr, 0, 0, rainDpr, 0, 0);
+  };
+
+  const pointOnSurface = () => {
+    const across = Math.random();
+    const depth = Math.random() * 0.76;
+    const leftX = mixRain(surfaceCorners[0][0], surfaceCorners[1][0], across);
+    const leftY = mixRain(surfaceCorners[0][1], surfaceCorners[1][1], across);
+    const rightX = mixRain(surfaceCorners[3][0], surfaceCorners[2][0], across);
+    const rightY = mixRain(surfaceCorners[3][1], surfaceCorners[2][1], across);
+    return {
+      x: mixRain(leftX, rightX, depth),
+      y: mixRain(leftY, rightY, depth)
+    };
+  };
+
+  const isOnSurface = (x, y) => {
+    let inside = false;
+    for (let i = 0, j = surfaceCorners.length - 1; i < surfaceCorners.length; j = i++) {
+      const [xi, yi] = surfaceCorners[i];
+      const [xj, yj] = surfaceCorners[j];
+      const crosses = (yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+      if (crosses) inside = !inside;
+    }
+    return inside;
+  };
+
+  const makeSurfaceDrop = () => {
+    const point = pointOnSurface();
+    return {
+      x: point.x,
+      y: point.y,
+      radius: 2.4 + Math.random() * 4.4,
+      speed: 18 + Math.random() * 34,
+      life: 160 + Math.random() * 380,
+      pause: 0
+    };
+  };
+
+  const drawSurfaceDrop = drop => {
+    const { x, y, radius } = drop;
+    const body = surfaceContext.createRadialGradient(
+      x - radius * 0.34, y - radius * 0.43, radius * 0.06,
+      x, y, radius
+    );
+    body.addColorStop(0, 'rgba(255,255,255,.64)');
+    body.addColorStop(0.2, 'rgba(218,237,255,.32)');
+    body.addColorStop(0.62, 'rgba(115,161,202,.16)');
+    body.addColorStop(1, 'rgba(12,25,40,.34)');
+    surfaceContext.beginPath();
+    surfaceContext.ellipse(x, y, radius * 0.82, radius, -0.36, 0, Math.PI * 2);
+    surfaceContext.fillStyle = body;
+    surfaceContext.fill();
+    surfaceContext.strokeStyle = 'rgba(225,241,255,.3)';
+    surfaceContext.lineWidth = 0.7;
+    surfaceContext.stroke();
+    surfaceContext.beginPath();
+    surfaceContext.ellipse(x - radius * 0.24, y - radius * 0.38, radius * 0.24, radius * 0.12, -0.45, 0, Math.PI * 2);
+    surfaceContext.fillStyle = 'rgba(255,255,255,.58)';
+    surfaceContext.fill();
+  };
+
+  const clearRainCanvases = () => {
+    ambientContext.clearRect(0, 0, ambientWidth, ambientHeight);
+    surfaceContext.clearRect(0, 0, surfaceWidth, surfaceHeight);
+    rainAmbient.style.opacity = '0';
+    rainSurface.style.opacity = '0';
+    surfaceDrops = [];
+  };
+
+  const renderRainFrame = now => {
+    rainFrame = 0;
+    if (document.hidden) return;
+
+    const rect = rainSection.getBoundingClientRect();
+    const inView = rect.bottom > 0 && rect.top < window.innerHeight;
+    if (!inView) {
+      clearRainCanvases();
+      return;
+    }
+
+    const sectionProgress = clampRain((window.innerHeight - rect.top) / (window.innerHeight + rect.height));
+    const rainIntensity = smoothRain(0.025, 0.2, sectionProgress) * (1 - smoothRain(0.78, 0.96, sectionProgress));
+    const wetness = smoothRain(0.12, 0.4, sectionProgress) * (1 - smoothRain(0.84, 0.99, sectionProgress));
+    const dt = Math.min(0.05, Math.max(0, (now - previousRainTime) / 1000));
+    previousRainTime = now;
+
+    rainAmbient.style.opacity = rainIntensity.toFixed(3);
+    rainSurface.style.opacity = wetness.toFixed(3);
+    ambientContext.clearRect(0, 0, ambientWidth, ambientHeight);
+
+    if (rainIntensity > 0.005 && ambientWidth && ambientHeight) {
+      ambientContext.lineWidth = 1;
+      ambientContext.lineCap = 'round';
+      for (const streak of rainStreaks) {
+        if (!reducedMotion) {
+          streak.y += streak.speed * dt;
+          streak.x += streak.speed * dt * 0.1;
+        }
+        if (streak.y > 1.08) {
+          streak.y = -0.08;
+          streak.x = Math.random();
+        }
+        if (streak.x > 1.08) streak.x = -0.08;
+        const x = streak.x * ambientWidth;
+        const y = streak.y * ambientHeight;
+        ambientContext.strokeStyle = `rgba(190,211,235,${(streak.alpha * rainIntensity).toFixed(3)})`;
+        ambientContext.beginPath();
+        ambientContext.moveTo(x, y);
+        ambientContext.lineTo(x + streak.length * 0.12, y + streak.length);
+        ambientContext.stroke();
+      }
+    }
+
+    if (wetness > 0.005) {
+      surfaceContext.globalCompositeOperation = 'destination-out';
+      surfaceContext.fillStyle = 'rgba(0,0,0,0.018)';
+      surfaceContext.fillRect(0, 0, surfaceWidth, surfaceHeight);
+      surfaceContext.globalCompositeOperation = 'source-over';
+      surfaceContext.save();
+      surfaceContext.beginPath();
+      surfaceCorners.forEach(([x, y], index) => index ? surfaceContext.lineTo(x, y) : surfaceContext.moveTo(x, y));
+      surfaceContext.closePath();
+      surfaceContext.clip();
+
+      const desiredDrops = Math.min(34, Math.round(34 * wetness));
+      if (surfaceDrops.length < desiredDrops && !reducedMotion && Math.random() < dt * 18) {
+        surfaceDrops.push(makeSurfaceDrop());
+      }
+      while (reducedMotion && surfaceDrops.length < desiredDrops) surfaceDrops.push(makeSurfaceDrop());
+
+      surfaceContext.strokeStyle = `rgba(204,226,246,${(0.12 * wetness).toFixed(3)})`;
+      surfaceContext.lineWidth = 1.2;
+      surfaceContext.lineCap = 'round';
+      for (const drop of surfaceDrops) {
+        if (!reducedMotion && drop.pause > 0) drop.pause -= dt;
+        else if (!reducedMotion) {
+          const dy = drop.speed * dt;
+          const dx = dy * 0.78;
+          surfaceContext.beginPath();
+          surfaceContext.moveTo(drop.x, drop.y);
+          surfaceContext.lineTo(drop.x + dx, drop.y + dy);
+          surfaceContext.stroke();
+          drop.x += dx;
+          drop.y += dy;
+          drop.life -= dy;
+          if (Math.random() < 0.01) drop.pause = 0.12 + Math.random() * 0.36;
+        }
+        drawSurfaceDrop(drop);
+      }
+      surfaceContext.restore();
+      surfaceDrops = surfaceDrops.filter(drop => drop.life > 0 && isOnSurface(drop.x, drop.y));
+    } else {
+      surfaceContext.clearRect(0, 0, surfaceWidth, surfaceHeight);
+      surfaceDrops = [];
+    }
+
+    if (rainIntensity > 0.005 || wetness > 0.005 || surfaceDrops.length) {
+      rainFrame = requestAnimationFrame(renderRainFrame);
+    }
+  };
+
+  const scheduleRainFrame = () => {
+    if (!rainFrame) rainFrame = requestAnimationFrame(renderRainFrame);
+  };
+  resizeRainCanvas();
+  addEventListener('scroll', scheduleRainFrame, { passive: true });
+  addEventListener('resize', () => { resizeRainCanvas(); scheduleRainFrame(); }, { passive: true });
+  document.addEventListener('visibilitychange', scheduleRainFrame);
+  if ('ResizeObserver' in window) new ResizeObserver(() => { resizeRainCanvas(); scheduleRainFrame(); }).observe(rainAmbient);
+  scheduleRainFrame();
+}
+
 const climateCarousel = document.querySelector('[data-climate-carousel]');
 if (climateCarousel) {
   const track = climateCarousel.querySelector('[data-climate-track]');
