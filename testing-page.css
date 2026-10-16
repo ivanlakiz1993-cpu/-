@@ -349,3 +349,63 @@
   .mechanical-tests__content{gap:28px;padding-bottom:0}
   .mechanical-tests__list-row,.mechanical-tests__equipment-row{position:relative;top:auto}
 }
+
+/* Climate tests — desktop, tablet and mobile Figma layouts */
+.climate-tests__product-stack{left:50%;top:calc(50% + 16px);width:min(935px,54.4vw);aspect-ratio:935/604;transform:translate(-50%,-50%)}
+.climate-tests__product-photo{object-fit:contain}
+.climate-tests__vibro-photo{display:none}
+.climate-tests__equipment dd{color:var(--orange)}
+@media(min-width:1101px){
+  .climate-tests__track{height:calc(740px + 70svh)}
+  .climate-tests__stage{height:740px;min-height:740px;overflow:visible}
+  .climate-tests__inner{height:auto;min-height:740px;padding-top:0}
+  .climate-tests__body{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;min-height:0;margin-top:50px}
+  .climate-tests__product-stack{top:calc(50% + 16px)}
+  .climate-tests__details{width:min(860px,calc(100% - min(631px,48%) - 30px))}
+  .climate-tests__equipment{gap:30px}
+  .climate-tests__visuals{position:relative;top:auto;right:auto;flex:none}
+}
+@media(min-width:701px) and (max-width:1100px){
+  .climate-tests{margin-top:84px}
+  .climate-tests__track{height:auto}
+  .climate-tests__stage{position:relative;top:auto;height:auto;min-height:0;overflow:visible}
+  .climate-tests__inner{width:calc(100% - 2 * clamp(24px,4.6875vw,48px));height:auto;min-height:0;margin-inline:auto;padding:0}
+  .climate-tests h2{font-size:38px;line-height:.9;letter-spacing:.38px}
+  .climate-tests__body{position:relative;display:block;height:auto;min-height:762px;margin-top:30px}
+  .climate-tests__product-stack{left:50%;top:117px;width:min(761px,100%);aspect-ratio:761/492;transform:translateX(-50%)}
+  .climate-tests__product-photo{display:none}
+  .climate-tests__vibro-photo{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;opacity:.5}
+  .climate-tests__details{width:100%}
+  .climate-tests__list{gap:10px}
+  .climate-tests__list li{padding:20px 30px;font-size:16px;line-height:1.2;letter-spacing:.16px}
+  .climate-tests__equipment{width:min(473px,51%);margin-top:30px;padding:15px;gap:30px}
+  .climate-tests__equipment h3{font-size:24px;line-height:1;letter-spacing:-1.2px}
+  .climate-tests__equipment dl{gap:15px;font-size:16px;line-height:1.2;letter-spacing:.16px;white-space:normal}
+  .climate-tests__equipment dl>div{gap:10px}
+  .climate-tests__equipment dd{text-align:right;white-space:nowrap}
+  .climate-tests__visuals{position:absolute;z-index:1;left:51.08%;right:auto;top:296px;display:block;width:48.92%;height:auto;aspect-ratio:1}
+  .climate-tests__camera-stack{width:100%;height:100%;aspect-ratio:1}
+  .climate-tests__pagination{display:none}
+}
+@media(max-width:700px){
+  .climate-tests{margin-top:64px}
+  .climate-tests__track{height:auto}
+  .climate-tests__stage{position:relative;top:auto;height:auto;min-height:0;overflow:visible}
+  .climate-tests__inner{position:relative;width:calc(100% - 24px);height:auto;min-height:0;margin-inline:auto;padding:0 0 20px}
+  .climate-tests h2{font-size:38px;line-height:.9;letter-spacing:.38px}
+  .climate-tests__body{position:static;display:flex;flex-direction:column;align-items:stretch;gap:10px;height:auto;min-height:0;margin-top:30px}
+  .climate-tests__product-stack{left:50%;top:454px;width:min(392px,100vw);aspect-ratio:392/253;transform:translateX(-50%)}
+  .climate-tests__product-photo{display:none}
+  .climate-tests__vibro-photo{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;opacity:.5}
+  .climate-tests__details{width:100%}
+  .climate-tests__list{gap:10px}
+  .climate-tests__list li{min-height:0;padding:12px 8px;border-radius:10px;font-size:16px;line-height:1.2;letter-spacing:.16px}
+  .climate-tests__equipment{width:min(370px,calc(100% + 4px));margin-top:30px;padding:15px;gap:30px}
+  .climate-tests__equipment h3{font-size:24px;line-height:1;letter-spacing:-1.2px}
+  .climate-tests__equipment dl{gap:15px;font-size:16px;line-height:1.2;letter-spacing:.16px;white-space:normal}
+  .climate-tests__equipment dl>div{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:12px}
+  .climate-tests__equipment dd{text-align:right;white-space:nowrap}
+  .climate-tests__visuals{position:relative;left:auto;right:auto;top:auto;display:block;width:100%;height:auto;aspect-ratio:1}
+  .climate-tests__camera-stack{width:min(366px,100%);height:auto;aspect-ratio:1;margin:0}
+  .climate-tests__pagination{display:none}
+}

@@ -697,16 +697,23 @@ if (climateCarousel) {
     { title: 'Климатическая камера THCB-125', highTemperature: 'до 150 °C', lowTemperature: 'до −70 °C', humidity: false }
   ];
   let active = -1;
+  let activeCompactLayout = null;
   let climateFrame = 0;
   const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
+  const compactClimateLayout = matchMedia('(max-width: 1100px)');
 
   const showClimateState = (index) => {
-    if (index === active) return;
+    const isCompactLayout = compactClimateLayout.matches;
+    if (index === active && isCompactLayout === activeCompactLayout) return;
     active = index;
+    activeCompactLayout = isCompactLayout;
     products.forEach((image, imageIndex) => image.classList.toggle('is-active', imageIndex === index));
     cameras.forEach((image, imageIndex) => image.classList.toggle('is-active', imageIndex === index));
     pages.forEach((page, pageIndex) => page.classList.toggle('is-active', pageIndex === index));
-    const spec = cameraSpecs[index];
+    const baseSpec = cameraSpecs[index];
+    const spec = index === 0 && isCompactLayout
+      ? { ...baseSpec, highTemperature: 'до 150 °C', lowTemperature: 'до −70 °C' }
+      : baseSpec;
     if (title) title.textContent = spec.title;
     if (highTemperature) highTemperature.textContent = spec.highTemperature;
     if (lowTemperature) lowTemperature.textContent = spec.lowTemperature;
@@ -716,6 +723,10 @@ if (climateCarousel) {
   const updateClimateState = () => {
     climateFrame = 0;
     if (!track || !stage || products.length < 2 || cameras.length < 2) return;
+    if (compactClimateLayout.matches) {
+      showClimateState(0);
+      return;
+    }
     const trackBounds = track.getBoundingClientRect();
     const stickyTravel = Math.max(1, track.offsetHeight - stage.offsetHeight);
     const progress = clamp(-trackBounds.top / stickyTravel);
