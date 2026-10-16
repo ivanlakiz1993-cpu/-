@@ -16,6 +16,9 @@ document.addEventListener('keydown', event => { if (event.key === 'Escape' && me
 document.addEventListener('pointerdown', event => { if (menuButton?.getAttribute('aria-expanded') === 'true' && !menuDrawer?.contains(event.target)) setMenuOpen(false); });
 
 const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+const syncScrollPauses = () => document.documentElement.classList.toggle('testing-scroll-pauses', !pageMotionPreference.matches);
+syncScrollPauses();
+pageMotionPreference.addEventListener('change', syncScrollPauses);
 if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   const reveal = (elements, stagger = 0) => elements.forEach((element, index) => {
     if (!element || element.hasAttribute('data-scroll-reveal')) return;
@@ -63,6 +66,129 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
       document.documentElement.classList.remove('testing-motion-ready');
     }
   }, 1800);
+}
+
+// Reveal copy line by line as it enters the viewport, matching the homepage's
+// scroll-linked text treatment instead of relying only on one-time fade-ins.
+if (!pageMotionPreference.matches) {
+  const textTargets = [...document.querySelectorAll([
+    '.testing-stage__copy h1', '.testing-stage__copy p',
+    '.testing-about h2', '.testing-about__text p', '.testing-about__label',
+    '.climate-tests h2', '.climate-tests__list li', '.climate-tests__equipment h3',
+    '.climate-tests__equipment dt', '.climate-tests__equipment dd',
+    '.mechanical-tests h2', '.mechanical-tests__list li', '.mechanical-tests__equipment h3',
+    '.mechanical-tests__group h4', '.mechanical-tests__group dt', '.mechanical-tests__group dd',
+    '.testing-faq h2', '.testing-faq__item summary span:first-child', '.testing-faq__answer p',
+    '.testing-page>.footer h2', '.testing-page>.footer h3', '.testing-page>.footer p',
+    '.testing-page>.footer address', '.testing-page>.footer .footer-bottom'
+  ].join(','))];
+  const linesByElement = new Map();
+  let textFrame = 0;
+  let textLayoutDirty = true;
+  const clampTextProgress = value => Math.max(0, Math.min(1, value));
+
+  const wrapTextWords = element => {
+    if (element.querySelector('.text-reveal__word')) return;
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node => {
+      if (!node.textContent.trim()) return;
+      const fragment = document.createDocumentFragment();
+      node.textContent.split(/(\s+)/u).forEach(part => {
+        if (!part) return;
+        if (/^\s+$/u.test(part)) {
+          fragment.append(document.createTextNode(part));
+          return;
+        }
+        const word = document.createElement('span');
+        word.className = 'text-reveal__word';
+        word.textContent = part;
+        fragment.append(word);
+      });
+      node.replaceWith(fragment);
+    });
+    element.classList.add('text-reveal');
+    element.style.setProperty('--text-final-color', getComputedStyle(element).color);
+  };
+
+  const measureTextLines = element => {
+    const lines = [];
+    element.querySelectorAll('.text-reveal__word').forEach(word => {
+      const y = word.getBoundingClientRect().top;
+      let line = lines[lines.length - 1];
+      if (!line || Math.abs(line.y - y) > 2) {
+        line = { y, length: 0, words: [] };
+        lines.push(line);
+      }
+      const length = Array.from(word.textContent).length;
+      line.words.push({ word, start: line.length, length });
+      line.length += length + 1;
+    });
+    lines.forEach(line => { line.length = Math.max(1, line.length - 1); });
+    return lines;
+  };
+
+  const requestTextFrame = () => {
+    if (!textFrame) textFrame = requestAnimationFrame(updateTextReveal);
+  };
+  const updateTextReveal = () => {
+    textFrame = 0;
+    if (textLayoutDirty) {
+      textTargets.forEach(element => linesByElement.set(element, measureTextLines(element)));
+      textLayoutDirty = false;
+    }
+    const viewport = innerHeight;
+    const scroll = scrollY;
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - viewport);
+    textTargets.forEach(element => {
+      const rect = element.getBoundingClientRect();
+      const lines = linesByElement.get(element) || [];
+      if (!rect.width || !rect.height || !lines.length) return;
+      const top = rect.top + scroll;
+      const start = top - viewport * .92;
+      const end = Math.min(maxScroll, top - viewport * .42);
+      const progress = clampTextProgress((scroll - start) / Math.max(1, end - start));
+      lines.forEach((line, lineIndex) => {
+        const lineProgress = clampTextProgress(progress * lines.length - lineIndex);
+        const frontier = lineProgress * (line.length + 8) - 4;
+        line.words.forEach(({ word, start: wordStart, length }) => {
+          const left = (frontier - wordStart - 4) / length * 100;
+          const right = (frontier - wordStart + 4) / length * 100;
+          const color = getComputedStyle(element).getPropertyValue('--text-final-color').trim() || '#fff';
+          const gradient = `linear-gradient(90deg,${color} ${left.toFixed(2)}%,#777 ${right.toFixed(2)}%)`;
+          if (word.style.backgroundImage !== gradient) word.style.backgroundImage = gradient;
+        });
+      });
+    });
+  };
+
+  textTargets.forEach(element => {
+    wrapTextWords(element);
+    const observer = new MutationObserver(() => {
+      if (!element.querySelector('.text-reveal__word')) wrapTextWords(element);
+      textLayoutDirty = true;
+      requestTextFrame();
+    });
+    observer.observe(element, { childList: true, characterData: true, subtree: true });
+  });
+  if ('ResizeObserver' in window) {
+    const textResizeObserver = new ResizeObserver(() => {
+      textLayoutDirty = true;
+      requestTextFrame();
+    });
+    textTargets.forEach(element => textResizeObserver.observe(element));
+  }
+  addEventListener('scroll', requestTextFrame, { passive: true });
+  addEventListener('resize', () => { textLayoutDirty = true; requestTextFrame(); }, { passive: true });
+  document.addEventListener('toggle', event => {
+    if (event.target.matches('.testing-faq__item')) {
+      textLayoutDirty = true;
+      requestTextFrame();
+    }
+  }, true);
+  document.fonts?.ready.then(() => { textLayoutDirty = true; requestTextFrame(); });
+  requestTextFrame();
 }
 
 document.querySelectorAll('.testing-stage__button').forEach(button => {

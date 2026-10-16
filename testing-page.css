@@ -330,3 +330,14 @@
   .testing-about__number{width:100%;font-size:110px;line-height:.9;text-align:center}
   .testing-about__label,.testing-about__metric--experience .testing-about__label{width:100%;max-width:none;font-size:16px;line-height:1.2;text-align:center}
 }
+
+/* Let each main section settle into view like the pinned sections on the homepage. */
+.testing-scroll-pauses{scroll-snap-type:y mandatory}
+.testing-scroll-pauses .testing-sequence,
+.testing-scroll-pauses .testing-about,
+.testing-scroll-pauses .climate-tests,
+.testing-scroll-pauses .mechanical-tests,
+.testing-scroll-pauses .testing-faq,
+.testing-scroll-pauses .testing-page>.footer{scroll-snap-align:start;scroll-snap-stop:always}
+@media(max-width:600px){.testing-scroll-pauses{scroll-snap-type:y proximity}}
+@media(prefers-reduced-motion:reduce){.testing-scroll-pauses{scroll-snap-type:none}}
