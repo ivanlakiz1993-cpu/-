@@ -420,3 +420,10 @@
   .submit{width:100%;height:56px;padding:12px;border-radius:10px;font-size:24px;line-height:1.25;letter-spacing:-1.2px}
   .contact-form .form-feedback:empty{display:none}
 }
+
+/* Shared header alignment: menu label and hamburger share the same center line. */
+.menu-drawer .menu-toggle{align-items:center;line-height:1}
+.menu-drawer .menu-toggle>span:first-child{top:0}
+@media(max-width:600px){
+  .menu-drawer .menu-icon{height:12px}
+}

@@ -226,13 +226,6 @@
   }
 }
 
-/* Keep the menu label and hamburger on one visual center line at every width. */
-.menu-toggle{align-items:center;line-height:1}
-.menu-toggle>span:first-child{top:0}
-@media(max-width:600px){
-  .menu-icon{height:12px}
-}
-
 /* Clip only the desktop description backdrop below its upper grid rule. */
 @media(min-width:1200px){
   .hero-description{background:transparent;backdrop-filter:none;isolation:isolate}
