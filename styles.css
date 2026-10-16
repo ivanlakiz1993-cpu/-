@@ -423,7 +423,10 @@
 
 /* Shared header alignment: menu label and hamburger share the same center line. */
 .menu-drawer .menu-toggle{align-items:center;line-height:1}
-.menu-drawer .menu-toggle>span:first-child{top:0}
+.menu-drawer .menu-toggle>span:first-child{top:0;line-height:1}
+@supports(text-box-trim:trim-both){
+  .menu-drawer .menu-toggle>span:first-child{text-box-trim:trim-both;text-box-edge:cap alphabetic}
+}
 @media(max-width:600px){
   .menu-drawer .menu-icon{height:12px}
 }
