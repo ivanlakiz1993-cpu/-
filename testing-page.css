@@ -331,13 +331,18 @@
   .testing-about__label,.testing-about__metric--experience .testing-about__label{width:100%;max-width:none;font-size:16px;line-height:1.2;text-align:center}
 }
 
-/* Let each main section settle into view like the pinned sections on the homepage. */
-.testing-scroll-pauses{scroll-snap-type:y mandatory}
-.testing-scroll-pauses .testing-sequence,
-.testing-scroll-pauses .testing-about,
-.testing-scroll-pauses .climate-tests,
-.testing-scroll-pauses .mechanical-tests,
-.testing-scroll-pauses .testing-faq,
-.testing-scroll-pauses .testing-page>.footer{scroll-snap-align:start;scroll-snap-stop:always}
-@media(max-width:600px){.testing-scroll-pauses{scroll-snap-type:y proximity}}
-@media(prefers-reduced-motion:reduce){.testing-scroll-pauses{scroll-snap-type:none}}
+/* Desktop section holds mirror the homepage's sticky stages without scroll snapping. */
+@media(min-width:1101px){
+  .climate-tests__track{height:calc(795px + 70svh)}
+  .climate-tests__stage{position:sticky;top:0}
+  .mechanical-tests__content{gap:50vh;padding-bottom:50vh}
+  .mechanical-tests__list-row,.mechanical-tests__equipment-row{position:sticky;top:max(115px,calc((100svh - 604px)/2))}
+  .mechanical-tests__list-row{z-index:1}
+  .mechanical-tests__equipment-row{z-index:2}
+}
+@media(max-width:1100px){
+  .climate-tests__track{height:auto}
+  .climate-tests__stage{position:relative;top:auto}
+  .mechanical-tests__content{gap:28px;padding-bottom:0}
+  .mechanical-tests__list-row,.mechanical-tests__equipment-row{position:relative;top:auto}
+}

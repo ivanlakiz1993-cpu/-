@@ -16,9 +16,115 @@ document.addEventListener('keydown', event => { if (event.key === 'Escape' && me
 document.addEventListener('pointerdown', event => { if (menuButton?.getAttribute('aria-expanded') === 'true' && !menuDrawer?.contains(event.target)) setMenuOpen(false); });
 
 const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
-const syncScrollPauses = () => document.documentElement.classList.toggle('testing-scroll-pauses', !pageMotionPreference.matches);
-syncScrollPauses();
-pageMotionPreference.addEventListener('change', syncScrollPauses);
+
+// Keep wheel and touch scrolling as smooth as on the homepage without snapping
+// the browser abruptly to section boundaries.
+{
+  const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+  const wheelDistanceScale = .5;
+  const settlingTime = 280;
+  let frame = 0;
+  let position = scrollY;
+  let destination = position;
+  let previousTime = 0;
+  let activeSettlingTime = settlingTime;
+
+  const stop = () => {
+    cancelAnimationFrame(frame);
+    frame = 0;
+    previousTime = 0;
+  };
+  const advance = time => {
+    const elapsed = previousTime ? Math.min(50, time - previousTime) : 16.67;
+    previousTime = time;
+    position += (destination - position) * (1 - Math.exp(-elapsed / activeSettlingTime));
+    if (Math.abs(destination - position) < .5) position = destination;
+    scrollTo({ top: position, behavior: 'instant' });
+    frame = position === destination ? 0 : requestAnimationFrame(advance);
+    if (!frame) previousTime = 0;
+  };
+
+  addEventListener('wheel', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (pageMotionPreference.matches || !finePointer.matches || event.ctrlKey || event.metaKey || !event.deltaY ||
+        Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
+        target?.closest('input, textarea, select, .menu-drawer, [contenteditable]') ||
+        document.documentElement.classList.contains('menu-open')) return;
+    const distance = event.deltaY * (event.deltaMode === 1 ? 40 : event.deltaMode === 2 ? innerHeight : 1) * wheelDistanceScale;
+    const limit = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+    if (!event.cancelable || !limit) return;
+    event.preventDefault();
+    if (!frame) position = destination = scrollY;
+    activeSettlingTime = event.deltaMode === 0 && Math.abs(event.deltaY) < 35 ? 90 : settlingTime;
+    const maxLead = innerHeight * .9;
+    destination = Math.max(0, Math.min(limit, position + Math.max(-maxLead, Math.min(maxLead, destination + distance - position))));
+    if (!frame) frame = requestAnimationFrame(advance);
+  }, { passive: false });
+
+  ['pointerdown', 'touchstart', 'keydown', 'hashchange', 'popstate'].forEach(type => addEventListener(type, stop, { passive: true }));
+  pageMotionPreference.addEventListener('change', stop);
+  addEventListener('resize', stop, { passive: true });
+}
+
+{
+  const touchScale = .46;
+  let gesture = null;
+  let glideFrame = 0;
+  let glideVelocity = 0;
+  let glideTime = 0;
+  const stopGlide = () => {
+    cancelAnimationFrame(glideFrame);
+    glideFrame = 0;
+    glideTime = 0;
+  };
+  const glide = time => {
+    const elapsed = glideTime ? Math.min(32, time - glideTime) : 16.67;
+    glideTime = time;
+    const before = scrollY;
+    scrollTo({ top: before + glideVelocity * elapsed, behavior: 'instant' });
+    glideVelocity *= Math.exp(-elapsed / 180);
+    if (Math.abs(glideVelocity) < .025 || Math.abs(scrollY - before) < .5) stopGlide();
+    else glideFrame = requestAnimationFrame(glide);
+  };
+  addEventListener('touchstart', event => {
+    stopGlide();
+    gesture = null;
+    const target = event.target instanceof Element ? event.target : null;
+    if (event.touches.length !== 1 || document.documentElement.classList.contains('menu-open') ||
+        target?.closest('input, textarea, select, video, .menu-drawer, [contenteditable]')) return;
+    const touch = event.touches[0];
+    gesture = { startX: touch.clientX, startY: touch.clientY, lastY: touch.clientY, lastTime: performance.now(), velocity: 0, dragging: false };
+  }, { passive: true });
+  addEventListener('touchmove', event => {
+    if (!gesture || event.touches.length !== 1) return;
+    const touch = event.touches[0];
+    const vertical = Math.abs(touch.clientY - gesture.startY);
+    if (!gesture.dragging && vertical < 2) return;
+    if (!gesture.dragging && vertical <= Math.abs(touch.clientX - gesture.startX)) return;
+    if (!event.cancelable) return;
+    event.preventDefault();
+    gesture.dragging = true;
+    const now = performance.now();
+    const elapsed = Math.max(1, now - gesture.lastTime);
+    const distance = (gesture.lastY - touch.clientY) * touchScale;
+    scrollTo({ top: scrollY + distance, behavior: 'instant' });
+    gesture.velocity = gesture.velocity * .35 + distance / elapsed * .65;
+    gesture.lastY = touch.clientY;
+    gesture.lastTime = now;
+  }, { passive: false });
+  addEventListener('touchend', event => {
+    if (!gesture || event.touches.length) return;
+    if (gesture.dragging && !pageMotionPreference.matches && performance.now() - gesture.lastTime < 80) {
+      glideVelocity = Math.max(-.8, Math.min(.8, gesture.velocity));
+      if (Math.abs(glideVelocity) > .025) glideFrame = requestAnimationFrame(glide);
+    }
+    gesture = null;
+  }, { passive: true });
+  addEventListener('touchcancel', () => { gesture = null; stopGlide(); }, { passive: true });
+  addEventListener('keydown', stopGlide, { passive: true });
+  addEventListener('hashchange', stopGlide, { passive: true });
+}
+
 if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   const reveal = (elements, stagger = 0) => elements.forEach((element, index) => {
     if (!element || element.hasAttribute('data-scroll-reveal')) return;
@@ -30,27 +136,12 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   const revealGroup = (selector, stagger = 0) => reveal([...document.querySelectorAll(selector)], stagger);
   revealGroup('.topbar .brand-mark, .topbar .brand > span, .menu-toggle > span, .menu-toggle .menu-icon > i', 75);
   revealGroup('.nav .menu-nav-links a, .nav .menu-social__link, .testing-stage__breadcrumb > *', 55);
-  revealGroup('.testing-stage__copy h1, .testing-stage__copy p, .testing-stage__button', 125);
-  revealGroup('.testing-about h2', 80);
-  revealGroup('.testing-about__text > *', 110);
-  revealGroup('.testing-about__metric', 100);
-  revealGroup('.testing-about__number, .testing-about__label', 65);
-
-  revealGroup('.climate-tests h2', 80);
+  revealGroup('.testing-stage__button', 125);
   revealGroup('.climate-tests__product-stack, .climate-tests__visuals', 120);
-  revealGroup('.climate-tests__list li', 72);
-  revealGroup('.climate-tests__equipment h3, .climate-tests__equipment dl > div', 65);
   revealGroup('.climate-tests__pagination span', 100);
-
-  revealGroup('.mechanical-tests h2', 80);
-  revealGroup('.mechanical-tests__list li', 60);
   revealGroup('.mechanical-tests__ambient img, .mechanical-tests__shaker img', 100);
-  revealGroup('.mechanical-tests__equipment h3, .mechanical-tests__group h4, .mechanical-tests__group dl > div', 65);
-
-  revealGroup('.testing-faq h2', 80);
-  revealGroup('.testing-faq__item', 95);
   revealGroup('.footer-brand .brand-mark, .footer-brand > span, .footer-nav a, .footer-legal a', 60);
-  revealGroup('.footer-contact-link, .footer-contacts address, .footer-social h3, .footer-social-link, .footer-bottom', 70);
+  revealGroup('.footer-contact-link, .footer-social-link', 70);
 
   const revealObserver = new IntersectionObserver(entries => {
     entries.forEach(entry => {
@@ -68,17 +159,13 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   }, 1800);
 }
 
-// Reveal copy line by line as it enters the viewport, matching the homepage's
-// scroll-linked text treatment instead of relying only on one-time fade-ins.
+// Scroll-linked text treatment follows the homepage timing. Keep it on section
+// headings and plain copy; metric cards, list cards, spec rows, and FAQ dropdowns
+// retain their existing text behavior.
 if (!pageMotionPreference.matches) {
   const textTargets = [...document.querySelectorAll([
-    '.testing-stage__copy h1', '.testing-stage__copy p',
-    '.testing-about h2', '.testing-about__text p', '.testing-about__label',
-    '.climate-tests h2', '.climate-tests__list li', '.climate-tests__equipment h3',
-    '.climate-tests__equipment dt', '.climate-tests__equipment dd',
-    '.mechanical-tests h2', '.mechanical-tests__list li', '.mechanical-tests__equipment h3',
-    '.mechanical-tests__group h4', '.mechanical-tests__group dt', '.mechanical-tests__group dd',
-    '.testing-faq h2', '.testing-faq__item summary span:first-child', '.testing-faq__answer p',
+    'main h1', 'main h2', 'main h3',
+    '.testing-stage__copy p', '.testing-about__text p',
     '.testing-page>.footer h2', '.testing-page>.footer h3', '.testing-page>.footer p',
     '.testing-page>.footer address', '.testing-page>.footer .footer-bottom'
   ].join(','))];
@@ -146,11 +233,20 @@ if (!pageMotionPreference.matches) {
       const lines = linesByElement.get(element) || [];
       if (!rect.width || !rect.height || !lines.length) return;
       const top = rect.top + scroll;
-      const start = top - viewport * .92;
-      const end = Math.min(maxScroll, top - viewport * .42);
-      const progress = clampTextProgress((scroll - start) / Math.max(1, end - start));
+      const start = top - viewport * .9;
+      const end = Math.min(top - viewport * .48, maxScroll);
+      const groupSelector = '.testing-stage__copy, .testing-about, .climate-tests__inner, .mechanical-tests__inner, .testing-faq__inner, .footer-main > div';
+      const group = element.closest(groupSelector) || element;
+      const siblings = textTargets.filter(target => (target.closest(groupSelector) || target) === group);
+      const groupTop = Math.min(...siblings.map(target => target.getBoundingClientRect().top + scrollY - viewport * .9));
+      const groupEnd = Math.max(...siblings.map(target => target.getBoundingClientRect().top + scrollY - viewport * .48));
+      const groupStart = groupTop;
+      const groupFinish = Math.min(maxScroll, Math.max(groupEnd, groupStart + (siblings.length > 1 ? viewport * .7 : end - start)));
+      const progress = clampTextProgress((scroll - groupStart) / Math.max(1, groupFinish - groupStart));
+      const groupLines = siblings.flatMap(target => linesByElement.get(target) || []);
+      const firstLineIndex = groupLines.indexOf(lines[0]);
       lines.forEach((line, lineIndex) => {
-        const lineProgress = clampTextProgress(progress * lines.length - lineIndex);
+        const lineProgress = clampTextProgress(progress * groupLines.length - firstLineIndex - lineIndex);
         const frontier = lineProgress * (line.length + 8) - 4;
         line.words.forEach(({ word, start: wordStart, length }) => {
           const left = (frontier - wordStart - 4) / length * 100;
@@ -181,12 +277,6 @@ if (!pageMotionPreference.matches) {
   }
   addEventListener('scroll', requestTextFrame, { passive: true });
   addEventListener('resize', () => { textLayoutDirty = true; requestTextFrame(); }, { passive: true });
-  document.addEventListener('toggle', event => {
-    if (event.target.matches('.testing-faq__item')) {
-      textLayoutDirty = true;
-      requestTextFrame();
-    }
-  }, true);
   document.fonts?.ready.then(() => { textLayoutDirty = true; requestTextFrame(); });
   requestTextFrame();
 }
@@ -235,8 +325,9 @@ if (climateCarousel) {
   const updateClimateState = () => {
     climateFrame = 0;
     if (!track || !stage || products.length < 2 || cameras.length < 2) return;
-    const bounds = stage.getBoundingClientRect();
-    const progress = clamp((innerHeight - bounds.top) / (bounds.height + innerHeight));
+    const trackBounds = track.getBoundingClientRect();
+    const stickyTravel = Math.max(1, track.offsetHeight - stage.offsetHeight);
+    const progress = clamp(-trackBounds.top / stickyTravel);
     showClimateState(progress >= 0.5 ? 1 : 0);
   };
 
