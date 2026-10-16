@@ -92,12 +92,19 @@
     }
     document.documentElement.append(entryRoot);
     let entryStarted = false;
-    let readyObserver;
-    const startEntryReveal = () => {
+    const startEntryReveal = async () => {
       if (entryStarted) return;
       entryStarted = true;
-      readyObserver?.disconnect();
-      window.setTimeout(() => {
+      // Wait for the actual first screen, not merely its opening <main> tag.
+      const firstImage = document.querySelector('.hero .hero-bg img, .testing-stage__image');
+      await Promise.race([
+        Promise.all([
+          firstImage?.decode?.().catch(() => {}),
+          document.fonts?.ready
+        ]),
+        new Promise(resolve => window.setTimeout(resolve, 700))
+      ]);
+      requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           entryTiles.forEach(({ tile, row, column }) => {
             const distance = Math.hypot(row - centerRow, column - centerColumn) / maxDistance;
@@ -106,15 +113,10 @@
             tile.classList.add('is-revealed');
           });
         });
-        window.setTimeout(() => entryRoot.remove(), 1900);
-      }, 200);
-    };
-    const firstScreenExists = () => document.querySelector('.hero .hero-bg img, .testing-stage__image, body > main');
-    if (document.readyState === 'loading' && !firstScreenExists()) {
-      readyObserver = new MutationObserver(() => {
-        if (firstScreenExists()) startEntryReveal();
+        window.setTimeout(() => entryRoot.remove(), 1400);
       });
-      readyObserver.observe(document.documentElement, { childList: true, subtree: true });
+    };
+    if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', startEntryReveal, { once: true });
     } else {
       startEntryReveal();

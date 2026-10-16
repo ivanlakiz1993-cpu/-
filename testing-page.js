@@ -19,6 +19,8 @@ const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   const reveal = (elements, stagger = 0) => elements.forEach((element, index) => {
     if (!element || element.hasAttribute('data-scroll-reveal')) return;
+    // The shared page-entry mask already reveals the first screen.
+    if (window.siteMosaicIncoming && element.closest('.topbar, .menu-drawer, .testing-stage')) return;
     element.setAttribute('data-scroll-reveal', '');
     element.style.setProperty('--reveal-delay', `${Math.min(index * stagger, 420)}ms`);
   });
