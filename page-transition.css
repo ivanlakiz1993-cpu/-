@@ -5,4 +5,7 @@
   display:block;margin:-1px;background:#000;opacity:0;transform-origin:center;will-change:transform,opacity
 }
 .mosaic-transition.is-covered .mosaic-transition__tile{opacity:1}
-@media(prefers-reduced-motion:reduce){.mosaic-transition{display:none!important}}
+.page-entry-reveal{position:fixed;inset:0;z-index:4;display:grid;grid-template-columns:repeat(16,minmax(0,1fr));grid-template-rows:repeat(9,minmax(0,1fr));overflow:hidden;pointer-events:none}
+.page-entry-reveal__tile{min-width:0;min-height:0;background:#0a0a0a;opacity:1;transition:opacity .62s cubic-bezier(.4,0,.2,1);transition-delay:var(--tile-delay,0ms)}
+.page-entry-reveal__tile.is-revealed{opacity:0}
+@media(prefers-reduced-motion:reduce){.mosaic-transition,.page-entry-reveal{display:none!important}}

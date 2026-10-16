@@ -70,19 +70,55 @@
     return animation.finished.catch(() => {});
   }));
   if (entering) {
-    // Keep the destination covered from its first paint, then start the matching reveal immediately.
-    root.classList.add('is-covered');
-    document.documentElement.append(root);
-    requestAnimationFrame(async () => {
-      if (!root.isConnected) return;
-      const failSafe = window.setTimeout(() => { if (root.isConnected) reset(); }, 1400);
-      try {
-        await animate(false);
-      } finally {
-        window.clearTimeout(failSafe);
-        if (root.isConnected) reset();
+    // Match the home-cover reveal: a 16×9 field of tiles clears radially.
+    const entryRoot = document.createElement('div');
+    entryRoot.className = 'page-entry-reveal';
+    entryRoot.setAttribute('aria-hidden', 'true');
+    const entryTiles = [];
+    const rows = 9;
+    const columns = 16;
+    const centerRow = (rows - 1) / 2;
+    const centerColumn = (columns - 1) / 2;
+    const maxDistance = Math.hypot(centerRow, centerColumn);
+    for (let row = 0; row < rows; row++) {
+      for (let column = 0; column < columns; column++) {
+        const tile = document.createElement('span');
+        tile.className = 'page-entry-reveal__tile';
+        tile.style.gridRow = String(row + 1);
+        tile.style.gridColumn = String(column + 1);
+        entryRoot.append(tile);
+        entryTiles.push({ tile, row, column });
       }
-    });
+    }
+    document.documentElement.append(entryRoot);
+    let entryStarted = false;
+    let readyObserver;
+    const startEntryReveal = () => {
+      if (entryStarted) return;
+      entryStarted = true;
+      readyObserver?.disconnect();
+      window.setTimeout(() => {
+        requestAnimationFrame(() => {
+          entryTiles.forEach(({ tile, row, column }) => {
+            const distance = Math.hypot(row - centerRow, column - centerColumn) / maxDistance;
+            const randomOffset = Math.random() * .35;
+            tile.style.setProperty('--tile-delay', `${distance * 480 + randomOffset * 500}ms`);
+            tile.classList.add('is-revealed');
+          });
+        });
+        window.setTimeout(() => entryRoot.remove(), 1900);
+      }, 200);
+    };
+    const firstScreenExists = () => document.querySelector('.hero .hero-bg img, .testing-stage__image, body > main');
+    if (document.readyState === 'loading' && !firstScreenExists()) {
+      readyObserver = new MutationObserver(() => {
+        if (firstScreenExists()) startEntryReveal();
+      });
+      readyObserver.observe(document.documentElement, { childList: true, subtree: true });
+      document.addEventListener('DOMContentLoaded', startEntryReveal, { once: true });
+    } else {
+      startEntryReveal();
+    }
   }
   const destinationFor = link => {
     if (!link || link.hasAttribute('download') || (link.target && link.target.toLowerCase() !== '_self')) return null;
@@ -123,5 +159,9 @@
     try { sessionStorage.setItem(enterKey, String(Date.now())); } catch {}
     location.assign(destination.href);
   }, true);
-  window.addEventListener('pageshow', event => { if (event.persisted) reset(); });
+  window.addEventListener('pageshow', event => {
+    if (!event.persisted) return;
+    reset();
+    document.querySelector('.page-entry-reveal')?.remove();
+  });
 })();
