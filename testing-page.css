@@ -282,7 +282,7 @@
 .testing-journey__visual .testing-stage__equipment{position:relative;inset:auto;left:auto;top:auto;width:min(48.7vw,935px);max-width:calc(100% - 24px);height:auto;aspect-ratio:935/604;transform:perspective(1500px) rotateY(var(--testing-rotate-y,0deg)) rotateX(var(--testing-rotate-x,0deg)) rotateZ(var(--testing-rotate-z,0deg));transform-origin:50% 54%;transform-style:preserve-3d;will-change:transform;opacity:1}
 .testing-journey__visual .testing-stage__image{opacity:.5;filter:none;object-fit:contain}
 .testing-journey__visual .testing-stage__equipment{z-index:1}
-.testing-rain__ambient{position:absolute;z-index:2;inset:0;display:block;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .16s linear}
+.testing-rain__ambient{position:absolute;z-index:0;inset:0;display:block;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .16s linear}
 .testing-rain__surface{position:absolute;z-index:2;inset:0;display:block;width:100%;height:100%;opacity:0;mix-blend-mode:normal;pointer-events:none;transition:opacity .16s linear}
 .testing-sequence,.testing-stage{background:transparent}
 .testing-sequence,.testing-about{position:relative;z-index:2}
