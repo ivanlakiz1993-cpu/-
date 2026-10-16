@@ -313,6 +313,7 @@ const rainEquipment = document.querySelector('[data-testing-equipment]');
 if (rainSection && rainSurface && rainAmbient && rainEquipment) {
   const surfaceContext = rainSurface.getContext('2d');
   const ambientContext = rainAmbient.getContext('2d');
+  const rainProductImage = rainEquipment.querySelector('.testing-stage__image');
   const surfaceWidth = rainSurface.width;
   const surfaceHeight = rainSurface.height;
   const surfaceCorners = [[14, 270], [862, 12], [1218, 172], [262, 462]];
@@ -321,6 +322,7 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     x: Math.random(), y: Math.random(), length: 7 + Math.random() * 12,
     speed: 0.55 + Math.random() * 0.55, alpha: 0.08 + Math.random() * 0.14
   }));
+  const waterSprites = [];
   let surfaceDrops = [];
   let ambientWidth = 0;
   let ambientHeight = 0;
@@ -334,6 +336,43 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     return t * t * (3 - 2 * t);
   };
   const mixRain = (start, end, amount) => start + (end - start) * amount;
+
+  // Build small RGBA droplet sprites once. Per-pixel neutral shading creates
+  // the dark meniscus and sharp specular glints without blue painted strokes.
+  const createWaterSprite = variant => {
+    const sprite = document.createElement('canvas');
+    sprite.width = 36;
+    sprite.height = 48;
+    const context = sprite.getContext('2d');
+    const pixels = context.createImageData(sprite.width, sprite.height);
+    const lightX = variant % 2 ? -0.34 : -0.46;
+    const lightY = -0.58;
+    for (let py = 0; py < sprite.height; py++) {
+      for (let px = 0; px < sprite.width; px++) {
+        const nx = (px + 0.5 - sprite.width / 2) / (sprite.width * 0.39);
+        const ny = (py + 0.5 - sprite.height / 2) / (sprite.height * 0.43);
+        const distance = Math.hypot(nx, ny);
+        if (distance > 1.08) continue;
+
+        const edge = clampRain((1.08 - distance) / 0.16);
+        const rim = Math.exp(-Math.pow((distance - 0.88) / 0.075, 2));
+        const lowerReflection = Math.exp(-Math.pow((distance - 0.76) / 0.12, 2)) * clampRain((ny + 0.18) * 1.4);
+        const specular = Math.exp(-(((nx - lightX) / 0.2) ** 2 + ((ny - lightY) / 0.13) ** 2));
+        const pinGlint = Math.exp(-(((nx - lightX * 0.72) / 0.075) ** 2 + ((ny - lightY * 0.84) / 0.06) ** 2));
+        const centerRefraction = Math.exp(-((nx / 0.62) ** 2 + ((ny + 0.04) / 0.64) ** 2));
+        const shade = clampRain(0.23 + rim * 0.28 + lowerReflection * 0.23 + specular * 0.62 + pinGlint * 0.8 + centerRefraction * 0.12, 0, 1);
+        const alpha = clampRain((0.08 + rim * 0.32 + lowerReflection * 0.16 + specular * 0.58 + pinGlint * 0.92) * edge, 0, 0.92);
+        const offset = (py * sprite.width + px) * 4;
+        pixels.data[offset] = 205 + shade * 50;
+        pixels.data[offset + 1] = 210 + shade * 45;
+        pixels.data[offset + 2] = 211 + shade * 44;
+        pixels.data[offset + 3] = Math.round(alpha * 255);
+      }
+    }
+    context.putImageData(pixels, 0, 0);
+    return sprite;
+  };
+  for (let variant = 0; variant < 4; variant++) waterSprites.push(createWaterSprite(variant));
 
   const resizeRainCanvas = () => {
     const bounds = rainAmbient.getBoundingClientRect();
@@ -375,62 +414,55 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     return {
       x: point.x,
       y: point.y,
-      radius: (4 + Math.random() * 4) / surfaceScale,
+      radius: (3.5 + Math.random() * 3.8) / surfaceScale,
       speed: 18 + Math.random() * 34,
       life: 160 + Math.random() * 380,
       pause: 0,
       drift: (Math.random() - 0.5) * 0.24,
       pathPhase: Math.random() * Math.PI * 2,
-      trailLimit: 2.6 + Math.random() * 1.5,
-      trail: []
+      sprite: waterSprites[Math.floor(Math.random() * waterSprites.length)],
+      phase: Math.random() * Math.PI * 2
     };
-  };
-
-  const drawSurfaceTrail = drop => {
-    if (drop.trail.length < 2) return;
-    const points = [...drop.trail].reverse();
-    const tail = points[0];
-    const head = points[points.length - 1];
-    const shine = surfaceContext.createLinearGradient(tail.x, tail.y, head.x, head.y);
-    shine.addColorStop(0, 'rgba(183,215,241,.025)');
-    shine.addColorStop(0.55, 'rgba(191,224,250,.11)');
-    shine.addColorStop(1, 'rgba(239,249,255,.27)');
-    surfaceContext.lineCap = 'round';
-    surfaceContext.lineJoin = 'round';
-    for (let index = 0; index < points.length - 1; index++) {
-      const progress = (index + 1) / (points.length - 1);
-      surfaceContext.beginPath();
-      surfaceContext.moveTo(points[index].x, points[index].y);
-      surfaceContext.lineTo(points[index + 1].x, points[index + 1].y);
-      surfaceContext.strokeStyle = shine;
-      surfaceContext.lineWidth = Math.max(0.65, drop.radius * (0.08 + progress * 0.21));
-      surfaceContext.globalAlpha = 0.3 + progress * 0.7;
-      surfaceContext.stroke();
-    }
-    surfaceContext.globalAlpha = 1;
   };
 
   const drawSurfaceDrop = drop => {
     const { x, y, radius } = drop;
-    const body = surfaceContext.createRadialGradient(
-      x - radius * 0.34, y - radius * 0.43, radius * 0.06,
-      x, y, radius
-    );
-    body.addColorStop(0, 'rgba(255,255,255,.78)');
-    body.addColorStop(0.2, 'rgba(218,237,255,.4)');
-    body.addColorStop(0.62, 'rgba(115,161,202,.19)');
-    body.addColorStop(1, 'rgba(12,25,40,.38)');
+    const width = radius * 1.7;
+    const height = radius * 2.05;
+    const pulse = 1 + Math.sin(drop.phase) * 0.025;
+
+    // Slightly magnify the pixels underneath each bead to suggest a clear lens.
+    if (rainProductImage?.complete && rainProductImage.naturalWidth) {
+      const sourceScaleX = rainProductImage.naturalWidth / surfaceWidth;
+      const sourceScaleY = rainProductImage.naturalHeight / surfaceHeight;
+      surfaceContext.save();
+      surfaceContext.beginPath();
+      surfaceContext.ellipse(x, y, width * 0.46, height * 0.48, -0.24, 0, Math.PI * 2);
+      surfaceContext.clip();
+      surfaceContext.globalAlpha = 0.28;
+      surfaceContext.drawImage(
+        rainProductImage,
+        (x - width * 0.5) * sourceScaleX,
+        (y - height * 0.5) * sourceScaleY,
+        width * 1.3 * sourceScaleX,
+        height * 1.3 * sourceScaleY,
+        x - width * 0.65,
+        y - height * 0.65,
+        width * 1.3,
+        height * 1.3
+      );
+      surfaceContext.restore();
+    }
+
+    surfaceContext.save();
+    surfaceContext.globalAlpha = 0.18;
     surfaceContext.beginPath();
-    surfaceContext.ellipse(x, y, radius * 0.82, radius, -0.36, 0, Math.PI * 2);
-    surfaceContext.fillStyle = body;
+    surfaceContext.ellipse(x + radius * 0.06, y + radius * 0.36, width * 0.38, height * 0.28, -0.24, 0, Math.PI * 2);
+    surfaceContext.fillStyle = 'rgba(0,0,0,.85)';
     surfaceContext.fill();
-    surfaceContext.strokeStyle = 'rgba(225,241,255,.46)';
-    surfaceContext.lineWidth = 0.9;
-    surfaceContext.stroke();
-    surfaceContext.beginPath();
-    surfaceContext.ellipse(x - radius * 0.24, y - radius * 0.38, radius * 0.24, radius * 0.12, -0.45, 0, Math.PI * 2);
-    surfaceContext.fillStyle = 'rgba(255,255,255,.72)';
-    surfaceContext.fill();
+    surfaceContext.globalAlpha = 1;
+    surfaceContext.drawImage(drop.sprite, x - width / 2, y - height / 2, width * pulse, height * pulse);
+    surfaceContext.restore();
   };
 
   const clearRainCanvases = () => {
@@ -494,10 +526,7 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     }
 
     if (wetness > 0.005) {
-      surfaceContext.globalCompositeOperation = 'destination-out';
-      surfaceContext.fillStyle = 'rgba(0,0,0,0.018)';
-      surfaceContext.fillRect(0, 0, surfaceWidth, surfaceHeight);
-      surfaceContext.globalCompositeOperation = 'source-over';
+      surfaceContext.clearRect(0, 0, surfaceWidth, surfaceHeight);
       surfaceContext.save();
       surfaceContext.beginPath();
       surfaceCorners.forEach(([x, y], index) => index ? surfaceContext.lineTo(x, y) : surfaceContext.moveTo(x, y));
@@ -521,15 +550,9 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
           drop.y += dy;
           drop.life -= dy;
           drop.pathPhase += dt * 3.4;
-          drop.trail.unshift({ x: drop.x, y: drop.y });
-          while (drop.trail.length > 2) {
-            const lastPoint = drop.trail[drop.trail.length - 1];
-            if (Math.hypot(drop.x - lastPoint.x, drop.y - lastPoint.y) <= drop.radius * drop.trailLimit) break;
-            drop.trail.pop();
-          }
+          drop.phase += dt * 2.4;
           if (Math.random() < 0.01) drop.pause = 0.12 + Math.random() * 0.36;
         }
-        drawSurfaceTrail(drop);
         drawSurfaceDrop(drop);
       }
       surfaceContext.restore();
