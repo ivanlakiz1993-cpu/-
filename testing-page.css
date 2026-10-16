@@ -56,22 +56,22 @@
 .testing-stage__button:hover::before,.testing-stage__button:focus-visible::before{opacity:1}
 .testing-stage__equipment{position:absolute;z-index:1;left:calc(50% + 340px);top:50%;width:min(53.125vw,calc(67svh * 1.548),1020px);aspect-ratio:1020/659;transform:perspective(1500px) translate3d(calc(-50% + var(--equipment-x,0px)),calc(-50% + var(--equipment-y,0px)),var(--equipment-depth,0px)) rotateX(var(--equipment-tilt-x,0deg)) rotateY(var(--equipment-tilt-y,0deg)) scale(var(--equipment-scale,1)) rotate(var(--equipment-rotate,0deg));transform-origin:50% 55%;transform-style:preserve-3d;will-change:transform;pointer-events:none}
 .testing-stage__image{position:absolute;inset:0;width:100%;height:100%}
-.testing-stage__image{z-index:1;object-fit:contain;filter:drop-shadow(0 26px 48px rgba(0,0,0,.42))}
+.testing-stage__image{z-index:1;object-fit:contain;filter:drop-shadow(0 26px 48px rgba(0,0,0,.42));transition:opacity .72s ease-in-out}
+.testing-stage__frost-image{position:absolute;z-index:2;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .72s ease-in-out;pointer-events:none}
+.testing-stage__equipment.is-frosted .testing-stage__image{opacity:0}
+.testing-stage__equipment.is-frosted .testing-stage__frost-image{opacity:.5}
 @media(max-width:1000px){.testing-stage__breadcrumb{top:92px;left:clamp(24px,5.2vw,100px)}.testing-stage__copy{width:43vw}.testing-stage__equipment{left:62%;width:min(55vw,calc(56svh * 1.548),680px)}.testing-stage__copy h1{font-size:clamp(36px,5.4vw,54px)}.testing-stage__copy p{font-size:18px}.testing-stage__button{min-height:72px}}
 @media(max-width:650px){.testing-stage{min-height:520px}.testing-stage__breadcrumb{top:86px;left:20px}.testing-stage__copy{top:22%;left:20px;transform:none;width:calc(100% - 40px);gap:18px}.testing-stage__copy h1{font-size:clamp(34px,9vw,48px);max-width:520px}.testing-stage__copy p{font-size:16px;max-width:480px}.testing-stage__button{width:100%;min-height:62px;font-size:15px}.testing-stage__equipment{left:50%;top:67%;width:min(112vw,calc(48svh * 1.548),620px)}}
 @media(min-width:1001px){.testing-stage{height:824px;min-height:824px;background:#000}.testing-stage__breadcrumb{left:100px;top:111px;gap:3px}.testing-stage__copy{left:100px;top:145px;transform:none;width:calc(100% - 200px);gap:30px}.testing-stage__copy h1{font-size:64px;letter-spacing:.01em;max-width:1200px}.testing-stage__copy p{width:min(561px,100%);font-size:18px;max-width:700px}.testing-stage__button{margin-top:10px;font:400 24px/1.25 "Yandex Sans Text",Arial,sans-serif;letter-spacing:-.05em}.testing-stage__equipment{left:50%;top:calc(50% + 110px);width:min(48.7vw,935px);aspect-ratio:935/604}.testing-stage__image{opacity:.5;filter:none}}
 @media(prefers-reduced-motion:reduce){.testing-stage__equipment{will-change:auto}.testing-stage__button,.testing-stage__button::before{transition:none}}
 
 /* Climate tests section — Figma 2585:2013 */
-.climate-tests{position:relative;margin-top:150px;background:#000;color:#fff;overflow:visible}
+.climate-tests{position:relative;z-index:2;margin-top:150px;background:transparent;color:#fff;overflow:visible}
 .climate-tests__track{position:relative;height:auto}
-.climate-tests__stage{position:relative;min-height:795px;background:#000;overflow:hidden}
+.climate-tests__stage{position:relative;min-height:795px;background:transparent;overflow:hidden}
 .climate-tests__inner{position:relative;width:var(--wrap);min-height:795px;margin-inline:auto}
 .climate-tests h2{margin:0;font:400 64px/1 var(--sans);letter-spacing:.64px;color:#fff}
 .climate-tests__body{position:relative;min-height:681px;margin-top:50px}
-.climate-tests__product-stack{position:absolute;z-index:0;left:0;top:calc(50% + 36.5px);width:min(759px,46vw);aspect-ratio:759/491;transform:translateY(-50%);pointer-events:none}
-.climate-tests__product-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .72s ease-in-out}
-.climate-tests__product-photo.is-active{opacity:.5}
 .climate-tests__details{position:relative;z-index:2;width:min(860px,calc(100% - min(631px,48%) - 30px))}
 .climate-tests__list{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
 .climate-tests__list li{display:flex;align-items:flex-start;padding:20px 30px;border-radius:10px;background:#121212;font:400 18px/1.2 var(--sans);color:#f5f5f5}
@@ -96,7 +96,6 @@
   .climate-tests__inner{width:var(--wrap);min-height:0;padding:48px 0 64px}
   .climate-tests h2{font-size:clamp(38px,5.6vw,64px)}
   .climate-tests__body{display:flex;flex-direction:column;align-items:stretch;gap:28px;min-height:0;margin-top:30px}
-  .climate-tests__product-stack{position:relative;left:auto;top:auto;z-index:0;align-self:center;width:min(100%,759px);transform:none}
   .climate-tests__details{width:100%}
   .climate-tests__list li{font-size:clamp(16px,1.8vw,18px)}
   .climate-tests__equipment{padding:clamp(22px,3.2vw,30px)}
@@ -121,7 +120,7 @@
   .climate-tests__pagination span{width:6px;height:9px}
   .climate-tests__pagination span.is-active{height:64px}
 }
-@media(prefers-reduced-motion:reduce){.climate-tests__product-photo,.climate-tests__camera-photo,.climate-tests__pagination span{transition:none}}
+@media(prefers-reduced-motion:reduce){.climate-tests__camera-photo,.climate-tests__pagination span,.testing-stage__frost-image{transition:none}}
 
 /* Mechanical tests — Figma 1731:3723 */
 .mechanical-tests{position:relative;margin-top:85px;background:#000;color:#fff}
@@ -351,16 +350,12 @@
 }
 
 /* Climate tests — desktop, tablet and mobile Figma layouts */
-.climate-tests__product-stack{left:50%;top:calc(50% + 16px);width:min(935px,54.4vw);aspect-ratio:935/604;transform:translate(-50%,-50%)}
-.climate-tests__product-photo{object-fit:contain}
-.climate-tests__vibro-photo{display:none}
 .climate-tests__equipment dd{color:var(--orange)}
 @media(min-width:1101px){
   .climate-tests__track{height:calc(740px + 70svh)}
   .climate-tests__stage{height:740px;min-height:740px;overflow:visible}
   .climate-tests__inner{height:auto;min-height:740px;padding-top:0}
   .climate-tests__body{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;min-height:0;margin-top:50px}
-  .climate-tests__product-stack{top:calc(50% + 16px)}
   .climate-tests__details{width:min(860px,calc(100% - min(631px,48%) - 30px))}
   .climate-tests__equipment{gap:30px}
   .climate-tests__visuals{position:relative;top:auto;right:auto;flex:none}
@@ -372,9 +367,6 @@
   .climate-tests__inner{width:calc(100% - 2 * clamp(24px,4.6875vw,48px));height:auto;min-height:0;margin-inline:auto;padding:0}
   .climate-tests h2{font-size:38px;line-height:.9;letter-spacing:.38px}
   .climate-tests__body{position:relative;display:block;height:auto;min-height:762px;margin-top:30px}
-  .climate-tests__product-stack{left:50%;top:117px;width:min(761px,100%);aspect-ratio:761/492;transform:translateX(-50%)}
-  .climate-tests__product-photo{display:none}
-  .climate-tests__vibro-photo{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;opacity:.5}
   .climate-tests__details{width:100%}
   .climate-tests__list{gap:10px}
   .climate-tests__list li{padding:20px 30px;font-size:16px;line-height:1.2;letter-spacing:.16px}
@@ -394,9 +386,6 @@
   .climate-tests__inner{position:relative;width:calc(100% - 24px);height:auto;min-height:0;margin-inline:auto;padding:0 0 20px}
   .climate-tests h2{font-size:38px;line-height:.9;letter-spacing:.38px}
   .climate-tests__body{position:static;display:flex;flex-direction:column;align-items:stretch;gap:10px;height:auto;min-height:0;margin-top:30px}
-  .climate-tests__product-stack{left:50%;top:454px;width:min(392px,100vw);aspect-ratio:392/253;transform:translateX(-50%)}
-  .climate-tests__product-photo{display:none}
-  .climate-tests__vibro-photo{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;opacity:.5}
   .climate-tests__details{width:100%}
   .climate-tests__list{gap:10px}
   .climate-tests__list li{min-height:0;padding:12px 8px;border-radius:10px;font-size:16px;line-height:1.2;letter-spacing:.16px}

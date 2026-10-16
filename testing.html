@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=20261016-menu-alignment-2">
   <link rel="stylesheet" href="hero-grid.css?v=20261013-hero-split-seam-3">
   <link rel="stylesheet" href="layout-gutters.css?v=20261012-figma-gutters-1">
-  <link rel="stylesheet" href="testing-page.css?v=20261016-smooth-pauses-2">
+  <link rel="stylesheet" href="testing-page.css?v=20261016-climate-layout-2">
   <link rel="stylesheet" href="page-transition.css?v=20261016-entry-ready-2">
   <script src="page-transition.js?v=20261016-entry-ready-2"></script>
 </head>
@@ -51,6 +51,7 @@
       <div class="testing-journey__visual" aria-hidden="true">
         <div class="testing-stage__equipment" data-testing-equipment>
           <img class="testing-stage__image" src="assets/equipment-cutout.png" alt="">
+          <img class="testing-stage__frost-image" src="assets/equipment-frost.png" alt="">
           <canvas class="testing-rain__surface" data-rain-surface width="1230" height="756" aria-hidden="true"></canvas>
         </div>
         <canvas class="testing-rain__ambient" data-rain-ambient aria-hidden="true"></canvas>
@@ -97,18 +98,12 @@
         </div>
       </div>
       </section>
-    </div>
     <section class="climate-tests" aria-labelledby="climate-tests-title" data-climate-carousel>
       <div class="climate-tests__track" data-climate-track>
         <div class="climate-tests__stage" data-climate-stage>
           <div class="climate-tests__inner">
             <h2 id="climate-tests-title">Климатические испытания</h2>
             <div class="climate-tests__body">
-              <div class="climate-tests__product-stack" aria-hidden="true">
-                <img class="climate-tests__product-photo is-active" data-climate-product src="assets/equipment-cutout.png" width="1561" height="1008" alt="" loading="lazy" decoding="async">
-                <img class="climate-tests__product-photo" data-climate-product src="assets/equipment-frost.png" width="1561" height="1007" alt="" loading="lazy" decoding="async">
-                <img class="climate-tests__vibro-photo" src="assets/testing-mechanical-shaker.jpg" width="1200" height="985" alt="" loading="lazy" decoding="async">
-              </div>
               <div class="climate-tests__details">
                 <ul class="climate-tests__list" aria-label="Виды климатических испытаний">
                   <li>Испытание на воздействие повышенной температуры среды</li>
@@ -141,6 +136,7 @@
         </div>
       </div>
     </section>
+    </div>
     <section class="mechanical-tests" aria-labelledby="mechanical-tests-title">
       <div class="mechanical-tests__inner">
         <h2 id="mechanical-tests-title">Механические испытания</h2>
@@ -257,6 +253,6 @@
     </div>
     <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
   </footer>
-  <script src="testing-page.js?v=20261016-smooth-pauses-3"></script>
+  <script src="testing-page.js?v=20261016-climate-layout-2"></script>
 </body>
 </html>

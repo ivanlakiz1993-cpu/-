@@ -151,7 +151,7 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   revealGroup('.topbar .brand-mark, .topbar .brand > span, .menu-toggle > span, .menu-toggle .menu-icon > i', 75);
   revealGroup('.nav .menu-nav-links a, .nav .menu-social__link, .testing-stage__breadcrumb > *', 55);
   revealGroup('.testing-stage__button', 125);
-  revealGroup('.climate-tests__product-stack, .climate-tests__visuals', 120);
+  revealGroup('.climate-tests__visuals', 120);
   revealGroup('.climate-tests__pagination span', 100);
   revealGroup('.mechanical-tests__ambient img, .mechanical-tests__shaker img', 100);
   revealGroup('.footer-brand .brand-mark, .footer-brand > span, .footer-nav a, .footer-legal a', 60);
@@ -685,8 +685,8 @@ const climateCarousel = document.querySelector('[data-climate-carousel]');
 if (climateCarousel) {
   const track = climateCarousel.querySelector('[data-climate-track]');
   const stage = climateCarousel.querySelector('[data-climate-stage]');
-  const products = [...climateCarousel.querySelectorAll('[data-climate-product]')];
   const cameras = [...climateCarousel.querySelectorAll('[data-climate-camera]')];
+  const sharedProduct = document.querySelector('[data-testing-equipment]');
   const pages = [...climateCarousel.querySelectorAll('[data-climate-page]')];
   const title = climateCarousel.querySelector('[data-climate-camera-title]');
   const highTemperature = climateCarousel.querySelector('[data-climate-high-temp]');
@@ -707,7 +707,7 @@ if (climateCarousel) {
     if (index === active && isCompactLayout === activeCompactLayout) return;
     active = index;
     activeCompactLayout = isCompactLayout;
-    products.forEach((image, imageIndex) => image.classList.toggle('is-active', imageIndex === index));
+    sharedProduct?.classList.toggle('is-frosted', index === 1);
     cameras.forEach((image, imageIndex) => image.classList.toggle('is-active', imageIndex === index));
     pages.forEach((page, pageIndex) => page.classList.toggle('is-active', pageIndex === index));
     const baseSpec = cameraSpecs[index];
@@ -722,7 +722,7 @@ if (climateCarousel) {
 
   const updateClimateState = () => {
     climateFrame = 0;
-    if (!track || !stage || products.length < 2 || cameras.length < 2) return;
+    if (!track || !stage || cameras.length < 2) return;
     if (compactClimateLayout.matches) {
       showClimateState(0);
       return;
