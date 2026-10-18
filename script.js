@@ -24,7 +24,7 @@ const benefitDescription = document.querySelector('[data-benefit-description]');
 const benefitCopy = document.querySelector('[data-benefit-copy]');
 const benefitArt = document.querySelector('[data-benefit-art]');
 const benefitMore = document.querySelector('[data-benefit-more]');
-const benefitImages = [...document.querySelectorAll('.benefit-image')];
+const benefitImage = document.querySelector('[data-benefit-image]');
 const benefitButtons = [...document.querySelectorAll('[data-benefit-index]')];
 let requestTextReveal = () => {};
 let refreshTextRevealLayout = () => {};
@@ -168,9 +168,23 @@ const benefitStates = [
   },
 ];
 
-if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && benefitCopy && benefitArt) {
+if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && benefitCopy && benefitArt && benefitImage) {
   let activeBenefit = 0;
   let scrollFrame = 0;
+  let imageSwapVersion = 0;
+  let copySwapVersion = 0;
+
+  const benefitArtwork = [
+    { src: 'assets/benefit-warranty.png', className: 'benefit-image--guarantee' },
+    { src: 'assets/benefit-quality.png', className: 'benefit-image--quality' },
+    { src: 'assets/benefit-production.png', className: 'benefit-image--production' },
+  ];
+  const preloadedBenefitArtwork = benefitArtwork.map(({ src }) => {
+    const image = new Image();
+    image.src = src;
+    image.decode?.().catch(() => {});
+    return image;
+  });
 
 
 
@@ -200,16 +214,50 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   };
   const setBenefitCard = (index) => {
     benefitArt.dataset.state = String(index);
-    benefitImages.forEach((image, imageIndex) => {
-      image.classList.toggle('is-active', imageIndex === index);
-    });
+    const version = ++imageSwapVersion;
+    if (Number(benefitImage.dataset.imageIndex) === index) {
+      benefitImage.classList.remove('is-changing');
+      return;
+    }
+
+    const nextArtwork = benefitArtwork[index];
+    benefitImage.classList.add('is-changing');
+
+    const swapImage = async () => {
+      if (version !== imageSwapVersion) return;
+      benefitImage.src = nextArtwork.src;
+      benefitImage.className = `benefit-image ${nextArtwork.className} is-active is-changing`;
+      benefitImage.dataset.imageIndex = String(index);
+      try {
+        await (preloadedBenefitArtwork[index]?.decode?.() ?? benefitImage.decode?.());
+      } catch {}
+      if (version !== imageSwapVersion) return;
+      requestAnimationFrame(() => {
+        if (version === imageSwapVersion) benefitImage.classList.remove('is-changing');
+      });
+    };
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) swapImage();
+    else window.setTimeout(swapImage, 220);
   };
 
   const showBenefit = (index) => {
     if (index === activeBenefit) return;
     activeBenefit = index;
-    updateBenefitText(index);
     setBenefitCard(index);
+
+    const version = ++copySwapVersion;
+    benefitCopy.classList.add('is-switching');
+    const swapText = () => {
+      if (version !== copySwapVersion) return;
+      updateBenefitText(index);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (version === copySwapVersion) benefitCopy.classList.remove('is-switching');
+      }));
+    };
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) swapText();
+    else window.setTimeout(swapText, 180);
   };
 
   const updateBenefitFromScroll = () => {
