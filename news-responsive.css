@@ -18,9 +18,9 @@
     gap:15px;
   }
   .news-intro__copy { width:100%;gap:30px; }
-  .news-intro h2 { margin:0;font-size:40px;line-height:.85;letter-spacing:.4px; }
-  .news-intro p { margin:0;font-size:16px;line-height:1.2;letter-spacing:0; }
-  .all-news { margin:0;font-size:24px;line-height:30px; }
+  .news-intro h2 { margin:0;font-size:38px;line-height:.9;letter-spacing:.38px; }
+  .news-intro p { margin:0;font-size:16px;line-height:1.2;letter-spacing:.16px; }
+  .all-news { margin:0;font-size:18px;line-height:1.25;letter-spacing:0; }
   .news-cards {
     display:flex;
     gap:15px;
@@ -45,8 +45,8 @@
     background-position:center;
     scroll-snap-align:start;
   }
-  .news-card span { font-size:16px;line-height:1.1;letter-spacing:-.5px;white-space:normal; }
-  .news-card--victory span { font-size:16px; }
+  .news-card span { font-size:18px;line-height:1.2;letter-spacing:0;white-space:normal; }
+  .news-card--victory span { font-size:18px;line-height:1.2;letter-spacing:0; }
   .news-card--lab,.news-card--march { display:flex; }
   .news-card--lab { order:1; }
   .news-card--march { order:2; }
@@ -77,9 +77,9 @@
     gap:15px;
   }
   .news-intro__copy { width:100%;gap:30px; }
-  .news-intro h2 { margin:0;font-size:40px;line-height:.85;letter-spacing:.4px; }
-  .news-intro p { margin:0;font-size:14px;line-height:1.35;letter-spacing:0; }
-  .all-news { margin:0;font-size:24px;line-height:30px; }
+  .news-intro h2 { margin:0;font-size:38px;line-height:.9;letter-spacing:.38px; }
+  .news-intro p { margin:0;font-size:16px;line-height:1.2;letter-spacing:.16px; }
+  .all-news { margin:0;font-size:16px;line-height:1.25;letter-spacing:-.8px; }
   .news-cards {
     display:flex;
     gap:10px;
@@ -103,7 +103,7 @@
     background-size:cover;
     background-position:center;
   }
-  .news-card span,.news-card--victory span { font-size:16px;line-height:1.1;letter-spacing:-.5px;white-space:normal; }
+  .news-card span,.news-card--victory span { font-size:16px;line-height:1.2;letter-spacing:.16px;white-space:normal; }
   .news-card--lab,.news-card--march { display:flex; }
   .news-card--lab { order:1; }
   .news-card--march { order:2; }
