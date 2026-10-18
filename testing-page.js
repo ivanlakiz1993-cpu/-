@@ -152,7 +152,6 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   revealGroup('.nav .menu-nav-links a, .nav .menu-social__link, .testing-stage__breadcrumb > *', 55);
   revealGroup('.testing-stage__button', 125);
   revealGroup('.climate-tests__visuals', 120);
-  revealGroup('.climate-tests__pagination span', 100);
   revealGroup('.mechanical-tests__shaker img', 100);
   revealGroup('.footer-brand .brand-mark, .footer-brand > span, .footer-nav a, .footer-legal a', 60);
   revealGroup('.footer-contact-link, .footer-social-link', 70);
@@ -304,9 +303,11 @@ document.querySelectorAll('.testing-stage__button').forEach(button => {
   });
 });
 
-// Scroll-linked rain is limited to the second section. The shared product stays
-// in its sticky visual while the overlays are clipped to its top face.
+// The product remains one shared visual across the second and third sections:
+// rain and surface water give way to frost on the same image and canvas.
+const testingJourney = document.querySelector('[data-testing-journey]');
 const rainSection = document.querySelector('.testing-about');
+const climateSection = document.querySelector('.climate-tests');
 const rainSurface = document.querySelector('[data-rain-surface]');
 const rainAmbient = document.querySelector('[data-rain-ambient]');
 const rainEquipment = document.querySelector('[data-testing-equipment]');
@@ -402,28 +403,122 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     ambientContext.setTransform(rainDpr, 0, 0, rainDpr, 0, 0);
   };
 
-  const pointOnSurface = () => {
+  const pointOnSurface = (corners = surfaceCorners, maxDepth = 0.76) => {
     const across = Math.random();
-    const depth = Math.random() * 0.76;
-    const leftX = mixRain(surfaceCorners[0][0], surfaceCorners[1][0], across);
-    const leftY = mixRain(surfaceCorners[0][1], surfaceCorners[1][1], across);
-    const rightX = mixRain(surfaceCorners[3][0], surfaceCorners[2][0], across);
-    const rightY = mixRain(surfaceCorners[3][1], surfaceCorners[2][1], across);
+    const depth = Math.random() * maxDepth;
+    const leftX = mixRain(corners[0][0], corners[1][0], across);
+    const leftY = mixRain(corners[0][1], corners[1][1], across);
+    const rightX = mixRain(corners[3][0], corners[2][0], across);
+    const rightY = mixRain(corners[3][1], corners[2][1], across);
     return {
       x: mixRain(leftX, rightX, depth),
       y: mixRain(leftY, rightY, depth)
     };
   };
 
-  const isOnSurface = (x, y) => {
+  const isOnPolygon = (x, y, corners) => {
     let inside = false;
-    for (let i = 0, j = surfaceCorners.length - 1; i < surfaceCorners.length; j = i++) {
-      const [xi, yi] = surfaceCorners[i];
-      const [xj, yj] = surfaceCorners[j];
+    for (let i = 0, j = corners.length - 1; i < corners.length; j = i++) {
+      const [xi, yi] = corners[i];
+      const [xj, yj] = corners[j];
       const crosses = (yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
       if (crosses) inside = !inside;
     }
     return inside;
+  };
+  const isOnSurface = (x, y) => isOnPolygon(x, y, surfaceCorners);
+
+  const distanceToSegment = (x, y, start, end) => {
+    const dx = end[0] - start[0];
+    const dy = end[1] - start[1];
+    const lengthSquared = dx * dx + dy * dy;
+    const projection = clampRain(((x - start[0]) * dx + (y - start[1]) * dy) / lengthSquared);
+    return Math.hypot(x - (start[0] + projection * dx), y - (start[1] + projection * dy));
+  };
+
+  let frostRandomState = 73129;
+  const frostRandom = () => {
+    frostRandomState = (frostRandomState * 16807) % 2147483647;
+    return (frostRandomState - 1) / 2147483646;
+  };
+  const frostFaces = [
+    { corners: surfaceCorners, count: 1500, reach: 330, opacity: 1 },
+    { corners: [[9, 265], [203, 440], [228, 748], [41, 694]], count: 380, reach: 230, opacity: 0.62 },
+    { corners: [[203, 440], [1218, 166], [1218, 566], [288, 751]], count: 1120, reach: 250, opacity: 0.72 }
+  ].map(face => ({
+    ...face,
+    crystals: Array.from({ length: face.count }, () => {
+      const point = pointOnSurface(face.corners, 1);
+      let edgeDistance = Infinity;
+      for (let index = 0; index < face.corners.length; index++) {
+        const start = face.corners[index];
+        const end = face.corners[(index + 1) % face.corners.length];
+        edgeDistance = Math.min(edgeDistance, distanceToSegment(point.x, point.y, start, end));
+      }
+      return {
+        x: point.x,
+        y: point.y,
+        edgeDistance,
+        size: 0.55 + Math.pow(frostRandom(), 1.6) * 3.4,
+        angle: frostRandom() * Math.PI,
+        opacity: 0.16 + frostRandom() * 0.3,
+        branch: frostRandom() > 0.68
+      };
+    })
+  }));
+
+  const drawFrost = progress => {
+    if (progress <= 0.002) return;
+    // Fine crystals spread independently over the lid and the two visible
+    // metal faces, following irregular edge fronts rather than a flat wipe.
+    for (const face of frostFaces) {
+      surfaceContext.save();
+      surfaceContext.beginPath();
+      face.corners.forEach(([x, y], index) => index ? surfaceContext.lineTo(x, y) : surfaceContext.moveTo(x, y));
+      surfaceContext.closePath();
+      surfaceContext.clip();
+
+      for (const crystal of face.crystals) {
+        const edgeNoise = Math.sin(crystal.x * 0.031 + crystal.y * 0.017) * 17 +
+          Math.sin(crystal.x * 0.009 - crystal.y * 0.026) * 13;
+        const growth = clampRain((progress * face.reach + edgeNoise - crystal.edgeDistance) / 38);
+        if (growth <= 0) continue;
+        const size = crystal.size * (0.28 + growth * 0.72);
+        const alpha = crystal.opacity * growth * face.opacity * (0.55 + progress * 0.45);
+        surfaceContext.save();
+        surfaceContext.translate(crystal.x, crystal.y);
+        surfaceContext.rotate(crystal.angle);
+        surfaceContext.lineCap = 'round';
+        surfaceContext.lineWidth = 0.38 + size * 0.075;
+        surfaceContext.strokeStyle = `rgba(218,232,245,${alpha.toFixed(3)})`;
+        surfaceContext.beginPath();
+        surfaceContext.moveTo(0, -size);
+        surfaceContext.lineTo(0, size);
+        surfaceContext.moveTo(-size * 0.86, -size * 0.5);
+        surfaceContext.lineTo(size * 0.86, size * 0.5);
+        surfaceContext.moveTo(-size * 0.86, size * 0.5);
+        surfaceContext.lineTo(size * 0.86, -size * 0.5);
+        surfaceContext.stroke();
+
+        if (crystal.branch && size > 1.5) {
+          surfaceContext.lineWidth *= 0.72;
+          surfaceContext.beginPath();
+          for (const arm of [0, Math.PI * 2 / 3, Math.PI * 4 / 3]) {
+            for (const side of [-1, 1]) {
+              const branchAngle = arm + side * 0.72;
+              const startRadius = size * 0.25;
+              const endRadius = size * 0.67;
+              surfaceContext.moveTo(Math.cos(arm) * startRadius, Math.sin(arm) * startRadius);
+              surfaceContext.lineTo(Math.cos(arm) * endRadius + Math.cos(branchAngle) * size * 0.32,
+                Math.sin(arm) * endRadius + Math.sin(branchAngle) * size * 0.32);
+            }
+          }
+          surfaceContext.stroke();
+        }
+        surfaceContext.restore();
+      }
+      surfaceContext.restore();
+    }
   };
 
   const makeSurfaceDrop = () => {
@@ -570,15 +665,20 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     rainFrame = 0;
     if (document.hidden) return;
 
-    const rect = rainSection.getBoundingClientRect();
-    const inView = rect.bottom > 0 && rect.top < window.innerHeight;
-    if (!inView) {
+    const journeyBounds = testingJourney.getBoundingClientRect();
+    const journeyInView = journeyBounds.bottom > 0 && journeyBounds.top < window.innerHeight;
+    if (!journeyInView) {
       clearRainCanvases();
       return;
     }
 
+    const rect = rainSection.getBoundingClientRect();
     const sectionProgress = clampRain((window.innerHeight - rect.top) / (window.innerHeight + rect.height));
     const rotationProgress = smoothRain(0.02, 0.9, sectionProgress);
+    const climateBounds = climateSection.getBoundingClientRect();
+    const climateProgress = clampRain((window.innerHeight - climateBounds.top) /
+      (window.innerHeight + climateBounds.height));
+    const frostProgress = smoothRain(0.015, 0.82, climateProgress);
     const motionScale = reducedMotion ? 0.35 : 1;
     const rotationY = 28 * rotationProgress * motionScale;
     const rotationX = 10 * rotationProgress * motionScale;
@@ -588,12 +688,12 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     rainEquipment.style.setProperty('--testing-rotate-z', `${rotationZ.toFixed(2)}deg`);
     const gravity = surfaceGravity(rotationX, rotationY, rotationZ);
     const rainIntensity = smoothRain(0.025, 0.2, sectionProgress) * (1 - smoothRain(0.78, 0.96, sectionProgress));
-    const wetness = smoothRain(0.035, 0.18, sectionProgress) * (1 - smoothRain(0.9, 0.99, sectionProgress));
+    const wetness = smoothRain(0.035, 0.18, sectionProgress) * (1 - smoothRain(0.76, 0.93, sectionProgress));
     const dt = Math.min(0.05, Math.max(0, (now - previousRainTime) / 1000));
     previousRainTime = now;
 
     rainAmbient.style.opacity = rainIntensity.toFixed(3);
-    rainSurface.style.opacity = wetness.toFixed(3);
+    rainSurface.style.opacity = Math.max(wetness, frostProgress * 0.88).toFixed(3);
     ambientContext.clearRect(0, 0, ambientWidth, ambientHeight);
 
     if (rainIntensity > 0.005 && ambientWidth && ambientHeight) {
@@ -619,8 +719,8 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
       }
     }
 
+    surfaceContext.clearRect(0, 0, surfaceWidth, surfaceHeight);
     if (wetness > 0.005) {
-      surfaceContext.clearRect(0, 0, surfaceWidth, surfaceHeight);
       surfaceContext.save();
       surfaceContext.beginPath();
       surfaceCorners.forEach(([x, y], index) => index ? surfaceContext.lineTo(x, y) : surfaceContext.moveTo(x, y));
@@ -661,11 +761,11 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
       surfaceContext.restore();
       surfaceDrops = surfaceDrops.filter(drop => drop.life > 0 && isOnSurface(drop.x, drop.y));
     } else {
-      surfaceContext.clearRect(0, 0, surfaceWidth, surfaceHeight);
       surfaceDrops = [];
     }
+    drawFrost(frostProgress);
 
-    if (inView || rainIntensity > 0.005 || wetness > 0.005 || surfaceDrops.length) {
+    if (rainIntensity > 0.005 || wetness > 0.005 || surfaceDrops.length) {
       rainFrame = requestAnimationFrame(renderRainFrame);
     }
   };
@@ -679,67 +779,4 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
   document.addEventListener('visibilitychange', scheduleRainFrame);
   if ('ResizeObserver' in window) new ResizeObserver(() => { resizeRainCanvas(); scheduleRainFrame(); }).observe(rainAmbient);
   scheduleRainFrame();
-}
-
-const climateCarousel = document.querySelector('[data-climate-carousel]');
-if (climateCarousel) {
-  const track = climateCarousel.querySelector('[data-climate-track]');
-  const stage = climateCarousel.querySelector('[data-climate-stage]');
-  const cameras = [...climateCarousel.querySelectorAll('[data-climate-camera]')];
-  const sharedProduct = document.querySelector('[data-testing-equipment]');
-  const pages = [...climateCarousel.querySelectorAll('[data-climate-page]')];
-  const title = climateCarousel.querySelector('[data-climate-camera-title]');
-  const highTemperature = climateCarousel.querySelector('[data-climate-high-temp]');
-  const lowTemperature = climateCarousel.querySelector('[data-climate-low-temp]');
-  const humidityRow = climateCarousel.querySelector('[data-climate-humidity]');
-  const cameraSpecs = [
-    { title: 'Климатическая камера S-B-8200', highTemperature: 'до 210 °C', lowTemperature: 'до −80 °C', humidity: true },
-    { title: 'Климатическая камера THCB-125', highTemperature: 'до 150 °C', lowTemperature: 'до −70 °C', humidity: false }
-  ];
-  let active = -1;
-  let activeCompactLayout = null;
-  let climateFrame = 0;
-  const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
-  const compactClimateLayout = matchMedia('(max-width: 1100px)');
-
-  const showClimateState = (index) => {
-    const isCompactLayout = compactClimateLayout.matches;
-    if (index === active && isCompactLayout === activeCompactLayout) return;
-    active = index;
-    activeCompactLayout = isCompactLayout;
-    sharedProduct?.classList.toggle('is-frosted', index === 1);
-    cameras.forEach((image, imageIndex) => image.classList.toggle('is-active', imageIndex === index));
-    pages.forEach((page, pageIndex) => page.classList.toggle('is-active', pageIndex === index));
-    const baseSpec = cameraSpecs[index];
-    const spec = index === 0 && isCompactLayout
-      ? { ...baseSpec, highTemperature: 'до 150 °C', lowTemperature: 'до −70 °C' }
-      : baseSpec;
-    if (title) title.textContent = spec.title;
-    if (highTemperature) highTemperature.textContent = spec.highTemperature;
-    if (lowTemperature) lowTemperature.textContent = spec.lowTemperature;
-    if (humidityRow) humidityRow.hidden = !spec.humidity;
-  };
-
-  const updateClimateState = () => {
-    climateFrame = 0;
-    if (!track || !stage || cameras.length < 2) return;
-    if (compactClimateLayout.matches) {
-      showClimateState(0);
-      return;
-    }
-    const trackBounds = track.getBoundingClientRect();
-    const stickyTravel = Math.max(1, track.offsetHeight - stage.offsetHeight);
-    const progress = clamp(-trackBounds.top / stickyTravel);
-    showClimateState(progress >= 0.5 ? 1 : 0);
-  };
-
-  const scheduleClimateUpdate = () => {
-    if (!climateFrame) climateFrame = requestAnimationFrame(updateClimateState);
-  };
-  const climateObserver = new ResizeObserver(scheduleClimateUpdate);
-  climateObserver.observe(track);
-  climateObserver.observe(stage);
-  addEventListener('scroll', scheduleClimateUpdate, { passive: true });
-  addEventListener('resize', scheduleClimateUpdate, { passive: true });
-  scheduleClimateUpdate();
 }
