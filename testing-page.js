@@ -153,7 +153,7 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   revealGroup('.testing-stage__button', 125);
   revealGroup('.climate-tests__visuals', 120);
   revealGroup('.climate-tests__pagination span', 100);
-  revealGroup('.mechanical-tests__ambient img, .mechanical-tests__shaker img', 100);
+  revealGroup('.mechanical-tests__shaker img', 100);
   revealGroup('.footer-brand .brand-mark, .footer-brand > span, .footer-nav a, .footer-legal a', 60);
   revealGroup('.footer-contact-link, .footer-social-link', 70);
 
