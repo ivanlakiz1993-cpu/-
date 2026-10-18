@@ -305,7 +305,7 @@ document.querySelectorAll('.testing-stage__button').forEach(button => {
 });
 
 // The product remains one shared visual across the second and third sections:
-// rain and surface water give way to frost on the same image and canvas.
+// rain and surface water give way to growing frost on the same device.
 const testingJourney = document.querySelector('[data-testing-journey]');
 const rainSection = document.querySelector('.testing-about');
 const climateSection = document.querySelector('.climate-tests');
@@ -319,6 +319,12 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
   const surfaceHeight = rainSurface.height;
   const surfaceCorners = [[14, 270], [862, 12], [1218, 172], [262, 462]];
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const frost = window.createTestingFrost?.({
+    canvas: document.querySelector('[data-frost-surface]'),
+    baseImage: rainEquipment.querySelector('.testing-stage__image'),
+    textureSrc: 'assets/equipment-frost.png'
+  });
+  let frostProgress = 0;
   const rainStreaks = Array.from({ length: 165 }, () => ({
     x: Math.random(), y: Math.random(), length: 7 + Math.random() * 12,
     speed: 0.55 + Math.random() * 0.55, alpha: 0.08 + Math.random() * 0.14
@@ -428,99 +434,6 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     return inside;
   };
   const isOnSurface = (x, y) => isOnPolygon(x, y, surfaceCorners);
-
-  const distanceToSegment = (x, y, start, end) => {
-    const dx = end[0] - start[0];
-    const dy = end[1] - start[1];
-    const lengthSquared = dx * dx + dy * dy;
-    const projection = clampRain(((x - start[0]) * dx + (y - start[1]) * dy) / lengthSquared);
-    return Math.hypot(x - (start[0] + projection * dx), y - (start[1] + projection * dy));
-  };
-
-  let frostRandomState = 73129;
-  const frostRandom = () => {
-    frostRandomState = (frostRandomState * 16807) % 2147483647;
-    return (frostRandomState - 1) / 2147483646;
-  };
-  const frostFaces = [
-    { corners: surfaceCorners, count: 1500, reach: 330, opacity: 1 },
-    { corners: [[9, 265], [203, 440], [228, 748], [41, 694]], count: 380, reach: 230, opacity: 0.62 },
-    { corners: [[203, 440], [1218, 166], [1218, 566], [288, 751]], count: 1120, reach: 250, opacity: 0.72 }
-  ].map(face => ({
-    ...face,
-    crystals: Array.from({ length: face.count }, () => {
-      const point = pointOnSurface(face.corners, 1);
-      let edgeDistance = Infinity;
-      for (let index = 0; index < face.corners.length; index++) {
-        const start = face.corners[index];
-        const end = face.corners[(index + 1) % face.corners.length];
-        edgeDistance = Math.min(edgeDistance, distanceToSegment(point.x, point.y, start, end));
-      }
-      return {
-        x: point.x,
-        y: point.y,
-        edgeDistance,
-        size: 0.55 + Math.pow(frostRandom(), 1.6) * 3.4,
-        angle: frostRandom() * Math.PI,
-        opacity: 0.16 + frostRandom() * 0.3,
-        branch: frostRandom() > 0.68
-      };
-    })
-  }));
-
-  const drawFrost = progress => {
-    if (progress <= 0.002) return;
-    // Fine crystals spread independently over the lid and the two visible
-    // metal faces, following irregular edge fronts rather than a flat wipe.
-    for (const face of frostFaces) {
-      surfaceContext.save();
-      surfaceContext.beginPath();
-      face.corners.forEach(([x, y], index) => index ? surfaceContext.lineTo(x, y) : surfaceContext.moveTo(x, y));
-      surfaceContext.closePath();
-      surfaceContext.clip();
-
-      for (const crystal of face.crystals) {
-        const edgeNoise = Math.sin(crystal.x * 0.031 + crystal.y * 0.017) * 17 +
-          Math.sin(crystal.x * 0.009 - crystal.y * 0.026) * 13;
-        const growth = clampRain((progress * face.reach + edgeNoise - crystal.edgeDistance) / 38);
-        if (growth <= 0) continue;
-        const size = crystal.size * (0.28 + growth * 0.72);
-        const alpha = crystal.opacity * growth * face.opacity * (0.55 + progress * 0.45);
-        surfaceContext.save();
-        surfaceContext.translate(crystal.x, crystal.y);
-        surfaceContext.rotate(crystal.angle);
-        surfaceContext.lineCap = 'round';
-        surfaceContext.lineWidth = 0.38 + size * 0.075;
-        surfaceContext.strokeStyle = `rgba(218,232,245,${alpha.toFixed(3)})`;
-        surfaceContext.beginPath();
-        surfaceContext.moveTo(0, -size);
-        surfaceContext.lineTo(0, size);
-        surfaceContext.moveTo(-size * 0.86, -size * 0.5);
-        surfaceContext.lineTo(size * 0.86, size * 0.5);
-        surfaceContext.moveTo(-size * 0.86, size * 0.5);
-        surfaceContext.lineTo(size * 0.86, -size * 0.5);
-        surfaceContext.stroke();
-
-        if (crystal.branch && size > 1.5) {
-          surfaceContext.lineWidth *= 0.72;
-          surfaceContext.beginPath();
-          for (const arm of [0, Math.PI * 2 / 3, Math.PI * 4 / 3]) {
-            for (const side of [-1, 1]) {
-              const branchAngle = arm + side * 0.72;
-              const startRadius = size * 0.25;
-              const endRadius = size * 0.67;
-              surfaceContext.moveTo(Math.cos(arm) * startRadius, Math.sin(arm) * startRadius);
-              surfaceContext.lineTo(Math.cos(arm) * endRadius + Math.cos(branchAngle) * size * 0.32,
-                Math.sin(arm) * endRadius + Math.sin(branchAngle) * size * 0.32);
-            }
-          }
-          surfaceContext.stroke();
-        }
-        surfaceContext.restore();
-      }
-      surfaceContext.restore();
-    }
-  };
 
   const makeSurfaceDrop = () => {
     const point = pointOnSurface();
@@ -656,6 +569,8 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     surfaceContext.clearRect(0, 0, surfaceWidth, surfaceHeight);
     rainAmbient.style.opacity = '0';
     rainSurface.style.opacity = '0';
+    frost?.clear();
+    frostProgress = 0;
     surfaceDrops = [];
     rainEquipment.style.setProperty('--testing-rotate-y', '0deg');
     rainEquipment.style.setProperty('--testing-rotate-x', '0deg');
@@ -677,9 +592,16 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     const sectionProgress = clampRain((window.innerHeight - rect.top) / (window.innerHeight + rect.height));
     const rotationProgress = smoothRain(0.02, 0.9, sectionProgress);
     const climateBounds = climateSection.getBoundingClientRect();
-    const climateProgress = clampRain((window.innerHeight - climateBounds.top) /
-      (window.innerHeight + climateBounds.height));
-    const frostProgress = smoothRain(0.015, 0.82, climateProgress);
+    // Crystallisation belongs to the handover between sections, independent
+    // of the camera carousel's height or selected equipment.
+    const climateProgress = clampRain((window.innerHeight * 0.72 - climateBounds.top) /
+      (window.innerHeight * 0.92));
+    const targetFrost = smoothRain(0, 1, climateProgress);
+    const dt = Math.min(0.05, Math.max(0, (now - previousRainTime) / 1000));
+    previousRainTime = now;
+    frostProgress = reducedMotion ? targetFrost :
+      frostProgress + (targetFrost - frostProgress) * (1 - Math.exp(-dt * 12));
+    if (Math.abs(targetFrost - frostProgress) < 0.0005) frostProgress = targetFrost;
     const motionScale = reducedMotion ? 0.35 : 1;
     const rotationY = 28 * rotationProgress * motionScale;
     const rotationX = 10 * rotationProgress * motionScale;
@@ -688,13 +610,13 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     rainEquipment.style.setProperty('--testing-rotate-x', `${rotationX.toFixed(2)}deg`);
     rainEquipment.style.setProperty('--testing-rotate-z', `${rotationZ.toFixed(2)}deg`);
     const gravity = surfaceGravity(rotationX, rotationY, rotationZ);
-    const rainIntensity = smoothRain(0.025, 0.2, sectionProgress) * (1 - smoothRain(0.78, 0.96, sectionProgress));
-    const wetness = smoothRain(0.035, 0.18, sectionProgress) * (1 - smoothRain(0.76, 0.93, sectionProgress));
-    const dt = Math.min(0.05, Math.max(0, (now - previousRainTime) / 1000));
-    previousRainTime = now;
+    const rainIntensity = smoothRain(0.025, 0.2, sectionProgress) *
+      (1 - smoothRain(0.78, 0.96, sectionProgress)) * (1 - smoothRain(0.02, 0.28, frostProgress));
+    const wetness = smoothRain(0.035, 0.18, sectionProgress) *
+      (1 - smoothRain(0.76, 0.93, sectionProgress)) * (1 - smoothRain(0.05, 0.4, frostProgress));
 
     rainAmbient.style.opacity = rainIntensity.toFixed(3);
-    rainSurface.style.opacity = Math.max(wetness, frostProgress * 0.88).toFixed(3);
+    rainSurface.style.opacity = wetness.toFixed(3);
     ambientContext.clearRect(0, 0, ambientWidth, ambientHeight);
 
     if (rainIntensity > 0.005 && ambientWidth && ambientHeight) {
@@ -764,9 +686,10 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     } else {
       surfaceDrops = [];
     }
-    drawFrost(frostProgress);
+    frost?.draw(frostProgress);
 
-    if (rainIntensity > 0.005 || wetness > 0.005 || surfaceDrops.length) {
+    if ((!reducedMotion && (rainIntensity > 0.005 || wetness > 0.005 || surfaceDrops.length)) ||
+        Math.abs(targetFrost - frostProgress) > 0.0005) {
       rainFrame = requestAnimationFrame(renderRainFrame);
     }
   };
