@@ -124,15 +124,15 @@
   .benefit-copy p{text-align:justify}
   .benefit-art{left:55.078125vw;right:auto;top:var(--tablet-art-top);width:40.234375vw;height:34.08203125vw}
   .benefit-art .benefit-image{object-fit:contain}
-  .benefit-more{left:4.6875vw;top:calc(var(--tablet-art-top) + 34.08203125vw);font-size:clamp(20px,2.34375vw,24px)}
+  .benefit-more{left:4.6875vw;top:calc(var(--tablet-art-top) + 34.08203125vw + 30px);font-size:clamp(20px,2.34375vw,24px)}
   .benefit-progress{display:none}
 }
 @media(min-width:601px) and (max-width:767px){
   .benefits-stage h2{font-size:clamp(28px,4.2vw,32px)}
   .benefit-copy,.benefit-copy[data-state="0"]{top:calc(var(--tablet-art-top) + max(9.5703vw,90px))}
   .benefit-copy h3{font-size:clamp(16px,2.5vw,18px)}
-  .benefit-copy p{font-size:14px;line-height:1.25;text-align:left}
-  .benefit-more{top:calc(var(--tablet-art-top) + max(34.08203125vw,285px));font-size:18px}
+  .benefit-copy p{font-size:16px;line-height:1.2;letter-spacing:.16px;text-align:justify}
+  .benefit-more{top:calc(var(--tablet-art-top) + 34.08203125vw + 30px);font-size:18px}
 }
 @media(max-width:600px){
   .benefits.wrap{width:100%;height:400svh;margin-top:0}
@@ -142,7 +142,7 @@
   .benefit-copy,.benefit-copy[data-state="0"]{position:relative;top:auto;bottom:auto;left:auto;width:100%;min-height:86px;flex:none;margin:0 0 30px;padding-left:24px;gap:12px}
   .benefit-copy::before{left:0;top:4px}
   .benefit-copy h3{font-size:16px;line-height:1.2;letter-spacing:.16px}
-  .benefit-copy p{font-size:14px;line-height:1.2;letter-spacing:0;text-align:justify}
+  .benefit-copy p{font-size:16px;line-height:1.2;letter-spacing:.16px;text-align:justify}
   .benefit-art{position:relative;top:auto;right:auto;left:auto;order:3;width:100%;height:min(349px,calc((100vw - 24px)*.953552),calc(100svh - 406px));min-height:220px;flex:none}
   .benefit-art .benefit-image{object-fit:contain}
   .benefit-more{position:relative;top:auto;left:auto;order:4;align-self:flex-start;margin-top:30px;font-size:24px;line-height:1.25;letter-spacing:-1.2px}
