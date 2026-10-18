@@ -10,8 +10,8 @@
   const renderer=window.HelicopterRenderer.create(canvas,model);
   if(!renderer)return;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const splitMedia=matchMedia('(min-width: 601px), (max-width: 600px)');
-  const mobileMedia=matchMedia('(max-width: 600px)');
+  const splitMedia=matchMedia('(min-width: 37.5625rem), (max-width: 37.5rem)');
+  const mobileMedia=matchMedia('(max-width: 37.5rem)');
   const root=document.documentElement,{sample,poses,matrix,lerp,smooth}=storyboard;
   let enabled=false,splitEnabled=false,splitOverlay=null,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
   let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;

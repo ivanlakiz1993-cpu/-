@@ -2,7 +2,7 @@
   position:fixed;inset:0;z-index:2147483000;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:repeat(6,minmax(0,1fr));gap:0;pointer-events:auto;overflow:hidden;isolation:isolate
 }
 .mosaic-transition__tile{
-  display:block;margin:-1px;background:#000;opacity:0;transform-origin:center;will-change:transform,opacity
+  display:block;margin:-0.0625rem;background:#000;opacity:0;transform-origin:center;will-change:transform,opacity
 }
 .mosaic-transition.is-covered .mosaic-transition__tile{opacity:1}
 .page-entry-reveal{position:fixed;inset:0;z-index:2147483000;display:grid;grid-template-columns:repeat(16,minmax(0,1fr));grid-template-rows:repeat(9,minmax(0,1fr));overflow:hidden;pointer-events:auto}

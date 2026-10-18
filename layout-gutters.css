@@ -1,11 +1,11 @@
-/* Horizontal alignment audited against Figma 1756:6421 (1920px canvas). */
-@media (min-width:1200px) {
+/* Horizontal alignment audited against Figma 1756:6421 (120rem canvas). */
+@media (min-width:75rem) {
   :root {
-    --desktop-inset:min(100px,5.2083333333vw);
-    --wrap:min(1720px,89.5833333333%);
+    --desktop-inset:min(6.25rem,5.2083333333vw);
+    --wrap:min(107.5rem,89.5833333333%);
   }
-  .topbar { padding-inline:max(5.2083333333%,calc((100% - 1720px)/2)); }
-  .menu-toggle { right:max(5.2083333333vw,calc((100vw - 1720px)/2)); }
+  .topbar { padding-inline:max(5.2083333333%,calc((100% - 107.5rem)/2)); }
+  .menu-toggle { right:max(5.2083333333vw,calc((100vw - 107.5rem)/2)); }
 
   /* Full-width service photography; its text follows the page content edge. */
   .work-card { padding-inline:var(--desktop-inset); }
@@ -20,25 +20,25 @@
   .benefit-progress { left:48.6627906977%; }
 
   .metrics-desktop__copy--area,.metrics-desktop__copy--founded {
-    left:calc((100% - min(1920px,100vw))/2 + var(--desktop-inset));
+    left:calc((100% - min(120rem,100vw))/2 + var(--desktop-inset));
   }
   .metrics-desktop__copy--staff {
     left:auto;
-    right:calc((100% - min(1920px,100vw))/2 + var(--desktop-inset));
+    right:calc((100% - min(120rem,100vw))/2 + var(--desktop-inset));
   }
 
   /* Preserve the slightly wider intro and laboratory card in the source frame. */
-  .news-intro { width:calc(100% + min(7.5px,.390625vw)); }
+  .news-intro { width:calc(100% + min(0.46875rem,.390625vw)); }
   .news-intro__copy { width:100%; }
-  .news-card--lab { width:calc(100% + min(2.5px,.1302083333vw)); }
+  .news-card--lab { width:calc(100% + min(0.15625rem,.1302083333vw)); }
   .news-card span { min-width:0;white-space:normal; }
 }
 
 /* Long consent links and fixed text widths must not enlarge the form columns. */
 .contact-form,.contact-heading,.form-row > label,.consent > span { min-width:0; }
-@media (min-width:901px) {
+@media (min-width:56.3125rem) {
   .contact { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .contact-heading h2 { max-width:100%; }
   .contact-heading > p { max-width:100%; }
-  .consent { height:auto;min-height:22px;white-space:normal; }
+  .consent { height:auto;min-height:1.375rem;white-space:normal; }
 }

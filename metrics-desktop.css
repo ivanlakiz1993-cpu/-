@@ -1,16 +1,16 @@
 /* Desktop storyboard: Figma 1920 × 1000 / 1053. */
 .metrics-desktop { display: none; }
 
-@media (min-width: 601px) and (max-width: 900px) {
+@media (min-width: 37.5625rem) and (max-width: 56.25rem) {
   .intro-sequence { position: relative; isolation: isolate; }
 }
 
-@media (min-width: 901px) {
+@media (min-width: 56.3125rem) {
   .intro-sequence { position: relative; isolation: isolate; }
   .metrics {
-    width: min(1920px, 100%);
+    width: min(120rem, 100%);
     margin: 0 auto;
-    padding: 100px 5.208333%;
+    padding: 6.25rem 5.208333%;
     background: #000;
     color: #fff;
   }
@@ -20,7 +20,7 @@
 html.metrics-sequence .metrics {
   position: relative;
   z-index: 2;
-  width: min(1920px, 100%);
+  width: min(120rem, 100%);
   height: var(--metrics-run-height);
   margin: 0 auto;
   padding: 0;
@@ -50,11 +50,11 @@ html.hero-split-active .hero-split {
 .hero-split__half > .hero { height: var(--hero-split-hero-height); }
 .hero-split__half--top {
   clip-path: inset(0 0 calc(100% - var(--hero-split-y)) 0);
-  transform: translateY(var(--hero-split-top-offset, 0px));
+  transform: translateY(var(--hero-split-top-offset, 0));
 }
 .hero-split__half--bottom {
   clip-path: inset(var(--hero-split-y) 0 0 0);
-  transform: translateY(var(--hero-split-bottom-offset, 0px));
+  transform: translateY(var(--hero-split-bottom-offset, 0));
 }
 html.metrics-sequence .metrics-desktop {
   position: sticky;
@@ -84,7 +84,7 @@ html.metrics-sequence .metrics-desktop {
     font-weight: 400;
     color: #fff;
     opacity: 0;
-    translate: 0 var(--copy-shift, 0px);
+    translate: 0 var(--copy-shift, 0);
   }
 .metrics-desktop__value {
     margin: 0;
@@ -126,7 +126,7 @@ html.metrics-sequence .metrics-desktop {
     transform: translateY(-50%);
   }
 
-@media (max-width: 1200px) {
+@media (max-width: 75rem) {
   .metrics-desktop__value-wide { display: none; }
   .metrics-desktop__value-compact { display: inline; }
   .metrics-desktop__copy { gap: 2.929688cqw; }
@@ -135,7 +135,7 @@ html.metrics-sequence .metrics-desktop {
   .metrics-desktop__copy--area { top: 15.197%; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 37.5rem) {
   html.hero-split-active .intro-sequence > .hero { position: relative; z-index: 3; opacity: 1; }
   html.hero-split-active.hero-split-opening .intro-sequence > .hero { opacity: 0; }
   html.hero-split-active .hero-split { display: none; }
