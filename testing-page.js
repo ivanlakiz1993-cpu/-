@@ -152,6 +152,7 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   revealGroup('.nav .menu-nav-links a, .nav .menu-social__link, .testing-stage__breadcrumb > *', 55);
   revealGroup('.testing-stage__button', 125);
   revealGroup('.climate-tests__visuals', 120);
+  revealGroup('.climate-tests__pagination button', 100);
   revealGroup('.mechanical-tests__shaker img', 100);
   revealGroup('.footer-brand .brand-mark, .footer-brand > span, .footer-nav a, .footer-legal a', 60);
   revealGroup('.footer-contact-link, .footer-social-link', 70);
@@ -779,4 +780,56 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
   document.addEventListener('visibilitychange', scheduleRainFrame);
   if ('ResizeObserver' in window) new ResizeObserver(() => { resizeRainCanvas(); scheduleRainFrame(); }).observe(rainAmbient);
   scheduleRainFrame();
+}
+
+// Climate equipment and its specifications switch together as the section
+// scrolls. This carousel is independent from the shared test-unit frost effect.
+const climateCarousel = document.querySelector('[data-climate-carousel]');
+if (climateCarousel) {
+  const cameras = [...climateCarousel.querySelectorAll('[data-climate-camera]')];
+  const pages = [...climateCarousel.querySelectorAll('[data-climate-page]')];
+  const title = climateCarousel.querySelector('[data-climate-camera-title]');
+  const highTemperature = climateCarousel.querySelector('[data-climate-high-temp]');
+  const lowTemperature = climateCarousel.querySelector('[data-climate-low-temp]');
+  const humidityRow = climateCarousel.querySelector('[data-climate-humidity]');
+  const cameraSpecs = [
+    { title: 'Климатическая камера S-B-8200', highTemperature: 'до 210 °C', lowTemperature: 'до −80 °C', humidity: true },
+    { title: 'Климатическая камера THCB-125', highTemperature: 'до 150 °C', lowTemperature: 'до −70 °C', humidity: false }
+  ];
+  let activeCamera = -1;
+  let climateFrame = 0;
+  const clampClimate = value => Math.max(0, Math.min(1, value));
+
+  const showClimateState = index => {
+    if (index === activeCamera) return;
+    activeCamera = index;
+    cameras.forEach((image, imageIndex) => image.classList.toggle('is-active', imageIndex === index));
+    pages.forEach((page, pageIndex) => {
+      const active = pageIndex === index;
+      page.classList.toggle('is-active', active);
+      page.setAttribute('aria-pressed', String(active));
+    });
+    const spec = cameraSpecs[index];
+    if (title) title.textContent = spec.title;
+    if (highTemperature) highTemperature.textContent = spec.highTemperature;
+    if (lowTemperature) lowTemperature.textContent = spec.lowTemperature;
+    if (humidityRow) humidityRow.hidden = !spec.humidity;
+  };
+
+  const updateClimateState = () => {
+    climateFrame = 0;
+    const bounds = climateCarousel.getBoundingClientRect();
+    const progress = clampClimate((window.innerHeight - bounds.top) /
+      (window.innerHeight + bounds.height));
+    showClimateState(progress >= 0.5 ? 1 : 0);
+  };
+  const scheduleClimateUpdate = () => {
+    if (!climateFrame) climateFrame = requestAnimationFrame(updateClimateState);
+  };
+
+  pages.forEach((page, index) => page.addEventListener('click', () => showClimateState(index)));
+  addEventListener('scroll', scheduleClimateUpdate, { passive: true });
+  addEventListener('resize', scheduleClimateUpdate, { passive: true });
+  if ('ResizeObserver' in window) new ResizeObserver(scheduleClimateUpdate).observe(climateCarousel);
+  scheduleClimateUpdate();
 }

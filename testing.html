@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="hero-grid.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="layout-gutters.css?v=20261018-fluid-home-1">
-  <link rel="stylesheet" href="testing-page.css?v=20261018-continuous-frost-1">
+  <link rel="stylesheet" href="testing-page.css?v=20261018-continuous-frost-2">
   <link rel="stylesheet" href="page-transition.css?v=20261018-fluid-home-1">
   <script src="page-transition.js?v=20261016-entry-ready-2"></script>
 </head>
@@ -97,7 +97,7 @@
         </div>
       </div>
       </section>
-    <section class="climate-tests" aria-labelledby="climate-tests-title">
+    <section class="climate-tests" aria-labelledby="climate-tests-title" data-climate-carousel>
       <div class="climate-tests__track">
         <div class="climate-tests__stage">
           <div class="climate-tests__inner">
@@ -111,17 +111,23 @@
                   <li>Испытание на воздействие повышенной влажности воздуха</li>
                 </ul>
                 <div class="climate-tests__equipment">
-                  <h3>Климатическая камера THCB-125</h3>
+                  <h3 data-climate-camera-title>Климатическая камера S-B-8200</h3>
                   <dl>
-                    <div><dt>Повышенная температура:</dt><dd>до 150 °C</dd></div>
-                    <div><dt>Пониженная температура:</dt><dd>до −70 °C</dd></div>
+                    <div><dt>Повышенная температура:</dt><dd data-climate-high-temp>до 210 °C</dd></div>
+                    <div><dt>Пониженная температура:</dt><dd data-climate-low-temp>до −80 °C</dd></div>
+                    <div data-climate-humidity><dt>Повышенная влажность:</dt><dd>до 100%</dd></div>
                     <div><dt>Полезный объём:</dt><dd>600 × 600 × 600 мм</dd></div>
                   </dl>
                 </div>
               </div>
               <div class="climate-tests__visuals">
+                <div class="climate-tests__pagination" role="group" aria-label="Климатические камеры">
+                  <button class="is-active" type="button" data-climate-page aria-label="Климатическая камера S-B-8200" aria-pressed="true"></button>
+                  <button type="button" data-climate-page aria-label="Климатическая камера THCB-125" aria-pressed="false"></button>
+                </div>
                 <div class="climate-tests__camera-stack">
-                  <img class="climate-tests__camera-photo" src="assets/figma-climate-camera-2585.png" width="1156" height="1186" alt="Климатическая камера THCB-125" fetchpriority="low" loading="lazy" decoding="async">
+                  <img class="climate-tests__camera-photo is-active" data-climate-camera src="assets/figma-climate-camera.png" width="1010" height="1036" alt="Климатическая камера S-B-8200" fetchpriority="low" loading="lazy" decoding="async">
+                  <img class="climate-tests__camera-photo" data-climate-camera src="assets/figma-climate-camera-2585.png" width="1156" height="1186" alt="Климатическая камера THCB-125" loading="lazy" decoding="async">
                 </div>
               </div>
             </div>
@@ -240,6 +246,6 @@
     </div>
     <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
   </footer>
-  <script src="testing-page.js?v=20261018-continuous-frost-1"></script>
+  <script src="testing-page.js?v=20261018-continuous-frost-2"></script>
 </body>
 </html>

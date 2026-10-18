@@ -80,9 +80,13 @@
 .climate-tests__equipment dt,.climate-tests__equipment dd{margin:0}
 .climate-tests__equipment dt{color:#979797}
 @media(min-width:1101px){.climate-tests__equipment dl{white-space:nowrap}}
-.climate-tests__visuals{position:absolute;z-index:1;top:5.4375rem;right:0;display:grid;grid-template-columns:minmax(0,1fr);width:min(39.4375rem,48%);height:37.125rem;align-items:end}
+.climate-tests__visuals{position:absolute;z-index:1;top:5.4375rem;right:0;display:grid;grid-template-columns:0.5rem minmax(0,37.0625rem);gap:1.875rem;width:min(39.4375rem,48%);height:37.125rem;align-items:end}
+.climate-tests__pagination{align-self:end;display:flex;flex-direction:column-reverse;gap:0.3125rem;width:0.5rem;height:6.4375rem}
+.climate-tests__pagination button{display:block;flex:none;width:0.5rem;height:0.5625rem;padding:0;border:0;border-radius:0.3125rem;background:#686868;opacity:.68;cursor:pointer;transition:height .75s cubic-bezier(.4,0,.2,1),width .75s cubic-bezier(.4,0,.2,1),background-color .7s ease-in-out,opacity .7s ease-in-out}
+.climate-tests__pagination button.is-active{height:5.5625rem;background:#fff;opacity:1}
 .climate-tests__camera-stack{position:relative;width:100%;height:100%;overflow:hidden}
-.climate-tests__camera-photo{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.climate-tests__camera-photo{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;transition:opacity .72s ease-in-out}
+.climate-tests__camera-photo.is-active{opacity:1}
 @media(min-width:1101px){.climate-tests__track{height:auto}.climate-tests__stage{position:relative;height:795px;min-height:795px}.climate-tests__inner{height:795px}}
 @media(max-width:1100px){
   .climate-tests__track{height:auto}
@@ -94,7 +98,10 @@
   .climate-tests__list li{font-size:clamp(16px,1.8vw,18px)}
   .climate-tests__equipment{padding:clamp(22px,3.2vw,30px)}
   .climate-tests__equipment dl{white-space:normal}
-  .climate-tests__visuals{position:relative;top:auto;right:auto;grid-template-columns:0.5rem minmax(0,1fr);gap:clamp(1rem,3vw,1.875rem);width:100%;height:auto;min-height:0}
+  .climate-tests__visuals{position:relative;top:auto;right:auto;grid-template-columns:minmax(0,1fr);gap:0.875rem;width:100%;height:auto;min-height:0}
+  .climate-tests__pagination{grid-row:1;grid-column:1;align-self:center;justify-content:center;flex-direction:row;width:auto;height:auto}
+  .climate-tests__pagination button{width:0.5625rem;height:0.5625rem}
+  .climate-tests__pagination button.is-active{width:2.5rem;height:0.5625rem}
   .climate-tests__camera-stack{width:min(100%,37.0625rem);height:auto;aspect-ratio:1;justify-self:center}
 }
 @media(max-width:600px){
@@ -108,9 +115,9 @@
   .climate-tests__equipment dl{gap:20px;font-size:16px}
   .climate-tests__equipment dl>div{align-items:flex-start;gap:10px}
   .climate-tests__equipment dd{text-align:right;white-space:nowrap}
-  .climate-tests__visuals{grid-template-columns:0.5rem minmax(0,1fr);gap:0.875rem}
+  .climate-tests__visuals{grid-template-columns:minmax(0,1fr);gap:0.875rem}
 }
-@media(prefers-reduced-motion:reduce){.testing-rain__ambient,.testing-rain__surface{transition:none}}
+@media(prefers-reduced-motion:reduce){.climate-tests__camera-photo,.climate-tests__pagination button,.testing-rain__ambient,.testing-rain__surface{transition:none}}
 
 /* Mechanical tests — Figma 1731:3723 */
 .mechanical-tests{position:relative;margin-top:85px;background:#000;color:#fff}
@@ -391,4 +398,9 @@
   .climate-tests__equipment dd{text-align:right;white-space:nowrap}
   .climate-tests__visuals{position:absolute;z-index:1;left:0;right:auto;top:32.6875rem;display:block;width:min(22.875rem,100%);height:auto;aspect-ratio:1}
   .climate-tests__camera-stack{width:min(22.875rem,100%);height:auto;aspect-ratio:1;margin:0}
+}
+@media(max-width:1100px){
+  .climate-tests__pagination{position:absolute;z-index:2;top:0.75rem;right:0.75rem;display:flex;flex-direction:row;justify-content:flex-end;gap:0.375rem;width:auto;height:auto}
+  .climate-tests__pagination button{width:0.5625rem;height:0.5625rem}
+  .climate-tests__pagination button.is-active{width:2.5rem;height:0.5625rem}
 }
