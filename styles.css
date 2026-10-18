@@ -430,3 +430,22 @@
 @media(max-width:600px){
   .menu-drawer .menu-icon{height:12px}
 }
+
+/* Mobile section spacing matched to Figma 2221:10386 and 2221:10390. */
+@media(max-width:600px){
+  .benefits-layout{padding:0 12px}
+  .benefits-stage h2{margin:0 0 30px;font-size:38px;line-height:.9;letter-spacing:.38px}
+  .benefit-copy,.benefit-copy[data-state="0"]{
+    box-sizing:border-box;
+    width:100%;
+    min-height:98px;
+    margin:0 0 30px;
+    padding:8px 0 8px 24px;
+  }
+  .benefit-copy::before{left:0;top:12px}
+  .benefit-art{height:min(349px,calc((100vw - 24px)*.953552));min-height:0}
+  .benefit-more{width:207px;height:30px;margin-top:30px;font-size:16px;line-height:1.25;letter-spacing:-.8px;white-space:nowrap}
+  .work{gap:15px;margin-top:60px}
+  .work-card,.card-testing{padding:24px 12px}
+  .work-card-mode{font-size:18px;line-height:1;letter-spacing:-.9px}
+}
