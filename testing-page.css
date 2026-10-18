@@ -333,6 +333,15 @@
   .testing-about__label,.testing-about__metric--experience .testing-about__label{width:100%;max-width:none;font-size:16px;line-height:1.2;text-align:center}
 }
 
+/* Mobile testing cover matched to Figma 2628:2548. */
+@media(max-width:600px){
+  .testing-stage{height:635px;min-height:635px}
+  .testing-stage__content{justify-content:flex-start;gap:30px}
+  .testing-journey__visual .testing-stage__equipment{
+    transform:perspective(1500px) translate3d(3px,calc(548px - 50svh),0) rotateY(var(--testing-rotate-y,0deg)) rotateX(var(--testing-rotate-x,0deg)) rotateZ(var(--testing-rotate-z,0deg));
+  }
+}
+
 /* Desktop section holds mirror the homepage's sticky stages without scroll snapping. */
 @media(min-width:1101px){
   .climate-tests__track{height:calc(795px + 70svh)}
