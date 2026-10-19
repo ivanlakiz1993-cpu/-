@@ -6,7 +6,7 @@ const size = 1024;
 const crc = b => { let c = 0xffffffff; for (const v of b) { c ^= v; for(let k=0;k<8;k++) c=(c>>>1)^((c&1)?0xedb88320:0); } return (c^0xffffffff)>>>0; };
 const chunk = (name,data) => { const t=Buffer.from(name),n=Buffer.alloc(4),c=Buffer.alloc(4); n.writeUInt32BE(data.length); c.writeUInt32BE(crc(Buffer.concat([t,data]))); return Buffer.concat([n,t,data,c]); };
 const hash = (x,y) => { let n=Math.imul(x,374761393)^Math.imul(y,668265263); n=Math.imul(n^(n>>>13),1274126177); return ((n^(n>>>16))>>>0)/4294967295; };
-for (const [name,strength,rough] of [['brushed',.24,.34],['powder',.065,.39],['steel',.075,.22],['graphite',.055,.35]]) {
+for (const [name,strength,rough] of [['brushed',.095,.34],['powder',.065,.39],['steel',.075,.22],['graphite',.055,.35]]) {
  const heights = new Float32Array(size*size);
  for(let y=0;y<size;y++) for(let x=0;x<size;x++) {
   const grain=hash(x,y);

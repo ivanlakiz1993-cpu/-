@@ -4,7 +4,7 @@
   const equipment = document.querySelector('[data-testing-equipment]');
   if (!canvas || !equipment) return;
 
-  const modelUrl = 'assets/models/reference-v2/testing-equipment-reference.glb';
+  const modelUrl = 'assets/models/reference-v3/testing-equipment-reference.glb';
   const clampPixelRatio = () => Math.min(window.devicePixelRatio || 1, 2);
   let weather = { wetness: 0, frostProgress: 0, time: 0 };
   let drawWeatheredModel = null;
