@@ -304,8 +304,8 @@ document.querySelectorAll('.testing-stage__button').forEach(button => {
   });
 });
 
-// The product remains one shared visual across the second and third sections:
-// rain and surface water give way to growing frost on the same device.
+// The same product visual runs from the lab introduction through climate and
+// mechanical tests; rain and surface water give way to frost on this device.
 const testingJourney = document.querySelector('[data-testing-journey]');
 const rainSection = document.querySelector('.testing-about');
 const climateSection = document.querySelector('.climate-tests');

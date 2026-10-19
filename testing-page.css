@@ -87,57 +87,69 @@
 .climate-tests__camera-photo{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;transition:opacity .72s ease-in-out}
 .climate-tests__camera-photo.is-active{opacity:1}
 
-/* Mechanical tests — Figma 1731:3723 */
-.mechanical-tests{position:relative;margin-top:85px;background:#000;color:#fff}
+/* Mechanical tests — Figma 1731:3723, 2588:2051, 2631:2614. */
+.mechanical-tests{position:relative;z-index:2;margin-top:clamp(4rem,4.427083vw,5.3125rem);background:transparent;color:#fff}
 .mechanical-tests__inner{width:var(--wrap);margin-inline:auto}
-.mechanical-tests h2{margin:0;font:400 64px/1 var(--sans);letter-spacing:.64px;color:#fff}
-.mechanical-tests__content{display:flex;flex-direction:column;gap:30px;margin-top:50px}
-.mechanical-tests__list-row{position:relative;min-height:604px;width:100%}
-.mechanical-tests__list{position:relative;z-index:1;width:min(860px,100%);display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
-.mechanical-tests__list li{display:flex;align-items:flex-start;width:100%;padding:20px 30px;background:#121212;font:400 18px/1.2 var(--sans);color:#fff}
-.mechanical-tests__equipment-row{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:32px;width:100%;min-height:604px}
-.mechanical-tests__shaker{position:relative;z-index:1;flex:0 1 600px;min-width:0;aspect-ratio:1;margin:0;border-radius:10px;overflow:hidden}
+.mechanical-tests h2{margin:0;font:400 clamp(2.375rem,3.333333vw,4rem)/1 var(--sans);letter-spacing:.01em;color:#fff}
+.mechanical-tests__content{display:flex;flex-direction:column;gap:1.875rem;margin-top:clamp(1.875rem,2.604167vw,3.125rem)}
+.mechanical-tests__list-row{position:relative;width:100%}
+.mechanical-tests__list{position:relative;z-index:1;width:min(53.75rem,100%);display:flex;flex-direction:column;gap:.625rem;margin:0;padding:0;list-style:none}
+.mechanical-tests__list li{display:flex;align-items:flex-start;width:100%;padding:1.25rem 1.875rem;background:#121212;font:400 1.125rem/1.2 var(--sans);color:#fff}
+.mechanical-tests__equipment-row{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:1.875rem;width:100%}
+.mechanical-tests__shaker{position:relative;z-index:1;order:1;flex:0 1 min(37.5rem,34.8837%);min-width:0;aspect-ratio:1;margin:0;border-radius:.625rem;overflow:hidden}
 .mechanical-tests__shaker img{display:block;width:121.87%;height:100%;max-width:none;margin-left:-15.86%;object-fit:cover}
-.mechanical-tests__equipment{position:relative;z-index:1;flex:0 1 860px;min-width:0;display:flex;flex-direction:column;gap:50px;padding:30px;background:rgba(0,0,0,.6);overflow:hidden}
-.mechanical-tests__equipment h3{margin:0;font:400 36px/1.1 var(--sans);color:#fff}
-.mechanical-tests__group{display:flex;flex-direction:column;gap:30px;width:100%}
-.mechanical-tests__group h4{margin:0;font:400 24px/1 var(--sans);letter-spacing:-1.2px;color:#fff}
-.mechanical-tests__group dl{display:flex;flex-direction:column;gap:15px;margin:0;font:300 24px/1.1 var(--sans);color:#f5f5f5}
-.mechanical-tests__group dl>div{display:flex;align-items:center;justify-content:space-between;gap:20px}
-.mechanical-tests__group dt,.mechanical-tests__group dd{margin:0}
-.mechanical-tests__group dt,.mechanical-tests__group dd{white-space:nowrap}
-.mechanical-tests__divider{display:block;width:calc(100% + 30px);height:1px;max-width:none;object-fit:fill}
-@media(max-width:1100px){
-  .mechanical-tests__inner{padding:48px 0 64px}
-  .mechanical-tests h2{font-size:clamp(38px,5.6vw,64px)}
-  .mechanical-tests__content{gap:28px;margin-top:30px}
-  .mechanical-tests__list-row{min-height:0;display:flex;flex-direction:column;align-items:stretch;gap:22px}
-  .mechanical-tests__equipment-row{flex-direction:column;align-items:stretch;gap:22px}
+.mechanical-tests__equipment{position:relative;z-index:1;order:2;flex:0 1 min(53.75rem,50%);min-width:0;display:flex;flex-direction:column;gap:clamp(1.875rem,2.604167vw,3.125rem);padding:1.875rem;background:rgba(0,0,0,.6);overflow:hidden}
+.mechanical-tests__equipment h3{margin:0;font:400 clamp(1.5rem,1.875vw,2.25rem)/1.1 var(--sans);color:#fff}
+.mechanical-tests__group{display:flex;flex-direction:column;gap:1.875rem;width:100%}
+.mechanical-tests__group h4{margin:0;font:400 clamp(1.125rem,1.25vw,1.5rem)/1 var(--sans);letter-spacing:-.05em;color:#fff}
+.mechanical-tests__group dl{display:flex;flex-direction:column;gap:.9375rem;margin:0;font:300 clamp(1rem,1.25vw,1.5rem)/1.1 var(--sans);color:#f5f5f5}
+.mechanical-tests__group dl>div{display:flex;align-items:center;justify-content:space-between;gap:1.25rem}
+.mechanical-tests__group dt,.mechanical-tests__group dd{margin:0;white-space:nowrap}
+.mechanical-tests__group dd{color:var(--orange)}
+.mechanical-tests__divider{display:block;width:calc(100% + 1.875rem);height:1px;max-width:none;object-fit:fill}
+@media(max-width:68.75rem){
+  .mechanical-tests{margin-top:4rem}
+  .mechanical-tests__inner{width:calc(100% - 6rem)}
+  .mechanical-tests h2{font-size:2.375rem;line-height:.9;letter-spacing:.01em}
+  .mechanical-tests__content{gap:1.875rem;margin-top:1.875rem}
   .mechanical-tests__list{width:100%}
-  .mechanical-tests__list li{font-size:clamp(16px,1.8vw,18px)}
-  .mechanical-tests__shaker{flex:none;width:min(100%,600px);align-self:center}
-  .mechanical-tests__equipment{flex:none;width:100%;gap:36px;padding:clamp(22px,3.2vw,30px)}
-  .mechanical-tests__equipment h3{font-size:clamp(30px,4vw,36px)}
-  .mechanical-tests__group h4,.mechanical-tests__group dl{font-size:clamp(18px,2.5vw,24px)}
-  .mechanical-tests__group dl>div{gap:14px}
+  .mechanical-tests__list li{font-size:1rem;letter-spacing:.01em}
+  .mechanical-tests__equipment-row{flex-direction:column;align-items:stretch;gap:1.875rem}
+  .mechanical-tests__equipment{order:1;flex:none;width:100%;gap:1.875rem;padding:.9375rem}
+  .mechanical-tests__equipment h3{font-size:1.5rem;line-height:1;letter-spacing:-.075rem}
+  .mechanical-tests__group{gap:1.875rem}
+  .mechanical-tests__group h4{font-size:1.125rem;letter-spacing:-.05em}
+  .mechanical-tests__group dl{gap:.9375rem;font-size:1rem;line-height:1.2;letter-spacing:.01em}
+  .mechanical-tests__group dl>div{gap:.625rem}
   .mechanical-tests__group dt,.mechanical-tests__group dd{white-space:normal}
-  .mechanical-tests__divider{width:100%;max-width:100%}
+  .mechanical-tests__group dd{text-align:right}
+  .mechanical-tests__shaker{order:2;flex:none;align-self:center;width:min(100%,29rem);border-radius:.625rem}
+  .mechanical-tests__divider{width:calc(100% + 1.875rem)}
 }
-@media(max-width:600px){
-  .mechanical-tests__inner{padding:40px 0 52px}
-  .mechanical-tests h2{font-size:clamp(34px,9vw,44px);line-height:1.02;letter-spacing:0}
-  .mechanical-tests__content{gap:22px;margin-top:24px}
-  .mechanical-tests__list-row{gap:20px}
-  .mechanical-tests__list{gap:8px}
-  .mechanical-tests__list li{padding:16px 18px;border-radius:8px;font-size:16px}
-  .mechanical-tests__equipment-row{gap:22px}
-  .mechanical-tests__equipment{gap:28px;padding:20px}
-  .mechanical-tests__equipment h3{font-size:clamp(28px,7.2vw,36px);line-height:1.08}
-  .mechanical-tests__group{gap:18px}
-  .mechanical-tests__group h4{font-size:18px;line-height:1.15;letter-spacing:-.4px}
-  .mechanical-tests__group dl{gap:12px;font-size:16px}
-  .mechanical-tests__group dl>div{align-items:flex-start;gap:10px}
+@media(min-width:56.3125rem) and (max-width:68.75rem){
+  .mechanical-tests__equipment-row{flex-direction:row;align-items:flex-end;gap:0}
+  .mechanical-tests__equipment{flex:0 1 51.08%;width:auto}
+  .mechanical-tests__equipment h3{white-space:nowrap}
+  .mechanical-tests__shaker{flex:0 1 48.92%;align-self:flex-end;width:auto}
+}
+@media(max-width:43.75rem){
+  .mechanical-tests{margin-top:3.75rem}
+  .mechanical-tests__inner{width:calc(100% - 1.5rem)}
+  .mechanical-tests h2{font-size:clamp(2.125rem,9.75vw,2.375rem);line-height:.9;letter-spacing:.01em}
+  .mechanical-tests__content{gap:1.875rem;margin-top:1.875rem}
+  .mechanical-tests__list{width:100%;gap:.625rem}
+  .mechanical-tests__list li{padding:.75rem .5rem;font-size:1rem;line-height:1.2;letter-spacing:.01em}
+  .mechanical-tests__equipment-row{flex-direction:column;align-items:stretch;gap:1.875rem}
+  .mechanical-tests__equipment{order:1;flex:none;width:100%;gap:1.875rem;padding:.9375rem 0;background:rgba(0,0,0,.6)}
+  .mechanical-tests__equipment h3{font-size:1.5rem;line-height:1;letter-spacing:-.075rem;white-space:normal}
+  .mechanical-tests__group{gap:1.875rem}
+  .mechanical-tests__group h4{font-size:1.125rem;line-height:1;letter-spacing:-.05em}
+  .mechanical-tests__group dl{gap:.9375rem;font-size:1rem;line-height:1.2;letter-spacing:.01em}
+  .mechanical-tests__group dl>div{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:.625rem}
+  .mechanical-tests__group dt{max-width:13.25rem;color:#979797}
   .mechanical-tests__group dd{text-align:right;white-space:nowrap}
+  .mechanical-tests__divider{width:100%;max-width:100%}
+  .mechanical-tests__shaker{order:2;flex:none;align-self:center;width:min(100%,22.875rem)}
 }
 
 /* FAQ and motion details for the laboratory page. */
@@ -173,7 +185,7 @@
 .testing-motion-ready [data-scroll-reveal].is-visible{opacity:1;clip-path:inset(0 0 0 0);translate:none;filter:blur(0)}
 @media(max-width:1000px){
   .climate-tests{margin-top:84px}
-  .mechanical-tests{margin-top:64px}
+  .mechanical-tests{margin-top:4rem}
   .testing-faq{margin-top:50px;padding:62px 0 70px}
   .testing-page>.footer{margin-top:48px}
   .testing-faq__list{margin-top:34px}
@@ -184,7 +196,7 @@
 }
 @media(max-width:600px){
   .climate-tests{margin-top:64px}
-  .mechanical-tests{margin-top:64px}
+  .mechanical-tests{margin-top:3.75rem}
   .testing-faq{margin-top:40px;padding:46px 0 52px}
   .testing-page>.footer{margin-top:40px}
   .testing-faq__list{margin-top:24px}
@@ -236,11 +248,11 @@
 }
 @media(prefers-reduced-motion:reduce){.testing-stage__equipment{will-change:auto}}
 
-/* One shared product visual stays centered while the hero and laboratory copy scroll past it. */
+/* One shared test unit stays centered while every section in the testing journey scrolls past it. */
 .testing-page{overflow-x:clip}
 .testing-journey{position:relative;isolation:isolate;overflow:clip;background:#000}
 .testing-journey__visual{position:sticky;z-index:1;top:0;display:grid;width:100%;height:100svh;margin-bottom:-100svh;place-items:center;pointer-events:none}
-.testing-journey__visual .testing-stage__equipment{position:relative;inset:auto;left:auto;top:auto;width:min(48.7vw,935px);max-width:calc(100% - 24px);height:auto;aspect-ratio:935/604;transform:perspective(1500px) rotateY(var(--testing-rotate-y,0deg)) rotateX(var(--testing-rotate-x,0deg)) rotateZ(var(--testing-rotate-z,0deg));transform-origin:50% 54%;transform-style:preserve-3d;will-change:transform;opacity:1}
+.testing-journey__visual .testing-stage__equipment{position:relative;inset:auto;left:auto;top:auto;width:min(48.7vw,58.4375rem);max-width:calc(100% - 1.5rem);height:auto;aspect-ratio:935/604;transform:perspective(93.75rem) rotateY(var(--testing-rotate-y,0deg)) rotateX(var(--testing-rotate-x,0deg)) rotateZ(var(--testing-rotate-z,0deg));transform-origin:50% 54%;transform-style:preserve-3d;will-change:transform;opacity:1}
 .testing-journey__visual .testing-stage__image{opacity:.5;filter:none;object-fit:contain}
 .testing-journey__visual .testing-stage__equipment{z-index:1}
 .testing-rain__ambient{position:absolute;z-index:0;inset:0;display:block;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .16s linear}
@@ -251,8 +263,8 @@
 .testing-about{min-height:620px;margin:0 auto;padding-top:0;padding-bottom:0}
 .testing-about__content{min-height:506px}
 
-@media(max-width:1100px){
-  .testing-journey__visual .testing-stage__equipment{width:min(48.4375vw,496px)}
+@media(max-width:68.75rem){
+  .testing-journey__visual .testing-stage__equipment{width:min(48.4375vw,31rem)}
   .testing-about{min-height:0;margin:0 auto;padding:0 clamp(24px,4.6875vw,48px) 30px}
   .testing-about h2{font-size:38px;line-height:.9;margin-bottom:30px}
   .testing-about__content{min-height:0;gap:50px}
@@ -282,8 +294,8 @@
   .testing-about__number{font-size:100px;text-align:center}
   .testing-about__label{font-size:16px;text-align:center}
 }
-@media(max-width:600px){
-  .testing-journey__visual .testing-stage__equipment{width:min(92.3077vw,360px);max-width:calc(100% - 24px)}
+@media(max-width:37.5rem){
+  .testing-journey__visual .testing-stage__equipment{width:min(92.3077vw,22.5rem);max-width:calc(100% - 1.5rem)}
   .testing-about{min-height:0;padding:0 12px 24px}
   .testing-about h2{margin-bottom:24px;font-size:38px;line-height:.9}
   .testing-about__content{gap:24px}
@@ -297,11 +309,11 @@
 }
 
 /* Mobile testing cover matched to Figma 2628:2548. */
-@media(max-width:600px){
+@media(max-width:37.5rem){
   .testing-stage{height:635px;min-height:635px}
   .testing-stage__content{justify-content:flex-start;gap:30px}
   .testing-journey__visual .testing-stage__equipment{
-    transform:perspective(1500px) translate3d(3px,calc(548px - 50svh),0) rotateY(var(--testing-rotate-y,0deg)) rotateX(var(--testing-rotate-x,0deg)) rotateZ(var(--testing-rotate-z,0deg));
+    transform:perspective(93.75rem) translate3d(.1875rem,calc(34.25rem - 50svh),0) rotateY(var(--testing-rotate-y,0deg)) rotateX(var(--testing-rotate-x,0deg)) rotateZ(var(--testing-rotate-z,0deg));
   }
 }
 
@@ -309,16 +321,10 @@
 @media(min-width:68.8125rem){
   .climate-tests__track{height:calc(49.6875rem + 70svh)}
   .climate-tests__stage{position:sticky;top:0}
-  .mechanical-tests__content{gap:50vh;padding-bottom:50vh}
-  .mechanical-tests__list-row,.mechanical-tests__equipment-row{position:sticky;top:max(115px,calc((100svh - 604px)/2))}
-  .mechanical-tests__list-row{z-index:1}
-  .mechanical-tests__equipment-row{z-index:2}
 }
 @media(max-width:68.75rem){
   .climate-tests__track{height:auto}
   .climate-tests__stage{position:relative;top:auto}
-  .mechanical-tests__content{gap:28px;padding-bottom:0}
-  .mechanical-tests__list-row,.mechanical-tests__equipment-row{position:relative;top:auto}
 }
 
 /* Climate tests: proportions and spacing from the 1920, 1024 and 390 Figma frames. */
