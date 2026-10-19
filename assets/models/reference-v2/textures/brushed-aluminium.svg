@@ -1,15 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="512" viewBox="0 0 1024 512">
   <defs>
-    <pattern id="grain-lines" width="512" height="8" patternUnits="userSpaceOnUse">
-      <rect width="512" height="8" fill="#fff"/>
-      <path d="M0 1.5H512M0 5.25H512" stroke="#555" stroke-opacity=".17" stroke-width=".6"/>
-      <path d="M0 3.6H512M0 7.25H512" stroke="#fff" stroke-opacity=".55" stroke-width=".5"/>
-    </pattern>
-    <filter id="micrograin" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency=".018 .48" numOctaves="2" seed="17" stitchTiles="stitch"/>
-      <feComponentTransfer><feFuncR type="linear" slope=".1" intercept=".9"/><feFuncG type="linear" slope=".1" intercept=".9"/><feFuncB type="linear" slope=".1" intercept=".9"/></feComponentTransfer>
+    <filter id="directional-micrograin" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency=".006 .72" numOctaves="2" seed="37" stitchTiles="stitch"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope=".2" intercept=".78"/>
+        <feFuncG type="linear" slope=".2" intercept=".78"/>
+        <feFuncB type="linear" slope=".2" intercept=".78"/>
+      </feComponentTransfer>
     </filter>
+    <pattern id="brushed-grain" width="1024" height="512" patternUnits="userSpaceOnUse">
+      <rect width="1024" height="512" fill="#fff"/>
+      <rect width="1024" height="512" filter="url(#directional-micrograin)" opacity=".42"/>
+      <g fill="none" stroke-linecap="round">
+        <path d="M0 29.5H1024M0 118.25H1024M0 231.5H1024M0 348.75H1024M0 469.25H1024" stroke="#4b4b4b" stroke-opacity=".12" stroke-width=".55"/>
+        <path d="M0 73.25H1024M0 189.75H1024M0 294.5H1024M0 413.25H1024" stroke="#fff" stroke-opacity=".34" stroke-width=".45"/>
+        <path d="M0 155H1024M0 383.5H1024" stroke="#292929" stroke-opacity=".08" stroke-width=".8"/>
+      </g>
+    </pattern>
   </defs>
-  <rect width="512" height="512" fill="url(#grain-lines)"/>
-  <rect width="512" height="512" filter="url(#micrograin)" opacity=".3"/>
+  <rect width="1024" height="512" fill="url(#brushed-grain)"/>
 </svg>

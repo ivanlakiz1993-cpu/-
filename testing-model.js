@@ -120,15 +120,28 @@
       const name = (material.name || '').toLowerCase();
       let metallic = pbr.metallicFactor ?? 1;
       let roughness = pbr.roughnessFactor ?? 0.68;
-      if (name.includes('black anodized side walls')) { metallic = 0.7; roughness = 0.31; }
-      if (name.includes('brushed black aluminium')) { metallic = 0.82; roughness = 0.27; }
-      if (name.includes('satin graphite powder coat')) { metallic = 0.32; roughness = 0.38; }
+      let color = pbr.baseColorFactor || [1, 1, 1, 1];
+      if (name.includes('black anodized side walls')) {
+        metallic = 0.78;
+        roughness = 0.32;
+        color = [0.018, 0.019, 0.022, 1];
+      }
+      if (name.includes('brushed black aluminium')) {
+        metallic = 0.88;
+        roughness = 0.28;
+        color = [0.014, 0.015, 0.018, 1];
+      }
+      if (name.includes('satin graphite powder coat')) {
+        metallic = 0.38;
+        roughness = 0.36;
+        color = [0.03, 0.031, 0.034, 1];
+      }
       if (name.includes('black moulded connector polymer')) { metallic = 0.08; roughness = 0.37; }
       if (name.includes('machined nickel connector shells')) { metallic = 0.98; roughness = 0.2; }
       if (name.includes('satin stainless steel')) { metallic = 0.94; roughness = 0.24; }
       return {
         name: material.name || '',
-        color: pbr.baseColorFactor || [1, 1, 1, 1],
+        color,
         metallic,
         roughness,
         emissive: material.emissiveFactor || [0, 0, 0],
@@ -137,7 +150,7 @@
     });
     const buckets = new Map();
     const bounds = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] };
-    const appendPrimitive = (primitive, world) => {
+    const appendPrimitive = (primitive, world, meshIndex) => {
       if ((primitive.mode ?? 4) !== 4) return;
       const attributes = primitive.attributes;
       const positions = readAccessor(json, binary, attributes.POSITION);
@@ -146,12 +159,32 @@
         ? Array.from({ length: positions.count }, (_, i) => i)
         : readAccessor(json, binary, primitive.indices).values;
       const normalTransform = normalMatrix(world);
+      // Meshes 0–6 are the enclosure shell. Raise it to the reference's
+      // approximate 150 mm height; shift hardware as a rigid part so plugs,
+      // screws and legends keep their manufactured proportions.
+      const isEnclosure = meshIndex < 7;
+      const enclosureHeightScale = 1.32;
+      const localBounds = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] };
+      for (let i = 0; i < positions.values.length; i += 3) {
+        for (let axis = 0; axis < 3; axis++) {
+          const value = positions.values[i + axis];
+          localBounds.min[axis] = Math.min(localBounds.min[axis], value);
+          localBounds.max[axis] = Math.max(localBounds.max[axis], value);
+        }
+      }
+      const localCenter = localBounds.min.map((value, axis) => (value + localBounds.max[axis]) * 0.5);
+      const worldCenter = transformPoint(world, localCenter);
+      const fitHeight = point => {
+        if (isEnclosure) point[1] *= enclosureHeightScale;
+        else point[1] += worldCenter[1] * (enclosureHeightScale - 1);
+        return point;
+      };
       const materialIndex = primitive.material ?? -1;
       let bucket = buckets.get(materialIndex);
       if (!bucket) { bucket = { positions: [], normals: [] }; buckets.set(materialIndex, bucket); }
       for (let triangle = 0; triangle + 2 < indices.length; triangle += 3) {
         const ids = [indices[triangle], indices[triangle + 1], indices[triangle + 2]];
-        const points = ids.map(index => transformPoint(world, positions.values.subarray(index * 3, index * 3 + 3)));
+        const points = ids.map(index => fitHeight(transformPoint(world, positions.values.subarray(index * 3, index * 3 + 3))));
         points.forEach(point => point.forEach((value, axis) => {
           bounds.min[axis] = Math.min(bounds.min[axis], value);
           bounds.max[axis] = Math.max(bounds.max[axis], value);
@@ -165,14 +198,16 @@
         ids.forEach((index, vertex) => {
           bucket.positions.push(...points[vertex]);
           const n = normals ? normals.values.subarray(index * 3, index * 3 + 3) : faceNormal;
-          bucket.normals.push(...(normals ? transformNormal(normalTransform, n) : n));
+          const transformedNormal = normals ? transformNormal(normalTransform, n) : n;
+          if (isEnclosure) transformedNormal[1] /= enclosureHeightScale;
+          bucket.normals.push(...vector.normalize(transformedNormal));
         });
       }
     };
     const visit = (nodeIndex, parentMatrix) => {
       const node = json.nodes[nodeIndex];
       const world = multiplyMatrix(parentMatrix, nodeMatrix(node));
-      if (node.mesh !== undefined) json.meshes[node.mesh].primitives.forEach(primitive => appendPrimitive(primitive, world));
+      if (node.mesh !== undefined) json.meshes[node.mesh].primitives.forEach(primitive => appendPrimitive(primitive, world, node.mesh));
       (node.children || []).forEach(child => visit(child, world));
     };
     (json.scenes?.[json.scene || 0]?.nodes || []).forEach(node => visit(node, identity()));
@@ -201,6 +236,7 @@
       uniform vec4 u_color;
       uniform float u_metallic;
       uniform float u_roughness;
+      uniform float u_brushed;
       uniform vec3 u_emissive;
       uniform vec3 u_eye;
       uniform sampler2D u_texture;
@@ -242,6 +278,12 @@
         vec3 h1 = normalize(l1 + v);
         vec3 h2 = normalize(l2 + v);
         float specular = pow(max(dot(n, h1), 0.0), exponent) * 0.78 + pow(max(dot(n, h2), 0.0), exponent * 0.7) * 0.38;
+        vec3 brushAxis = abs(n.x) > 0.95 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+        vec3 brushTangent = normalize(brushAxis - n * dot(n, brushAxis));
+        vec3 brushBitangent = normalize(cross(n, brushTangent));
+        float brushAcross = dot(brushBitangent, h1);
+        float brushedLobe = pow(max(dot(n, h1), 0.0), exponent * 0.58) * exp(-brushAcross * brushAcross * (9.0 + 20.0 * (1.0 - roughness)));
+        specular += u_brushed * brushedLobe * 0.75;
         float dielectric = 1.0 - u_metallic;
         vec3 base = u_color.rgb * textureValue;
         vec3 lit = base * (0.12 + diffuse * 0.62) * (0.28 + dielectric * 0.72);
@@ -323,7 +365,7 @@
     const center = bounds.min.map((value, axis) => (value + bounds.max[axis]) * 0.5);
     // A milder azimuth shows more of the connector face and stops this
     // orthogonal enclosure from reading as a tapered wedge.
-    const eye = center.map((value, axis) => value + [-2.7, 6.5, 12][axis]);
+    const eye = center.map((value, axis) => value + [-3.7, 8.8, 12][axis]);
     const forward = vector.normalize(center.map((value, i) => value - eye[i]));
     const right = vector.normalize(vector.cross(forward, [0, 1, 0]));
     const up = vector.cross(right, forward);
@@ -397,6 +439,7 @@
       gl.uniform1f(uniforms.roughness, material.roughness);
       gl.uniform3fv(uniforms.emissive, material.emissive);
       const materialName = (material.name || '').toLowerCase();
+      gl.uniform1f(uniforms.brushed, materialName.includes('brushed black aluminium') ? 1 : 0);
       const textureKey = materialName.includes('brushed black aluminium') ? 'brushed'
         : materialName.includes('black anodized side walls') ? 'graphite'
         : materialName.includes('powder coat') ? 'powder'
@@ -428,7 +471,7 @@
     const uniform = name => gl.getUniformLocation(program, `u_${name}`);
     const uniforms = {
       viewProjection: uniform('viewProjection'), color: uniform('color'), metallic: uniform('metallic'),
-      roughness: uniform('roughness'), emissive: uniform('emissive'), eye: uniform('eye')
+      roughness: uniform('roughness'), brushed: uniform('brushed'), emissive: uniform('emissive'), eye: uniform('eye')
     };
     uniforms.texture = uniform('texture');
     uniforms.textureScale = uniform('textureScale');
@@ -438,9 +481,9 @@
     uniforms.time = uniform('time');
     const attributes = { position: gl.getAttribLocation(program, 'a_position'), normal: gl.getAttribLocation(program, 'a_normal') };
     const textureSources = [
-      ['brushed', 'assets/models/reference-v2/textures/brushed-aluminium.svg', 0.78, 1.1],
-      ['graphite', 'assets/models/reference-v2/textures/anodized-graphite.svg', 0.58, 1.25],
-      ['powder', 'assets/models/reference-v2/textures/powder-coat.svg', 0.72, 1.5],
+      ['brushed', 'assets/models/reference-v2/textures/brushed-aluminium.svg', 0.52, 1.7],
+      ['graphite', 'assets/models/reference-v2/textures/anodized-graphite.svg', 0.42, 1.5],
+      ['powder', 'assets/models/reference-v2/textures/powder-coat.svg', 0.36, 2.1],
       ['rubber', 'assets/models/reference-v2/textures/epdm-rubber.svg', 0.65, 1.6],
       ['polymer', 'assets/models/reference-v2/textures/moulded-polymer.svg', 0.62, 1.4],
       ['steel', 'assets/models/reference-v2/textures/machined-steel.svg', 0.54, 1.2],
@@ -451,7 +494,7 @@
       try {
         const image = new Image();
         image.decoding = 'async';
-        image.src = `${url}?v=20261019-1`;
+        image.src = `${url}?v=20261019-metal-surface-1`;
         await image.decode();
         const texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, texture);

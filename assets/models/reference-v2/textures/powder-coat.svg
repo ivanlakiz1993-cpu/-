@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
-    <filter id="powder" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency=".23 .23" numOctaves="3" seed="41" stitchTiles="stitch"/>
-      <feComponentTransfer><feFuncR type="linear" slope=".17" intercept=".83"/><feFuncG type="linear" slope=".17" intercept=".83"/><feFuncB type="linear" slope=".17" intercept=".83"/></feComponentTransfer>
+    <filter id="satin-powder" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency=".105 .105" numOctaves="3" seed="41" stitchTiles="stitch"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope=".12" intercept=".82"/>
+        <feFuncG type="linear" slope=".12" intercept=".82"/>
+        <feFuncB type="linear" slope=".12" intercept=".82"/>
+      </feComponentTransfer>
     </filter>
-    <pattern id="fine" width="7" height="7" patternUnits="userSpaceOnUse">
-      <circle cx="1" cy="2" r=".35" fill="#777" opacity=".22"/><circle cx="5" cy="5" r=".3" fill="#777" opacity=".18"/>
-    </pattern>
   </defs>
   <rect width="512" height="512" fill="#fff"/>
-  <rect width="512" height="512" filter="url(#powder)" opacity=".45"/>
-  <rect width="512" height="512" fill="url(#fine)"/>
+  <rect width="512" height="512" filter="url(#satin-powder)" opacity=".5"/>
 </svg>
