@@ -321,10 +321,10 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     textureSrc: 'assets/equipment-frost.png'
   });
   let frostProgress = 0;
-  const rainDrops = Array.from({ length: 260 }, () => ({
-    x: Math.random(), y: Math.random(), size: 0.75 + Math.random() * 0.7,
-    speed: 0.7 + Math.random() * 0.6, drift: (Math.random() - 0.5) * 0.12,
-    angle: (Math.random() - 0.5) * 0.3, alpha: 0.18 + Math.random() * 0.2
+  const rainDrops = Array.from({ length: 400 }, () => ({
+    x: Math.random(), y: Math.random(), size: 1.8 + Math.random() * 0.9,
+    speed: 0.85 + Math.random() * 0.75, drift: (Math.random() - 0.5) * 0.14,
+    angle: (Math.random() - 0.5) * 0.3, alpha: 0.55 + Math.random() * 0.35
   }));
   let surfaceDrops = [];
   let ambientWidth = 0;
@@ -612,7 +612,7 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     const wetness = smoothRain(0.035, 0.18, sectionProgress) *
       (1 - smoothRain(0.76, 0.93, sectionProgress)) * (1 - smoothRain(0.05, 0.4, frostProgress));
 
-    rainAmbient.style.opacity = rainIntensity.toFixed(3);
+    rainAmbient.style.opacity = Math.min(1, rainIntensity * 1.35).toFixed(3);
     rainSurface.style.opacity = wetness.toFixed(3);
     ambientContext.clearRect(0, 0, ambientWidth, ambientHeight);
 
@@ -631,7 +631,7 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
         const x = drop.x * ambientWidth;
         const y = drop.y * ambientHeight;
         const width = drop.size;
-        const height = width * 1.9;
+        const height = width * 2.3;
 
         // Render each falling particle as a small water bead, not a long
         // line. The neutral reflection keeps it legible against the dark page.
@@ -646,15 +646,12 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
         ambientContext.bezierCurveTo(-0.38, 0.98, -0.82, 0.66, -0.76, 0.24);
         ambientContext.bezierCurveTo(-0.7, -0.12, -0.2, -0.64, 0, -1);
         ambientContext.closePath();
-        const bead = ambientContext.createLinearGradient(-0.6, -0.6, 0.6, 0.8);
-        bead.addColorStop(0, `rgba(250,252,251,${(drop.alpha * 0.72).toFixed(3)})`);
-        bead.addColorStop(0.42, `rgba(208,216,213,${(drop.alpha * 0.46).toFixed(3)})`);
-        bead.addColorStop(1, `rgba(151,163,159,${(drop.alpha * 0.6).toFixed(3)})`);
-        ambientContext.fillStyle = bead;
+        ambientContext.globalAlpha = drop.alpha;
+        ambientContext.fillStyle = 'rgba(218,226,222,.84)';
         ambientContext.fill();
         ambientContext.beginPath();
-        ambientContext.ellipse(-0.22, -0.3, 0.12, 0.24, -0.2, 0, Math.PI * 2);
-        ambientContext.fillStyle = `rgba(255,255,255,${(drop.alpha * 0.56).toFixed(3)})`;
+        ambientContext.ellipse(-0.24, -0.28, 0.15, 0.25, -0.2, 0, Math.PI * 2);
+        ambientContext.fillStyle = 'rgba(255,255,255,.9)';
         ambientContext.fill();
         ambientContext.restore();
       }
