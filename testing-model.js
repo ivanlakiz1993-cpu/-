@@ -5,7 +5,7 @@
   if (!canvas || !equipment) return;
 
   const modelUrl = 'assets/models/reference-v2/testing-equipment-reference.glb';
-  const clampPixelRatio = () => Math.min(window.devicePixelRatio || 1, 1.5);
+  const clampPixelRatio = () => Math.min(window.devicePixelRatio || 1, 2);
   let weather = { wetness: 0, frostProgress: 0, time: 0 };
   let drawWeatheredModel = null;
   window.updateTestingModelWeather = next => {
@@ -159,26 +159,8 @@
         ? Array.from({ length: positions.count }, (_, i) => i)
         : readAccessor(json, binary, primitive.indices).values;
       const normalTransform = normalMatrix(world);
-      // Meshes 0–6 are the enclosure shell. Raise it to the reference's
-      // approximate 150 mm height; shift hardware as a rigid part so plugs,
-      // screws and legends keep their manufactured proportions.
-      const isEnclosure = meshIndex < 7;
-      const enclosureHeightScale = 1.32;
-      const localBounds = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] };
-      for (let i = 0; i < positions.values.length; i += 3) {
-        for (let axis = 0; axis < 3; axis++) {
-          const value = positions.values[i + axis];
-          localBounds.min[axis] = Math.min(localBounds.min[axis], value);
-          localBounds.max[axis] = Math.max(localBounds.max[axis], value);
-        }
-      }
-      const localCenter = localBounds.min.map((value, axis) => (value + localBounds.max[axis]) * 0.5);
-      const worldCenter = transformPoint(world, localCenter);
-      const fitHeight = point => {
-        if (isEnclosure) point[1] *= enclosureHeightScale;
-        else point[1] += worldCenter[1] * (enclosureHeightScale - 1);
-        return point;
-      };
+      // Preserve the manufactured shell and assembled hardware proportions.
+      const fitHeight = point => point;
       const materialIndex = primitive.material ?? -1;
       let bucket = buckets.get(materialIndex);
       if (!bucket) { bucket = { positions: [], normals: [] }; buckets.set(materialIndex, bucket); }
@@ -199,7 +181,7 @@
           bucket.positions.push(...points[vertex]);
           const n = normals ? normals.values.subarray(index * 3, index * 3 + 3) : faceNormal;
           const transformedNormal = normals ? transformNormal(normalTransform, n) : n;
-          if (isEnclosure) transformedNormal[1] /= enclosureHeightScale;
+
           bucket.normals.push(...vector.normalize(transformedNormal));
         });
       }
@@ -240,6 +222,8 @@
       uniform vec3 u_emissive;
       uniform vec3 u_eye;
       uniform sampler2D u_texture;
+      uniform sampler2D u_surface;
+      uniform float u_hasSurface;
       uniform float u_textureScale;
       uniform float u_textureAmount;
       uniform float u_wetness;
@@ -269,11 +253,24 @@
         vec3 mapped = textureX * weights.x + textureY * weights.y + textureZ * weights.z;
         float grain = dot(mapped, vec3(0.2126, 0.7152, 0.0722));
         float textureValue = mix(1.0, grain, u_textureAmount);
+        // Normal and roughness are independent of the albedo texture.
+        // Triplanar tangent frames preserve the direction of the machining marks.
+        vec4 sx = texture2D(u_surface, v_position.zy * u_textureScale);
+        vec4 sy = texture2D(u_surface, v_position.xz * u_textureScale);
+        vec4 sz = texture2D(u_surface, v_position.xy * u_textureScale);
+        vec3 tx = sx.rgb * 2.0 - 1.0;
+        vec3 ty = sy.rgb * 2.0 - 1.0;
+        vec3 tz = sz.rgb * 2.0 - 1.0;
+        vec3 detail = vec3(0.0, tx.y, tx.x) * weights.x
+                    + vec3(ty.x, 0.0, ty.y) * weights.y
+                    + vec3(tz.x, tz.y, 0.0) * weights.z;
+        n = normalize(n + detail * u_hasSurface);
+        float surfaceRoughness = dot(vec3(sx.a, sy.a, sz.a), weights);
         vec3 l1 = normalize(vec3(-0.45, 0.82, 0.94));
         vec3 l2 = normalize(vec3(0.78, 0.55, 0.36));
         vec3 l3 = normalize(vec3(-0.55, 0.42, -0.72));
         float diffuse = max(dot(n, l1), 0.0) * 0.75 + max(dot(n, l2), 0.0) * 0.42 + max(dot(n, l3), 0.0) * 0.18;
-        float roughness = clamp(u_roughness + (1.0 - grain) * u_textureAmount * 0.12, 0.0, 1.0);
+        float roughness = mix(u_roughness, surfaceRoughness, u_hasSurface);
         float exponent = mix(112.0, 8.0, roughness);
         vec3 h1 = normalize(l1 + v);
         vec3 h2 = normalize(l2 + v);
@@ -290,7 +287,13 @@
         lit += base * specular * (0.08 + u_metallic * 1.22);
         lit += vec3(specular * (0.04 + u_metallic * 0.34));
         vec3 reflected = reflect(-v, n);
-        float boxPower = mix(5.0, 22.0, 1.0 - roughness);
+        // Finite studio panels give spatially varying reflections on flat metal.
+        vec3 panelDirection = normalize(vec3(0.0, 6.0, -5.0) - v_position);
+        float broadReflection = pow(max(dot(reflected, panelDirection), 0.0), 3.0 + roughness * 3.0);
+        float stripReflection = pow(max(dot(reflected, normalize(vec3(0.0, -1.0, 6.0) - v_position)), 0.0), 18.0);
+        lit += mix(vec3(0.065), base * 0.7 + vec3(0.15), u_metallic) * broadReflection;
+        lit += mix(vec3(0.04), base + vec3(0.28), u_metallic) * stripReflection * 0.65;
+        float boxPower = mix(3.0, 30.0, 1.0 - roughness);
         float softboxA = pow(max(dot(reflected, normalize(vec3(-0.62, 0.74, 0.28))), 0.0), boxPower);
         float softboxB = pow(max(dot(reflected, normalize(vec3(0.58, 0.24, -0.78))), 0.0), boxPower * 0.72);
         float softboxC = pow(max(dot(reflected, normalize(vec3(0.12, 0.96, 0.25))), 0.0), boxPower * 0.9);
@@ -365,7 +368,7 @@
     const center = bounds.min.map((value, axis) => (value + bounds.max[axis]) * 0.5);
     // Keep the front controls, left wall and lid visible at the same time,
     // matching the supplied product-photo angle.
-    const eye = center.map((value, axis) => value + [-3.7, 8.8, 12][axis]);
+    const eye = center.map((value, axis) => value + [-6, 7.5, 10][axis]);
     const forward = vector.normalize(center.map((value, i) => value - eye[i]));
     const right = vector.normalize(vector.cross(forward, [0, 1, 0]));
     const up = vector.cross(right, forward);
@@ -448,6 +451,10 @@
         : materialName.includes('machined nickel') || materialName.includes('stainless steel') ? 'steel'
         : materialName.includes('brass contacts') ? 'brass' : null;
       const localTexture = textureKey ? localTextures.get(textureKey) : null;
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, localTexture?.surface || fallbackTexture);
+      gl.uniform1i(uniforms.surface, 1);
+      gl.uniform1f(uniforms.hasSurface, localTexture?.surface ? 1 : 0);
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, localTexture?.texture || fallbackTexture);
       gl.uniform1i(uniforms.texture, 0);
@@ -474,6 +481,8 @@
       roughness: uniform('roughness'), brushed: uniform('brushed'), emissive: uniform('emissive'), eye: uniform('eye')
     };
     uniforms.texture = uniform('texture');
+    uniforms.surface = uniform('surface');
+    uniforms.hasSurface = uniform('hasSurface');
     uniforms.textureScale = uniform('textureScale');
     uniforms.textureAmount = uniform('textureAmount');
     uniforms.wetness = uniform('wetness');
@@ -481,9 +490,9 @@
     uniforms.time = uniform('time');
     const attributes = { position: gl.getAttribLocation(program, 'a_position'), normal: gl.getAttribLocation(program, 'a_normal') };
     const textureSources = [
-      ['brushed', 'assets/models/reference-v2/textures/brushed-aluminium.svg', 0.52, 1.7],
+      ['brushed', 'assets/models/reference-v2/textures/brushed-aluminium.svg', 0.52, 0.65],
       ['graphite', 'assets/models/reference-v2/textures/anodized-graphite.svg', 0.42, 1.5],
-      ['powder', 'assets/models/reference-v2/textures/powder-coat.svg', 0.36, 2.1],
+      ['powder', 'assets/models/reference-v2/textures/powder-coat.svg', 0.36, 0.65],
       ['rubber', 'assets/models/reference-v2/textures/epdm-rubber.svg', 0.65, 1.6],
       ['polymer', 'assets/models/reference-v2/textures/moulded-polymer.svg', 0.62, 1.4],
       ['steel', 'assets/models/reference-v2/textures/machined-steel.svg', 0.54, 1.2],
@@ -505,7 +514,22 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.generateMipmap(gl.TEXTURE_2D);
-        localTextures.set(key, { texture, amount, scale });
+        let surface = null;
+        if (['brushed', 'powder', 'steel', 'graphite'].includes(key)) {
+          const map = new Image();
+          map.src = 'assets/models/reference-v2/textures/' + key + '-surface.png';
+          await map.decode();
+          surface = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, surface);
+          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, map);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.generateMipmap(gl.TEXTURE_2D);
+        }
+        localTextures.set(key, { texture, surface, amount, scale });
       } catch (error) {
         console.warn(`The local ${key} surface map could not be loaded.`, error);
       }
