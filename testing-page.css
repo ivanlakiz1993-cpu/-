@@ -105,7 +105,8 @@
 .mechanical-tests__group dl{display:flex;flex-direction:column;gap:.9375rem;margin:0;font:300 clamp(1rem,1.25vw,1.5rem)/1.1 var(--sans);color:#f5f5f5}
 .mechanical-tests__group dl>div{display:flex;align-items:center;justify-content:space-between;gap:1.25rem}
 .mechanical-tests__group dt,.mechanical-tests__group dd{margin:0;white-space:nowrap}
-.mechanical-tests__group dd{color:var(--orange)}
+.mechanical-tests__group dt{color:#979797}
+.mechanical-tests__group dd{color:#ff730d}
 .mechanical-tests__divider{display:block;width:calc(100% + 1.875rem);height:1px;max-width:none;object-fit:fill}
 @media(max-width:68.75rem){
   .mechanical-tests{margin-top:4rem}
@@ -370,8 +371,9 @@
   .climate-tests__equipment dd{text-align:right;white-space:nowrap}
   .climate-tests__visuals{position:absolute;z-index:1;left:0;right:auto;top:32.6875rem;display:block;width:min(22.875rem,100%);height:auto;aspect-ratio:1}
   .climate-tests__pagination{position:absolute;z-index:2;top:.75rem;right:.75rem;display:flex;flex-direction:row;justify-content:flex-end;gap:.375rem;width:auto;height:auto}
-  .climate-tests__pagination button{width:.5625rem;height:.5625rem}
-  .climate-tests__pagination button.is-active{width:2.5rem;height:.5625rem}
+  .climate-tests__pagination{gap:.3125rem}
+  .climate-tests__pagination button{width:.5625rem;height:.5rem;border-radius:.3125rem;background:rgba(42,42,42,.6);opacity:1}
+  .climate-tests__pagination button.is-active{width:5.5625rem;height:.5rem;background:#fff}
 }
 @media(min-width:43.8125rem) and (max-width:68.75rem){
   .climate-tests__pagination{position:absolute;z-index:2;left:-1.25rem;right:auto;top:auto;bottom:0;display:flex;flex-direction:column-reverse;gap:.3125rem;width:.5rem;height:6.4375rem}
@@ -381,6 +383,12 @@
 @media(prefers-reduced-motion:reduce){.climate-tests__camera-photo,.climate-tests__pagination button,.testing-rain__ambient,.testing-rain__surface{transition:none}}
 
 /* Keep the vertical rhythm shared across the three Figma sections at every width. */
-.testing-page{--testing-section-gap:clamp(2.5rem,7.8125vw,9.375rem)}
+.testing-page{--testing-section-gap:clamp(2.5rem,7.8125vw,9.375rem);--testing-content-gutter:clamp(.75rem,calc(5.7971vw - .71rem),6.25rem)}
 .testing-about{margin:var(--testing-section-gap) auto 0}
 .climate-tests,.mechanical-tests{margin-top:var(--testing-section-gap)}
+
+/* One shared horizontal guide keeps the three sections aligned at each breakpoint. */
+.testing-about{padding-right:var(--testing-content-gutter);padding-left:var(--testing-content-gutter)}
+.climate-tests__inner,.mechanical-tests__inner{width:min(calc(100% - var(--testing-content-gutter) - var(--testing-content-gutter)),107.5rem);margin-inline:auto}
+.testing-stage__content{left:var(--testing-content-gutter);right:var(--testing-content-gutter)}
+.testing-stage__breadcrumb{left:var(--testing-content-gutter)}
