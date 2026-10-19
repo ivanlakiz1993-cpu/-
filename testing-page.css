@@ -216,35 +216,35 @@
 /* Testing hero — Figma 1731:3603, 2466:4070, 2628:2548 */
 .testing-sequence{padding-top:5.9375rem}
 .testing-stage{height:45.5625rem;min-height:45.5625rem;overflow:hidden}
-.testing-stage__content{position:absolute;z-index:4;top:50px;left:clamp(24px,5.208333vw,100px);right:clamp(24px,5.208333vw,100px);display:flex;max-width:none;flex-direction:column;align-items:flex-start;gap:40px}
-.testing-stage__breadcrumb{top:16px;left:clamp(24px,5.208333vw,100px)}
-.testing-stage__copy{position:static;width:100%;transform:none;gap:30px}
-.testing-stage__copy h1{max-width:1200px;font-size:64px;line-height:1;letter-spacing:.01em}
-.testing-stage__copy p{width:min(561px,100%);max-width:700px;font-size:18px;line-height:1.2;font-weight:400;letter-spacing:0}
-.testing-stage__button{width:min(445px,100%);min-height:92px;margin:0;padding:20px 24px;font:400 24px/1.25 "Yandex Sans Text",Arial,sans-serif;letter-spacing:-.05em}
+.testing-stage__content{position:absolute;z-index:4;top:3.125rem;left:clamp(1.5rem,5.208333vw,6.25rem);right:clamp(1.5rem,5.208333vw,6.25rem);display:flex;max-width:none;flex-direction:column;align-items:flex-start;gap:2.5rem}
+.testing-stage__breadcrumb{top:1rem;left:clamp(1.5rem,5.208333vw,6.25rem)}
+.testing-stage__copy{position:static;width:100%;transform:none;gap:1.875rem}
+.testing-stage__copy h1{max-width:75rem;font-size:4rem;line-height:1;letter-spacing:.01em}
+.testing-stage__copy p{width:min(35.0625rem,100%);max-width:43.75rem;font-size:1.125rem;line-height:1.2;font-weight:400;letter-spacing:0}
+.testing-stage__button{width:min(27.8125rem,100%);min-height:5.75rem;margin:0;padding:1.25rem 1.5rem;font:400 1.5rem/1.25 "Yandex Sans Text",Arial,sans-serif;letter-spacing:-.05em}
 .testing-stage__button-label--compact{display:none}
-.testing-stage__equipment{left:50%;top:calc(50% + 62.5px);width:min(48.7vw,935px);aspect-ratio:935/604;transform:translate(-50%,-50%);transform-style:flat;will-change:auto;opacity:1}
+.testing-stage__equipment{left:50%;top:calc(50% + 3.90625rem);width:min(48.7vw,58.4375rem);aspect-ratio:935/604;transform:translate(-50%,-50%);transform-style:flat;will-change:auto;opacity:1}
 .testing-stage__image{opacity:1;filter:none;object-fit:contain}
-@media(max-width:1100px){
-  .testing-stage{height:519px;min-height:519px}
-  .testing-stage__content{top:50px;left:clamp(24px,4.6875vw,48px);right:clamp(24px,4.6875vw,48px);gap:30px}
-  .testing-stage__copy h1{max-width:646px;font-size:38px;line-height:.9;letter-spacing:.01em}
-  .testing-stage__copy p{width:min(527px,100%);font-size:16px;line-height:1.2;letter-spacing:.01em}
-  .testing-stage__button{min-height:72px}
+@media(max-width:68.75rem){
+  .testing-stage{height:32.4375rem;min-height:32.4375rem}
+  .testing-stage__content{top:3.125rem;left:clamp(1.5rem,4.6875vw,3rem);right:clamp(1.5rem,4.6875vw,3rem);gap:1.875rem}
+  .testing-stage__copy h1{max-width:40.375rem;font-size:2.375rem;line-height:.9;letter-spacing:.01em}
+  .testing-stage__copy p{width:min(32.9375rem,100%);font-size:1rem;line-height:1.2;letter-spacing:.01em}
+  .testing-stage__button{min-height:4.5rem}
   .testing-stage__button-label--desktop{display:none}
   .testing-stage__button-label--compact{display:inline}
-  .testing-stage__equipment{left:28.125%;top:calc(50% + 78px);width:min(48.4375vw,496px);aspect-ratio:496/321}
+  .testing-stage__equipment{left:28.125%;top:calc(50% + 4.875rem);width:min(48.4375vw,31rem);aspect-ratio:496/321}
   .testing-stage__breadcrumb{display:none}
 }
-@media(max-width:650px){
-  .testing-sequence{padding-top:48px}
-  .testing-stage{height:640px;min-height:640px}
-  .testing-stage__content{top:50px;right:12px;bottom:30px;left:12px;width:auto;max-width:none;justify-content:space-between;gap:24px}
-  .testing-stage__copy{gap:30px}
-  .testing-stage__copy h1{width:min(329px,100%);font-size:38px;line-height:.9;letter-spacing:.01em}
-  .testing-stage__copy p{width:100%;max-width:none;font-size:16px;line-height:1.2;letter-spacing:.01em}
-  .testing-stage__button{width:100%;min-height:56px;padding:12px 16px;font-size:24px}
-  .testing-stage__equipment{left:50%;top:calc(50% + 72.5px);width:min(92.3077vw,360px);aspect-ratio:360/233}
+@media(max-width:40.625rem){
+  .testing-sequence{padding-top:3rem}
+  .testing-stage{height:40rem;min-height:40rem}
+  .testing-stage__content{top:3.125rem;right:.75rem;bottom:1.875rem;left:.75rem;width:auto;max-width:none;justify-content:space-between;gap:1.5rem}
+  .testing-stage__copy{gap:1.875rem}
+  .testing-stage__copy h1{width:min(20.5625rem,100%);font-size:2.375rem;line-height:.9;letter-spacing:.01em}
+  .testing-stage__copy p{width:100%;max-width:none;font-size:1rem;line-height:1.2;letter-spacing:.01em}
+  .testing-stage__button{width:100%;min-height:3.5rem;padding:.75rem 1rem;font-size:1.5rem}
+  .testing-stage__equipment{left:50%;top:calc(50% + 4.53125rem);width:min(92.3077vw,22.5rem);aspect-ratio:360/233}
 }
 @media(prefers-reduced-motion:reduce){.testing-stage__equipment{will-change:auto}}
 
@@ -311,8 +311,8 @@
 
 /* Mobile testing cover matched to Figma 2628:2548. */
 @media(max-width:37.5rem){
-  .testing-stage{height:635px;min-height:635px}
-  .testing-stage__content{justify-content:flex-start;gap:30px}
+  .testing-stage{height:39.6875rem;min-height:39.6875rem}
+  .testing-stage__content{justify-content:flex-start;gap:1.875rem}
   .testing-journey__visual .testing-stage__equipment{
     transform:perspective(93.75rem) translate3d(.0625rem,calc(36.25rem - 50svh),0) rotateY(var(--testing-rotate-y,0deg)) rotateX(var(--testing-rotate-x,0deg)) rotateZ(var(--testing-rotate-z,0deg));
   }
@@ -379,3 +379,8 @@
   .climate-tests__pagination button.is-active{width:.5rem;height:5.5625rem}
 }
 @media(prefers-reduced-motion:reduce){.climate-tests__camera-photo,.climate-tests__pagination button,.testing-rain__ambient,.testing-rain__surface{transition:none}}
+
+/* Keep the vertical rhythm shared across the three Figma sections at every width. */
+.testing-page{--testing-section-gap:clamp(2.5rem,7.8125vw,9.375rem)}
+.testing-about{margin:var(--testing-section-gap) auto 0}
+.climate-tests,.mechanical-tests{margin-top:var(--testing-section-gap)}
