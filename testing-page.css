@@ -167,13 +167,11 @@
 .testing-faq__item summary i{position:relative;display:block;flex:none;width:2.75rem;height:2.75rem;border:.0625rem solid #6e6e6e;border-radius:50%;color:#d9d9d9;opacity:.82;transition:transform .45s cubic-bezier(.2,.75,.25,1),opacity .3s ease,background-color .3s ease,border-color .3s ease,color .3s ease}
 .testing-faq__item summary i::before{content:"";position:absolute;left:50%;top:50%;width:.5625rem;height:.5625rem;border-right:.09375rem solid currentColor;border-bottom:.09375rem solid currentColor;transform:translate(-50%,-70%) rotate(45deg);transition:transform .45s cubic-bezier(.2,.75,.25,1)}
 .testing-faq__item[open] summary i{border-color:#171717;color:#171717;opacity:1;transform:rotate(180deg)}
-.testing-faq__item:not([open]) summary:hover i,.testing-faq__item:not([open]) summary:focus-visible i{background:rgba(255,115,13,.12);border-color:#fff;color:#fff;opacity:1}
-.testing-faq__item[open] summary:hover i,.testing-faq__item[open] summary:focus-visible i{background:rgba(255,115,13,.12);opacity:1}
+.testing-faq__item:not([open]) summary:hover i,.testing-faq__item:not([open]) summary:focus-visible i{background:transparent;border-color:#fff;color:#fff;opacity:1}
+.testing-faq__item[open] summary:hover i,.testing-faq__item[open] summary:focus-visible i{background:transparent;border-color:#171717;color:#171717;opacity:1}
 .testing-faq__item summary:focus-visible{outline:.125rem solid var(--orange);outline-offset:.1875rem}
-.testing-faq__answer{display:grid;grid-template-rows:0fr;transition:grid-template-rows .48s cubic-bezier(.2,.75,.25,1)}
-.testing-faq__item[open] .testing-faq__answer{grid-template-rows:1fr}
-.testing-faq__answer p{width:min(50rem,calc(100% - var(--testing-content-gutter,6.25rem) - var(--testing-content-gutter,6.25rem)));min-height:0;margin:0 var(--testing-content-gutter,6.25rem);overflow:hidden;padding:0;font:400 1.125rem/1.2 var(--sans);color:#525252;transition:padding-bottom .48s cubic-bezier(.2,.75,.25,1)}
-.testing-faq__item[open] .testing-faq__answer p{padding-bottom:1.75rem}
+.testing-faq__answer{overflow:hidden}
+.testing-faq__answer p{width:min(50rem,calc(100% - var(--testing-content-gutter,6.25rem) - var(--testing-content-gutter,6.25rem)));min-height:0;margin:0 var(--testing-content-gutter,6.25rem);overflow:hidden;padding:0 0 1.75rem;font:400 1.125rem/1.2 var(--sans);color:#525252}
 .climate-tests__list li,.mechanical-tests__list li{position:relative;isolation:isolate;overflow:hidden;transition:background-color .35s ease,transform .35s cubic-bezier(.2,.75,.25,1)}
 .climate-tests__list li::before,.mechanical-tests__list li::before{content:"";position:absolute;z-index:-1;left:0;top:15%;bottom:15%;width:2px;background:linear-gradient(180deg,transparent,var(--orange),transparent);box-shadow:0 0 14px rgba(255,115,13,.48);transform:scaleY(0);transform-origin:center;transition:transform .42s cubic-bezier(.2,.75,.25,1)}
 .climate-tests__list li:hover,.mechanical-tests__list li:hover{background-color:#191919;transform:translateX(3px)}
@@ -206,11 +204,10 @@
   .testing-faq__item summary{min-height:4.5rem;gap:.875rem;padding:.75rem 0;font-size:1.125rem;line-height:1;letter-spacing:-.05625rem}
   .testing-faq__item summary i{width:1.875rem;height:1.875rem}
   .testing-faq__item summary i::before{width:.4375rem;height:.4375rem}
-  .testing-faq__answer p{padding-right:2.75rem;font-size:.875rem;line-height:1.35}
-  .testing-faq__item[open] .testing-faq__answer p{padding-bottom:1.25rem}
+  .testing-faq__answer p{padding:0 2.75rem 1.25rem 0;font-size:.875rem;line-height:1.35}
 }
 @media(prefers-reduced-motion:reduce){
-  .testing-faq__item summary i,.testing-faq__item summary i::before,.testing-faq__answer,.testing-faq__answer p,.climate-tests__list li,.mechanical-tests__list li,.testing-stage__button{transition:none}
+  .testing-faq__item,.testing-faq__item summary,.testing-faq__item summary i,.testing-faq__item summary i::before,.testing-faq__answer,.testing-faq__answer p,.climate-tests__list li,.mechanical-tests__list li,.testing-stage__button{transition:none}
   .climate-tests__list li:hover,.mechanical-tests__list li:hover,.testing-stage__button:active{transform:none}
 }
 

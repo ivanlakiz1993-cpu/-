@@ -17,6 +17,52 @@ document.addEventListener('pointerdown', event => { if (menuButton?.getAttribute
 
 const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 
+const faqList = document.querySelector('.testing-faq__list');
+if (faqList) {
+  const faqItems = [...faqList.querySelectorAll('.testing-faq__item')];
+  const faqDuration = pageMotionPreference.matches ? 0 : 420;
+  let faqQueue = Promise.resolve();
+
+  const animateFaqAnswer = (answer, from, to) => {
+    if (!faqDuration || Math.abs(from - to) < 1) return Promise.resolve();
+    const animation = answer.animate([
+      { height: `${from}px`, opacity: from ? 1 : 0 },
+      { height: `${to}px`, opacity: to ? 1 : 0 }
+    ], { duration: faqDuration, easing: 'cubic-bezier(.2,.75,.25,1)', fill: 'both' });
+    return animation.finished.catch(() => {}).then(() => animation.cancel());
+  };
+
+  const closeFaqItem = async item => {
+    if (!item.open) return;
+    const answer = item.querySelector('.testing-faq__answer');
+    if (answer) await animateFaqAnswer(answer, answer.getBoundingClientRect().height, 0);
+    item.open = false;
+  };
+
+  const openFaqItem = async item => {
+    item.open = true;
+    const answer = item.querySelector('.testing-faq__answer');
+    if (answer) await animateFaqAnswer(answer, 0, answer.scrollHeight);
+  };
+
+  faqList.addEventListener('click', event => {
+    const summary = event.target.closest('.testing-faq__item > summary');
+    if (!summary) return;
+    event.preventDefault();
+    const item = summary.parentElement;
+    faqQueue = faqQueue.then(async () => {
+      if (item.open) {
+        await closeFaqItem(item);
+        return;
+      }
+      for (const other of faqItems) {
+        if (other !== item && other.open) await closeFaqItem(other);
+      }
+      await openFaqItem(item);
+    }).catch(() => {});
+  });
+}
+
 // A hard reload of this long sticky page should restart at the cover, while
 // browser back/forward navigation keeps its normal scroll restoration.
 const testingNavigation = performance.getEntriesByType?.('navigation')?.[0];
