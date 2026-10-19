@@ -137,7 +137,7 @@
         color = [0.03, 0.031, 0.034, 1];
       }
       if (name.includes('black moulded connector polymer')) { metallic = 0.08; roughness = 0.37; }
-      if (name.includes('machined nickel connector shells')) { metallic = 0.98; roughness = 0.2; }
+      if (name.includes('machined nickel connector shells')) { metallic = 0.98; roughness = 0.17; }
       if (name.includes('satin stainless steel')) { metallic = 0.94; roughness = 0.24; }
       return {
         name: material.name || '',
@@ -160,13 +160,12 @@
         : readAccessor(json, binary, primitive.indices).values;
       const normalTransform = normalMatrix(world);
       // Preserve the manufactured shell and assembled hardware proportions.
-      const fitHeight = point => point;
       const materialIndex = primitive.material ?? -1;
       let bucket = buckets.get(materialIndex);
       if (!bucket) { bucket = { positions: [], normals: [] }; buckets.set(materialIndex, bucket); }
       for (let triangle = 0; triangle + 2 < indices.length; triangle += 3) {
         const ids = [indices[triangle], indices[triangle + 1], indices[triangle + 2]];
-        const points = ids.map(index => fitHeight(transformPoint(world, positions.values.subarray(index * 3, index * 3 + 3))));
+        const points = ids.map(index => transformPoint(world, positions.values.subarray(index * 3, index * 3 + 3)));
         points.forEach(point => point.forEach((value, axis) => {
           bounds.min[axis] = Math.min(bounds.min[axis], value);
           bounds.max[axis] = Math.max(bounds.max[axis], value);
@@ -302,8 +301,12 @@
         vec3 environment = vec3(0.78, 0.83, 0.9) * softboxA * 0.68 +
           vec3(0.34, 0.4, 0.48) * softboxB * 0.36 + vec3(0.55, 0.58, 0.62) * softboxC * 0.48;
         lit += environment * (metalF0 + (vec3(1.0) - metalF0) * fresnel) * (0.5 + u_metallic * 1.05);
+        float sideReflection = pow(max(dot(reflected, normalize(vec3(-6.0, -2.0, -4.0) - v_position)), 0.0), 3.0);
+        lit += sideReflection * (base * 0.65 + vec3(0.06)) * u_metallic;
         lit += u_emissive;
 
+        // Weather uses the geometric normal, independent of metal microrelief.
+        n = normalize(v_normal);
         // Water beads are shaded on the actual top surface of the GLB.
         float topFace = smoothstep(0.72, 0.97, n.y);
         if (u_wetness > 0.001 && topFace > 0.001) {
@@ -495,7 +498,7 @@
       ['powder', 'assets/models/reference-v2/textures/powder-coat.svg', 0.36, 0.65],
       ['rubber', 'assets/models/reference-v2/textures/epdm-rubber.svg', 0.65, 1.6],
       ['polymer', 'assets/models/reference-v2/textures/moulded-polymer.svg', 0.62, 1.4],
-      ['steel', 'assets/models/reference-v2/textures/machined-steel.svg', 0.54, 1.2],
+      ['steel', 'assets/models/reference-v2/textures/machined-steel.svg', 0.12, 1.2],
       ['brass', 'assets/models/reference-v2/textures/gold-plated-brass.svg', 0.46, 1.25]
     ];
     const localTextures = new Map();

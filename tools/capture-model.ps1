@@ -1,4 +1,4 @@
-param([string]$Output = 'model-after.png', [switch]$Reload)
+param([string]$Output = 'model-after.png', [switch]$Reload, [string]$Url = '', [int]$Width = 1600, [int]$Height = 1000, [string]$Expression = '')
 $tabs = (Invoke-WebRequest http://127.0.0.1:9333/json -UseBasicParsing).Content | ConvertFrom-Json
 $tab = $tabs | Where-Object type -eq 'page' | Select-Object -First 1
 $socket = [System.Net.WebSockets.ClientWebSocket]::new()
@@ -22,8 +22,10 @@ function Invoke-CDP($method, $parameters) {
  } while ($response.id -ne $script:messageId)
  return $response
 }
-Invoke-CDP 'Emulation.setDeviceMetricsOverride' @{width=1600;height=1000;deviceScaleFactor=1;mobile=$false} | Out-Null
+Invoke-CDP 'Emulation.setDeviceMetricsOverride' @{width=$Width;height=$Height;deviceScaleFactor=1;mobile=$false} | Out-Null
+if ($Url) { Invoke-CDP 'Page.navigate' @{url=$Url} | Out-Null; Start-Sleep -Seconds 3 }
 if ($Reload) { Invoke-CDP 'Page.reload' @{ignoreCache=$true} | Out-Null; Start-Sleep -Seconds 3 }
+if ($Expression) { Invoke-CDP 'Runtime.evaluate' @{expression=$Expression} | ConvertTo-Json -Depth 6 }
 Invoke-CDP 'Runtime.evaluate' @{expression='document.body.innerText + " READY:" + document.querySelector("[data-testing-equipment]").className'} | ConvertTo-Json -Depth 6
 $shot = Invoke-CDP 'Page.captureScreenshot' @{}
 [IO.File]::WriteAllBytes((Join-Path $PWD $Output),[Convert]::FromBase64String($shot.result.data))
