@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <pattern id="lathe" width="512" height="10" patternUnits="userSpaceOnUse">
+      <rect width="512" height="10" fill="#fff"/>
+      <path d="M0 2H512M0 6H512" stroke="#666" stroke-opacity=".16" stroke-width=".55"/>
+      <path d="M0 4H512M0 9H512" stroke="#fff" stroke-opacity=".48" stroke-width=".5"/>
+    </pattern>
+    <filter id="steel" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency=".025 .38" numOctaves="2" seed="79" stitchTiles="stitch"/>
+      <feComponentTransfer><feFuncR type="linear" slope=".1" intercept=".9"/><feFuncG type="linear" slope=".1" intercept=".9"/><feFuncB type="linear" slope=".1" intercept=".9"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#lathe)"/>
+  <rect width="512" height="512" filter="url(#steel)" opacity=".26"/>
+</svg>

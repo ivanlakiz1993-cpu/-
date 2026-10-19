@@ -373,6 +373,13 @@
 
 /* Keep the vertical rhythm shared across the three Figma sections at every width. */
 .testing-page{--testing-section-gap:clamp(2.5rem,7.8125vw,9.375rem);--testing-content-gutter:clamp(.75rem,calc(5.7971vw - .71rem),6.25rem)}
+
+/* Draw the editable GLB in the same box as the original device image. The old
+   image stays loaded as a fallback and as the frost effect's unchanged mask. */
+.testing-stage__model{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .24s ease}
+.testing-journey__visual .testing-model-ready .testing-stage__model{opacity:1}
+.testing-journey__visual .testing-model-ready .testing-stage__image{visibility:hidden}
+@media(prefers-reduced-motion:reduce){.testing-stage__model{transition:none}}
 .testing-about{margin:var(--testing-section-gap) auto 0}
 .climate-tests,.mechanical-tests{margin-top:var(--testing-section-gap)}
 
