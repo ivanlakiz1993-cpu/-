@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="hero-grid.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="metrics-desktop.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="layout-gutters.css?v=20261018-fluid-home-1">
-  <link rel="stylesheet" href="news-page.css?v=20261019-news-page-1">
+  <link rel="stylesheet" href="news-page.css?v=20261019-news-page-2">
   <link rel="stylesheet" href="page-transition.css?v=20261018-fluid-home-1">
   <script src="page-transition.js?v=20261016-entry-ready-2"></script>
 </head>
@@ -50,10 +50,10 @@
       <h1 class="news-page__title" id="news-title">Наши новости</h1>
       <div class="news-page__filter-wrap"><label class="visually-hidden" for="news-filter">Категория новостей</label><select class="news-page__filter" id="news-filter"><option value="all">События</option><option value="laboratory">Лаборатория</option><option value="forum">Выставки</option><option value="holidays">Праздники</option></select></div>
       <div class="news-page__grid" id="news-stories" aria-live="polite">
-        <a class="news-page__card" id="story-victory-day" href="#story-victory-day" data-category="holidays" aria-label="Поздравляем с Днем победы, 9 мая 2025 года"><img class="news-page__image" src="assets/news-victory.jpg" alt="Красные гвоздики ко Дню Победы" fetchpriority="high"><span class="news-page__copy"><span class="news-page__headline">Поздравляем с Днем победы!</span><time class="news-page__date" datetime="2025-05-09">09.05.2025</time></span></a>
-        <a class="news-page__card" id="story-laboratory" href="#story-laboratory" data-category="laboratory" aria-label="Расширение испытательной лаборатории, 14 марта 2024 года"><img class="news-page__image" src="assets/news-laboratory.jpg" alt="Климатическая испытательная камера"><span class="news-page__copy"><span class="news-page__headline">Расширение испытательной лаборатории</span><time class="news-page__date" datetime="2024-03-14">14.03.2024</time></span></a>
-        <a class="news-page__card" id="story-forum" href="#story-forum" data-category="forum" aria-label="Наша компания на форуме Микроэлектроника, 12 января 2023 года"><img class="news-page__image" src="assets/news-forum.jpg" alt="Стенд СпецЭлектроники на форуме Микроэлектроника"><span class="news-page__copy"><span class="news-page__headline">Наша компания на форуме «Микроэлектроника»</span><time class="news-page__date" datetime="2023-01-12">12.01.2023</time></span></a>
-        <a class="news-page__card" id="story-womens-day" href="#story-womens-day" data-category="holidays" aria-label="Поздравляем с 8 марта, 8 марта 2021 года"><img class="news-page__image" src="assets/news-womens-day.jpg" alt="Нежно-розовые розы"><span class="news-page__copy"><span class="news-page__headline">Поздравляем с 8 марта!</span><time class="news-page__date" datetime="2021-03-08">08.03.2021</time></span></a>
+        <a class="news-page__card news-page__card--victory" id="story-victory-day" href="#story-victory-day" data-category="holidays" aria-label="Поздравляем с Днем победы, 9 мая 2025 года"><img class="news-page__image" src="assets/news-victory.jpg" alt="Красные гвоздики ко Дню Победы" fetchpriority="high"><span class="news-page__copy"><span class="news-page__headline">Поздравляем с Днем победы!</span><time class="news-page__date" datetime="2025-05-09">09.05.2025</time></span></a>
+        <a class="news-page__card news-page__card--laboratory" id="story-laboratory" href="#story-laboratory" data-category="laboratory" aria-label="Расширение испытательной лаборатории, 14 марта 2024 года"><img class="news-page__image" src="assets/news-laboratory.jpg" alt="Климатическая испытательная камера"><span class="news-page__copy"><span class="news-page__headline">Расширение испытательной лаборатории</span><time class="news-page__date" datetime="2024-03-14">14.03.2024</time></span></a>
+        <a class="news-page__card news-page__card--forum" id="story-forum" href="#story-forum" data-category="forum" aria-label="Наша компания на форуме Микроэлектроника, 12 января 2023 года"><img class="news-page__image" src="assets/news-forum.jpg" alt="Стенд СпецЭлектроники на форуме Микроэлектроника"><span class="news-page__copy"><span class="news-page__headline">Наша компания на форуме «Микроэлектроника»</span><time class="news-page__date" datetime="2023-01-12">12.01.2023</time></span></a>
+        <a class="news-page__card news-page__card--womens-day" id="story-womens-day" href="#story-womens-day" data-category="holidays" aria-label="Поздравляем с 8 марта, 8 марта 2021 года"><img class="news-page__image" src="assets/news-womens-day.jpg" alt="Нежно-розовые розы"><span class="news-page__copy"><span class="news-page__headline">Поздравляем с 8 марта!</span><time class="news-page__date" datetime="2021-03-08">08.03.2021</time></span></a>
         <p class="news-page__empty">По этой категории новостей пока нет.</p>
       </div>
     </section>
@@ -98,6 +98,6 @@
     </div>
     <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
   </footer>
-  <script src="news-page.js?v=20261019-news-page-1"></script>
+  <script src="news-page.js?v=20261019-news-page-2"></script>
 </body>
 </html>
