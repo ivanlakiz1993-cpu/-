@@ -1,6 +1,4 @@
-// Small, same-origin GLB viewer for the shared test unit. It deliberately
-// keeps the transparent canvas in the existing image box so rain and frost
-// overlays retain their original coordinates and timing.
+// Local GLB viewer for the shared test unit, including its surface weather.
 (() => {
   const canvas = document.querySelector('[data-testing-model]');
   const equipment = document.querySelector('[data-testing-equipment]');
@@ -8,6 +6,12 @@
 
   const modelUrl = 'assets/models/reference-v2/testing-equipment-reference.glb';
   const clampPixelRatio = () => Math.min(window.devicePixelRatio || 1, 1.5);
+  let weather = { wetness: 0, frostProgress: 0, time: 0 };
+  let drawWeatheredModel = null;
+  window.updateTestingModelWeather = next => {
+    weather = { ...weather, ...next };
+    drawWeatheredModel?.();
+  };
   const vector = {
     normalize(v) {
       const length = Math.hypot(v[0], v[1], v[2]) || 1;
@@ -113,11 +117,20 @@
   const unpackModel = ({ json, binary }) => {
     const materials = (json.materials || []).map(material => {
       const pbr = material.pbrMetallicRoughness || {};
+      const name = (material.name || '').toLowerCase();
+      let metallic = pbr.metallicFactor ?? 1;
+      let roughness = pbr.roughnessFactor ?? 0.68;
+      if (name.includes('black anodized side walls')) { metallic = 0.7; roughness = 0.31; }
+      if (name.includes('brushed black aluminium')) { metallic = 0.82; roughness = 0.27; }
+      if (name.includes('satin graphite powder coat')) { metallic = 0.32; roughness = 0.38; }
+      if (name.includes('black moulded connector polymer')) { metallic = 0.08; roughness = 0.37; }
+      if (name.includes('machined nickel connector shells')) { metallic = 0.98; roughness = 0.2; }
+      if (name.includes('satin stainless steel')) { metallic = 0.94; roughness = 0.24; }
       return {
         name: material.name || '',
         color: pbr.baseColorFactor || [1, 1, 1, 1],
-        metallic: pbr.metallicFactor ?? 1,
-        roughness: pbr.roughnessFactor ?? 1,
+        metallic,
+        roughness,
         emissive: material.emissiveFactor || [0, 0, 0],
         doubleSided: !!material.doubleSided
       };
@@ -193,8 +206,22 @@
       uniform sampler2D u_texture;
       uniform float u_textureScale;
       uniform float u_textureAmount;
+      uniform float u_wetness;
+      uniform float u_frostProgress;
+      uniform float u_time;
       varying vec3 v_position;
       varying vec3 v_normal;
+      float hash21(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+      }
+      float noise2(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        float a = mix(hash21(i), hash21(i + vec2(1.0, 0.0)), f.x);
+        float b = mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), f.x);
+        return mix(a, b, f.y);
+      }
       void main() {
         vec3 n = normalize(v_normal);
         vec3 v = normalize(u_eye - v_position);
@@ -211,16 +238,65 @@
         vec3 l3 = normalize(vec3(-0.55, 0.42, -0.72));
         float diffuse = max(dot(n, l1), 0.0) * 0.75 + max(dot(n, l2), 0.0) * 0.42 + max(dot(n, l3), 0.0) * 0.18;
         float roughness = clamp(u_roughness + (1.0 - grain) * u_textureAmount * 0.12, 0.0, 1.0);
-        float exponent = mix(72.0, 8.0, roughness);
+        float exponent = mix(112.0, 8.0, roughness);
         vec3 h1 = normalize(l1 + v);
         vec3 h2 = normalize(l2 + v);
         float specular = pow(max(dot(n, h1), 0.0), exponent) * 0.78 + pow(max(dot(n, h2), 0.0), exponent * 0.7) * 0.38;
         float dielectric = 1.0 - u_metallic;
         vec3 base = u_color.rgb * textureValue;
-        vec3 lit = base * (0.10 + diffuse * 0.56) * (0.34 + dielectric * 0.66);
-        lit += base * specular * (0.08 + u_metallic * 1.05);
-        lit += vec3(specular * (0.035 + u_metallic * 0.28));
+        vec3 lit = base * (0.12 + diffuse * 0.62) * (0.28 + dielectric * 0.72);
+        lit += base * specular * (0.08 + u_metallic * 1.22);
+        lit += vec3(specular * (0.04 + u_metallic * 0.34));
+        vec3 reflected = reflect(-v, n);
+        float boxPower = mix(5.0, 22.0, 1.0 - roughness);
+        float softboxA = pow(max(dot(reflected, normalize(vec3(-0.62, 0.74, 0.28))), 0.0), boxPower);
+        float softboxB = pow(max(dot(reflected, normalize(vec3(0.58, 0.24, -0.78))), 0.0), boxPower * 0.72);
+        float softboxC = pow(max(dot(reflected, normalize(vec3(0.12, 0.96, 0.25))), 0.0), boxPower * 0.9);
+        float fresnel = pow(1.0 - max(dot(n, v), 0.0), 5.0);
+        vec3 metalF0 = mix(vec3(0.04), base, u_metallic);
+        vec3 environment = vec3(0.78, 0.83, 0.9) * softboxA * 0.68 +
+          vec3(0.34, 0.4, 0.48) * softboxB * 0.36 + vec3(0.55, 0.58, 0.62) * softboxC * 0.48;
+        lit += environment * (metalF0 + (vec3(1.0) - metalF0) * fresnel) * (0.5 + u_metallic * 1.05);
         lit += u_emissive;
+
+        // Water beads are shaded on the actual top surface of the GLB.
+        float topFace = smoothstep(0.72, 0.97, n.y);
+        if (u_wetness > 0.001 && topFace > 0.001) {
+          vec2 dropGrid = v_position.xz * vec2(4.0, 3.2);
+          dropGrid.y += sin(u_time * 0.45 + dropGrid.x * 2.3) * 0.025;
+          vec2 dropCell = floor(dropGrid);
+          vec2 dropRandom = vec2(hash21(dropCell), hash21(dropCell + vec2(19.73, 19.73)));
+          vec2 dropCenter = vec2(0.2) + dropRandom * 0.6;
+          vec2 dropRadius = vec2(0.15, 0.19) * (0.78 + dropRandom.y * 0.58);
+          vec2 dropCoord = (fract(dropGrid) - dropCenter) / dropRadius;
+          float dropDistance = length(dropCoord);
+          float dropMask = (1.0 - smoothstep(0.82, 1.0, dropDistance)) * step(0.27, dropRandom.x);
+          float dropAmount = dropMask * topFace * u_wetness;
+          float dome = sqrt(max(0.0, 1.0 - dot(dropCoord, dropCoord)));
+          vec3 dropNormal = normalize(vec3(dropCoord.x * 0.72, dome, dropCoord.y * 0.72));
+          vec3 dropHalf = normalize(dropNormal + normalize(vec3(-0.45, 0.82, 0.94)));
+          float dropSpecular = pow(max(dot(dropNormal, dropHalf), 0.0), 48.0);
+          float dropGlint = pow(max(dot(dropNormal, normalize(vec3(-0.5, 0.82, 0.3))), 0.0), 58.0);
+          lit = mix(lit, lit * 0.54 + base * 0.1, dropAmount * 0.78);
+          lit += dropAmount * (vec3(0.42, 0.48, 0.53) * dropSpecular * 0.72 + vec3(0.9) * dropGlint * 0.66);
+        }
+
+        // Frost grows from scattered nuclei with a noisy, irregular boundary.
+        if (u_frostProgress > 0.001) {
+          vec3 frostP = v_position;
+          float seedA = length((frostP - vec3(-1.72, 1.08, 0.78)) * vec3(0.78, 0.9, 0.82));
+          float seedB = length((frostP - vec3(1.62, 1.08, -0.62)) * vec3(0.82, 0.88, 0.9));
+          float seedC = length((frostP - vec3(0.05, 1.08, 0.12)) * vec3(0.78, 0.92, 0.78));
+          float frostDistance = min(seedA, min(seedB, seedC));
+          vec2 frostCoord = abs(n.y) > abs(n.x) ? (abs(n.y) > abs(n.z) ? v_position.xz : v_position.xy) : (abs(n.x) > abs(n.z) ? v_position.zy : v_position.xy);
+          float frostWarp = (noise2(frostCoord * 4.2) - 0.5) * 0.42 + (grain - 0.5) * 0.16;
+          float frostRadius = u_frostProgress * 3.6;
+          float frostMask = (1.0 - smoothstep(frostRadius - 0.08, frostRadius + 0.16, frostDistance + frostWarp)) * smoothstep(0.025, 0.11, u_frostProgress);
+          float frostGrain = mix(grain, hash21(floor(frostCoord * vec2(28.0, 23.0))), 0.58);
+          vec3 ice = mix(base, vec3(0.48, 0.54, 0.61), 0.72 + frostGrain * 0.12);
+          lit = mix(lit, ice * (0.28 + diffuse * 0.72), frostMask * 0.84);
+          lit += frostMask * smoothstep(0.7, 0.92, frostGrain) * vec3(0.16, 0.18, 0.2);
+        }
         lit = pow(max(lit, vec3(0.0)), vec3(1.0 / 2.2));
         gl_FragColor = vec4(lit, u_color.a);
       }
@@ -245,7 +321,9 @@
 
   const viewProjection = (aspect, bounds) => {
     const center = bounds.min.map((value, axis) => (value + bounds.max[axis]) * 0.5);
-    const eye = center.map((value, axis) => value + [-6, 7.5, 10][axis]);
+    // A milder azimuth shows more of the connector face and stops this
+    // orthogonal enclosure from reading as a tapered wedge.
+    const eye = center.map((value, axis) => value + [-2.7, 6.5, 12][axis]);
     const forward = vector.normalize(center.map((value, i) => value - eye[i]));
     const right = vector.normalize(vector.cross(forward, [0, 1, 0]));
     const up = vector.cross(right, forward);
@@ -279,7 +357,7 @@
     return { matrix: multiplyMatrix(projection, view), eye };
   };
 
-  const renderModel = ({ gl, program, model, buffers, uniforms, attributes, localTextures, fallbackTexture }) => {
+  const renderModel = ({ gl, program, model, buffers, uniforms, attributes, localTextures, fallbackTexture, weather }) => {
     const bounds = canvas.getBoundingClientRect();
     if (!bounds.width || !bounds.height) return false;
     const dpr = clampPixelRatio();
@@ -296,6 +374,9 @@
     const camera = viewProjection(width / height, model.bounds);
     gl.uniformMatrix4fv(uniforms.viewProjection, false, camera.matrix);
     gl.uniform3fv(uniforms.eye, camera.eye);
+    gl.uniform1f(uniforms.wetness, weather.wetness);
+    gl.uniform1f(uniforms.frostProgress, weather.frostProgress);
+    gl.uniform1f(uniforms.time, weather.time);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.CULL_FACE);
@@ -352,6 +433,9 @@
     uniforms.texture = uniform('texture');
     uniforms.textureScale = uniform('textureScale');
     uniforms.textureAmount = uniform('textureAmount');
+    uniforms.wetness = uniform('wetness');
+    uniforms.frostProgress = uniform('frostProgress');
+    uniforms.time = uniform('time');
     const attributes = { position: gl.getAttribLocation(program, 'a_position'), normal: gl.getAttribLocation(program, 'a_normal') };
     const textureSources = [
       ['brushed', 'assets/models/reference-v2/textures/brushed-aluminium.svg', 0.78, 1.1],
@@ -398,7 +482,8 @@
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.normals), gl.STATIC_DRAW);
       buffers.push({ materialIndex, position, normal, count: data.positions.length / 3 });
     }
-    const draw = () => renderModel({ gl, program, model, buffers, uniforms, attributes, localTextures, fallbackTexture });
+    const draw = () => renderModel({ gl, program, model, buffers, uniforms, attributes, localTextures, fallbackTexture, weather });
+    drawWeatheredModel = draw;
     if (!draw()) throw new Error('The model canvas has no visible size');
     equipment.classList.add('testing-model-ready');
     if ('ResizeObserver' in window) new ResizeObserver(draw).observe(equipment);
@@ -406,5 +491,5 @@
     document.addEventListener('visibilitychange', () => { if (!document.hidden) draw(); });
   };
 
-  start().catch(error => console.warn('The test unit model could not be displayed; image fallback remains visible.', error));
+  start().catch(error => console.warn('The local test unit model could not be displayed.', error));
 })();

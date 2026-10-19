@@ -253,12 +253,9 @@
 .testing-page{overflow-x:clip}
 .testing-journey{position:relative;isolation:isolate;overflow:clip;background:#000}
 .testing-journey__visual{position:sticky;z-index:1;top:0;display:grid;width:100%;height:100svh;margin-bottom:-100svh;place-items:center;pointer-events:none}
-.testing-journey__visual .testing-stage__equipment{position:relative;inset:auto;left:auto;top:auto;width:min(48.7vw,58.4375rem);max-width:calc(100% - 1.5rem);height:auto;aspect-ratio:935/604;transform:translate3d(var(--testing-x,0vw),var(--testing-y,0vh),0);transform-origin:50% 50%;transform-style:flat;will-change:transform;opacity:1}
-.testing-journey__visual .testing-stage__image{opacity:.5;filter:none;object-fit:contain}
+.testing-journey__visual .testing-stage__equipment{position:relative;inset:auto;left:auto;top:auto;width:min(48.7vw,58.4375rem);max-width:calc(100% - 1.5rem);height:auto;aspect-ratio:935/604;transform:none;transform-origin:50% 50%;transform-style:flat;will-change:auto;opacity:1}
 .testing-journey__visual .testing-stage__equipment{z-index:1}
 .testing-rain__ambient{position:absolute;z-index:0;inset:0;display:block;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .16s linear}
-.testing-rain__surface{position:absolute;z-index:2;inset:0;display:block;width:100%;height:100%;opacity:0;mix-blend-mode:normal;pointer-events:none;transition:opacity .16s linear}
-.testing-frost__surface{position:absolute;z-index:3;inset:0;display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
 .testing-sequence,.testing-stage{background:transparent}
 .testing-sequence,.testing-about{position:relative;z-index:2}
 .testing-about{min-height:38.75rem;margin:9.375rem auto 0;padding-top:0;padding-bottom:0}
@@ -313,9 +310,7 @@
 @media(max-width:37.5rem){
   .testing-stage{height:39.6875rem;min-height:39.6875rem}
   .testing-stage__content{justify-content:flex-start;gap:1.875rem}
-  .testing-journey__visual .testing-stage__equipment{
-    transform:translate3d(calc(.0625rem + var(--testing-x,0vw)),calc(36.25rem - 50svh + var(--testing-y,0vh)),0);
-  }
+  .testing-journey__visual .testing-stage__equipment{transform:none}
 }
 
 /* Climate tests: proportions and spacing from the 1920, 1024 and 402 Figma frames. */
@@ -369,16 +364,13 @@
   .climate-tests__pagination button{width:.5rem;height:.5625rem}
   .climate-tests__pagination button.is-active{width:.5rem;height:5.5625rem}
 }
-@media(prefers-reduced-motion:reduce){.climate-tests__camera-photo,.climate-tests__pagination button,.testing-rain__ambient,.testing-rain__surface{transition:none}}
+@media(prefers-reduced-motion:reduce){.climate-tests__camera-photo,.climate-tests__pagination button,.testing-rain__ambient{transition:none}}
 
 /* Keep the vertical rhythm shared across the three Figma sections at every width. */
 .testing-page{--testing-section-gap:clamp(2.5rem,7.8125vw,9.375rem);--testing-content-gutter:clamp(.75rem,calc(5.7971vw - .71rem),6.25rem)}
 
-/* Draw the editable GLB in the same box as the original device image. The old
-   image stays loaded as a fallback and as the frost effect's unchanged mask. */
-.testing-stage__model{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .24s ease}
-.testing-journey__visual .testing-model-ready .testing-stage__model{opacity:1}
-.testing-journey__visual .testing-model-ready .testing-stage__image{visibility:hidden}
+/* The shared equipment is rendered and weathered on its actual GLB surfaces. */
+.testing-stage__model{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;opacity:1;pointer-events:none}
 @media(prefers-reduced-motion:reduce){.testing-stage__model{transition:none}}
 .testing-about{margin:var(--testing-section-gap) auto 0}
 .climate-tests,.mechanical-tests{margin-top:var(--testing-section-gap)}
