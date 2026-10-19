@@ -321,9 +321,10 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     textureSrc: 'assets/equipment-frost.png'
   });
   let frostProgress = 0;
-  const rainStreaks = Array.from({ length: 165 }, () => ({
-    x: Math.random(), y: Math.random(), length: 7 + Math.random() * 12,
-    speed: 0.55 + Math.random() * 0.55, alpha: 0.08 + Math.random() * 0.14
+  const rainDrops = Array.from({ length: 260 }, () => ({
+    x: Math.random(), y: Math.random(), size: 0.75 + Math.random() * 0.7,
+    speed: 0.7 + Math.random() * 0.6, drift: (Math.random() - 0.5) * 0.12,
+    angle: (Math.random() - 0.5) * 0.3, alpha: 0.18 + Math.random() * 0.2
   }));
   let surfaceDrops = [];
   let ambientWidth = 0;
@@ -616,25 +617,46 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     ambientContext.clearRect(0, 0, ambientWidth, ambientHeight);
 
     if (rainIntensity > 0.005 && ambientWidth && ambientHeight) {
-      ambientContext.lineWidth = 0.8;
-      ambientContext.lineCap = 'round';
-      for (const streak of rainStreaks) {
+      for (const drop of rainDrops) {
         if (!reducedMotion) {
-          streak.y += streak.speed * dt;
-          streak.x += streak.speed * dt * 0.1;
+          drop.y += drop.speed * dt;
+          drop.x += drop.drift * dt;
         }
-        if (streak.y > 1.08) {
-          streak.y = -0.08;
-          streak.x = Math.random();
+        if (drop.y > 1.04) {
+          drop.y = -0.04;
+          drop.x = Math.random();
         }
-        if (streak.x > 1.08) streak.x = -0.08;
-        const x = streak.x * ambientWidth;
-        const y = streak.y * ambientHeight;
-        ambientContext.strokeStyle = `rgba(220,224,222,${(streak.alpha * rainIntensity).toFixed(3)})`;
+        if (drop.x > 1.04) drop.x = -0.04;
+        if (drop.x < -0.04) drop.x = 1.04;
+        const x = drop.x * ambientWidth;
+        const y = drop.y * ambientHeight;
+        const width = drop.size;
+        const height = width * 1.9;
+
+        // Render each falling particle as a small water bead, not a long
+        // line. The neutral reflection keeps it legible against the dark page.
+        ambientContext.save();
+        ambientContext.translate(x, y);
+        ambientContext.rotate(drop.angle);
+        ambientContext.scale(width, height);
         ambientContext.beginPath();
-        ambientContext.moveTo(x, y);
-        ambientContext.lineTo(x + streak.length * 0.12, y + streak.length);
-        ambientContext.stroke();
+        ambientContext.moveTo(0, -1);
+        ambientContext.bezierCurveTo(0.2, -0.62, 0.92, 0.02, 0.76, 0.52);
+        ambientContext.bezierCurveTo(0.66, 0.88, 0.3, 1, 0, 1);
+        ambientContext.bezierCurveTo(-0.38, 0.98, -0.82, 0.66, -0.76, 0.24);
+        ambientContext.bezierCurveTo(-0.7, -0.12, -0.2, -0.64, 0, -1);
+        ambientContext.closePath();
+        const bead = ambientContext.createLinearGradient(-0.6, -0.6, 0.6, 0.8);
+        bead.addColorStop(0, `rgba(250,252,251,${(drop.alpha * 0.72).toFixed(3)})`);
+        bead.addColorStop(0.42, `rgba(208,216,213,${(drop.alpha * 0.46).toFixed(3)})`);
+        bead.addColorStop(1, `rgba(151,163,159,${(drop.alpha * 0.6).toFixed(3)})`);
+        ambientContext.fillStyle = bead;
+        ambientContext.fill();
+        ambientContext.beginPath();
+        ambientContext.ellipse(-0.22, -0.3, 0.12, 0.24, -0.2, 0, Math.PI * 2);
+        ambientContext.fillStyle = `rgba(255,255,255,${(drop.alpha * 0.56).toFixed(3)})`;
+        ambientContext.fill();
+        ambientContext.restore();
       }
     }
 
