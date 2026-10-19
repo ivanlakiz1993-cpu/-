@@ -363,8 +363,8 @@
 
   const viewProjection = (aspect, bounds) => {
     const center = bounds.min.map((value, axis) => (value + bounds.max[axis]) * 0.5);
-    // A milder azimuth shows more of the connector face and stops this
-    // orthogonal enclosure from reading as a tapered wedge.
+    // Keep the front controls, left wall and lid visible at the same time,
+    // matching the supplied product-photo angle.
     const eye = center.map((value, axis) => value + [-3.7, 8.8, 12][axis]);
     const forward = vector.normalize(center.map((value, i) => value - eye[i]));
     const right = vector.normalize(vector.cross(forward, [0, 1, 0]));
