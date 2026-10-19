@@ -195,10 +195,10 @@
 @media(min-width:37.5625rem) and (max-width:68.75rem){
   .testing-faq{margin-top:3.125rem;padding:3.875rem 0 4.375rem}
   .testing-page>.footer{margin-top:3rem}
-  .testing-faq h2{font-size:2.375rem;line-height:.9;letter-spacing:.006em}
+  .testing-faq h2{font-size:2.375rem;line-height:.9;letter-spacing:.01em}
   .testing-faq__list{margin-top:2.125rem}
-  .testing-faq__item summary{min-height:5.125rem;padding:1.25rem 0;font-size:1.5rem;line-height:1;letter-spacing:-.075rem}
-  .testing-faq__answer p{font-size:1rem}
+  .testing-faq__item summary{min-height:5.125rem;padding:1.25rem 0;font-size:1.125rem;line-height:1;letter-spacing:-.05625rem}
+  .testing-faq__answer p{font-size:1.125rem;line-height:1.2;letter-spacing:0}
 }
 @media(max-width:37.5rem){
   .testing-faq{margin-top:2.5rem;padding:2.875rem 0 3.25rem}
