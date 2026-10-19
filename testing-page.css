@@ -295,7 +295,7 @@
   .testing-about__label{font-size:16px;text-align:center}
 }
 @media(max-width:37.5rem){
-  .testing-journey__visual .testing-stage__equipment{width:min(92.3077vw,22.5rem);max-width:calc(100% - 1.5rem)}
+  .testing-journey__visual .testing-stage__equipment{width:min(97.5vw,24.5rem);max-width:calc(100% + .25rem)}
   .testing-about{min-height:0;padding:0 12px 24px}
   .testing-about h2{margin-bottom:24px;font-size:38px;line-height:.9}
   .testing-about__content{gap:24px}
@@ -313,7 +313,7 @@
   .testing-stage{height:635px;min-height:635px}
   .testing-stage__content{justify-content:flex-start;gap:30px}
   .testing-journey__visual .testing-stage__equipment{
-    transform:perspective(93.75rem) translate3d(.1875rem,calc(34.25rem - 50svh),0) rotateY(var(--testing-rotate-y,0deg)) rotateX(var(--testing-rotate-x,0deg)) rotateZ(var(--testing-rotate-z,0deg));
+    transform:perspective(93.75rem) translate3d(.0625rem,calc(36.25rem - 50svh),0) rotateY(var(--testing-rotate-y,0deg)) rotateX(var(--testing-rotate-x,0deg)) rotateZ(var(--testing-rotate-z,0deg));
   }
 }
 
@@ -327,7 +327,7 @@
   .climate-tests__stage{position:relative;top:auto}
 }
 
-/* Climate tests: proportions and spacing from the 1920, 1024 and 390 Figma frames. */
+/* Climate tests: proportions and spacing from the 1920, 1024 and 402 Figma frames. */
 .climate-tests__equipment dd{color:var(--orange)}
 @media(min-width:68.8125rem){
   .climate-tests__track{height:calc(46.25rem + 70svh)}
@@ -349,7 +349,7 @@
   .climate-tests__equipment dl{gap:.9375rem;font-size:1rem;line-height:1.2;letter-spacing:.01em;white-space:normal}
   .climate-tests__equipment dl>div{gap:.625rem}
   .climate-tests__equipment dd{text-align:right;white-space:nowrap}
-  .climate-tests__visuals{position:absolute;z-index:1;left:51.08%;right:auto;top:18.5rem;display:block;width:48.92%;height:auto;aspect-ratio:1}
+  .climate-tests__visuals{position:absolute;z-index:1;left:55.28%;right:auto;top:18.5rem;display:block;width:44.72%;height:auto;aspect-ratio:1}
 }
 @media(max-width:43.75rem){
   .climate-tests{margin-top:4rem}
@@ -372,8 +372,8 @@
   .climate-tests__pagination button.is-active{width:2.5rem;height:.5625rem}
 }
 @media(min-width:43.8125rem) and (max-width:68.75rem){
-  .climate-tests__pagination{position:absolute;z-index:2;top:.75rem;right:.75rem;display:flex;flex-direction:row;justify-content:flex-end;gap:.375rem;width:auto;height:auto}
-  .climate-tests__pagination button{width:.5625rem;height:.5625rem}
-  .climate-tests__pagination button.is-active{width:2.5rem;height:.5625rem}
+  .climate-tests__pagination{position:absolute;z-index:2;left:-1.25rem;right:auto;top:auto;bottom:0;display:flex;flex-direction:column-reverse;gap:.3125rem;width:.5rem;height:6.4375rem}
+  .climate-tests__pagination button{width:.5rem;height:.5625rem}
+  .climate-tests__pagination button.is-active{width:.5rem;height:5.5625rem}
 }
 @media(prefers-reduced-motion:reduce){.climate-tests__camera-photo,.climate-tests__pagination button,.testing-rain__ambient,.testing-rain__surface{transition:none}}
