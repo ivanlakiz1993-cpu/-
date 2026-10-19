@@ -253,7 +253,7 @@
 .testing-page{overflow-x:clip}
 .testing-journey{position:relative;isolation:isolate;overflow:clip;background:#000}
 .testing-journey__visual{position:sticky;z-index:1;top:0;display:grid;width:100%;height:100svh;margin-bottom:-100svh;place-items:center;pointer-events:none}
-.testing-journey__visual .testing-stage__equipment{position:relative;inset:auto;left:auto;top:auto;width:min(48.7vw,58.4375rem);max-width:calc(100% - 1.5rem);height:auto;aspect-ratio:935/604;transform:rotateZ(var(--testing-rotate-z,0deg));transform-origin:50% 50%;transform-style:flat;will-change:transform;opacity:1}
+.testing-journey__visual .testing-stage__equipment{position:relative;inset:auto;left:auto;top:auto;width:min(48.7vw,58.4375rem);max-width:calc(100% - 1.5rem);height:auto;aspect-ratio:935/604;transform:translate3d(var(--testing-x,0vw),var(--testing-y,0vh),0);transform-origin:50% 50%;transform-style:flat;will-change:transform;opacity:1}
 .testing-journey__visual .testing-stage__image{opacity:.5;filter:none;object-fit:contain}
 .testing-journey__visual .testing-stage__equipment{z-index:1}
 .testing-rain__ambient{position:absolute;z-index:0;inset:0;display:block;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .16s linear}
@@ -315,7 +315,7 @@
   .testing-stage{height:39.6875rem;min-height:39.6875rem}
   .testing-stage__content{justify-content:flex-start;gap:1.875rem}
   .testing-journey__visual .testing-stage__equipment{
-    transform:translate3d(.0625rem,calc(36.25rem - 50svh),0) rotateZ(var(--testing-rotate-z,0deg));
+    transform:translate3d(calc(.0625rem + var(--testing-x,0vw)),calc(36.25rem - 50svh + var(--testing-y,0vh)),0);
   }
 }
 

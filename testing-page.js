@@ -569,9 +569,8 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     frost?.clear();
     frostProgress = 0;
     surfaceDrops = [];
-    rainEquipment.style.setProperty('--testing-rotate-y', '0deg');
-    rainEquipment.style.setProperty('--testing-rotate-x', '0deg');
-    rainEquipment.style.setProperty('--testing-rotate-z', '0deg');
+    rainEquipment.style.setProperty('--testing-x', '0vw');
+    rainEquipment.style.setProperty('--testing-y', '0vh');
   };
 
   const renderRainFrame = now => {
@@ -587,10 +586,10 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
 
     const rect = rainSection.getBoundingClientRect();
     const sectionProgress = clampRain((window.innerHeight - rect.top) / (window.innerHeight + rect.height));
-    // The shared image is a 2D render, so rotate it in its own plane to keep
-    // its silhouette intact. Spread one full turn across the whole four-section journey.
-    const rotationRange = Math.max(1, journeyBounds.height - window.innerHeight);
-    const rotationProgress = clampRain(-journeyBounds.top / rotationRange);
+    // Keep the device rigid and move it gently through the screen plane as the
+    // shared four-section journey scrolls past it.
+    const movementRange = Math.max(1, journeyBounds.height - window.innerHeight);
+    const movementProgress = clampRain(-journeyBounds.top / movementRange);
     const climateBounds = climateSection.getBoundingClientRect();
     // Crystallisation belongs to the handover between sections, independent
     // of the camera carousel's height or selected equipment.
@@ -603,13 +602,12 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
       frostProgress + (targetFrost - frostProgress) * (1 - Math.exp(-dt * 12));
     if (Math.abs(targetFrost - frostProgress) < 0.0005) frostProgress = targetFrost;
     const motionScale = reducedMotion ? 0.35 : 1;
-    const rotationY = 28 * rotationProgress * motionScale;
-    const rotationX = 10 * rotationProgress * motionScale;
-    const rotationZ = 360 * rotationProgress * motionScale;
-    rainEquipment.style.setProperty('--testing-rotate-y', `${rotationY.toFixed(2)}deg`);
-    rainEquipment.style.setProperty('--testing-rotate-x', `${rotationX.toFixed(2)}deg`);
-    rainEquipment.style.setProperty('--testing-rotate-z', `${rotationZ.toFixed(2)}deg`);
-    const gravity = surfaceGravity(rotationX, rotationY, rotationZ);
+    const travelAngle = movementProgress * Math.PI * 2;
+    const travelX = Math.sin(travelAngle) * 4.5 * motionScale;
+    const travelY = Math.sin(travelAngle * 2) * 1.2 * motionScale;
+    rainEquipment.style.setProperty('--testing-x', `${travelX.toFixed(2)}vw`);
+    rainEquipment.style.setProperty('--testing-y', `${travelY.toFixed(2)}vh`);
+    const gravity = surfaceGravity(0, 0, 0);
     const rainIntensity = smoothRain(0.025, 0.2, sectionProgress) *
       (1 - smoothRain(0.78, 0.96, sectionProgress)) * (1 - smoothRain(0.02, 0.28, frostProgress));
     const wetness = smoothRain(0.035, 0.18, sectionProgress) *
