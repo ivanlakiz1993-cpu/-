@@ -5,7 +5,7 @@
   if (!canvas || !equipment) return;
 
   const modelUrl = 'assets/models/reference-v3/testing-equipment-reference.glb';
-  const clampPixelRatio = () => Math.min(window.devicePixelRatio || 1, 2);
+  const clampPixelRatio = () => Math.min(Math.max(window.devicePixelRatio || 1, 1.5), 2);
   let weather = { wetness: 0, frostProgress: 0, time: 0 };
   let drawWeatheredModel = null;
   window.updateTestingModelWeather = next => {
@@ -282,7 +282,7 @@
         specular += u_brushed * brushedLobe * 0.75;
         float dielectric = 1.0 - u_metallic;
         vec3 base = u_color.rgb * textureValue;
-        vec3 lit = base * (0.12 + diffuse * 0.62) * (0.28 + dielectric * 0.72);
+        vec3 lit = base * (0.12 + diffuse * 0.62) * (0.04 + dielectric * 0.96);
         lit += base * specular * (0.08 + u_metallic * 1.22);
         lit += vec3(specular * (0.04 + u_metallic * 0.34));
         vec3 reflected = reflect(-v, n);
@@ -300,6 +300,9 @@
         vec3 metalF0 = mix(vec3(0.04), base, u_metallic);
         vec3 environment = vec3(0.78, 0.83, 0.9) * softboxA * 0.68 +
           vec3(0.34, 0.4, 0.48) * softboxB * 0.36 + vec3(0.55, 0.58, 0.62) * softboxC * 0.48;
+        float reflectedStrip = exp(-pow((reflected.x - 0.32) / (0.055 + roughness * 0.18), 2.0));
+        float reflectedFill = exp(-pow((reflected.x + 0.62) / (0.12 + roughness * 0.25), 2.0));
+        environment += vec3(1.0, 0.97, 0.92) * (reflectedStrip * 1.1 + reflectedFill * 0.5);
         lit += environment * (metalF0 + (vec3(1.0) - metalF0) * fresnel) * (0.5 + u_metallic * 1.05);
         float sideReflection = pow(max(dot(reflected, normalize(vec3(-6.0, -2.0, -4.0) - v_position)), 0.0), 3.0);
         lit += sideReflection * (base * 0.65 + vec3(0.06)) * u_metallic;
