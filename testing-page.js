@@ -587,7 +587,10 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
 
     const rect = rainSection.getBoundingClientRect();
     const sectionProgress = clampRain((window.innerHeight - rect.top) / (window.innerHeight + rect.height));
-    const rotationProgress = smoothRain(0.02, 0.9, sectionProgress);
+    // The shared image is a 2D render, so rotate it in its own plane to keep
+    // its silhouette intact. Spread one full turn across the whole four-section journey.
+    const rotationRange = Math.max(1, journeyBounds.height - window.innerHeight);
+    const rotationProgress = clampRain(-journeyBounds.top / rotationRange);
     const climateBounds = climateSection.getBoundingClientRect();
     // Crystallisation belongs to the handover between sections, independent
     // of the camera carousel's height or selected equipment.
@@ -602,7 +605,7 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
     const motionScale = reducedMotion ? 0.35 : 1;
     const rotationY = 28 * rotationProgress * motionScale;
     const rotationX = 10 * rotationProgress * motionScale;
-    const rotationZ = -1.5 * rotationProgress * motionScale;
+    const rotationZ = 360 * rotationProgress * motionScale;
     rainEquipment.style.setProperty('--testing-rotate-y', `${rotationY.toFixed(2)}deg`);
     rainEquipment.style.setProperty('--testing-rotate-x', `${rotationX.toFixed(2)}deg`);
     rainEquipment.style.setProperty('--testing-rotate-z', `${rotationZ.toFixed(2)}deg`);
