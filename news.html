@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru" class="news-page">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="Новости компании СпецЭлектроника: события, лаборатория и участие в отраслевых форумах.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self'; connect-src 'self' https://formsubmit.co; prefetch-src 'self'; form-action 'self' https://formsubmit.co; upgrade-insecure-requests">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Новости — СпецЭлектроника</title>
+  <link rel="stylesheet" href="styles.css?v=20261018-fluid-home-1">
+  <link rel="stylesheet" href="hero-grid.css?v=20261018-fluid-home-1">
+  <link rel="stylesheet" href="metrics-desktop.css?v=20261018-fluid-home-1">
+  <link rel="stylesheet" href="layout-gutters.css?v=20261018-fluid-home-1">
+  <link rel="stylesheet" href="news-page.css?v=20261019-news-page-1">
+  <link rel="stylesheet" href="page-transition.css?v=20261018-fluid-home-1">
+  <script src="page-transition.js?v=20261016-entry-ready-2"></script>
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="brand" href="index.html#top" aria-label="СпецЭлектроника — главная"><img class="brand-mark" src="assets/footer-logo.svg" width="53" height="65" fetchpriority="high" alt=""><span>СПЕЦ<br>ЭЛЕКТРОНИКА</span></a>
+  </header>
+  <div class="menu-drawer">
+    <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Открыть меню">
+      <span>МЕНЮ</span>
+      <span class="menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
+    <nav id="site-nav" class="nav" aria-label="Основная навигация">
+      <div class="menu-nav-links">
+        <a href="index.html#work">Производство</a>
+        <a href="#work">Разработка</a>
+        <a href="testing.html">Испытания</a>
+        <a href="index.html#about">О нас</a>
+        <a href="news.html">Новости</a>
+        <a href="index.html#contact">Контакты</a>
+      </div>
+      <div class="menu-social" role="group" aria-label="Мы в социальных сетях">
+        <a class="menu-social__link menu-social__link--vk" href="#contact" aria-label="ВКонтакте"><img src="assets/social/vk.svg" alt=""></a>
+        <a class="menu-social__link menu-social__link--rutube" href="#contact" aria-label="Rutube"><img src="assets/social/rutube.svg" alt=""></a>
+        <a class="menu-social__link menu-social__link--dzen" href="#contact" aria-label="Дзен"><img src="assets/social/dzen.svg" alt=""></a>
+        <a class="menu-social__link menu-social__link--max" href="#contact" aria-label="MAX"><img src="assets/social/max.svg" alt=""></a>
+        <a class="menu-social__link menu-social__link--telegram" href="#contact" aria-label="Telegram"><img src="assets/social/telegram.svg" alt=""></a>
+      </div>
+    </nav>
+  </div>
+  <main class="news-page__main" id="top">
+    <nav class="news-page__crumbs" aria-label="Хлебные крошки"><a href="index.html">Главная</a><span aria-hidden="true">/</span><span aria-current="page">Новости</span></nav>
+    <section class="news-page__content" aria-labelledby="news-title">
+      <h1 class="news-page__title" id="news-title">Наши новости</h1>
+      <div class="news-page__filter-wrap"><label class="visually-hidden" for="news-filter">Категория новостей</label><select class="news-page__filter" id="news-filter"><option value="all">События</option><option value="laboratory">Лаборатория</option><option value="forum">Выставки</option><option value="holidays">Праздники</option></select></div>
+      <div class="news-page__grid" id="news-stories" aria-live="polite">
+        <a class="news-page__card" id="story-victory-day" href="#story-victory-day" data-category="holidays" aria-label="Поздравляем с Днем победы, 9 мая 2025 года"><img class="news-page__image" src="assets/news-victory.jpg" alt="Красные гвоздики ко Дню Победы" fetchpriority="high"><span class="news-page__copy"><span class="news-page__headline">Поздравляем с Днем победы!</span><time class="news-page__date" datetime="2025-05-09">09.05.2025</time></span></a>
+        <a class="news-page__card" id="story-laboratory" href="#story-laboratory" data-category="laboratory" aria-label="Расширение испытательной лаборатории, 14 марта 2024 года"><img class="news-page__image" src="assets/news-laboratory.jpg" alt="Климатическая испытательная камера"><span class="news-page__copy"><span class="news-page__headline">Расширение испытательной лаборатории</span><time class="news-page__date" datetime="2024-03-14">14.03.2024</time></span></a>
+        <a class="news-page__card" id="story-forum" href="#story-forum" data-category="forum" aria-label="Наша компания на форуме Микроэлектроника, 12 января 2023 года"><img class="news-page__image" src="assets/news-forum.jpg" alt="Стенд СпецЭлектроники на форуме Микроэлектроника"><span class="news-page__copy"><span class="news-page__headline">Наша компания на форуме «Микроэлектроника»</span><time class="news-page__date" datetime="2023-01-12">12.01.2023</time></span></a>
+        <a class="news-page__card" id="story-womens-day" href="#story-womens-day" data-category="holidays" aria-label="Поздравляем с 8 марта, 8 марта 2021 года"><img class="news-page__image" src="assets/news-womens-day.jpg" alt="Нежно-розовые розы"><span class="news-page__copy"><span class="news-page__headline">Поздравляем с 8 марта!</span><time class="news-page__date" datetime="2021-03-08">08.03.2021</time></span></a>
+        <p class="news-page__empty">По этой категории новостей пока нет.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <div class="footer-main wrap">
+      <a class="brand footer-brand" href="index.html#top" aria-label="СпецЭлектроника — наверх">
+        <img class="brand-mark" src="assets/footer-logo.svg" alt="">
+        <span>СПЕЦ<br>ЭЛЕКТРОНИКА</span>
+      </a>
+      <div class="footer-menu">
+        <nav class="footer-nav" aria-label="Навигация в подвале">
+          <a href="index.html#work">Производство</a>
+          <a href="#work">Разработка</a>
+          <a href="testing.html">Испытания</a>
+          <a href="index.html#about">О нас</a>
+          <a href="news.html">Новости</a>
+          <a href="index.html#contact">Контакты</a>
+        </nav>
+        <div class="footer-legal">
+          <a href="#contact">Политика обработки персональных данных</a>
+          <a href="#contact">Политика конфиденциальности</a>
+        </div>
+      </div>
+      <div class="footer-contacts">
+        <div class="footer-contact-links">
+          <a class="footer-contact-link" href="mailto:specel@yandex.ru"><img src="assets/footer-email.svg" alt="">specel@yandex.ru</a>
+          <a class="footer-contact-link" href="tel:+79999999999"><img src="assets/footer-phone.svg" alt="">+7 999-999-99-99</a>
+        </div>
+        <address>г. Москва<br>Ул. Гагарина 250, д 52, лит Ю<br>Россия, 999 999</address>
+      </div>
+      <div class="footer-social">
+        <h3>Мы в соцсетях</h3>
+        <div class="footer-social-links" aria-label="Социальные сети">
+          <a class="footer-social-link footer-social-link--vk" href="#contact" aria-label="ВКонтакте"><img src="assets/social/vk.svg" alt=""></a>
+          <a class="footer-social-link footer-social-link--rutube" href="#contact" aria-label="Rutube"><img src="assets/social/rutube.svg" alt=""></a>
+          <a class="footer-social-link footer-social-link--dzen" href="#contact" aria-label="Дзен"><img src="assets/social/dzen.svg" alt=""></a>
+          <a class="footer-social-link footer-social-link--max" href="#contact" aria-label="MAX"><img src="assets/social/max.svg" alt=""></a>
+          <a class="footer-social-link footer-social-link--telegram" href="#contact" aria-label="Telegram"><img src="assets/social/telegram.svg" alt=""></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
+  </footer>
+  <script src="news-page.js?v=20261019-news-page-1"></script>
+</body>
+</html>
