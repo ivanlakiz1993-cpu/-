@@ -319,29 +319,19 @@
   }
 }
 
-/* Desktop section holds mirror the homepage's sticky stages without scroll snapping. */
-@media(min-width:68.8125rem){
-  .climate-tests__track{height:calc(49.6875rem + 70svh)}
-  .climate-tests__stage{position:sticky;top:0}
-}
-@media(max-width:68.75rem){
-  .climate-tests__track{height:auto}
-  .climate-tests__stage{position:relative;top:auto}
-}
-
 /* Climate tests: proportions and spacing from the 1920, 1024 and 402 Figma frames. */
 .climate-tests__equipment dd{color:var(--orange)}
 @media(min-width:68.8125rem){
-  .climate-tests__track{height:auto}
-  .climate-tests__stage{position:relative;top:auto;height:auto;min-height:45.625rem;overflow:visible}
-  .climate-tests__inner{height:auto;min-height:45.625rem}
+  .climate-tests__track{--climate-stage-height:max(45.625rem,100svh);height:calc(var(--climate-stage-height) + 200svh)}
+  .climate-tests__stage{position:sticky;top:0;height:var(--climate-stage-height);min-height:var(--climate-stage-height);overflow:visible}
+  .climate-tests__inner{height:100%;min-height:var(--climate-stage-height)}
   .climate-tests__list li,.mechanical-tests__list li{min-height:3.875rem}
 }
 @media(min-width:43.8125rem) and (max-width:68.75rem){
   .climate-tests{margin-top:5.25rem}
-  .climate-tests__track{height:auto}
-  .climate-tests__stage{position:relative;top:auto;height:auto;min-height:0;overflow:visible}
-  .climate-tests__inner{width:calc(100% - 6rem);height:auto;min-height:0;margin-inline:auto;padding:0}
+  .climate-tests__track{--climate-stage-height:max(53rem,100svh);height:calc(var(--climate-stage-height) + 200svh)}
+  .climate-tests__stage{position:sticky;top:0;height:var(--climate-stage-height);min-height:var(--climate-stage-height);overflow:visible}
+  .climate-tests__inner{width:calc(100% - 6rem);height:100%;min-height:var(--climate-stage-height);margin-inline:auto;padding:0}
   .climate-tests h2{font-size:2.375rem;line-height:.9;letter-spacing:.01em}
   .climate-tests__body{display:block;min-height:47.625rem;margin-top:1.875rem}
   .climate-tests__details{width:100%}
@@ -360,7 +350,7 @@
   .climate-tests__stage{position:relative;top:auto;height:auto;min-height:0;overflow:visible}
   .climate-tests__inner{position:relative;width:calc(100% - 1.5rem);height:auto;min-height:0;margin-inline:auto;padding:0}
   .climate-tests h2{width:calc(100% + .75rem);max-width:calc(100vw - .75rem);font-size:clamp(2.125rem,9.75vw,2.375rem);line-height:.9;letter-spacing:.01em}
-  .climate-tests__body{position:relative;display:block;height:auto;min-height:max(47.625rem,calc(32.6875rem + min(22.875rem,100vw - 1.5rem)));margin-top:1.875rem}
+  .climate-tests__body{position:relative;display:flex;flex-direction:column;height:auto;min-height:0;margin-top:1.875rem;padding-bottom:200svh}
   .climate-tests__details{width:100%}
   .climate-tests__list{gap:.625rem}
   .climate-tests__list li{min-height:0;padding:.75rem .5rem;border-radius:.625rem;font-size:1rem;line-height:1.2;letter-spacing:.01em}
@@ -369,7 +359,7 @@
   .climate-tests__equipment dl{gap:.9375rem;font-size:1rem;line-height:1.2;letter-spacing:.01em;white-space:normal}
   .climate-tests__equipment dl>div{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:.75rem}
   .climate-tests__equipment dd{text-align:right;white-space:nowrap}
-  .climate-tests__visuals{position:absolute;z-index:1;left:0;right:auto;top:32.6875rem;display:block;width:min(22.875rem,100%);height:auto;aspect-ratio:1}
+  .climate-tests__visuals{position:sticky;z-index:1;top:20svh;left:auto;right:auto;align-self:center;display:block;width:min(22.875rem,100%);height:auto;margin-top:1.875rem;aspect-ratio:1}
   .climate-tests__pagination{position:absolute;z-index:2;top:.75rem;right:.75rem;display:flex;flex-direction:row;justify-content:flex-end;gap:.375rem;width:auto;height:auto}
   .climate-tests__pagination{gap:.3125rem}
   .climate-tests__pagination button{width:.5625rem;height:.5rem;border-radius:.3125rem;background:rgba(42,42,42,.6);opacity:1}

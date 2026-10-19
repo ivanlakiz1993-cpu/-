@@ -154,8 +154,6 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   revealGroup('.climate-tests__visuals', 120);
   revealGroup('.climate-tests__pagination button', 100);
   revealGroup('.mechanical-tests__shaker img', 100);
-  revealGroup('.footer-brand .brand-mark, .footer-brand > span, .footer-nav a, .footer-legal a', 60);
-  revealGroup('.footer-contact-link, .footer-social-link', 70);
 
   const revealObserver = new IntersectionObserver(entries => {
     entries.forEach(entry => {
@@ -179,9 +177,7 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
 if (!pageMotionPreference.matches) {
   const textTargets = [...document.querySelectorAll([
     'main h1', 'main h2', 'main h3',
-    '.testing-stage__copy p', '.testing-about__text p',
-    '.testing-page>.footer h2', '.testing-page>.footer h3', '.testing-page>.footer p',
-    '.testing-page>.footer address', '.testing-page>.footer .footer-bottom'
+    '.testing-stage__copy p', '.testing-about__text p'
   ].join(','))];
   const linesByElement = new Map();
   let textFrame = 0;
@@ -249,7 +245,7 @@ if (!pageMotionPreference.matches) {
       const top = rect.top + scroll;
       const start = top - viewport * .9;
       const end = Math.min(top - viewport * .48, maxScroll);
-      const groupSelector = '.testing-stage__copy, .testing-about, .climate-tests__inner, .mechanical-tests__inner, .testing-faq__inner, .footer-main > div';
+      const groupSelector = '.testing-stage__copy, .testing-about, .climate-tests__inner, .mechanical-tests__inner, .testing-faq__inner';
       const group = element.closest(groupSelector) || element;
       const siblings = textTargets.filter(target => (target.closest(groupSelector) || target) === group);
       const groupTop = Math.min(...siblings.map(target => target.getBoundingClientRect().top + scrollY - viewport * .9));
@@ -709,6 +705,10 @@ if (rainSection && rainSurface && rainAmbient && rainEquipment) {
 // scrolls. This carousel is independent from the shared test-unit frost effect.
 const climateCarousel = document.querySelector('[data-climate-carousel]');
 if (climateCarousel) {
+  const climateTrack = climateCarousel.querySelector('.climate-tests__track');
+  const climateStage = climateCarousel.querySelector('.climate-tests__stage');
+  const climateBody = climateCarousel.querySelector('.climate-tests__body');
+  const climateVisuals = climateCarousel.querySelector('.climate-tests__visuals');
   const cameras = [...climateCarousel.querySelectorAll('[data-climate-camera]')];
   const pages = [...climateCarousel.querySelectorAll('[data-climate-page]')];
   const title = climateCarousel.querySelector('[data-climate-camera-title]');
@@ -741,9 +741,23 @@ if (climateCarousel) {
 
   const updateClimateState = () => {
     climateFrame = 0;
-    const bounds = climateCarousel.getBoundingClientRect();
-    const progress = clampClimate((window.innerHeight - bounds.top) /
-      (window.innerHeight + bounds.height));
+    const trackBounds = climateTrack?.getBoundingClientRect();
+    const pinDistance = climateTrack && climateStage ?
+      climateTrack.offsetHeight - climateStage.offsetHeight : 0;
+    let progress;
+    if (pinDistance > 1 && trackBounds) {
+      progress = clampClimate(-trackBounds.top / pinDistance);
+    } else if (climateVisuals && climateBody && matchMedia('(max-width: 43.75rem)').matches) {
+      const stickyTop = window.innerHeight * 0.2;
+      const bodyTop = climateBody.getBoundingClientRect().top + window.scrollY;
+      const holdStart = bodyTop + climateVisuals.offsetTop - stickyTop;
+      const holdDistance = climateBody.offsetHeight - climateVisuals.offsetTop - climateVisuals.offsetHeight;
+      progress = clampClimate((window.scrollY - holdStart) / Math.max(1, holdDistance));
+    } else {
+      const bounds = climateCarousel.getBoundingClientRect();
+      progress = clampClimate((window.innerHeight - bounds.top) /
+        (window.innerHeight + bounds.height));
+    }
     showClimateState(progress >= 0.5 ? 1 : 0);
   };
   const scheduleClimateUpdate = () => {
