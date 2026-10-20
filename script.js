@@ -167,6 +167,7 @@ const benefitStates = [
     description: 'Выполняем все этапы работ — от разработки и изготовления печатных плат до сборки, тестирования и выпуска готового электронного модуля.',
   },
 ];
+let benefitScrollStep = 0;
 
 if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && benefitCopy && benefitArt && benefitImage) {
   let activeBenefit = 0;
@@ -264,7 +265,11 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     scrollFrame = 0;
     const sectionTop = benefitsSection.getBoundingClientRect().top + window.scrollY;
     const stageHeight = benefitsStage.offsetHeight || window.innerHeight;
-    const stateIndex = clamp(Math.floor((window.scrollY - sectionTop) / stageHeight), 0, benefitStates.length - 1);
+    const mobile = window.matchMedia('(max-width:37.5rem)').matches;
+    const stickyTop = mobile ? (parseFloat(getComputedStyle(benefitsStage).top) || 0) : 0;
+    const availableScroll = Math.max(1, benefitsSection.offsetHeight - stageHeight - stickyTop);
+    benefitScrollStep = mobile ? availableScroll / benefitStates.length : stageHeight;
+    const stateIndex = clamp(Math.floor((window.scrollY - sectionTop) / benefitScrollStep), 0, benefitStates.length - 1);
     showBenefit(stateIndex);
   };
 
@@ -289,7 +294,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     button.addEventListener('click', () => {
       const index = Number(button.dataset.benefitIndex);
       const sectionTop = benefitsSection.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: sectionTop + benefitsStage.offsetHeight * index, behavior: 'smooth' });
+      window.scrollTo({ top: sectionTop + (benefitScrollStep || benefitsStage.offsetHeight) * index, behavior: 'smooth' });
     });
   });
   updateBenefitScale();
@@ -375,8 +380,9 @@ const textRevealSelector = [
         start + (sequence.elements.length > 1 ? viewport * .7 : 0)));
       if (group === benefitsStage) {
         const sectionTop = benefitsSection.getBoundingClientRect().top + scroll;
-        start = sectionTop + (benefitState === 0 ? -viewport * .15 : benefitsStage.offsetHeight * benefitState);
-        end = start + benefitsStage.offsetHeight * .9;
+        const stateStep = benefitScrollStep || benefitsStage.offsetHeight;
+        start = sectionTop + (benefitState === 0 ? -viewport * .15 : stateStep * benefitState);
+        end = start + stateStep * .9;
       } else if (group.matches('.project-cta__copy, .news-intro__copy, .contact-heading')) {
         const sectionTop = group.closest('section').getBoundingClientRect().top + scroll;
         end = Math.min(end, sectionTop - viewport * .2);

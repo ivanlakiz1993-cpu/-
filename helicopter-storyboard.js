@@ -65,5 +65,5 @@
     return {progress,from,to,mix,rotation,matrix:matrix(rotation),achievement,textY,scene,
       height:lerp(poses[from].height,poses[to].height,mix)};
   }
-  window.HelicopterStoryboard = {sample,poses,matrix,lerp,smooth};
+  window.HelicopterStoryboard = {sample,poses,transitions,matrix,lerp,smooth};
 })();

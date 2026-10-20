@@ -12,14 +12,52 @@
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const splitMedia=matchMedia('(min-width: 37.5625rem), (max-width: 37.5rem)');
   const mobileMedia=matchMedia('(max-width: 37.5rem)');
-  const root=document.documentElement,{sample,poses,matrix,lerp,smooth}=storyboard;
+  const root=document.documentElement,{sample,poses,transitions,matrix,lerp,smooth}=storyboard;
   let enabled=false,splitEnabled=false,splitOverlay=null,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
   let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;
   let splitIntroTop=0,splitPreTravel=0,splitSeam=0,splitTopTravel=0,splitBottomTravel=0;
   let layoutWidth=0,layoutHeight=0,lastTime=0,rotorTime=0,lastScroll=NaN,target=0,progress=0;
   let state=sample(0);
-  // Fit the airframe, not the spinning rotor envelope. This keeps the scale fixed
-  // during holds and lets blades cross the edges of close-ups, as in the reference.
+  const rotorAngles=Array.from({length:12},(_,i)=>{
+    const angle=i/12*Math.PI*2;
+    return [Math.cos(angle),Math.sin(angle)];
+  });
+  const projectedBounds=rotation=>{
+    let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;
+    const include=(x,y,z)=>{
+      const perspective=22/(22-z),px=x*perspective,py=-y*perspective;
+      left=Math.min(left,px);right=Math.max(right,px);top=Math.min(top,py);bottom=Math.max(bottom,py);
+    };
+    for(const p of model.points){
+      if(p.group==='mainRotor'){
+        const dx=p.x-model.mainRotor[0],dz=p.z-model.mainRotor[2];
+        for(const [c,s] of rotorAngles){
+          const x=model.mainRotor[0]+c*dx+s*dz,y=p.y,z=model.mainRotor[2]-s*dx+c*dz;
+          include(rotation[0]*x+rotation[1]*y+rotation[2]*z,
+            rotation[3]*x+rotation[4]*y+rotation[5]*z,
+            rotation[6]*x+rotation[7]*y+rotation[8]*z);
+        }
+      }else if(p.group==='tailRotor'){
+        const dx=p.x-model.tailRotor[0],dy=p.y-model.tailRotor[1];
+        for(const [c,s] of rotorAngles){
+          const x=model.tailRotor[0]+c*dx+s*dy,y=model.tailRotor[1]-s*dx+c*dy,z=p.z;
+          include(rotation[0]*x+rotation[1]*y+rotation[2]*z,
+            rotation[3]*x+rotation[4]*y+rotation[5]*z,
+            rotation[6]*x+rotation[7]*y+rotation[8]*z);
+        }
+      }else{
+        include(rotation[0]*p.x+rotation[1]*p.y+rotation[2]*p.z,
+          rotation[3]*p.x+rotation[4]*p.y+rotation[5]*p.z,
+          rotation[6]*p.x+rotation[7]*p.y+rotation[8]*p.z);
+      }
+    }
+    return {left,right,top,bottom,width:right-left,height:bottom-top,
+      centerX:(left+right)/2,centerY:(top+bottom)/2};
+  };
+  const mobileFit=(bounds,scale,height)=>Math.min(1.1,
+    .9*Math.min(1920/(bounds.width*scale),height/(bounds.height*scale))/1.12);
+  // Desktop framing follows the body. Mobile framing also fits the rotor tips,
+  // including during edge-on poses, so the blades remain inside the canvas.
   const calibrations=poses.map(pose=>{
     const m=matrix(pose.rotation);
     let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;
@@ -31,8 +69,33 @@
       top=Math.min(top,-y*perspective);bottom=Math.max(bottom,-y*perspective);
     }
     const [bx,by,bw,bh]=pose.box,scale=Math.min(bw*1920/(right-left),bh*pose.height/(bottom-top));
-    return {scale,x:(bx+bw/2)*1920-(left+right)/2*scale,y:(by+bh/2)*pose.height-(top+bottom)/2*scale};
+    const bounds=projectedBounds(m);
+    return {scale,x:(bx+bw/2)*1920-(left+right)/2*scale,y:(by+bh/2)*pose.height-(top+bottom)/2*scale,
+      mobileFit:mobileFit(bounds,scale,pose.height),mobileCenterX:bounds.centerX,mobileCenterY:bounds.centerY};
   });
+  const mobileFitProfiles=transitions.map(transition=>{
+    const samples=[];
+    for(let i=0;i<=32;i++){
+      const p=transition.start+(transition.end-transition.start)*Math.min(i/32,1-1e-7);
+      const pose=sample(p,true),a=calibrations[transition.from],b=calibrations[transition.to];
+      const scale=lerp(a.scale,b.scale,pose.mix);
+      const height=lerp(poses[transition.from].height,poses[transition.to].height,pose.mix);
+      const bounds=projectedBounds(pose.matrix);
+      samples.push({mix:pose.mix,fit:mobileFit(bounds,scale,height),centerX:bounds.centerX,centerY:bounds.centerY});
+    }
+    const end=calibrations[transition.to];
+    samples.push({mix:1,fit:end.mobileFit,centerX:end.mobileCenterX,centerY:end.mobileCenterY});
+    return {from:transition.from,to:transition.to,samples};
+  });
+  function getMobileFit(pose){
+    if(pose.from===pose.to){const point=calibrations[pose.from];return {fit:point.mobileFit,centerX:point.mobileCenterX,centerY:point.mobileCenterY};}
+    const profile=mobileFitProfiles.find(item=>item.from===pose.from&&item.to===pose.to);
+    if(!profile){const point=calibrations[pose.from];return {fit:point.mobileFit,centerX:point.mobileCenterX,centerY:point.mobileCenterY};}
+    const samples=profile.samples;let i=1;
+    while(i<samples.length-1&&samples[i].mix<pose.mix)i++;
+    const a=samples[i-1],b=samples[i],t=(pose.mix-a.mix)/Math.max(.000001,b.mix-a.mix);
+    return {fit:lerp(a.fit,b.fit,t)*.97,centerX:lerp(a.centerX,b.centerX,t),centerY:lerp(a.centerY,b.centerY,t)};
+  }
   function stop(){cancelAnimationFrame(raf);raf=0;lastTime=0;}
   function ensureSplitOverlay(){
     if(splitOverlay)return;
@@ -57,6 +120,7 @@
     sceneWidth=width;sceneHeight=height;
     sceneFrame.style.setProperty('--metrics-frame-width',`${width}px`);
     sceneFrame.style.setProperty('--metrics-frame-height',`${height}px`);
+    sceneFrame.style.setProperty('--metrics-canvas-ratio',String(width/height));
     renderer.resize(width,height,devicePixelRatio||1);
   }
   function compose(){
@@ -103,10 +167,14 @@
     const a=calibrations[state.from],b=calibrations[state.to],unit=sceneWidth/1920;
     const arc=Math.sin(Math.PI*state.mix);
     const mobile=mobileMedia.matches;
+    const scale=lerp(a.scale,b.scale,state.mix),mobilePose=mobile?getMobileFit(state):null;
+    const mobileScale=mobile?mobilePose.fit:1,animatedScale=scale*mobileScale*(1+arc*.12);
+    const centerX=mobile?(960-mobilePose.centerX*animatedScale)*unit:lerp(a.x,b.x,state.mix)*unit;
+    const centerY=mobile?(state.height/2-mobilePose.centerY*animatedScale)*unit:
+      lerp(a.y,b.y,state.mix)*unit-arc*sceneHeight*.035;
     renderer.render({matrix:state.matrix,
-      scale:lerp(a.scale,b.scale,state.mix)*unit*(1+arc*.12)*(mobile?1.1:1),
-      centerX:lerp(a.x,b.x,state.mix)*unit,
-      centerY:lerp(a.y,b.y,state.mix)*unit-arc*sceneHeight*.035+(mobile?sceneHeight*.08:0),
+      scale:animatedScale*unit,
+      centerX,centerY,
       angle:rotorTime*.0032});
     stage.classList.add('is-rendered');
     raf=requestAnimationFrame(draw);
@@ -116,7 +184,7 @@
     resizeFrame=0;if(!enabled)return;
     viewport=innerHeight;
     const heroHeight=hero.offsetHeight,introTop=intro.getBoundingClientRect().top+scrollY;
-    sequenceDistance=viewport*4.8;
+    sequenceDistance=viewport*(mobileMedia.matches?4.2:4.8);
     entryDistance=splitEnabled?viewport*.85:0;
     splitIntroTop=introTop;
     splitPreTravel=splitEnabled?Math.max(0,heroHeight-viewport):0;

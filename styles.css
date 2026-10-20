@@ -436,7 +436,8 @@
 
 /* Mobile section spacing matched to Figma 2221:10386 and 2221:10390. */
 @media(max-width:37.5rem){
-  .benefits-layout{padding:0 0.75rem}
+  .benefits-stage{top:2.1875rem;height:calc(100svh - 2.1875rem)}
+  .benefits-layout{padding:2rem 0.75rem 0}
   .benefits-stage h2{margin:0 0 1.875rem;font-size:2.375rem;line-height:.9;letter-spacing:0.02375rem}
   .benefit-copy,.benefit-copy[data-state="0"]{
     box-sizing:border-box;

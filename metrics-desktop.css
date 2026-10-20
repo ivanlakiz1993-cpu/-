@@ -144,10 +144,11 @@ html.metrics-sequence .metrics-desktop {
   .metrics-desktop__frame { height: 157.4359vw; }
   .metrics-desktop__background {
     inset: auto;
-    left: -7.2%;
+    left: 0;
     top: 34%;
-    width: 130%;
-    height: 64%;
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--metrics-canvas-ratio, 1.92);
     transform: scaleX(-1);
   }
   .metrics-desktop__copy,
