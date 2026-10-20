@@ -20,7 +20,7 @@ const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 const faqList = document.querySelector('.testing-faq__list');
 if (faqList) {
   const faqItems = [...faqList.querySelectorAll('.testing-faq__item')];
-  const faqDuration = pageMotionPreference.matches ? 0 : 260;
+  const faqDuration = pageMotionPreference.matches ? 0 : 380;
   const faqAnimations = new WeakMap();
 
   const animateFaqAnswer = (answer, from, to) => {
@@ -33,7 +33,7 @@ if (faqList) {
     const animation = answer.animate([
       { height: `${from}px`, opacity: from ? 1 : 0 },
       { height: `${to}px`, opacity: to ? 1 : 0 }
-    ], { duration: faqDuration, easing: 'cubic-bezier(.2,.75,.25,1)', fill: 'both' });
+    ], { duration: faqDuration, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' });
     faqAnimations.set(answer, animation);
     return animation.finished.catch(() => {}).then(() => {
       if (faqAnimations.get(answer) !== animation) return false;
