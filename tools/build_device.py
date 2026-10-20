@@ -255,7 +255,7 @@ for index,(x,z,width,height) in enumerate([
     (0,.065,.014,.062),
 ], start=1):
     # Thin vertical blade cross-section, with a lightly rounded metal tip.
-    box(f'IEC exposed metal blade {index}',(acx+x,-1.425,acz+z),(width,.116,height),steel,.002)
+    box(f'IEC exposed metal blade {index}',(acx+x,-1.425,acz+z),(width,.116,height),gold,.002)
 for dx in (-.306,.306): screw('IEC flange fastener',acx+dx,-1.437,acz,False,.033)
 text('Mains supply rating','~220 \u0412  50 \u0413\u0446',acx,-1.367,.105,.066)
 text('Indicator legend','\u041f\u0418\u0422\u0410\u041d\u0418\u0415',acx,-1.367,.84,.073)
@@ -350,7 +350,7 @@ for obj in list(bpy.context.scene.objects):
     if obj.type not in {'MESH','CURVE','FONT'}: continue
     old=obj.data.materials[0] if obj.data.materials else None
     if 'IEC exposed metal blade' in obj.name:
-        new=metal; prefix='Metal_power_pin_'
+        new=gold_metal; prefix='Metal_power_pin_'
     elif old == gold: new=gold_metal; prefix='Metal_'
     elif old in (steel,nickel): new=metal; prefix='Metal_'
     elif old==panelmat: new=brushed; prefix='Panel_'
