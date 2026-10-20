@@ -1,4 +1,4 @@
-﻿# Device — Blender + Three.js
+# Device — Blender + Three.js
 
 Откройте `device.blend` в Blender или запустите генератор из корня проекта:
 
@@ -10,7 +10,7 @@
 
 Для просмотра запустите из корня проекта HTTP-сервер (например `python -m http.server 8080`) и откройте `http://localhost:8080/device-demo/`. Открытие HTML через file:// не поддерживается загрузчиками браузера. Интернет для просмотра не нужен.
 
-Прокрутка 400vh управляет поворотом Y 0–270°, scrub 1. Адаптивная камера учитывает полный габарит вращения. Старые страницы сайта не изменены. Для интеграции перенесите canvas, importmap и подключение viewer.js, а селектор scroll-area замените контейнером нужных секций.
+The 400vh scroll range rotates the model around Y from 0? to 270? with scrub 1. All libraries are stored in `vendor/` and load from this site; no external CDN or import map is used. HDR, GLB, and normal-map failures are reported to the console.
 
 Геометрия восстановлена по изображению, реальные размеры неизвестны; задняя стенка достроена. Это не подтверждённая точная инженерная копия. Корпус сделан матовым пластиком согласно техническому заданию; шлифованный металл назначен отдельной панели. Карта нормалей применяется к панели в Three.js. Цвет контактов серебристый согласно Metal_Shiny в задании.
 

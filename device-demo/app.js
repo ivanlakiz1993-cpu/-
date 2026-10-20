@@ -46,10 +46,16 @@ window.addEventListener('resize', resize);
 resize();
 if (equipment) new ResizeObserver(resize).observe(equipment);
 try {
+  const loadAsset = (loader, url, label) => new Promise((resolve, reject) => {
+    loader.load(url, resolve, undefined, error => {
+      console.error(`Failed to load ${label}: ${url}`, error);
+      reject(error);
+    });
+  });
   const [gltf, hdr, normal] = await Promise.all([
-    new GLTFLoader().loadAsync(asset('device.glb')),
-    new RGBELoader().loadAsync(asset('studio.hdr')),
-    new THREE.TextureLoader().loadAsync(asset('brushed_normal.jpg'))
+    loadAsset(new GLTFLoader(), asset('device.glb'), '3D model'),
+    loadAsset(new RGBELoader(), asset('studio.hdr'), 'studio HDR environment map'),
+    loadAsset(new THREE.TextureLoader(), asset('brushed_normal.jpg'), 'brushed metal normal map')
   ]);
   const pmrem = new THREE.PMREMGenerator(renderer);
   const environment = pmrem.fromEquirectangular(hdr);
