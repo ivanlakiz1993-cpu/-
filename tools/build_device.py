@@ -250,13 +250,13 @@ cut(shell,profile('IEC internal aperture',pts,-1.47,.18,None,.008))
 # well that read as three female holes while leaving room for exposed blades.
 profile('IEC shallow contact backing',pts,-1.483,.018,polymer,.005)
 for index,(x,z,width,height) in enumerate([
-    (-.103,-.015,.045,.072),
-    (.103,-.015,.045,.072),
-    (0,.075,.052,.082),
+    (-.103,-.015,.06,.08),
+    (.103,-.015,.06,.08),
+    (0,.075,.07,.09),
 ], start=1):
-    # The blade face points toward the viewer (-Y); each blade reaches 12.5 mm
+    # The blade face points toward the viewer (-Y); each blade reaches 15 mm
     # beyond the socket lip and is a separate mesh/material in the exported GLB.
-    box(f'IEC exposed metal blade {index}',(acx+x,-1.552,acz+z),(width,.155,height),steel,.006)
+    box(f'IEC exposed metal blade {index}',(acx+x,-1.565,acz+z),(width,.18,height),steel,.006)
 for dx in (-.306,.306): screw('IEC flange fastener',acx+dx,-1.437,acz,False,.033)
 text('Mains supply rating','~220 \u0412  50 \u0413\u0446',acx,-1.367,.105,.066)
 text('Indicator legend','\u041f\u0418\u0422\u0410\u041d\u0418\u0415',acx,-1.367,.84,.073)
