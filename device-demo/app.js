@@ -68,10 +68,21 @@ try {
     });
   });
   const textureLoader = new THREE.TextureLoader();
+  const makeFlatNormalFallback = () => {
+    const fallbackCanvas = document.createElement('canvas');
+    fallbackCanvas.width = fallbackCanvas.height = 2;
+    const context = fallbackCanvas.getContext('2d');
+    context.fillStyle = 'rgb(128, 128, 255)';
+    context.fillRect(0, 0, 2, 2);
+    return new THREE.CanvasTexture(fallbackCanvas);
+  };
   const [gltf, brushedNormal, rainNormal] = await Promise.all([
     loadAsset(new GLTFLoader(), asset('device.glb'), '3D model'),
     loadAsset(textureLoader, asset('brushed_normal.jpg'), 'brushed metal normal map'),
-    loadAsset(textureLoader, asset('rain_drops_normal.png'), 'rain drops normal map')
+    loadAsset(textureLoader, asset('rain_drops_normal.png'), 'rain drops normal map').catch(error => {
+      console.warn('Rain normal map unavailable; continuing without surface droplets.', error);
+      return makeFlatNormalFallback();
+    })
   ]);
   brushedNormal.colorSpace = THREE.NoColorSpace;
   brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
@@ -236,13 +247,18 @@ try {
   scene.add(new THREE.Points(rainGeometry, rainMaterial));
   resize();
   gsap.registerPlugin(ScrollTrigger);
+  const updateRainProgress = self => {
+    const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
+    wetMaterials.forEach(material => { material.clearcoat = progress; });
+    if (rainMaterial) rainMaterial.opacity = progress * .6;
+  };
   gsap.to(pivot.rotation, {
     y: Math.PI * 1.5, ease: 'none',
-    scrollTrigger: { trigger: equipment ? '[data-testing-journey]' : '.scroll-area', start: 'top top', end: 'bottom bottom', scrub: 1, invalidateOnRefresh: true },
-    onUpdate(self) {
-      const progress = self.progress();
-      wetMaterials.forEach(material => { material.clearcoat = progress; });
-      if (rainMaterial) rainMaterial.opacity = progress * .6;
+    scrollTrigger: {
+      trigger: equipment ? '[data-testing-journey]' : '.scroll-area',
+      start: 'top top', end: 'bottom bottom', scrub: 1, invalidateOnRefresh: true,
+      onUpdate: updateRainProgress,
+      onRefresh: updateRainProgress
     }
   });
   ScrollTrigger.refresh();
