@@ -16,7 +16,7 @@ renderer.setClearColor(0x000000, 0);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
 const pivot = new THREE.Group();
-pivot.scale.setScalar(.8);
+pivot.scale.setScalar(.95);
 scene.add(pivot);
 const light = new THREE.DirectionalLight(0xffffff, 1.2);
 light.position.set(-3, 5, 6);
