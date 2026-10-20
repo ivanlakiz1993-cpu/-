@@ -1,8 +1,10 @@
-﻿import * as THREE from 'three';
+import * as THREE from 'three';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
 import { RGBELoader } from './vendor/RGBELoader.js';
 
-const canvas = document.querySelector('#device');
+const canvas = document.querySelector('[data-testing-model], #device');
+const equipment = document.querySelector('[data-testing-equipment]');
+const asset = name => new URL(name, import.meta.url).href;
 const status = document.querySelector('#status');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -24,7 +26,8 @@ light.shadow.normalBias = .015;
 scene.add(light);
 let radius = 3;
 function resize() {
-  const width = window.innerWidth, height = window.innerHeight;
+  const bounds = equipment?.getBoundingClientRect();
+  const width = Math.max(1, bounds?.width || window.innerWidth), height = Math.max(1, bounds?.height || window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(width, height, false);
   camera.aspect = width / height;
@@ -37,11 +40,12 @@ function resize() {
 }
 window.addEventListener('resize', resize);
 resize();
+if (equipment) new ResizeObserver(resize).observe(equipment);
 try {
   const [gltf, hdr, normal] = await Promise.all([
-    new GLTFLoader().loadAsync('./device.glb'),
-    new RGBELoader().loadAsync('./studio.hdr'),
-    new THREE.TextureLoader().loadAsync('./brushed_normal.jpg')
+    new GLTFLoader().loadAsync(asset('device.glb')),
+    new RGBELoader().loadAsync(asset('studio.hdr')),
+    new THREE.TextureLoader().loadAsync(asset('brushed_normal.jpg'))
   ]);
   const pmrem = new THREE.PMREMGenerator(renderer);
   const environment = pmrem.fromEquirectangular(hdr);
@@ -77,12 +81,13 @@ try {
   gsap.registerPlugin(ScrollTrigger);
   gsap.to(pivot.rotation, {
     y: Math.PI * 1.5, ease: 'none',
-    scrollTrigger: { trigger: '.scroll-area', start: 'top top', end: 'bottom bottom', scrub: 1, invalidateOnRefresh: true }
+    scrollTrigger: { trigger: equipment ? '[data-testing-journey]' : '.scroll-area', start: 'top top', end: 'bottom bottom', scrub: 1, invalidateOnRefresh: true }
   });
   ScrollTrigger.refresh();
-  status.textContent = '';
+  if (status) status.textContent = '';
+  equipment?.classList.add('testing-model-ready');
 } catch (error) {
   console.error(error);
-  status.textContent = 'Не удалось загрузить модель или текстуры. Откройте страницу через HTTP-сервер.';
+  if (status) status.textContent = 'Не удалось загрузить модель или текстуры. Откройте страницу через HTTP-сервер.';
 }
 renderer.setAnimationLoop(() => renderer.render(scene, camera));
