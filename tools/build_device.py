@@ -246,17 +246,16 @@ iec=profile('IEC moulded flange',[(acx+x,acz+z) for x,z in [(-.36,-.09),(-.25,-.
 cut(iec,profile('IEC flange aperture',pts,-1.397,.14,None,.012))
 shell=profile('IEC bevelled socket housing',[(acx+x*1.11,acz+z*1.13) for x,z in shape],-1.445,.12,polymer,.012)
 cut(shell,profile('IEC internal aperture',pts,-1.47,.18,None,.008))
-# Cap the aperture close behind the socket lip. This removes the deep black
-# well that read as three female holes while leaving room for exposed blades.
-profile('IEC shallow contact backing',pts,-1.483,.018,polymer,.005)
+# Recessed insulating floor; blades grow forward from it but stay inside
+# the protective rim (front lip at Y=-1.505), as in the close-up reference.
+profile('IEC recessed contact backing',pts,-1.365,.018,polymer,.005)
 for index,(x,z,width,height) in enumerate([
-    (-.103,-.015,.06,.08),
-    (.103,-.015,.06,.08),
-    (0,.075,.07,.09),
+    (-.103,-.025,.014,.062),
+    (.103,-.025,.014,.062),
+    (0,.065,.014,.062),
 ], start=1):
-    # The blade face points toward the viewer (-Y); each blade reaches 15 mm
-    # beyond the socket lip and is a separate mesh/material in the exported GLB.
-    box(f'IEC exposed metal blade {index}',(acx+x,-1.565,acz+z),(width,.18,height),steel,.006)
+    # Thin vertical blade cross-section, with a lightly rounded metal tip.
+    box(f'IEC exposed metal blade {index}',(acx+x,-1.425,acz+z),(width,.116,height),steel,.002)
 for dx in (-.306,.306): screw('IEC flange fastener',acx+dx,-1.437,acz,False,.033)
 text('Mains supply rating','~220 \u0412  50 \u0413\u0446',acx,-1.367,.105,.066)
 text('Indicator legend','\u041f\u0418\u0422\u0410\u041d\u0418\u0415',acx,-1.367,.84,.073)
