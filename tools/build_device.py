@@ -246,7 +246,9 @@ iec=profile('IEC moulded flange',[(acx+x,acz+z) for x,z in [(-.36,-.09),(-.25,-.
 cut(iec,profile('IEC flange aperture',pts,-1.397,.14,None,.012))
 shell=profile('IEC bevelled socket housing',[(acx+x*1.11,acz+z*1.13) for x,z in shape],-1.445,.12,polymer,.012)
 cut(shell,profile('IEC internal aperture',pts,-1.47,.18,None,.008))
-profile('IEC deep back wall',pts,-1.365,.018,dark,.005)
+# Cap the aperture close behind the socket lip. This removes the deep black
+# well that read as three female holes while leaving room for exposed blades.
+profile('IEC shallow contact backing',pts,-1.483,.018,polymer,.005)
 for index,(x,z,width,height) in enumerate([
     (-.103,-.015,.045,.072),
     (.103,-.015,.045,.072),
@@ -319,7 +321,6 @@ for x in (-1.95,1.95):
 plastic = material('Plastic_Matte', (.018,.019,.021), 0, .6)
 metal = material('Metal_Shiny', (.73,.73,.73), 1, .12)
 gold_metal = material('Metal_Gold', (.64,.38,.09), 1, .2)
-power_pin_metal = material('Metal_Power_Pin', (.73,.73,.73), 1, .1)
 brushed = material('Metal_Brushed', (.025,.027,.03), 1, .4)
 ledmat = material('LED_Green', (0,1,.055), 0, .2)
 # Deterministic tangent-space horizontal brushing, saved alongside the GLB.
@@ -350,7 +351,7 @@ for obj in list(bpy.context.scene.objects):
     if obj.type not in {'MESH','CURVE','FONT'}: continue
     old=obj.data.materials[0] if obj.data.materials else None
     if 'IEC exposed metal blade' in obj.name:
-        new=power_pin_metal; prefix='Metal_power_pin_'
+        new=metal; prefix='Metal_power_pin_'
     elif old == gold: new=gold_metal; prefix='Metal_'
     elif old in (steel,nickel): new=metal; prefix='Metal_'
     elif old==panelmat: new=brushed; prefix='Panel_'
