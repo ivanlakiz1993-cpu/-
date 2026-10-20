@@ -102,11 +102,9 @@ try {
       }
 
       if (/iec (moulded flange|bevelled socket housing|recessed contact backing)/.test(meshName)) {
-        const backing = meshName.includes('backing');
-        return new THREE.MeshPhysicalMaterial({
-          name: 'IEC_Moulded_Black_Plastic', color: 0x090909,
-          metalness: 0, roughness: backing ? .5 : .32,
-          clearcoat: backing ? 0 : .18, clearcoatRoughness: .3
+        return new THREE.MeshStandardMaterial({
+          name: 'IEC_Moulded_Black_Plastic', color: 0x080808,
+          metalness: 0, roughness: .35
         });
       }
 
