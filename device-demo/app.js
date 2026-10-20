@@ -65,42 +65,51 @@ try {
   normal.wrapS = normal.wrapT = THREE.RepeatWrapping;
   normal.repeat.set(4, 4);
   normal.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  gltf.scene.traverse(mesh => {
-    if (mesh.name.replaceAll('_', ' ') === 'Label Indicator legend') {
-      mesh.visible = false;
+  const makeMaterial = (mesh, source) => {
+    const materialName = source.name || '';
+    const meshName = mesh.name || '';
+    if (materialName === 'LED_Green' || /green domed glass/i.test(meshName)) {
+      return new THREE.MeshBasicMaterial({ name: 'LED_Green', color: 0x33ff55 });
     }
-    if (!mesh.isMesh) return;
-    mesh.castShadow = mesh.receiveShadow = true;
-    const tune = source => {
-      const material = source.clone();
-      if (source.name === 'Metal_Brushed') {
-        material.metalness = 1; material.roughness = .35;
-        material.normalMap = normal; material.normalScale.set(.2, .2);
-      } else if (source.name === 'LED_Green') {
-        return new THREE.MeshBasicMaterial({ name: 'LED_Green', color: 0x33ff55 });
-      } else if (source.name === 'Metal_Shiny' || /metal|pin/i.test(mesh.name)) {
-        material.color.setHex(0xeeeeee); material.metalness = 1; material.roughness = .1;
-        material.envMapIntensity = 1.8;
-        // Object-space machining marks also cover lathed shells without UVs.
-        material.onBeforeCompile = shader => {
-          shader.vertexShader = 'varying vec3 vMachinedPosition;\n' + shader.vertexShader;
-          shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>',
-            '#include <begin_vertex>\nvMachinedPosition = position;');
-          shader.fragmentShader = 'varying vec3 vMachinedPosition;\n' + shader.fragmentShader;
-          shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>', `
-            #include <roughnessmap_fragment>
-            float grooves = .5 + .5 * sin(vMachinedPosition.y * 3100.0);
-            float grain = fract(sin(dot(floor(vMachinedPosition * 4500.0), vec3(12.9898,78.233,37.719))) * 43758.5453);
-            roughnessFactor = clamp(roughnessFactor + grooves * .035 + grain * .015, .1, .22);
-          `);
-        };
-        material.customProgramCacheKey = () => 'machined-metal-v1';
-      } else if (source.name === 'Plastic_Matte') {
-        material.color.setHex(0x1a1a1a); material.metalness = 0; material.roughness = .6;
-      }
-      return material;
-    };
-    mesh.material = Array.isArray(mesh.material) ? mesh.material.map(tune) : tune(mesh.material);
+    if (materialName === 'Metal_Brushed' || /panel.*control/i.test(meshName)) {
+      return new THREE.MeshStandardMaterial({
+        name: 'Metal_Brushed', color: 0xdddddd, metalness: 1, roughness: .35,
+        envMapIntensity: 1.5, normalMap: normal, normalScale: new THREE.Vector2(.2, .2)
+      });
+    }
+    if (materialName === 'Metal_Shiny' || /metal|pin|stainless|nickel|connector|screw/i.test(meshName)) {
+      return new THREE.MeshStandardMaterial({
+        name: 'Metal_Shiny', color: 0xdddddd, metalness: 1, roughness: .1,
+        envMapIntensity: 2.5
+      });
+    }
+    if (materialName === 'Plastic_Matte' || /plastic|rocker|chassis|housing|polymer/i.test(meshName)) {
+      return new THREE.MeshStandardMaterial({
+        name: 'Plastic_Matte', color: 0x1a1a1a, metalness: 0, roughness: .6
+      });
+    }
+    // Rebuild remaining printed legends and dark inserts too, preserving their
+    // intended non-metal color instead of accidentally turning them chrome.
+    return new THREE.MeshStandardMaterial({
+      name: materialName || 'Device_Matte',
+      color: source.color?.clone() || new THREE.Color(0x777777),
+      metalness: 0,
+      roughness: .65,
+      transparent: source.transparent,
+      opacity: source.opacity
+    });
+  };
+
+  gltf.scene.traverse(child => {
+    if (!child.isMesh) return;
+    if (child.name.replaceAll('_', ' ') === 'Label Indicator legend') child.visible = false;
+    child.castShadow = child.receiveShadow = true;
+    const oldMaterials = Array.isArray(child.material) ? child.material : [child.material];
+    const newMaterials = oldMaterials.map(source => makeMaterial(child, source));
+    oldMaterials.forEach(source => source?.dispose());
+    child.material = Array.isArray(child.material) ? newMaterials : newMaterials[0];
+    if (Array.isArray(child.material)) child.material.forEach(material => { material.needsUpdate = true; });
+    else child.material.needsUpdate = true;
   });
   pivot.add(gltf.scene);
   const bounds = new THREE.Box3().setFromObject(gltf.scene);
