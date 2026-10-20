@@ -11,7 +11,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
+renderer.toneMappingExposure = 1.3;
 renderer.setClearColor(0x000000, 0);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
@@ -25,6 +25,9 @@ light.shadow.mapSize.set(2048, 2048);
 Object.assign(light.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: .1, far: 25 });
 light.shadow.normalBias = .015;
 scene.add(light);
+const frontHighlight = new THREE.DirectionalLight(0xffffff, 2.2);
+frontHighlight.position.set(5, 5, 5);
+scene.add(frontHighlight);
 let radius = 3;
 let halfHeight = .6;
 function resize() {
@@ -57,10 +60,9 @@ try {
     loadAsset(new RGBELoader(), asset('studio.hdr'), 'studio HDR environment map'),
     loadAsset(new THREE.TextureLoader(), asset('brushed_normal.jpg'), 'brushed metal normal map')
   ]);
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  const environment = pmrem.fromEquirectangular(hdr);
-  scene.environment = environment.texture;
-  hdr.dispose(); pmrem.dispose();
+  hdr.mapping = THREE.EquirectangularReflectionMapping;
+  scene.environment = hdr;
+  scene.environmentIntensity = 2.0;
   normal.colorSpace = THREE.NoColorSpace;
   normal.wrapS = normal.wrapT = THREE.RepeatWrapping;
   normal.repeat.set(4, 4);
@@ -79,7 +81,7 @@ try {
     }
     if (materialName === 'Metal_Shiny' || /metal|pin|stainless|nickel|connector|screw/i.test(meshName)) {
       return new THREE.MeshStandardMaterial({
-        name: 'Metal_Shiny', color: 0xdddddd, metalness: 1, roughness: .1,
+        name: 'Metal_Shiny', color: 0xdddddd, metalness: 1, roughness: .08,
         envMapIntensity: 2.5
       });
     }
