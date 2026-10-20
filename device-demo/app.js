@@ -1,6 +1,5 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
-import { RGBELoader } from './vendor/RGBELoader.js';
 
 const canvas = document.querySelector('[data-testing-model], #device');
 const equipment = document.querySelector('[data-testing-equipment]');
@@ -11,23 +10,28 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.3;
+renderer.toneMappingExposure = 1.0;
 renderer.setClearColor(0x000000, 0);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
 const pivot = new THREE.Group();
 pivot.scale.setScalar(.95);
 scene.add(pivot);
-const light = new THREE.DirectionalLight(0xffffff, 1.2);
-light.position.set(-3, 5, 6);
-light.castShadow = true;
-light.shadow.mapSize.set(2048, 2048);
-Object.assign(light.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: .1, far: 25 });
-light.shadow.normalBias = .015;
-scene.add(light);
-const frontHighlight = new THREE.DirectionalLight(0xffffff, 2.2);
-frontHighlight.position.set(5, 5, 5);
-scene.add(frontHighlight);
+const mainLight = new THREE.DirectionalLight(0xffffff, 4.0);
+mainLight.position.set(5, 8, 5);
+mainLight.castShadow = true;
+mainLight.shadow.mapSize.set(2048, 2048);
+Object.assign(mainLight.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: .1, far: 25 });
+mainLight.shadow.normalBias = .015;
+mainLight.shadow.bias = -.00015;
+scene.add(mainLight);
+const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
+fillLight.position.set(-5, 3, 2);
+scene.add(fillLight);
+const rimLight = new THREE.DirectionalLight(0xffffff, 2.0);
+rimLight.position.set(0, 5, -5);
+scene.add(rimLight);
+scene.add(new THREE.AmbientLight(0xffffff, .2));
 let radius = 3;
 let halfHeight = .6;
 function resize() {
@@ -55,14 +59,10 @@ try {
       reject(error);
     });
   });
-  const [gltf, hdr, normal] = await Promise.all([
+  const [gltf, normal] = await Promise.all([
     loadAsset(new GLTFLoader(), asset('device.glb'), '3D model'),
-    loadAsset(new RGBELoader(), asset('studio.hdr'), 'studio HDR environment map'),
     loadAsset(new THREE.TextureLoader(), asset('brushed_normal.jpg'), 'brushed metal normal map')
   ]);
-  hdr.mapping = THREE.EquirectangularReflectionMapping;
-  scene.environment = hdr;
-  scene.environmentIntensity = 2.0;
   normal.colorSpace = THREE.NoColorSpace;
   normal.wrapS = normal.wrapT = THREE.RepeatWrapping;
   normal.repeat.set(4, 4);
@@ -75,19 +75,18 @@ try {
     }
     if (materialName === 'Metal_Brushed' || /panel.*control/i.test(meshName)) {
       return new THREE.MeshStandardMaterial({
-        name: 'Metal_Brushed', color: 0xdddddd, metalness: 1, roughness: .35,
+        name: 'Metal_Brushed', color: 0xdddddd, metalness: .9, roughness: .35,
         envMapIntensity: 1.5, normalMap: normal, normalScale: new THREE.Vector2(.2, .2)
       });
     }
     if (materialName === 'Metal_Shiny' || /metal|pin|stainless|nickel|connector|screw/i.test(meshName)) {
       return new THREE.MeshStandardMaterial({
-        name: 'Metal_Shiny', color: 0xdddddd, metalness: 1, roughness: .08,
-        envMapIntensity: 2.5
+        name: 'Metal_Shiny', color: 0xdddddd, metalness: .9, roughness: .1
       });
     }
     if (materialName === 'Plastic_Matte' || /plastic|rocker|chassis|housing|polymer/i.test(meshName)) {
       return new THREE.MeshStandardMaterial({
-        name: 'Plastic_Matte', color: 0x1a1a1a, metalness: 0, roughness: .6
+        name: 'Plastic_Matte', color: 0x222222, metalness: 0, roughness: .5
       });
     }
     // Rebuild remaining printed legends and dark inserts too, preserving their
