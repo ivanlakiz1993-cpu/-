@@ -1,5 +1,6 @@
 # Browser profiles, cookies, sessions, and recordings are local-only data.
 /.video-review/
+/.edge-check/
 
 # Local credentials and environment files must never enter the repository.
 /.env
