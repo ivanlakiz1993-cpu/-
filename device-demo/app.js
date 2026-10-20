@@ -77,8 +77,16 @@ try {
       const matName = (source?.name || '').toLowerCase();
       const partName = `${meshName} ${matName}`;
 
-      // 1. Gold contacts; check each material slot so the joined metal mesh
-      // keeps its pins gold without recoloring the neighboring connector shells.
+      // The three IEC blades are individual GLB nodes, detached in Blender.
+      // Handle them before the generic "pin" rule so they remain silver.
+      if (/power_pin|iec_pin|prong/.test(meshName) || matName.includes('metal_power_pin')) {
+        return new THREE.MeshStandardMaterial({
+          name: 'Metal_Power_Pin', color: 0xdedcd8, metalness: 1, roughness: .1,
+          envMapIntensity: 2
+        });
+      }
+
+      // Gold contacts live in a separate GLB material slot from the connector shells.
       if (/gold|pin|contact|core/.test(`${meshName} ${matName}`)) {
         return new THREE.MeshStandardMaterial({
           name: 'Metal_Gold', color: 0xd4af37, metalness: 1, roughness: .2
@@ -108,8 +116,9 @@ try {
       if (meshName.includes('body') || meshName.includes('box') ||
           meshName.startsWith('plastic_') || matName.includes('plastic_matte') ||
           /chassis|side wall|rear removable|service panel|lid|rocker|housing/.test(partName)) {
-        return new THREE.MeshStandardMaterial({
-          name: 'Plastic_Matte', color: 0x1c1c1c, metalness: .1, roughness: .5
+        return new THREE.MeshPhysicalMaterial({
+          name: 'Plastic_Matte', color: 0x0a0a0a, metalness: .15, roughness: .55,
+          clearcoat: .4, clearcoatRoughness: .25
         });
       }
 
