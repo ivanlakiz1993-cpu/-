@@ -102,20 +102,22 @@ try {
         return new THREE.MeshBasicMaterial({ name: 'LED_Green', color: 0x33ff55 });
       }
 
-      // Match the IEC socket by its label when available. If an exporter
-      // changes the node name, recognize the same three moulded pieces by
-      // their bounds and position around the power inlet instead of scale.x.
-      const namedIecSocketPart = /iec (moulded flange|bevelled socket housing|recessed contact backing)/.test(meshName);
+      // Catch every plastic part of the power inlet by either node or
+      // material name. Exclude labels, pins and fasteners so their own
+      // materials keep priority. Bounds also catch renamed flange meshes.
+      const partName = `${meshName} ${matName}`;
+      const isLabelPinOrFastener = /(label|legend|text|pin|screw|fastener|led|indicator)/.test(partName);
+      const namedPowerSocketPart = /(socket|iec|power)/.test(partName) && !isLabelPinOrFastener;
       const darkPlastic = (matName.includes('plastic') || isDarkColor) && (source?.metalness ?? 0) < .2;
       const inIecSocketRegion = center.x > -.28 && center.x < .12
         && center.y > -.32 && center.y < .08
         && center.z > 1.28 && center.z < 1.56;
-      const iecSocketShape = (dimensions.x < .15 && dimensions.y > .25 && dimensions.z > .08)
-        || (dimensions.x > .4 && dimensions.y > .2 && dimensions.z < .08);
-      if (namedIecSocketPart || (darkPlastic && inIecSocketRegion && iecSocketShape)) {
-        return new THREE.MeshStandardMaterial({
-          name: 'IEC_Moulded_Black_Plastic', color: 0x080808,
-          metalness: 0, roughness: .32
+      const isFittingAtIecPosition = darkPlastic && inIecSocketRegion
+        && largestDimension > .12 && largestDimension < .9;
+      if (namedPowerSocketPart || isFittingAtIecPosition) {
+        return new THREE.MeshPhysicalMaterial({
+          name: 'IEC_Moulded_Black_Plastic', color: 0x121212,
+          metalness: 0, roughness: .45, clearcoat: .8, clearcoatRoughness: .15
         });
       }
 
