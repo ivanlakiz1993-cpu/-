@@ -359,15 +359,19 @@ for obj in list(bpy.context.scene.objects):
     else: new=plastic; prefix='Plastic_'
     obj.data.materials.clear(); obj.data.materials.append(new); obj.name=prefix+obj.name
     obj.location.z -= .54
-# Apply geometry and merge only shiny hardware; leave panel as separate mesh.
+# Bake every object's location/rotation/scale into its mesh, then combine all
+# metal parts (including IEC blades) so they share one stable parent transform.
 bpy.ops.object.select_all(action='SELECT')
 bpy.context.view_layer.objects.active=front
 bpy.ops.object.convert(target='MESH')
+bpy.ops.object.select_all(action='SELECT')
+bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 bpy.ops.object.select_all(action='DESELECT')
+bpy.context.view_layer.objects.active=None
 for obj in bpy.context.scene.objects:
-    if obj.name.startswith('Metal_') and 'power_pin' not in obj.name.lower(): obj.select_set(True)
+    if obj.name.startswith('Metal_'): obj.select_set(True)
 bpy.context.view_layer.objects.active=next(o for o in bpy.context.scene.objects if o.select_get())
-bpy.ops.object.join(); bpy.context.object.name='Metal_Connectors_Screws'
+bpy.ops.object.join(); bpy.context.object.name='Metal_Connectors_Screws_Pins'
 bpy.context.scene.cursor.location=(0,0,0)
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.origin_set(type='ORIGIN_CURSOR')

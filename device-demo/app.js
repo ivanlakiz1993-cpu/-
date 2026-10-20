@@ -25,7 +25,7 @@ Object.assign(mainLight.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4,
 mainLight.shadow.normalBias = .015;
 mainLight.shadow.bias = -.00015;
 scene.add(mainLight);
-const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
+const fillLight = new THREE.DirectionalLight(0xffffff, .4);
 fillLight.position.set(-5, 3, 2);
 scene.add(fillLight);
 const rimLight = new THREE.DirectionalLight(0xffffff, 2.0);
@@ -99,19 +99,20 @@ try {
 
       // The front plate is also near-black in the source image, so preserve
       // its brushed-metal identity before classifying dark plastic by color.
-      if (matName.includes('metal_brushed') || meshName.includes('control panel')) {
-        return new THREE.MeshStandardMaterial({
-          name: 'Metal_Brushed', color: 0xdedcd8, metalness: .9, roughness: .35,
-          normalMap: brushedNormal, normalScale: new THREE.Vector2(.2, .2)
+      if (matName.includes('metal_brushed') || meshName.includes('panel') || meshName.includes('plate')) {
+        return new THREE.MeshPhysicalMaterial({
+          name: 'Dark_Titanium_Front_Panel', color: 0x181818, metalness: .95, roughness: .35,
+          normalMap: brushedNormal, normalScale: new THREE.Vector2(.2, .2),
+          clearcoat: .2, clearcoatRoughness: .3
         });
       }
 
-      // IEC pins are separate small metallic pieces. Geometry bounds work
-      // after Blender applies object scale, unlike checking child.scale.x.
+      // The combined IEC blades retain their own Metal_Power_Pin material
+      // slot, while size-based detection can still catch detached tiny metal parts.
       const isSmallMetal = largestDimension < .2 && (source?.metalness ?? 0) > .65;
       if (isSmallMetal || matName.includes('metal_power_pin')) {
         return new THREE.MeshStandardMaterial({
-          name: 'Metal_Power_Pin', color: 0xdedcd8, metalness: 1, roughness: .1,
+          name: 'Metal_Power_Pin', color: 0xffffff, metalness: 1, roughness: .08,
           envMapIntensity: 2
         });
       }
@@ -133,7 +134,7 @@ try {
       // shells and screws, while retaining the source color for print/labels.
       if ((source?.metalness ?? 0) > .5 || matName.includes('metal_shiny')) {
         return new THREE.MeshStandardMaterial({
-          name: 'Metal_Shiny', color: 0xdedcd8, metalness: 1, roughness: .12,
+          name: 'Metal_Shiny', color: 0xffffff, metalness: 1, roughness: .08,
           envMapIntensity: 2
         });
       }
