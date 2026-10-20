@@ -237,7 +237,7 @@ connector('Input RS485',-1.78,'\u0412\u0425\u041e\u0414','RS-485')
 connector('Output RS485',-.98,'\u0412\u042b\u0425\u041e\u0414','RS-485')
 connector('Sensor port',1.51,'\u0414\u0410\u0422\u0427\u0418\u041a\u0418','\u0412\u0425\u041e\u0414 1-4')
 
-# IEC C14 six-sided inlet, mounting ears and deep cavity.
+# IEC C14 inlet with three exposed, bevelled metal blades in the cavity.
 acx=-.20; acz=.425
 shape=[(-.245,-.135),(.245,-.135),(.245,.065),(.16,.15),(-.16,.15),(-.245,.065)]
 pts=[(acx+x,acz+z) for x,z in shape]
@@ -247,8 +247,14 @@ cut(iec,profile('IEC flange aperture',pts,-1.397,.14,None,.012))
 shell=profile('IEC bevelled socket housing',[(acx+x*1.11,acz+z*1.13) for x,z in shape],-1.445,.12,polymer,.012)
 cut(shell,profile('IEC internal aperture',pts,-1.47,.18,None,.008))
 profile('IEC deep back wall',pts,-1.365,.018,dark,.005)
-for x,z in [(-.103,-.01),(.103,-.01),(0,.075)]:
-    box('IEC rectangular pin',(acx+x,-1.50,acz+z),(.032,.085,.072),steel,.004)
+for index,(x,z,width,height) in enumerate([
+    (-.103,-.015,.045,.072),
+    (.103,-.015,.045,.072),
+    (0,.075,.052,.082),
+], start=1):
+    # The blade face points toward the viewer (-Y); each blade reaches 12.5 mm
+    # beyond the socket lip and is a separate mesh/material in the exported GLB.
+    box(f'IEC exposed metal blade {index}',(acx+x,-1.552,acz+z),(width,.155,height),steel,.006)
 for dx in (-.306,.306): screw('IEC flange fastener',acx+dx,-1.437,acz,False,.033)
 text('Mains supply rating','~220 \u0412  50 \u0413\u0446',acx,-1.367,.105,.066)
 text('Indicator legend','\u041f\u0418\u0422\u0410\u041d\u0418\u0415',acx,-1.367,.84,.073)
@@ -343,7 +349,7 @@ hdr.pixels.foreach_set(pixels.ravel()); hdr.filepath_raw=str(OUT/'studio.hdr'); 
 for obj in list(bpy.context.scene.objects):
     if obj.type not in {'MESH','CURVE','FONT'}: continue
     old=obj.data.materials[0] if obj.data.materials else None
-    if 'IEC rectangular pin' in obj.name:
+    if 'IEC exposed metal blade' in obj.name:
         new=power_pin_metal; prefix='Metal_power_pin_'
     elif old == gold: new=gold_metal; prefix='Metal_'
     elif old in (steel,nickel): new=metal; prefix='Metal_'

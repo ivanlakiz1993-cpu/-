@@ -59,14 +59,14 @@ try {
       reject(error);
     });
   });
-  const [gltf, normal] = await Promise.all([
+  const [gltf, brushedNormal] = await Promise.all([
     loadAsset(new GLTFLoader(), asset('device.glb'), '3D model'),
     loadAsset(new THREE.TextureLoader(), asset('brushed_normal.jpg'), 'brushed metal normal map')
   ]);
-  normal.colorSpace = THREE.NoColorSpace;
-  normal.wrapS = normal.wrapT = THREE.RepeatWrapping;
-  normal.repeat.set(4, 4);
-  normal.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  brushedNormal.colorSpace = THREE.NoColorSpace;
+  brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
+  brushedNormal.repeat.set(4, 4);
+  brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   gltf.scene.traverse(child => {
     if (!child.isMesh || !child.material) return;
     if (child.name.replaceAll('_', ' ') === 'Label Indicator legend') child.visible = false;
@@ -102,7 +102,7 @@ try {
       if (matName.includes('metal_brushed') || meshName.includes('control panel')) {
         return new THREE.MeshStandardMaterial({
           name: 'Metal_Brushed', color: 0xdedcd8, metalness: .9, roughness: .35,
-          normalMap: normal, normalScale: new THREE.Vector2(.2, .2)
+          normalMap: brushedNormal, normalScale: new THREE.Vector2(.2, .2)
         });
       }
 
@@ -120,8 +120,9 @@ try {
         // Distinguish the large enclosure faces from small dark socket
         // inserts using their measured geometry, not Blender object names.
         if (largestDimension > 1.5) return new THREE.MeshPhysicalMaterial({
-          name: 'Plastic_Matte', color: 0x0a0a0a, metalness: .15, roughness: .55,
-          clearcoat: .4, clearcoatRoughness: .25
+          name: 'Black_Anodized_Aluminum', color: 0x141414, metalness: .85, roughness: .38,
+          normalMap: brushedNormal, normalScale: new THREE.Vector2(.08, .08),
+          clearcoat: .3, clearcoatRoughness: .2
         });
         return new THREE.MeshStandardMaterial({
           name: 'Plastic_Internal', color: 0x0f0f0f, metalness: 0, roughness: .75
