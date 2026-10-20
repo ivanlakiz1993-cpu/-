@@ -17,7 +17,7 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
 const pivot = new THREE.Group();
 scene.add(pivot);
-const light = new THREE.DirectionalLight(0xffffff, 2.5);
+const light = new THREE.DirectionalLight(0xffffff, 1.2);
 light.position.set(-3, 5, 6);
 light.castShadow = true;
 light.shadow.mapSize.set(2048, 2048);
@@ -25,6 +25,7 @@ Object.assign(light.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, nea
 light.shadow.normalBias = .015;
 scene.add(light);
 let radius = 3;
+let halfHeight = .6;
 function resize() {
   const bounds = equipment?.getBoundingClientRect();
   const width = Math.max(1, bounds?.width || window.innerWidth), height = Math.max(1, bounds?.height || window.innerHeight);
@@ -32,9 +33,11 @@ function resize() {
   renderer.setSize(width, height, false);
   camera.aspect = width / height;
   // Fit the entire rotation envelope, including narrow mobile viewports.
-  const halfFov = Math.min(THREE.MathUtils.degToRad(camera.fov / 2), Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect));
-  const distance = radius / Math.sin(halfFov) * 1.12;
-  camera.position.set(-.32, .40, 1).normalize().multiplyScalar(distance);
+  const verticalFov = THREE.MathUtils.degToRad(camera.fov / 2);
+  const horizontalFov = Math.atan(Math.tan(verticalFov) * camera.aspect);
+  // Fit the horizontal rotation cylinder, not a sphere with empty space above it.
+  const distance = Math.max(radius / Math.sin(horizontalFov), radius + halfHeight / Math.tan(verticalFov)) * 1.08;
+  camera.position.set(0, 0, distance);
   camera.lookAt(0, 0, 0);
   camera.updateProjectionMatrix();
 }
@@ -66,7 +69,22 @@ try {
       } else if (source.name === 'LED_Green') {
         return new THREE.MeshBasicMaterial({ name: 'LED_Green', color: 0x00ff44 });
       } else if (source.name === 'Metal_Shiny' || mesh.name.includes('Metal')) {
-        material.color.setHex(0xdddddd); material.metalness = 1; material.roughness = .12;
+        material.color.setHex(0xd5d7db); material.metalness = 1; material.roughness = .17;
+        material.envMapIntensity = 1.8;
+        // Object-space machining marks also cover lathed shells without UVs.
+        material.onBeforeCompile = shader => {
+          shader.vertexShader = 'varying vec3 vMachinedPosition;\n' + shader.vertexShader;
+          shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>',
+            '#include <begin_vertex>\nvMachinedPosition = position;');
+          shader.fragmentShader = 'varying vec3 vMachinedPosition;\n' + shader.fragmentShader;
+          shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>', `
+            #include <roughnessmap_fragment>
+            float grooves = .5 + .5 * sin(vMachinedPosition.y * 3100.0);
+            float grain = fract(sin(dot(floor(vMachinedPosition * 4500.0), vec3(12.9898,78.233,37.719))) * 43758.5453);
+            roughnessFactor = clamp(roughnessFactor + grooves * .055 + grain * .025, .12, .3);
+          `);
+        };
+        material.customProgramCacheKey = () => 'machined-metal-v1';
       } else if (source.name === 'Plastic_Matte') {
         material.color.setHex(0x191a1c); material.metalness = 0; material.roughness = .6;
       }
@@ -76,7 +94,9 @@ try {
   });
   pivot.add(gltf.scene);
   const bounds = new THREE.Box3().setFromObject(gltf.scene);
-  radius = bounds.getBoundingSphere(new THREE.Sphere()).radius;
+  const size = bounds.getSize(new THREE.Vector3());
+  radius = Math.hypot(size.x, size.z) / 2;
+  halfHeight = size.y / 2;
   resize();
   gsap.registerPlugin(ScrollTrigger);
   gsap.to(pivot.rotation, {

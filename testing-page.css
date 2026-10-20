@@ -378,3 +378,8 @@
 .climate-tests__inner,.mechanical-tests__inner{width:min(calc(100% - var(--testing-content-gutter) - var(--testing-content-gutter)),107.5rem);margin-inline:auto}
 .testing-stage__content{left:var(--testing-content-gutter);right:var(--testing-content-gutter)}
 .testing-stage__breadcrumb{left:var(--testing-content-gutter)}
+
+/* Larger shared 3D device; the renderer fits its complete rotation envelope. */
+.testing-journey__visual .testing-stage__equipment{width:min(68vw,78rem)}
+@media(max-width:1000px){.testing-journey__visual .testing-stage__equipment{width:min(88vw,54rem)}}
+@media(max-width:650px){.testing-journey__visual .testing-stage__equipment{width:calc(100% - 1.5rem)}}
