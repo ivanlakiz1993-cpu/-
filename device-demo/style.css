@@ -1,0 +1,9 @@
+﻿:root { color-scheme: dark; font-family: Arial, sans-serif; background: #08090b; color: #eee; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+#device { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+.scroll-area { height: 400vh; position: relative; }
+.caption { position: relative; z-index: 2; padding: clamp(1.25rem, 4vw, 4rem); pointer-events: none; }
+h1 { font-size: clamp(1.4rem, 3vw, 2.6rem); font-weight: 400; margin: 0 0 .6em; }
+p { font-size: clamp(.85rem, 1.2vw, 1.1rem); color: #aaa; }
+#status:empty { display: none; }
