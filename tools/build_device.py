@@ -312,6 +312,7 @@ for x in (-1.95,1.95):
 # Portable PBR materials: replace Blender-only procedural nodes before export.
 plastic = material('Plastic_Matte', (.018,.019,.021), 0, .6)
 metal = material('Metal_Shiny', (.73,.73,.73), 1, .12)
+gold_metal = material('Metal_Gold', (.64,.38,.09), 1, .2)
 brushed = material('Metal_Brushed', (.025,.027,.03), 1, .4)
 ledmat = material('LED_Green', (0,1,.055), 0, .2)
 # Deterministic tangent-space horizontal brushing, saved alongside the GLB.
@@ -341,7 +342,8 @@ hdr.pixels.foreach_set(pixels.ravel()); hdr.filepath_raw=str(OUT/'studio.hdr'); 
 for obj in list(bpy.context.scene.objects):
     if obj.type not in {'MESH','CURVE','FONT'}: continue
     old=obj.data.materials[0] if obj.data.materials else None
-    if old in (steel,nickel,gold): new=metal; prefix='Metal_'
+    if old == gold: new=gold_metal; prefix='Metal_'
+    elif old in (steel,nickel): new=metal; prefix='Metal_'
     elif old==panelmat: new=brushed; prefix='Panel_'
     elif old==green: new=ledmat; prefix='LED_'
     elif old==ink: new=ink; prefix='Label_'
@@ -356,7 +358,7 @@ bpy.ops.object.select_all(action='DESELECT')
 for obj in bpy.context.scene.objects:
     if obj.name.startswith('Metal_'): obj.select_set(True)
 bpy.context.view_layer.objects.active=next(o for o in bpy.context.scene.objects if o.select_get())
-bpy.ops.object.join(); bpy.context.object.name='Metal_Connectors_Screws_Contacts'
+bpy.ops.object.join(); bpy.context.object.name='Metal_Connectors_Screws'
 bpy.context.scene.cursor.location=(0,0,0)
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.origin_set(type='ORIGIN_CURSOR')

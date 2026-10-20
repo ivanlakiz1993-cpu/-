@@ -70,8 +70,19 @@ try {
   const makeMaterial = (mesh, source) => {
     const materialName = source.name || '';
     const meshName = mesh.name || '';
+    const partName = `${meshName} ${materialName}`.toLowerCase();
     if (materialName === 'LED_Green' || /green domed glass/i.test(meshName)) {
       return new THREE.MeshBasicMaterial({ name: 'LED_Green', color: 0x33ff55 });
+    }
+    if (/pin|contact|core|gold/.test(partName)) {
+      return new THREE.MeshStandardMaterial({
+        name: 'Metal_Gold', color: 0xd4af37, metalness: 1, roughness: .2
+      });
+    }
+    if (/insulator|plastic_internal|slot|black insulating|deep back wall|recessed socket|insulating carrier/.test(partName)) {
+      return new THREE.MeshStandardMaterial({
+        name: 'Plastic_Internal', color: 0x0a0a0a, metalness: 0, roughness: .7
+      });
     }
     if (materialName === 'Metal_Brushed' || /panel.*control/i.test(meshName)) {
       return new THREE.MeshStandardMaterial({
@@ -81,7 +92,7 @@ try {
     }
     if (materialName === 'Metal_Shiny' || /metal|pin|stainless|nickel|connector|screw/i.test(meshName)) {
       return new THREE.MeshStandardMaterial({
-        name: 'Metal_Shiny', color: 0xdddddd, metalness: .9, roughness: .1
+        name: 'Metal_Shiny', color: 0xdedcd8, metalness: .9, roughness: .1
       });
     }
     if (materialName === 'Plastic_Matte' || /plastic|rocker|chassis|housing|polymer/i.test(meshName)) {
