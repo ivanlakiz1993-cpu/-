@@ -67,61 +67,71 @@ try {
   normal.wrapS = normal.wrapT = THREE.RepeatWrapping;
   normal.repeat.set(4, 4);
   normal.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const makeMaterial = (mesh, source) => {
-    const materialName = source.name || '';
-    const meshName = mesh.name || '';
-    const partName = `${meshName} ${materialName}`.toLowerCase();
-    if (materialName === 'LED_Green' || /green domed glass/i.test(meshName)) {
-      return new THREE.MeshBasicMaterial({ name: 'LED_Green', color: 0x33ff55 });
-    }
-    if (/pin|contact|core|gold/.test(partName)) {
-      return new THREE.MeshStandardMaterial({
-        name: 'Metal_Gold', color: 0xd4af37, metalness: 1, roughness: .2
-      });
-    }
-    if (/insulator|plastic_internal|slot|black insulating|deep back wall|recessed socket|insulating carrier/.test(partName)) {
-      return new THREE.MeshStandardMaterial({
-        name: 'Plastic_Internal', color: 0x0a0a0a, metalness: 0, roughness: .7
-      });
-    }
-    if (materialName === 'Metal_Brushed' || /panel.*control/i.test(meshName)) {
-      return new THREE.MeshStandardMaterial({
-        name: 'Metal_Brushed', color: 0xdddddd, metalness: .9, roughness: .35,
-        envMapIntensity: 1.5, normalMap: normal, normalScale: new THREE.Vector2(.2, .2)
-      });
-    }
-    if (materialName === 'Metal_Shiny' || /metal|pin|stainless|nickel|connector|screw/i.test(meshName)) {
-      return new THREE.MeshStandardMaterial({
-        name: 'Metal_Shiny', color: 0xdedcd8, metalness: .9, roughness: .1
-      });
-    }
-    if (materialName === 'Plastic_Matte' || /plastic|rocker|chassis|housing|polymer/i.test(meshName)) {
-      return new THREE.MeshStandardMaterial({
-        name: 'Plastic_Matte', color: 0x222222, metalness: 0, roughness: .5
-      });
-    }
-    // Rebuild remaining printed legends and dark inserts too, preserving their
-    // intended non-metal color instead of accidentally turning them chrome.
-    return new THREE.MeshStandardMaterial({
-      name: materialName || 'Device_Matte',
-      color: source.color?.clone() || new THREE.Color(0x777777),
-      metalness: 0,
-      roughness: .65,
-      transparent: source.transparent,
-      opacity: source.opacity
-    });
-  };
-
   gltf.scene.traverse(child => {
     if (!child.isMesh) return;
     if (child.name.replaceAll('_', ' ') === 'Label Indicator legend') child.visible = false;
     child.castShadow = child.receiveShadow = true;
     const oldMaterials = Array.isArray(child.material) ? child.material : [child.material];
-    const newMaterials = oldMaterials.map(source => makeMaterial(child, source));
+    const meshName = (child.name || '').toLowerCase();
+    const newMaterials = oldMaterials.map(source => {
+      const matName = (source?.name || '').toLowerCase();
+      const partName = `${meshName} ${matName}`;
+
+      // 1. Gold contacts; check each material slot so the joined metal mesh
+      // keeps its pins gold without recoloring the neighboring connector shells.
+      if (/gold|pin|contact|core/.test(`${meshName} ${matName}`)) {
+        return new THREE.MeshStandardMaterial({
+          name: 'Metal_Gold', color: 0xd4af37, metalness: 1, roughness: .2
+        });
+      }
+
+      if (matName.includes('led') || meshName.includes('green domed glass')) {
+        return new THREE.MeshBasicMaterial({ name: 'LED_Green', color: 0x33ff55 });
+      }
+
+      // 2. Recessed sockets and insulating inserts stay matte black.
+      if (/insulator|plastic_internal|slot|black insulating|deep back wall|recessed socket|insulating carrier/.test(partName)) {
+        return new THREE.MeshStandardMaterial({
+          name: 'Plastic_Internal', color: 0x0f0f0f, metalness: 0, roughness: .7
+        });
+      }
+
+      if (matName.includes('metal_brushed') || meshName.includes('control panel')) {
+        return new THREE.MeshStandardMaterial({
+          name: 'Metal_Brushed', color: 0xdedcd8, metalness: .9, roughness: .35,
+          normalMap: normal, normalScale: new THREE.Vector2(.2, .2)
+        });
+      }
+
+      // 3. Blender exports the enclosure as Plastic_* meshes rather than
+      // Body/Box, so include those actual names in the housing rule.
+      if (meshName.includes('body') || meshName.includes('box') ||
+          meshName.startsWith('plastic_') || matName.includes('plastic_matte') ||
+          /chassis|side wall|rear removable|service panel|lid|rocker|housing/.test(partName)) {
+        return new THREE.MeshStandardMaterial({
+          name: 'Plastic_Matte', color: 0x1c1c1c, metalness: .1, roughness: .5
+        });
+      }
+
+      // 4. Remaining connector shells and fasteners receive warm glossy chrome.
+      if (matName.includes('metal_shiny') || meshName.startsWith('metal_')) {
+        return new THREE.MeshStandardMaterial({
+          name: 'Metal_Shiny', color: 0xdedcd8, metalness: 1, roughness: .12
+        });
+      }
+
+      // Printed legends and other small parts keep their original non-metal tone.
+      return new THREE.MeshStandardMaterial({
+        name: matName || 'Device_Matte',
+        color: source?.color?.clone() || new THREE.Color(0x777777),
+        metalness: 0, roughness: .65,
+        transparent: source?.transparent || false,
+        opacity: source?.opacity ?? 1
+      });
+    });
     oldMaterials.forEach(source => source?.dispose());
     child.material = Array.isArray(child.material) ? newMaterials : newMaterials[0];
-    if (Array.isArray(child.material)) child.material.forEach(material => { material.needsUpdate = true; });
-    else child.material.needsUpdate = true;
+    newMaterials.forEach(material => { material.needsUpdate = true; });
   });
   pivot.add(gltf.scene);
   const bounds = new THREE.Box3().setFromObject(gltf.scene);
