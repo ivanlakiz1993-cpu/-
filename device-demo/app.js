@@ -68,42 +68,37 @@ try {
   normal.repeat.set(4, 4);
   normal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   gltf.scene.traverse(child => {
-    if (!child.isMesh) return;
+    if (!child.isMesh || !child.material) return;
     if (child.name.replaceAll('_', ' ') === 'Label Indicator legend') child.visible = false;
     child.castShadow = child.receiveShadow = true;
     const oldMaterials = Array.isArray(child.material) ? child.material : [child.material];
     const meshName = (child.name || '').toLowerCase();
+    const bounds = new THREE.Box3().setFromObject(child);
+    const dimensions = bounds.getSize(new THREE.Vector3());
+    const largestDimension = Math.max(dimensions.x, dimensions.y, dimensions.z);
     const newMaterials = oldMaterials.map(source => {
       const matName = (source?.name || '').toLowerCase();
-      const partName = `${meshName} ${matName}`;
-
-      // The three IEC blades are individual GLB nodes, detached in Blender.
-      // Handle them before the generic "pin" rule so they remain silver.
-      if (/power_pin|iec_pin|prong/.test(meshName) || matName.includes('metal_power_pin')) {
-        return new THREE.MeshStandardMaterial({
-          name: 'Metal_Power_Pin', color: 0xdedcd8, metalness: 1, roughness: .1,
-          envMapIntensity: 2
-        });
-      }
-
-      // Gold contacts live in a separate GLB material slot from the connector shells.
-      if (/gold|pin|contact|core/.test(`${meshName} ${matName}`)) {
+      // GLTFLoader stores base-color factors in linear RGB. Convert each
+      // material slot separately so merged meshes keep their distinct colors.
+      const linearColor = source?.color;
+      const color = source?.color?.clone().convertLinearToSRGB() || new THREE.Color(0x777777);
+      const { r, g, b } = color;
+      const isGoldColor = r > .45 && g > .2 && r > g * 1.25 && g > b * 1.6;
+      const isGreenColor = g > .45 && g > r * 1.35 && g > b * 1.2;
+      const isDarkColor = linearColor && linearColor.r < .15 && linearColor.g < .15 && linearColor.b < .15;
+      const sourceIsGold = (r > .6 && g > .4 && b < .3) || isGoldColor || matName.includes('gold');
+      if (sourceIsGold) {
         return new THREE.MeshStandardMaterial({
           name: 'Metal_Gold', color: 0xd4af37, metalness: 1, roughness: .2
         });
       }
 
-      if (matName.includes('led') || meshName.includes('green domed glass')) {
+      if (isGreenColor || matName.includes('led')) {
         return new THREE.MeshBasicMaterial({ name: 'LED_Green', color: 0x33ff55 });
       }
 
-      // 2. Recessed sockets and insulating inserts stay matte black.
-      if (/insulator|plastic_internal|slot|black insulating|deep back wall|recessed socket|insulating carrier/.test(partName)) {
-        return new THREE.MeshStandardMaterial({
-          name: 'Plastic_Internal', color: 0x0f0f0f, metalness: 0, roughness: .7
-        });
-      }
-
+      // The front plate is also near-black in the source image, so preserve
+      // its brushed-metal identity before classifying dark plastic by color.
       if (matName.includes('metal_brushed') || meshName.includes('control panel')) {
         return new THREE.MeshStandardMaterial({
           name: 'Metal_Brushed', color: 0xdedcd8, metalness: .9, roughness: .35,
@@ -111,25 +106,45 @@ try {
         });
       }
 
-      // 3. Blender exports the enclosure as Plastic_* meshes rather than
-      // Body/Box, so include those actual names in the housing rule.
-      if (meshName.includes('body') || meshName.includes('box') ||
-          meshName.startsWith('plastic_') || matName.includes('plastic_matte') ||
-          /chassis|side wall|rear removable|service panel|lid|rocker|housing/.test(partName)) {
+      // IEC pins are separate small metallic pieces. Geometry bounds work
+      // after Blender applies object scale, unlike checking child.scale.x.
+      const isSmallMetal = largestDimension < .2 && (source?.metalness ?? 0) > .65;
+      if (isSmallMetal || matName.includes('metal_power_pin')) {
+        return new THREE.MeshStandardMaterial({
+          name: 'Metal_Power_Pin', color: 0xdedcd8, metalness: 1, roughness: .1,
+          envMapIntensity: 2
+        });
+      }
+
+      if (isDarkColor) {
+        // Distinguish the large enclosure faces from small dark socket
+        // inserts using their measured geometry, not Blender object names.
+        if (largestDimension > 1.5) return new THREE.MeshPhysicalMaterial({
+          name: 'Plastic_Matte', color: 0x0a0a0a, metalness: .15, roughness: .55,
+          clearcoat: .4, clearcoatRoughness: .25
+        });
+        return new THREE.MeshStandardMaterial({
+          name: 'Plastic_Internal', color: 0x0f0f0f, metalness: 0, roughness: .75
+        });
+      }
+
+      // Use the source PBR metalness as a physical signal for connector
+      // shells and screws, while retaining the source color for print/labels.
+      if ((source?.metalness ?? 0) > .5 || matName.includes('metal_shiny')) {
+        return new THREE.MeshStandardMaterial({
+          name: 'Metal_Shiny', color: 0xdedcd8, metalness: 1, roughness: .12,
+          envMapIntensity: 2
+        });
+      }
+
+      if (meshName.includes('body') || meshName.includes('box') || largestDimension > 1.5) {
         return new THREE.MeshPhysicalMaterial({
           name: 'Plastic_Matte', color: 0x0a0a0a, metalness: .15, roughness: .55,
           clearcoat: .4, clearcoatRoughness: .25
         });
       }
 
-      // 4. Remaining connector shells and fasteners receive warm glossy chrome.
-      if (matName.includes('metal_shiny') || meshName.startsWith('metal_')) {
-        return new THREE.MeshStandardMaterial({
-          name: 'Metal_Shiny', color: 0xdedcd8, metalness: 1, roughness: .12
-        });
-      }
-
-      // Printed legends and other small parts keep their original non-metal tone.
+      // Printed legends and other non-metal details retain the Blender tone.
       return new THREE.MeshStandardMaterial({
         name: matName || 'Device_Matte',
         color: source?.color?.clone() || new THREE.Color(0x777777),
