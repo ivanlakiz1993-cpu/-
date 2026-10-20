@@ -20,29 +20,50 @@ const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 const faqList = document.querySelector('.testing-faq__list');
 if (faqList) {
   const faqItems = [...faqList.querySelectorAll('.testing-faq__item')];
-  const faqDuration = pageMotionPreference.matches ? 0 : 420;
-  let faqQueue = Promise.resolve();
+  const faqDuration = pageMotionPreference.matches ? 0 : 260;
+  const faqAnimations = new WeakMap();
 
   const animateFaqAnswer = (answer, from, to) => {
-    if (!faqDuration || Math.abs(from - to) < 1) return Promise.resolve();
+    const previousAnimation = faqAnimations.get(answer);
+    if (previousAnimation) {
+      previousAnimation.cancel();
+      faqAnimations.delete(answer);
+    }
+    if (!faqDuration || !answer.animate || Math.abs(from - to) < 1) return Promise.resolve(true);
     const animation = answer.animate([
       { height: `${from}px`, opacity: from ? 1 : 0 },
       { height: `${to}px`, opacity: to ? 1 : 0 }
     ], { duration: faqDuration, easing: 'cubic-bezier(.2,.75,.25,1)', fill: 'both' });
-    return animation.finished.catch(() => {}).then(() => animation.cancel());
+    faqAnimations.set(answer, animation);
+    return animation.finished.catch(() => {}).then(() => {
+      if (faqAnimations.get(answer) !== animation) return false;
+      animation.cancel();
+      faqAnimations.delete(answer);
+      return true;
+    });
   };
 
-  const closeFaqItem = async item => {
+  const closeFaqItem = item => {
     if (!item.open) return;
     const answer = item.querySelector('.testing-faq__answer');
-    if (answer) await animateFaqAnswer(answer, answer.getBoundingClientRect().height, 0);
+    if (!answer) {
+      item.open = false;
+      return;
+    }
+    const from = answer.getBoundingClientRect().height;
+    item.dataset.closing = 'true';
     item.open = false;
+    animateFaqAnswer(answer, from, 0).then(finished => {
+      if (finished && !item.open) item.removeAttribute('data-closing');
+    });
   };
 
-  const openFaqItem = async item => {
-    item.open = true;
+  const openFaqItem = item => {
     const answer = item.querySelector('.testing-faq__answer');
-    if (answer) await animateFaqAnswer(answer, 0, answer.scrollHeight);
+    const from = item.hasAttribute('data-closing') ? answer?.getBoundingClientRect().height ?? 0 : 0;
+    item.removeAttribute('data-closing');
+    item.open = true;
+    if (answer) animateFaqAnswer(answer, from, answer.scrollHeight);
   };
 
   faqList.addEventListener('click', event => {
@@ -50,16 +71,14 @@ if (faqList) {
     if (!summary) return;
     event.preventDefault();
     const item = summary.parentElement;
-    faqQueue = faqQueue.then(async () => {
-      if (item.open) {
-        await closeFaqItem(item);
-        return;
-      }
-      for (const other of faqItems) {
-        if (other !== item && other.open) await closeFaqItem(other);
-      }
-      await openFaqItem(item);
-    }).catch(() => {});
+    if (item.open) {
+      closeFaqItem(item);
+      return;
+    }
+    for (const other of faqItems) {
+      if (other !== item && other.open) closeFaqItem(other);
+    }
+    openFaqItem(item);
   });
 }
 
