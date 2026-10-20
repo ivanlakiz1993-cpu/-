@@ -3,7 +3,11 @@ import { GLTFLoader } from './vendor/GLTFLoader.js';
 
 const canvas = document.querySelector('[data-testing-model], #device');
 const equipment = document.querySelector('[data-testing-equipment]');
-const asset = name => new URL(name, import.meta.url).href;
+const asset = name => {
+  const url = new URL(name, import.meta.url);
+  url.search = new URL(import.meta.url).search;
+  return url.href;
+};
 const status = document.querySelector('#status');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -95,6 +99,15 @@ try {
 
       if (isGreenColor || matName.includes('led')) {
         return new THREE.MeshBasicMaterial({ name: 'LED_Green', color: 0x33ff55 });
+      }
+
+      if (/iec (moulded flange|bevelled socket housing|recessed contact backing)/.test(meshName)) {
+        const backing = meshName.includes('backing');
+        return new THREE.MeshPhysicalMaterial({
+          name: 'IEC_Moulded_Black_Plastic', color: 0x090909,
+          metalness: 0, roughness: backing ? .5 : .32,
+          clearcoat: backing ? 0 : .18, clearcoatRoughness: .3
+        });
       }
 
       // The front plate is also near-black in the source image, so preserve

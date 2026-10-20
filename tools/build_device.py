@@ -239,12 +239,29 @@ connector('Sensor port',1.51,'\u0414\u0410\u0422\u0427\u0418\u041a\u0418','\u041
 
 # IEC C14 inlet with three exposed, bevelled metal blades in the cavity.
 acx=-.20; acz=.425
+def rounded_iec_outline(points, radius=.018, steps=10):
+    """Round the planar moulded outline independently of the thin rim bevel."""
+    result=[]
+    for i,p in enumerate(points):
+        corner=Vector(p)
+        previous=Vector(points[i-1])-corner
+        following=Vector(points[(i+1)%len(points)])-corner
+        distance=min(radius, previous.length*.35, following.length*.35)
+        a=corner+previous.normalized()*distance
+        b=corner+following.normalized()*distance
+        for j in range(steps+1):
+            t=j/steps
+            v=(1-t)**2*a+2*(1-t)*t*corner+t*t*b
+            result.append(tuple(v))
+    return result
 shape=[(-.245,-.135),(.245,-.135),(.245,.065),(.16,.15),(-.16,.15),(-.245,.065)]
-pts=[(acx+x,acz+z) for x,z in shape]
+pts=[(acx+x,acz+z) for x,z in rounded_iec_outline(shape,.028)]
 cut(front,profile('IEC panel opening',pts,-1.335,.2,None,0))
-iec=profile('IEC moulded flange',[(acx+x,acz+z) for x,z in [(-.36,-.09),(-.25,-.18),(.25,-.18),(.36,-.09),(.36,.08),(.24,.18),(-.24,.18),(-.36,.08)]],-1.397,.06,polymer,.025)
+flange_outline=[(-.36,-.10),(-.275,-.18),(.275,-.18),(.36,-.10),(.36,.07),(.255,.18),(-.255,.18),(-.36,.07)]
+iec=profile('IEC moulded flange',[(acx+x,acz+z) for x,z in rounded_iec_outline(flange_outline,.035)],-1.397,.045,polymer,.005)
 cut(iec,profile('IEC flange aperture',pts,-1.397,.14,None,.012))
-shell=profile('IEC bevelled socket housing',[(acx+x*1.11,acz+z*1.13) for x,z in shape],-1.445,.12,polymer,.012)
+rim_outline=[(-.28,-.169),(.28,-.169),(.28,.08),(.18,.184),(-.18,.184),(-.28,.08)]
+shell=profile('IEC bevelled socket housing',[(acx+x,acz+z) for x,z in rounded_iec_outline(rim_outline,.035)],-1.445,.12,polymer,.005)
 cut(shell,profile('IEC internal aperture',pts,-1.47,.18,None,.008))
 # Recessed insulating floor; blades grow forward from it but stay inside
 # the protective rim (front lip at Y=-1.505), as in the close-up reference.
