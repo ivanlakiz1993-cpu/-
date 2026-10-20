@@ -11,7 +11,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1;
+renderer.toneMappingExposure = 1.2;
 renderer.setClearColor(0x000000, 0);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
@@ -68,12 +68,12 @@ try {
     const tune = source => {
       const material = source.clone();
       if (source.name === 'Metal_Brushed') {
-        material.metalness = 1; material.roughness = .4;
-        material.normalMap = normal; material.normalScale.set(.18, .18);
+        material.metalness = 1; material.roughness = .35;
+        material.normalMap = normal; material.normalScale.set(.2, .2);
       } else if (source.name === 'LED_Green') {
-        return new THREE.MeshBasicMaterial({ name: 'LED_Green', color: 0x00ff44 });
-      } else if (source.name === 'Metal_Shiny' || mesh.name.includes('Metal')) {
-        material.color.setHex(0xd5d7db); material.metalness = 1; material.roughness = .17;
+        return new THREE.MeshBasicMaterial({ name: 'LED_Green', color: 0x33ff55 });
+      } else if (source.name === 'Metal_Shiny' || /metal|pin/i.test(mesh.name)) {
+        material.color.setHex(0xeeeeee); material.metalness = 1; material.roughness = .1;
         material.envMapIntensity = 1.8;
         // Object-space machining marks also cover lathed shells without UVs.
         material.onBeforeCompile = shader => {
@@ -85,12 +85,12 @@ try {
             #include <roughnessmap_fragment>
             float grooves = .5 + .5 * sin(vMachinedPosition.y * 3100.0);
             float grain = fract(sin(dot(floor(vMachinedPosition * 4500.0), vec3(12.9898,78.233,37.719))) * 43758.5453);
-            roughnessFactor = clamp(roughnessFactor + grooves * .055 + grain * .025, .12, .3);
+            roughnessFactor = clamp(roughnessFactor + grooves * .035 + grain * .015, .1, .22);
           `);
         };
         material.customProgramCacheKey = () => 'machined-metal-v1';
       } else if (source.name === 'Plastic_Matte') {
-        material.color.setHex(0x191a1c); material.metalness = 0; material.roughness = .6;
+        material.color.setHex(0x1a1a1a); material.metalness = 0; material.roughness = .6;
       }
       return material;
     };
