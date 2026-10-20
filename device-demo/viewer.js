@@ -16,6 +16,7 @@ renderer.setClearColor(0x000000, 0);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
 const pivot = new THREE.Group();
+pivot.scale.setScalar(.8);
 scene.add(pivot);
 const light = new THREE.DirectionalLight(0xffffff, 1.2);
 light.position.set(-3, 5, 6);
@@ -37,7 +38,7 @@ function resize() {
   const horizontalFov = Math.atan(Math.tan(verticalFov) * camera.aspect);
   // Fit the horizontal rotation cylinder, not a sphere with empty space above it.
   const distance = Math.max(radius / Math.sin(horizontalFov), radius + halfHeight / Math.tan(verticalFov)) * 1.08;
-  camera.position.set(0, 0, distance);
+  camera.position.set(-.48, .48, 1).normalize().multiplyScalar(distance);
   camera.lookAt(0, 0, 0);
   camera.updateProjectionMatrix();
 }
@@ -59,6 +60,9 @@ try {
   normal.repeat.set(4, 4);
   normal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   gltf.scene.traverse(mesh => {
+    if (mesh.name.replaceAll('_', ' ') === 'Label Indicator legend') {
+      mesh.visible = false;
+    }
     if (!mesh.isMesh) return;
     mesh.castShadow = mesh.receiveShadow = true;
     const tune = source => {
@@ -94,7 +98,7 @@ try {
   });
   pivot.add(gltf.scene);
   const bounds = new THREE.Box3().setFromObject(gltf.scene);
-  const size = bounds.getSize(new THREE.Vector3());
+  const size = bounds.getSize(new THREE.Vector3()).divideScalar(pivot.scale.x);
   radius = Math.hypot(size.x, size.z) / 2;
   halfHeight = size.y / 2;
   resize();
