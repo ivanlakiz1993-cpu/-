@@ -21,6 +21,10 @@ const camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
 const pivot = new THREE.Group();
 pivot.scale.setScalar(.95);
 scene.add(pivot);
+const wetMaterials = new Set();
+let rainGeometry;
+let rainMaterial;
+let rainPositions;
 const mainLight = new THREE.DirectionalLight(0xffffff, 4.0);
 mainLight.position.set(5, 8, 5);
 mainLight.castShadow = true;
@@ -63,14 +67,20 @@ try {
       reject(error);
     });
   });
-  const [gltf, brushedNormal] = await Promise.all([
+  const textureLoader = new THREE.TextureLoader();
+  const [gltf, brushedNormal, rainNormal] = await Promise.all([
     loadAsset(new GLTFLoader(), asset('device.glb'), '3D model'),
-    loadAsset(new THREE.TextureLoader(), asset('brushed_normal.jpg'), 'brushed metal normal map')
+    loadAsset(textureLoader, asset('brushed_normal.jpg'), 'brushed metal normal map'),
+    loadAsset(textureLoader, asset('rain_drops_normal.png'), 'rain drops normal map')
   ]);
   brushedNormal.colorSpace = THREE.NoColorSpace;
   brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
   brushedNormal.repeat.set(4, 4);
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  rainNormal.colorSpace = THREE.NoColorSpace;
+  rainNormal.wrapS = rainNormal.wrapT = THREE.RepeatWrapping;
+  rainNormal.repeat.set(3, 3);
+  rainNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   gltf.scene.traverse(child => {
     if (!child.isMesh || !child.material) return;
     if (child.name.replaceAll('_', ' ') === 'Label Indicator legend') child.visible = false;
@@ -127,7 +137,8 @@ try {
         return new THREE.MeshPhysicalMaterial({
           name: 'Dark_Titanium_Front_Panel', color: 0x181818, metalness: .95, roughness: .35,
           normalMap: brushedNormal, normalScale: new THREE.Vector2(.2, .2),
-          clearcoat: .2, clearcoatRoughness: .3
+          clearcoat: 0, clearcoatRoughness: .05,
+          clearcoatNormalMap: rainNormal, clearcoatNormalScale: new THREE.Vector2(.4, .4)
         });
       }
 
@@ -147,7 +158,8 @@ try {
         if (largestDimension > 1.5) return new THREE.MeshPhysicalMaterial({
           name: 'Black_Anodized_Aluminum', color: 0x141414, metalness: .85, roughness: .38,
           normalMap: brushedNormal, normalScale: new THREE.Vector2(.08, .08),
-          clearcoat: .3, clearcoatRoughness: .2
+          clearcoat: 0, clearcoatRoughness: .05,
+          clearcoatNormalMap: rainNormal, clearcoatNormalScale: new THREE.Vector2(.4, .4)
         });
         return new THREE.MeshStandardMaterial({
           name: 'Plastic_Internal', color: 0x0f0f0f, metalness: 0, roughness: .75
@@ -166,7 +178,8 @@ try {
       if (meshName.includes('body') || meshName.includes('box') || largestDimension > 1.5) {
         return new THREE.MeshPhysicalMaterial({
           name: 'Plastic_Matte', color: 0x0a0a0a, metalness: .15, roughness: .55,
-          clearcoat: .4, clearcoatRoughness: .25
+          clearcoat: 0, clearcoatRoughness: .05,
+          clearcoatNormalMap: rainNormal, clearcoatNormalScale: new THREE.Vector2(.4, .4)
         });
       }
 
@@ -181,18 +194,56 @@ try {
     });
     oldMaterials.forEach(source => source?.dispose());
     child.material = Array.isArray(child.material) ? newMaterials : newMaterials[0];
-    newMaterials.forEach(material => { material.needsUpdate = true; });
+    newMaterials.forEach(material => {
+      material.needsUpdate = true;
+      if (material.clearcoatNormalMap === rainNormal) wetMaterials.add(material);
+    });
   });
   pivot.add(gltf.scene);
   const bounds = new THREE.Box3().setFromObject(gltf.scene);
   const size = bounds.getSize(new THREE.Vector3()).divideScalar(pivot.scale.x);
   radius = Math.hypot(size.x, size.z) / 2;
   halfHeight = size.y / 2;
+  const dropCount = 1500;
+  rainPositions = new Float32Array(dropCount * 3);
+  const rainWidth = Math.max(radius * 2.2, 8);
+  const rainDepth = Math.max(radius * 2.2, 8);
+  for (let i = 0; i < dropCount; i++) {
+    const offset = i * 3;
+    rainPositions[offset] = (Math.random() - .5) * rainWidth;
+    rainPositions[offset + 1] = Math.random() * 15 - 5;
+    rainPositions[offset + 2] = (Math.random() - .5) * rainDepth;
+  }
+  rainGeometry = new THREE.BufferGeometry();
+  rainGeometry.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
+  const rainSpriteCanvas = document.createElement('canvas');
+  rainSpriteCanvas.width = 16;
+  rainSpriteCanvas.height = 32;
+  const rainSpriteContext = rainSpriteCanvas.getContext('2d');
+  const rainSpriteGradient = rainSpriteContext.createRadialGradient(8, 16, 1, 8, 16, 15);
+  rainSpriteGradient.addColorStop(0, 'rgba(255,255,255,1)');
+  rainSpriteGradient.addColorStop(.55, 'rgba(255,255,255,.88)');
+  rainSpriteGradient.addColorStop(1, 'rgba(255,255,255,0)');
+  rainSpriteContext.fillStyle = rainSpriteGradient;
+  rainSpriteContext.beginPath();
+  rainSpriteContext.ellipse(8, 16, 5, 15, 0, 0, Math.PI * 2);
+  rainSpriteContext.fill();
+  const rainSprite = new THREE.CanvasTexture(rainSpriteCanvas);
+  rainMaterial = new THREE.PointsMaterial({
+    color: 0xdde9f5, size: .035, map: rainSprite, transparent: true, opacity: 0,
+    alphaTest: .05, depthWrite: false, sizeAttenuation: true
+  });
+  scene.add(new THREE.Points(rainGeometry, rainMaterial));
   resize();
   gsap.registerPlugin(ScrollTrigger);
   gsap.to(pivot.rotation, {
     y: Math.PI * 1.5, ease: 'none',
-    scrollTrigger: { trigger: equipment ? '[data-testing-journey]' : '.scroll-area', start: 'top top', end: 'bottom bottom', scrub: 1, invalidateOnRefresh: true }
+    scrollTrigger: { trigger: equipment ? '[data-testing-journey]' : '.scroll-area', start: 'top top', end: 'bottom bottom', scrub: 1, invalidateOnRefresh: true },
+    onUpdate(self) {
+      const progress = self.progress();
+      wetMaterials.forEach(material => { material.clearcoat = progress; });
+      if (rainMaterial) rainMaterial.opacity = progress * .6;
+    }
   });
   ScrollTrigger.refresh();
   if (status) status.textContent = '';
@@ -201,4 +252,15 @@ try {
   console.error(error);
   if (status) status.textContent = 'Не удалось загрузить модель или текстуры. Откройте страницу через HTTP-сервер.';
 }
-renderer.setAnimationLoop(() => renderer.render(scene, camera));
+const rainClock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const delta = Math.min(rainClock.getDelta(), .05);
+  if (rainPositions) {
+    for (let i = 1; i < rainPositions.length; i += 3) {
+      rainPositions[i] -= 4.5 * delta;
+      if (rainPositions[i] < -5) rainPositions[i] = 10;
+    }
+    rainGeometry.attributes.position.needsUpdate = true;
+  }
+  renderer.render(scene, camera);
+});
