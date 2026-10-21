@@ -112,7 +112,7 @@ export function createSurfaceWater(root, wetMaterials, environment) {
     spin.setFromAxisAngle(up, random() * Math.PI * 2);
     rotation.multiply(spin);
     const height = category > .97 ? .22 + random() * .15 : .3 + random() * .22;
-    placements.push({ point, rotation, scale: new THREE.Vector3(radius * elongation, radius * height, radius).multiplyScalar(1.12) });
+    placements.push({ point, rotation, scale: new THREE.Vector3(radius * elongation, radius * height, radius).multiplyScalar(2.016) });
   }
   root.add(drops);
   const matrix = new THREE.Matrix4();
