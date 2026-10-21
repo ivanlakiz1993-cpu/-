@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
-import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-volume-water-1';
+import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-volume-water-2';
 
 const canvas = document.querySelector('[data-testing-model], #device');
 const equipment = document.querySelector('[data-testing-equipment]');
@@ -294,7 +294,7 @@ try {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
     surfaceWater.setWetness(wetness);
-    dropletLight.intensity = 120 * progress;
+    dropletLight.intensity = 35 * progress;
     if (rainMaterial) rainMaterial.opacity = progress * .25;
     // Let the rain build from a light drift into a strong shower as the user
     // moves through the transition between the first two sections.

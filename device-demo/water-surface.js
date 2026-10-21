@@ -4,12 +4,12 @@ import * as THREE from './vendor/three.module.js';
 // rendered into the page background or applied to the dry enclosure.
 export function createWaterReflections(renderer) {
   const studio = new THREE.Scene();
-  studio.background = new THREE.Color(.055, .055, .055);
+  studio.background = new THREE.Color(.008, .008, .008);
   const cards = [];
   for (const [position, size, brightness] of [
-    [[-3, 5, 2], [4, 3], 4],
-    [[4, 2, -1], [1.5, 4], 2],
-    [[0, 3, -5], [3, 2], 1.5]
+    [[-3, 5, 2], [1.6, .7], 2],
+    [[4, 2, -1], [.5, 2], 1],
+    [[0, 3, -5], [1.2, .6], .7]
   ]) {
     const card = new THREE.Mesh(
       new THREE.PlaneGeometry(...size),
@@ -79,9 +79,11 @@ export function createSurfaceWater(root, wetMaterials, environment) {
   geometry.computeVertexNormals();
   const material = new THREE.MeshPhysicalMaterial({
     name: 'Surface_Water_Lenses', color: 0xffffff, metalness: 0,
-    roughness: .055, transmission: .94, ior: 1.333, thickness: .025,
-    envMap: environment, envMapIntensity: .85,
-    clearcoat: .25, clearcoatRoughness: .035
+    // Full transmission removes the white diffuse component. Water has
+    // one air/water interface, not an additional varnish clearcoat.
+    roughness: .035, transmission: 1, ior: 1.333, thickness: .012,
+    envMap: environment, envMapIntensity: .55,
+    clearcoat: 0
   });
   const count = Math.min(2800, Math.max(600, Math.round(totalArea * 85)));
   const drops = new THREE.InstancedMesh(geometry, material, count);
@@ -109,7 +111,8 @@ export function createSurfaceWater(root, wetMaterials, environment) {
     const rotation = new THREE.Quaternion().setFromUnitVectors(up, triangle.normal);
     spin.setFromAxisAngle(up, random() * Math.PI * 2);
     rotation.multiply(spin);
-    placements.push({ point, rotation, scale: new THREE.Vector3(radius * elongation, radius * (.45 + random() * .35), radius) });
+    const height = category > .97 ? .22 + random() * .15 : .3 + random() * .22;
+    placements.push({ point, rotation, scale: new THREE.Vector3(radius * elongation, radius * height, radius) });
   }
   root.add(drops);
   const matrix = new THREE.Matrix4();
