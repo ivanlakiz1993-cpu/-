@@ -81,8 +81,8 @@ export function createSurfaceWater(root, wetMaterials, environment) {
     name: 'Surface_Water_Lenses', color: 0xffffff, metalness: 0,
     // Full transmission removes the white diffuse component. Water has
     // one air/water interface, not an additional varnish clearcoat.
-    roughness: .02, transmission: 1, ior: 1.333, thickness: .008,
-    envMap: environment, envMapIntensity: .62,
+    roughness: .065, transmission: 1, ior: 1.333, thickness: .008,
+    envMap: environment, envMapIntensity: .24,
     clearcoat: 0
   });
   const count = Math.min(2800, Math.max(600, Math.round(totalArea * 85)));

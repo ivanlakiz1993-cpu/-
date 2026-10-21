@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
-import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-volume-water-4';
+import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-volume-water-5';
 
 const canvas = document.querySelector('[data-testing-model], #device');
 const equipment = document.querySelector('[data-testing-equipment]');
