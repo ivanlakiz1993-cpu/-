@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
-import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-volume-water-5';
+import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-frost-growth-1';
 
 const canvas = document.querySelector('[data-testing-model], #device');
 const equipment = document.querySelector('[data-testing-equipment]');
@@ -24,6 +24,79 @@ const pivot = new THREE.Group();
 pivot.scale.setScalar(.95);
 scene.add(pivot);
 const wetMaterials = new Map();
+const frostMaterials = new Map();
+
+function createFrostNoiseTexture() {
+  const size = 256;
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const u = x / size * Math.PI * 2, v = y / size * Math.PI * 2;
+    const broad = Math.sin(5 * u + 2 * Math.sin(3 * v)) * Math.cos(4 * v + Math.sin(2 * u));
+    const crystals = Math.sin(17 * u + 9 * v + 2 * Math.sin(7 * v))
+      * Math.cos(13 * v - 6 * u + Math.sin(5 * u));
+    const grain = Math.sin(47 * u + 31 * v) * Math.cos(39 * v - 23 * u);
+    const value = THREE.MathUtils.clamp(.5 + broad * .23 + crystals * .16 + grain * .07, 0, 1);
+    const i = (y * size + x) * 4;
+    data[i] = data[i + 1] = data[i + 2] = Math.round(value * 255);
+    data[i + 3] = 255;
+  }
+  const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+  texture.colorSpace = THREE.NoColorSpace;
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(2, 2);
+  texture.minFilter = texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = false;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+function addEdgeIcicles(root, bounds) {
+  let seed = 86231;
+  const random = () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; };
+  const geometry = new THREE.ConeGeometry(1, 1, 6);
+  const material = new THREE.MeshPhysicalMaterial({
+    color: 0xa9bfd1, metalness: 0, roughness: .22,
+    transmission: .55, thickness: .04, transparent: true, opacity: .72,
+    depthWrite: false
+  });
+  const count = 72;
+  const mesh = new THREE.InstancedMesh(geometry, material, count);
+  mesh.name = 'Growing_Edge_Icicles';
+  mesh.visible = false;
+  mesh.frustumCulled = false;
+  root.add(mesh);
+  const drops = [];
+  const min = bounds.min, max = bounds.max;
+  for (let i = 0; i < count; i++) {
+    const onLongEdge = i < 56;
+    const t = random();
+    const x = onLongEdge ? THREE.MathUtils.lerp(min.x, max.x, t)
+      : (i < 64 ? min.x : max.x);
+    const z = onLongEdge ? (i % 2 ? max.z : min.z)
+      : THREE.MathUtils.lerp(min.z, max.z, t);
+    const length = .035 + random() * .09;
+    const radius = .006 + random() * .006;
+    drops.push({ x, y: max.y - length * .5, z, length, radius });
+  }
+  const matrix = new THREE.Matrix4();
+  const position = new THREE.Vector3();
+  const scale = new THREE.Vector3();
+  const rotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI);
+  let last = -1;
+  return progress => {
+    if (Math.abs(progress - last) < .003) return;
+    last = progress;
+    mesh.visible = progress > .02;
+    drops.forEach((drop, i) => {
+      position.set(drop.x, drop.y, drop.z);
+      scale.set(drop.radius * progress, drop.length * progress, drop.radius * progress);
+      matrix.compose(position, rotation, scale);
+      mesh.setMatrixAt(i, matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    material.opacity = .72 * progress;
+  };
+}
 let rainGeometry;
 let rainMaterial;
 let rainPositions;
@@ -124,15 +197,44 @@ try {
   brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
   brushedNormal.repeat.set(4, 4);
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const frostNoise = createFrostNoiseTexture();
 
   const makeWetMaterial = options => {
     const material = new THREE.MeshPhysicalMaterial(options);
     // Preserve the dry metal; water is a separate dielectric surface.
     material.normalMap = brushedNormal;
     material.normalScale.set(.08, .08);
+    material.bumpMap = frostNoise;
+    material.bumpScale = 0;
     material.roughness = .4;
     material.clearcoat = 0;
     wetMaterials.set(material, true);
+    const frostState = { progress: 0, shader: null };
+    material.onBeforeCompile = shader => {
+      frostState.shader = shader;
+      shader.uniforms.uFrostNoise = { value: frostNoise };
+      shader.uniforms.uFrostProgress = { value: frostState.progress };
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <common>',
+        `#include <common>
+uniform sampler2D uFrostNoise;
+uniform float uFrostProgress;
+`
+      );
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <roughnessmap_fragment>',
+        `#include <roughnessmap_fragment>
+        vec2 frostUv = vBumpMapUv;
+        vec2 frostTile = fract(frostUv);
+        float frostEdge = 1.0 - smoothstep(0.0, 0.16, min(min(frostTile.x, 1.0 - frostTile.x), min(frostTile.y, 1.0 - frostTile.y)));
+        float frostField = texture2D(uFrostNoise, frostUv).r;
+        float frostGrowth = smoothstep(frostField - 0.035, frostField + 0.035, uFrostProgress * 1.12 + frostEdge * 0.18);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.58, 0.66, 0.75), frostGrowth * 0.78);
+        roughnessFactor = mix(roughnessFactor, 0.94, frostGrowth);`
+      );
+    };
+    material.customProgramCacheKey = () => 'device-frost-growth-v1';
+    frostMaterials.set(material, frostState);
     return material;
   };
   gltf.scene.traverse(child => {
@@ -252,6 +354,7 @@ try {
   halfHeight = size.y / 2;
   const waterReflections = createWaterReflections(renderer);
   const surfaceWater = createSurfaceWater(gltf.scene, wetMaterials, waterReflections.texture);
+  const icicleProgress = addEdgeIcicles(gltf.scene, bounds);
   const dropCount = 1000;
   rainPositions = new Float32Array(dropCount * 2 * 3);
   rainColors = new Float32Array(dropCount * 2 * 4);
@@ -300,6 +403,15 @@ try {
     // moves through the transition between the first two sections.
     rainFallSpeed = THREE.MathUtils.lerp(1.5, 12, progress);
   };
+  const setFrostProgress = progress => {
+    progress = THREE.MathUtils.clamp(progress, 0, 1);
+    frostMaterials.forEach((state, material) => {
+      state.progress = progress;
+      material.bumpScale = .035 * progress;
+      if (state.shader) state.shader.uniforms.uFrostProgress.value = progress;
+    });
+    icicleProgress(progress);
+  };
   const updateRainProgress = self => setRainProgress(self.progress);
   gsap.to(pivot.rotation, {
     y: Math.PI * 1.5, ease: 'none',
@@ -338,6 +450,18 @@ try {
     },
     onLeaveBack: () => setRainProgress(1),
     onLeave: () => setRainProgress(0)
+  });
+  const climateSection = document.querySelector('.climate-tests');
+  if (climateSection) ScrollTrigger.create({
+    trigger: climateSection,
+    start: 'top bottom',
+    end: 'top 35%',
+    scrub: .8,
+    scroller: scrollContainer,
+    onUpdate: self => setFrostProgress(self.progress),
+    onRefresh: self => setFrostProgress(self.progress),
+    onLeave: () => setFrostProgress(1),
+    onLeaveBack: () => setFrostProgress(0)
   });
   ScrollTrigger.refresh();
   if (status) status.textContent = '';
