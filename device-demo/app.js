@@ -228,7 +228,7 @@ uniform float uFrostProgress;
         vec2 frostTile = fract(frostUv);
         float frostEdge = 1.0 - smoothstep(0.0, 0.16, min(min(frostTile.x, 1.0 - frostTile.x), min(frostTile.y, 1.0 - frostTile.y)));
         float frostField = texture2D(uFrostNoise, frostUv).r;
-        float frostGrowth = smoothstep(frostField - 0.055, frostField + 0.055, uFrostProgress * (1.3 + frostEdge * 0.2));
+        float frostGrowth = smoothstep(frostField - 0.055, frostField + 0.055, uFrostProgress * (1.3 + frostEdge * 0.2)) * smoothstep(0.0, 0.035, uFrostProgress);
         diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.58, 0.66, 0.75), frostGrowth * 0.78);
         roughnessFactor = mix(roughnessFactor, 0.94, frostGrowth);`
       );
