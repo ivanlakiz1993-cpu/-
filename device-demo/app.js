@@ -209,7 +209,7 @@ try {
     material.roughness = .4;
     material.clearcoat = 0;
     wetMaterials.set(material, true);
-    const frostState = { progress: 0, shader: null, baseColor: material.color.clone(), baseRoughness: material.roughness };
+    const frostState = { progress: 0, shader: null };
     material.onBeforeCompile = shader => {
       frostState.shader = shader;
       shader.uniforms.uFrostNoise = { value: frostNoise };
@@ -228,12 +228,13 @@ uniform float uFrostProgress;
         vec2 frostTile = fract(frostUv);
         float frostEdge = 1.0 - smoothstep(0.0, 0.16, min(min(frostTile.x, 1.0 - frostTile.x), min(frostTile.y, 1.0 - frostTile.y)));
         float frostField = texture2D(uFrostNoise, frostUv).r;
-        float frostGrowth = smoothstep(frostField - 0.055, frostField + 0.055, uFrostProgress * (1.3 + frostEdge * 0.2)) * smoothstep(0.0, 0.035, uFrostProgress);
-        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.58, 0.66, 0.75), frostGrowth * 0.78);
-        roughnessFactor = mix(roughnessFactor, 0.94, frostGrowth);`
+        float frostThreshold = clamp(uFrostProgress * (0.72 + frostEdge * 0.28), 0.0, 1.0);
+        float frostGrowth = smoothstep(frostField - 0.055, frostField + 0.055, frostThreshold) * smoothstep(0.0, 0.035, uFrostProgress);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.48, 0.55, 0.63), frostGrowth * 0.72);
+        roughnessFactor = mix(roughnessFactor, 1.0, frostGrowth);`
       );
     };
-    material.customProgramCacheKey = () => 'device-frost-growth-v1';
+    material.customProgramCacheKey = () => 'device-frost-growth-v2';
     frostMaterials.set(material, frostState);
     return material;
   };
@@ -407,11 +408,6 @@ uniform float uFrostProgress;
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     frostMaterials.forEach((state, material) => {
       state.progress = progress;
-      // Keep a visible frost tint and matte response even on devices where
-      // custom shader compilation is unavailable; the shader adds the growth mask.
-      material.color.copy(state.baseColor).lerp(new THREE.Color(0x8193a7), progress * .24);
-      material.roughness = THREE.MathUtils.lerp(state.baseRoughness, .82, progress * .4);
-      material.bumpScale = .06 * progress;
       if (state.shader) state.shader.uniforms.uFrostProgress.value = progress;
     });
     icicleProgress(progress);
@@ -456,14 +452,24 @@ uniform float uFrostProgress;
     onLeave: () => setRainProgress(0)
   });
   const climateSection = document.querySelector('.climate-tests');
+  let frostProgressLogBucket = -1;
+  const updateFrostProgress = self => {
+    const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
+    setFrostProgress(progress);
+    const bucket = Math.round(progress * 10);
+    if (bucket !== frostProgressLogBucket) {
+      frostProgressLogBucket = bucket;
+      console.log('Frost Progress:', progress.toFixed(2));
+    }
+  };
   if (climateSection) ScrollTrigger.create({
     trigger: climateSection,
     start: 'top bottom',
-    end: 'top 35%',
+    end: 'bottom top',
     scrub: .8,
     scroller: scrollContainer,
-    onUpdate: self => setFrostProgress(self.progress),
-    onRefresh: self => setFrostProgress(self.progress),
+    onUpdate: updateFrostProgress,
+    onRefresh: updateFrostProgress,
     onLeave: () => setFrostProgress(1),
     onLeaveBack: () => setFrostProgress(0)
   });
