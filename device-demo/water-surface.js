@@ -81,8 +81,8 @@ export function createSurfaceWater(root, wetMaterials, environment) {
     name: 'Surface_Water_Lenses', color: 0xffffff, metalness: 0,
     // Full transmission removes the white diffuse component. Water has
     // one air/water interface, not an additional varnish clearcoat.
-    roughness: .035, transmission: 1, ior: 1.333, thickness: .012,
-    envMap: environment, envMapIntensity: .55,
+    roughness: .02, transmission: 1, ior: 1.333, thickness: .008,
+    envMap: environment, envMapIntensity: .62,
     clearcoat: 0
   });
   const count = Math.min(2800, Math.max(600, Math.round(totalArea * 85)));
@@ -112,7 +112,7 @@ export function createSurfaceWater(root, wetMaterials, environment) {
     spin.setFromAxisAngle(up, random() * Math.PI * 2);
     rotation.multiply(spin);
     const height = category > .97 ? .22 + random() * .15 : .3 + random() * .22;
-    placements.push({ point, rotation, scale: new THREE.Vector3(radius * elongation, radius * height, radius) });
+    placements.push({ point, rotation, scale: new THREE.Vector3(radius * elongation, radius * height, radius).multiplyScalar(1.12) });
   }
   root.add(drops);
   const matrix = new THREE.Matrix4();
