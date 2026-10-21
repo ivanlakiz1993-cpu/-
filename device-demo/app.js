@@ -43,9 +43,55 @@ function createFrostNoiseTexture() {
   const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
   texture.colorSpace = THREE.NoColorSpace;
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(2, 2);
+  texture.repeat.set(1, 1);
   texture.minFilter = texture.magFilter = THREE.LinearFilter;
   texture.generateMipmaps = false;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+function createFrostMicroTexture() {
+  const size = 256;
+  const cells = 32;
+  const data = new Uint8Array(size * size * 4);
+  let seed = 0x4f1bbcdc;
+  const random = () => {
+    seed = (1664525 * seed + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  const points = Array.from({ length: cells * cells }, () => [random(), random()]);
+  const cellIndex = (x, y) => ((y + cells) % cells) * cells + ((x + cells) % cells);
+
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const gx = x / size * cells;
+    const gy = y / size * cells;
+    const cx = Math.floor(gx);
+    const cy = Math.floor(gy);
+    let nearest = 1;
+    for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
+      const px = cx + ox;
+      const py = cy + oy;
+      const point = points[cellIndex(px, py)];
+      const dx = px + point[0] - gx;
+      const dy = py + point[1] - gy;
+      nearest = Math.min(nearest, Math.hypot(dx, dy));
+    }
+    const u = x / size * Math.PI * 2;
+    const v = y / size * Math.PI * 2;
+    const grit = 0.5 + 0.5 * Math.sin(19 * u + 13 * v) * Math.cos(11 * u - 21 * v);
+    const crystal = THREE.MathUtils.clamp(0.44 + (0.22 - nearest) * 0.65 + (grit - 0.5) * 0.22, 0, 1);
+    const i = (y * size + x) * 4;
+    data[i] = data[i + 1] = data[i + 2] = Math.round(crystal * 255);
+    data[i + 3] = 255;
+  }
+
+  const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+  texture.colorSpace = THREE.NoColorSpace;
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(1, 1);
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = true;
   texture.needsUpdate = true;
   return texture;
 }
@@ -198,13 +244,14 @@ try {
   brushedNormal.repeat.set(4, 4);
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   const frostNoise = createFrostNoiseTexture();
+  const frostMicroNoise = createFrostMicroTexture();
 
   const makeWetMaterial = options => {
     const material = new THREE.MeshPhysicalMaterial(options);
     // Preserve the dry metal; water is a separate dielectric surface.
     material.normalMap = brushedNormal;
     material.normalScale.set(.08, .08);
-    material.bumpMap = frostNoise;
+    material.bumpMap = frostMicroNoise;
     material.bumpScale = 0;
     material.roughness = .4;
     material.clearcoat = 0;
@@ -213,20 +260,25 @@ try {
     material.onBeforeCompile = shader => {
       frostState.shader = shader;
       shader.uniforms.uFrostNoise = { value: frostNoise };
+      shader.uniforms.uFrostMicroNoise = { value: frostMicroNoise };
       shader.uniforms.uFrostProgress = { value: frostState.progress };
       shader.fragmentShader = shader.fragmentShader.replace(
         '#include <common>',
         `#include <common>
 uniform sampler2D uFrostNoise;
+uniform sampler2D uFrostMicroNoise;
 uniform float uFrostProgress;
 float frostMaskAt(vec2 uv) {
   vec2 tile = fract(uv);
   float edge = 1.0 - smoothstep(0.0, 0.16, min(min(tile.x, 1.0 - tile.x), min(tile.y, 1.0 - tile.y)));
-  float field = texture2D(uFrostNoise, uv).r;
+  vec2 fineUv = uv * 15.0;
+  float fineField = texture2D(uFrostMicroNoise, fineUv).r;
+  float broadField = texture2D(uFrostNoise, uv).r;
+  float field = mix(fineField, broadField, 0.12);
   float threshold = clamp(uFrostProgress * (0.72 + edge * 0.28), 0.0, 1.0);
-  float edgeNoise = texture2D(uFrostNoise, uv * 5.0).r;
-  float noisyThreshold = threshold + (edgeNoise - 0.5) * 0.05;
-  return smoothstep(field - 0.08, field + 0.08, noisyThreshold) * smoothstep(0.0, 0.035, uFrostProgress);
+  float edgeNoise = texture2D(uFrostMicroNoise, fineUv).r;
+  float noisyThreshold = threshold + (edgeNoise - 0.5) * 0.04;
+  return smoothstep(field - 0.12, field + 0.12, noisyThreshold) * smoothstep(0.0, 0.035, uFrostProgress);
 }
 `
       );
@@ -234,29 +286,33 @@ float frostMaskAt(vec2 uv) {
         '#include <roughnessmap_fragment>',
         `#include <roughnessmap_fragment>
         vec2 frostUv = vBumpMapUv;
+        vec2 fineUv = vBumpMapUv * 15.0;
         float frostGrowth = frostMaskAt(frostUv);
-        float frostCrystalNoise = texture2D(uFrostNoise, frostUv * 8.0).r;
-        vec3 frostCrystalColor = vec3(0.9, 0.95, 1.0) * mix(0.9, 1.0, frostCrystalNoise);
-        diffuseColor.rgb = mix(diffuseColor.rgb, frostCrystalColor, frostGrowth);
-        roughnessFactor = mix(roughnessFactor, 1.0, frostGrowth);`
+        float frostCrystalNoise = texture2D(uFrostMicroNoise, fineUv).r;
+        float frostFactor = frostGrowth * mix(0.72, 1.0, smoothstep(0.15, 0.85, frostCrystalNoise));
+        vec3 metalColor = diffuseColor.rgb;
+        vec3 frostColor = vec3(0.92, 0.96, 1.0);
+        vec3 finalColor = mix(metalColor, frostColor, frostFactor);
+        diffuseColor.rgb = finalColor;
+        roughnessFactor = mix(roughnessFactor, 1.0, smoothstep(0.1, 0.12, frostFactor));`
       );
       shader.fragmentShader = shader.fragmentShader.replace(
         '#include <normal_fragment_maps>',
         `#include <normal_fragment_maps>
         #ifdef USE_BUMPMAP
-          vec2 frostReliefUv = vBumpMapUv * 8.0;
+          vec2 frostReliefUv = vBumpMapUv * 15.0;
           vec2 frostReliefDx = dFdx(frostReliefUv);
           vec2 frostReliefDy = dFdy(frostReliefUv);
           vec2 frostMaskDx = dFdx(vBumpMapUv);
           vec2 frostMaskDy = dFdy(vBumpMapUv);
-          float frostHeight = frostMaskAt(vBumpMapUv) * texture2D(uFrostNoise, frostReliefUv).r;
-          float frostHeightX = frostMaskAt(vBumpMapUv + frostMaskDx) * texture2D(uFrostNoise, frostReliefUv + frostReliefDx).r;
-          float frostHeightY = frostMaskAt(vBumpMapUv + frostMaskDy) * texture2D(uFrostNoise, frostReliefUv + frostReliefDy).r;
+          float frostHeight = frostGrowth * texture2D(uFrostMicroNoise, frostReliefUv).r;
+          float frostHeightX = frostMaskAt(vBumpMapUv + frostMaskDx) * texture2D(uFrostMicroNoise, frostReliefUv + frostReliefDx).r;
+          float frostHeightY = frostMaskAt(vBumpMapUv + frostMaskDy) * texture2D(uFrostMicroNoise, frostReliefUv + frostReliefDy).r;
           normal = perturbNormalArb(-vViewPosition, normal, vec2(frostHeightX - frostHeight, frostHeightY - frostHeight) * 3.0, faceDirection);
         #endif`
       );
     };
-    material.customProgramCacheKey = () => 'device-frost-growth-v3';
+    material.customProgramCacheKey = () => 'device-frost-growth-v4';
     frostMaterials.set(material, frostState);
     return material;
   };
