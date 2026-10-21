@@ -1,6 +1,5 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
-import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-volume-water-2';
 
 const canvas = document.querySelector('[data-testing-model], #device');
 const equipment = document.querySelector('[data-testing-equipment]');
@@ -24,6 +23,71 @@ const pivot = new THREE.Group();
 pivot.scale.setScalar(.95);
 scene.add(pivot);
 const wetMaterials = new Map();
+
+function createWaterHeightMaps() {
+  const size = 1024;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, size, size);
+  ctx.globalCompositeOperation = 'lighten';
+  let seed = 12345;
+  const random = () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; };
+  for (let i = 0; i < 200; i++) {
+    const x = random() * size, y = random() * size;
+    const rx = 5 + random() * 17;
+    const ry = rx * (random() < .5 ? 1 : 2 + random());
+    // Wrapped copies keep the height field seamless at repeat boundaries.
+    for (const dx of [-size, 0, size]) for (const dy of [-size, 0, size]) {
+      if (x + dx + rx < 0 || x + dx - rx > size || y + dy + ry < 0 || y + dy - ry > size) continue;
+      ctx.save();
+      ctx.translate(x + dx, y + dy);
+      ctx.scale(rx, ry);
+      const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+      gradient.addColorStop(0, '#fff');
+      gradient.addColorStop(.4, '#ebebeb');
+      gradient.addColorStop(.75, '#999');
+      gradient.addColorStop(1, '#000');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(0, 0, 1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+  const heightPixels = ctx.getImageData(0, 0, size, size).data;
+  const coverage = new Uint8Array(size * size);
+  const roughnessPixels = new Uint8Array(size * size * 4).fill(255);
+  for (let i = 0; i < coverage.length; i++) {
+    // Gloss covers the interior, with a soft contact edge. Height remains
+    // smoothly curved instead of using this mask as a stepped bump.
+    coverage[i] = Math.round(255 * THREE.MathUtils.smoothstep(heightPixels[i * 4] / 255, .03, .25));
+  }
+  const heightMap = new THREE.CanvasTexture(canvas);
+  const roughnessMap = new THREE.DataTexture(roughnessPixels, size, size);
+  for (const texture of [heightMap, roughnessMap]) {
+    texture.colorSpace = THREE.NoColorSpace;
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(1.5, 1.5);
+    texture.flipY = false;
+    texture.minFilter = texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
+    texture.needsUpdate = true;
+  }
+  let previous = -1;
+  return { heightMap, roughnessMap, setWetness(wetness) {
+    const step = Math.round(wetness * 100);
+    if (step === previous) return;
+    previous = step;
+    for (let i = 0; i < coverage.length; i++) {
+      // Three multiplies roughness by the green channel: .3 * (17/255) = .02.
+      const value = Math.round(255 - 238 * coverage[i] / 255 * step / 100);
+      roughnessPixels[i * 4] = roughnessPixels[i * 4 + 1] = roughnessPixels[i * 4 + 2] = value;
+    }
+    roughnessMap.needsUpdate = true;
+  } };
+}
 let rainGeometry;
 let rainMaterial;
 let rainPositions;
@@ -115,22 +179,22 @@ try {
       reject(error);
     });
   });
-  const textureLoader = new THREE.TextureLoader();
-  const [gltf, brushedNormal] = await Promise.all([
-    loadAsset(new GLTFLoader(), asset('device.glb'), '3D model'),
-    loadAsset(textureLoader, asset('brushed_normal.jpg'), 'brushed metal normal map')
-  ]);
-  brushedNormal.colorSpace = THREE.NoColorSpace;
-  brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
-  brushedNormal.repeat.set(4, 4);
-  brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
-
+  const gltf = await loadAsset(new GLTFLoader(), asset('device.glb'), '3D model');
+  const waterMaps = createWaterHeightMaps();
   const makeWetMaterial = options => {
     const material = new THREE.MeshPhysicalMaterial(options);
-    // Preserve the dry metal; water is a separate dielectric surface.
-    material.normalMap = brushedNormal;
-    material.normalScale.set(.08, .08);
-    material.roughness = .4;
+    material.color.set(0x000000);
+    material.map = null;
+    material.emissive.set(0x000000);
+    material.emissiveMap = null;
+    material.alphaMap = null;
+    // A normal map takes precedence over bumpMap in Three's shader.
+    material.normalMap = null;
+    material.bumpMap = waterMaps.heightMap;
+    material.bumpScale = 0;
+    material.roughnessMap = waterMaps.roughnessMap;
+    material.roughness = .3;
+    material.metalness = .1;
     material.clearcoat = 0;
     wetMaterials.set(material, true);
     return material;
@@ -250,8 +314,6 @@ try {
   const size = bounds.getSize(new THREE.Vector3()).divideScalar(pivot.scale.x);
   radius = Math.hypot(size.x, size.z) / 2;
   halfHeight = size.y / 2;
-  const waterReflections = createWaterReflections(renderer);
-  const surfaceWater = createSurfaceWater(gltf.scene, wetMaterials, waterReflections.texture);
   const dropCount = 1000;
   rainPositions = new Float32Array(dropCount * 2 * 3);
   rainColors = new Float32Array(dropCount * 2 * 4);
@@ -293,7 +355,8 @@ try {
   const setRainProgress = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
-    surfaceWater.setWetness(wetness);
+    waterMaps.setWetness(wetness);
+    wetMaterials.forEach((_, material) => { material.bumpScale = .05 * wetness; });
     dropletLight.intensity = 35 * progress;
     if (rainMaterial) rainMaterial.opacity = progress * .25;
     // Let the rain build from a light drift into a strong shower as the user
