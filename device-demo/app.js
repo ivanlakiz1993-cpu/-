@@ -1,5 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
+import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-volume-water-1';
 
 const canvas = document.querySelector('[data-testing-model], #device');
 const equipment = document.querySelector('[data-testing-equipment]');
@@ -63,98 +64,6 @@ const randomRainPoint = () => {
     z: Math.sin(angle) * distance * rainRadius
   };
 };
-const createProceduralWaterMaps = (size = 512) => {
-  const heights = new Float32Array(size * size);
-  const droplets = new Uint8Array(size * size);
-  const byteData = new Uint8Array(size * size * 4);
-  const wrap = value => (value + size) % size;
-  const randomBetween = (min, max) => min + Math.random() * (max - min);
-  const noise = (x, y) => {
-    const u = x / size * Math.PI * 2;
-    const v = y / size * Math.PI * 2;
-    return .5 * Math.sin(u * 7 + Math.sin(v * 5))
-      + .3 * Math.cos(v * 9 + Math.cos(u * 4))
-      + .2 * Math.sin((u + v) * 6);
-  };
-
-  // Most droplets are tiny beads; a few larger beads and runnels break up
-  // the distribution without turning the lid into broad embossed patches.
-  const groups = [
-    { count: 2600, min: 1.1, max: 2.4 },
-    { count: 520, min: 2.5, max: 5 },
-    { count: 90, min: 5.5, max: 11 },
-    { count: 10, min: 12, max: 21 }
-  ];
-  for (const group of groups) for (let drop = 0; drop < group.count; drop++) {
-    const shape = Math.random() > .995 ? 'trail' : 'circle';
-    const centerX = Math.floor(Math.random() * size);
-    const centerY = Math.floor(Math.random() * size);
-    const radiusX = shape === 'circle' ? randomBetween(group.min, group.max) : randomBetween(1.8, 4);
-    const radiusY = shape === 'circle' ? radiusX * randomBetween(.8, 1.25) : randomBetween(12, 32);
-    const amplitude = shape === 'circle' ? Math.min(1.4, radiusX * .075) : radiusX * .035;
-    const bend = randomBetween(-1, 1);
-    const phase = Math.random() * Math.PI * 2;
-
-    for (let dy = -Math.ceil(radiusY); dy <= Math.ceil(radiusY); dy++) {
-      const along = dy / radiusY;
-      const taper = shape === 'trail'
-        ? .3 + .7 * Math.sqrt(Math.max(0, 1 - along * along))
-        : 1;
-      const curve = shape === 'trail' ? Math.sin(along * 2.4 + phase) * radiusX * bend : 0;
-      for (let dx = -Math.ceil(radiusX * 1.5); dx <= Math.ceil(radiusX * 1.5); dx++) {
-        const x = centerX + dx;
-        const y = centerY + dy;
-        const warpedX = (dx - curve) / (radiusX * taper);
-        const warp = radiusX > 4 || shape === 'trail' ? noise(wrap(x), wrap(y)) * .055 : 0;
-        const distance = Math.hypot(warpedX, along) + warp;
-        if (distance >= 1) continue;
-        const height = amplitude * Math.pow(Math.max(0, 1 - distance * distance), 1.2);
-        const index = wrap(y) * size + wrap(x);
-        heights[index] = Math.max(heights[index], height);
-        const coverage = Math.min(1, Math.max(0, (1 - distance) * Math.min(radiusX, 7)));
-        droplets[index] = Math.max(droplets[index], Math.round(coverage * 255));
-      }
-    }
-  }
-
-  const normalCanvas = document.createElement('canvas');
-  normalCanvas.width = normalCanvas.height = size;
-  const normalContext = normalCanvas.getContext('2d', { willReadFrequently: true });
-  const normalImage = normalContext.createImageData(size, size);
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const index = y * size + x;
-      const left = y * size + wrap(x - 1);
-      const right = y * size + wrap(x + 1);
-      const up = wrap(y - 1) * size + x;
-      const down = wrap(y + 1) * size + x;
-      const nx = -(heights[right] - heights[left]) * 1.6;
-      const ny = (heights[down] - heights[up]) * 1.6;
-      const length = Math.hypot(nx, ny, 1);
-      const pixel = index * 4;
-      normalImage.data[pixel] = Math.round((nx / length * .5 + .5) * 255);
-      normalImage.data[pixel + 1] = Math.round((ny / length * .5 + .5) * 255);
-      normalImage.data[pixel + 2] = Math.round((1 / length * .5 + .5) * 255);
-      normalImage.data[pixel + 3] = 255;
-
-      byteData[pixel] = 0;
-      byteData[pixel + 1] = byteData[pixel + 2] = 255;
-      byteData[pixel + 3] = 255;
-    }
-  }
-  normalContext.putImageData(normalImage, 0, 0);
-  const normalMap = new THREE.CanvasTexture(normalCanvas);
-  normalMap.colorSpace = THREE.NoColorSpace;
-  normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
-  normalMap.flipY = false;
-  normalMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const surfaceMap = new THREE.DataTexture(byteData, size, size, THREE.RGBAFormat, THREE.UnsignedByteType);
-  surfaceMap.colorSpace = THREE.NoColorSpace;
-  surfaceMap.wrapS = surfaceMap.wrapT = THREE.RepeatWrapping;
-  surfaceMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  surfaceMap.needsUpdate = true;
-  return { normalMap, surfaceMap, droplets, byteData };
-};
 const mainLight = new THREE.DirectionalLight(0xffffff, 4.0);
 mainLight.position.set(5, 8, 5);
 mainLight.castShadow = true;
@@ -215,20 +124,14 @@ try {
   brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
   brushedNormal.repeat.set(4, 4);
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const waterMaps = createProceduralWaterMaps();
+
   const makeWetMaterial = options => {
     const material = new THREE.MeshPhysicalMaterial(options);
-    // The metal keeps its brushed normal. A masked clearcoat supplies the
-    // glossy raised water lenses without embossing the whole enclosure.
+    // Preserve the dry metal; water is a separate dielectric surface.
     material.normalMap = brushedNormal;
     material.normalScale.set(.08, .08);
     material.roughness = .4;
-    material.roughnessMap = waterMaps.surfaceMap;
-    material.clearcoatMap = waterMaps.surfaceMap;
-    material.clearcoatNormalMap = waterMaps.normalMap;
-    material.clearcoatNormalScale.set(0, 0);
-    material.clearcoat = 1;
-    material.clearcoatRoughness = .025;
+    material.clearcoat = 0;
     wetMaterials.set(material, true);
     return material;
   };
@@ -347,6 +250,8 @@ try {
   const size = bounds.getSize(new THREE.Vector3()).divideScalar(pivot.scale.x);
   radius = Math.hypot(size.x, size.z) / 2;
   halfHeight = size.y / 2;
+  const waterReflections = createWaterReflections(renderer);
+  const surfaceWater = createSurfaceWater(gltf.scene, wetMaterials, waterReflections.texture);
   const dropCount = 1000;
   rainPositions = new Float32Array(dropCount * 2 * 3);
   rainColors = new Float32Array(dropCount * 2 * 4);
@@ -388,16 +293,7 @@ try {
   const setRainProgress = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
-    for (let i = 0; i < waterMaps.droplets.length; i++) {
-      const water = Math.round(waterMaps.droplets[i] * wetness);
-      const pixel = i * 4;
-      waterMaps.byteData[pixel] = water;
-      waterMaps.byteData[pixel + 1] = 255 - water;
-    }
-    waterMaps.surfaceMap.needsUpdate = true;
-    wetMaterials.forEach((_, material) => {
-      material.clearcoatNormalScale.setScalar(1.1 * wetness);
-    });
+    surfaceWater.setWetness(wetness);
     dropletLight.intensity = 120 * progress;
     if (rainMaterial) rainMaterial.opacity = progress * .25;
     // Let the rain build from a light drift into a strong shower as the user
