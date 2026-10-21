@@ -21,11 +21,17 @@ const camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
 const pivot = new THREE.Group();
 pivot.scale.setScalar(.95);
 scene.add(pivot);
-const wetMaterials = new Set();
+const wetMaterials = new Map();
 let rainGeometry;
 let rainMaterial;
+let rainNormalMap;
 let rainPositions;
+let rainLengths;
+let rainLeans;
+let rainWidth = 8;
+let rainDepth = 8;
 let rainFallSpeed = 1.5;
+const rainWindSpeed = 6;
 const mainLight = new THREE.DirectionalLight(0xffffff, 4.0);
 mainLight.position.set(5, 8, 5);
 mainLight.castShadow = true;
@@ -85,16 +91,27 @@ try {
       return makeFlatNormalFallback();
     })
   ]);
+  rainNormalMap = rainNormal;
   brushedNormal.colorSpace = THREE.NoColorSpace;
   brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
   brushedNormal.repeat.set(4, 4);
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   rainNormal.colorSpace = THREE.NoColorSpace;
   rainNormal.wrapS = rainNormal.wrapT = THREE.RepeatWrapping;
-  // Keep the droplets large enough to read on the enclosure instead of
-  // shrinking the full map into a fine, almost invisible grain.
-  rainNormal.repeat.set(1.2, 1.2);
+  rainNormal.repeat.set(6, 6);
   rainNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const makeWetMaterial = options => {
+    const material = new THREE.MeshPhysicalMaterial(options);
+    material.normalMap = rainNormal;
+    material.normalScale.set(0, 0);
+    // Keep the fine brushed-metal grain in the clear lacquer layer while the
+    // animated rain normal adds the larger moving water beads to the surface.
+    material.clearcoatNormalMap = brushedNormal;
+    material.clearcoatNormalScale.set(.08, .08);
+    material.clearcoat = Math.max(material.clearcoat, .12);
+    wetMaterials.set(material, { dryRoughness: material.roughness });
+    return material;
+  };
   gltf.scene.traverse(child => {
     if (!child.isMesh || !child.material) return;
     if (child.name.replaceAll('_', ' ') === 'Label Indicator legend') child.visible = false;
@@ -148,11 +165,9 @@ try {
       // The front plate is also near-black in the source image, so preserve
       // its brushed-metal identity before classifying dark plastic by color.
       if (matName.includes('metal_brushed') || meshName.includes('panel') || meshName.includes('plate')) {
-        return new THREE.MeshPhysicalMaterial({
+        return makeWetMaterial({
           name: 'Dark_Titanium_Front_Panel', color: 0x181818, metalness: .95, roughness: .35,
-          normalMap: brushedNormal, normalScale: new THREE.Vector2(.2, .2),
-          clearcoat: 0, clearcoatRoughness: .05,
-          clearcoatNormalMap: rainNormal, clearcoatNormalScale: new THREE.Vector2(1.15, 1.15)
+          clearcoat: 0, clearcoatRoughness: .08
         });
       }
 
@@ -169,11 +184,9 @@ try {
       if (isDarkColor) {
         // Distinguish the large enclosure faces from small dark socket
         // inserts using their measured geometry, not Blender object names.
-        if (largestDimension > 1.5) return new THREE.MeshPhysicalMaterial({
+        if (largestDimension > 1.5) return makeWetMaterial({
           name: 'Black_Anodized_Aluminum', color: 0x141414, metalness: .85, roughness: .38,
-          normalMap: brushedNormal, normalScale: new THREE.Vector2(.08, .08),
-          clearcoat: 0, clearcoatRoughness: .05,
-          clearcoatNormalMap: rainNormal, clearcoatNormalScale: new THREE.Vector2(1.15, 1.15)
+          clearcoat: 0, clearcoatRoughness: .08
         });
         return new THREE.MeshStandardMaterial({
           name: 'Plastic_Internal', color: 0x0f0f0f, metalness: 0, roughness: .75
@@ -190,10 +203,9 @@ try {
       }
 
       if (meshName.includes('body') || meshName.includes('box') || largestDimension > 1.5) {
-        return new THREE.MeshPhysicalMaterial({
+        return makeWetMaterial({
           name: 'Plastic_Matte', color: 0x0a0a0a, metalness: .15, roughness: .55,
-          clearcoat: 0, clearcoatRoughness: .05,
-          clearcoatNormalMap: rainNormal, clearcoatNormalScale: new THREE.Vector2(1.15, 1.15)
+          clearcoat: 0, clearcoatRoughness: .08
         });
       }
 
@@ -208,10 +220,7 @@ try {
     });
     oldMaterials.forEach(source => source?.dispose());
     child.material = Array.isArray(child.material) ? newMaterials : newMaterials[0];
-    newMaterials.forEach(material => {
-      material.needsUpdate = true;
-      if (material.clearcoatNormalMap === rainNormal) wetMaterials.add(material);
-    });
+    newMaterials.forEach(material => { material.needsUpdate = true; });
   });
   pivot.add(gltf.scene);
   const bounds = new THREE.Box3().setFromObject(gltf.scene);
@@ -219,35 +228,34 @@ try {
   radius = Math.hypot(size.x, size.z) / 2;
   halfHeight = size.y / 2;
   const dropCount = 1500;
-  rainPositions = new Float32Array(dropCount * 3);
-  const rainWidth = Math.max(radius * 2.2, 8);
-  const rainDepth = Math.max(radius * 2.2, 8);
+  rainPositions = new Float32Array(dropCount * 2 * 3);
+  rainLengths = new Float32Array(dropCount);
+  rainLeans = new Float32Array(dropCount);
+  rainWidth = Math.max(radius * 2.2, 8);
+  rainDepth = Math.max(radius * 2.2, 8);
   for (let i = 0; i < dropCount; i++) {
-    const offset = i * 3;
-    rainPositions[offset] = (Math.random() - .5) * rainWidth;
-    rainPositions[offset + 1] = Math.random() * 15 - 5;
-    rainPositions[offset + 2] = (Math.random() - .5) * rainDepth;
+    const offset = i * 6;
+    const x = (Math.random() - .5) * rainWidth;
+    const y = Math.random() * 20 - 5;
+    const z = (Math.random() - .5) * rainDepth;
+    rainLengths[i] = THREE.MathUtils.lerp(.65, 1.05, Math.random());
+    rainLeans[i] = THREE.MathUtils.lerp(.04, .14, Math.random());
+    rainPositions[offset] = x;
+    rainPositions[offset + 1] = y;
+    rainPositions[offset + 2] = z;
+    rainPositions[offset + 3] = x + rainLeans[i];
+    rainPositions[offset + 4] = y - rainLengths[i];
+    rainPositions[offset + 5] = z;
   }
   rainGeometry = new THREE.BufferGeometry();
   rainGeometry.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
-  const rainSpriteCanvas = document.createElement('canvas');
-  rainSpriteCanvas.width = 16;
-  rainSpriteCanvas.height = 32;
-  const rainSpriteContext = rainSpriteCanvas.getContext('2d');
-  const rainSpriteGradient = rainSpriteContext.createRadialGradient(8, 16, 1, 8, 16, 15);
-  rainSpriteGradient.addColorStop(0, 'rgba(255,255,255,1)');
-  rainSpriteGradient.addColorStop(.55, 'rgba(255,255,255,.88)');
-  rainSpriteGradient.addColorStop(1, 'rgba(255,255,255,0)');
-  rainSpriteContext.fillStyle = rainSpriteGradient;
-  rainSpriteContext.beginPath();
-  rainSpriteContext.ellipse(8, 16, 5, 15, 0, 0, Math.PI * 2);
-  rainSpriteContext.fill();
-  const rainSprite = new THREE.CanvasTexture(rainSpriteCanvas);
-  rainMaterial = new THREE.PointsMaterial({
-    color: 0xdde9f5, size: .035, map: rainSprite, transparent: true, opacity: 0,
-    alphaTest: .05, depthWrite: false, sizeAttenuation: true
+  rainMaterial = new THREE.LineBasicMaterial({
+    color: 0xdde9f5, transparent: true, opacity: 0,
+    depthWrite: false, blending: THREE.AdditiveBlending
   });
-  scene.add(new THREE.Points(rainGeometry, rainMaterial));
+  const rainLines = new THREE.LineSegments(rainGeometry, rainMaterial);
+  rainLines.frustumCulled = false;
+  scene.add(rainLines);
   resize();
   gsap.registerPlugin(ScrollTrigger);
   const findScrollContainer = () => {
@@ -265,8 +273,13 @@ try {
   const scrollContainer = findScrollContainer();
   const updateRainProgress = self => {
     const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
-    wetMaterials.forEach(material => { material.clearcoat = progress; });
-    if (rainMaterial) rainMaterial.opacity = progress * .6;
+    wetMaterials.forEach((state, material) => {
+      const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
+      material.normalScale.setScalar(4 * wetness);
+      material.clearcoat = THREE.MathUtils.lerp(.12, 1, wetness);
+      material.roughness = THREE.MathUtils.lerp(state.dryRoughness, .05, wetness);
+    });
+    if (rainMaterial) rainMaterial.opacity = progress * .72;
     // Let the rain build from a light drift into a strong shower as the user
     // moves through the testing section.
     rainFallSpeed = THREE.MathUtils.lerp(1.5, 12, progress);
@@ -303,12 +316,30 @@ try {
 const rainClock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const delta = Math.min(rainClock.getDelta(), .05);
-  if (rainPositions) {
-    for (let i = 1; i < rainPositions.length; i += 3) {
-      rainPositions[i] -= rainFallSpeed * delta;
-      if (rainPositions[i] < -5) rainPositions[i] = 10;
+  if (rainPositions && rainLengths) {
+    for (let i = 0; i < rainLengths.length; i++) {
+      const offset = i * 6;
+      rainPositions[offset] -= rainWindSpeed * delta;
+      rainPositions[offset + 1] -= rainFallSpeed * delta;
+      rainPositions[offset + 3] -= rainWindSpeed * delta;
+      rainPositions[offset + 4] -= rainFallSpeed * delta;
+      if (rainPositions[offset + 4] < -5 || rainPositions[offset] < -rainWidth / 2) {
+        const x = rainWidth / 2;
+        const y = 10 + Math.random() * 5;
+        const z = (Math.random() - .5) * rainDepth;
+        rainPositions[offset] = x;
+        rainPositions[offset + 1] = y;
+        rainPositions[offset + 2] = z;
+        rainPositions[offset + 3] = x + rainLeans[i];
+        rainPositions[offset + 4] = y - rainLengths[i];
+        rainPositions[offset + 5] = z;
+      }
     }
     rainGeometry.attributes.position.needsUpdate = true;
+  }
+  if (rainNormalMap) {
+    rainNormalMap.offset.y -= .001 * delta * 60;
+    if (rainNormalMap.offset.y < 0) rainNormalMap.offset.y += 1;
   }
   renderer.render(scene, camera);
 });
