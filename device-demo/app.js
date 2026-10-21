@@ -66,14 +66,6 @@ const randomRainPoint = () => {
     z: Math.sin(angle) * distance * rainRadius
   };
 };
-const rainSpawnAtWindwardEdge = () => {
-  const nx = THREE.MathUtils.lerp(.82, .98, Math.random());
-  const nzLimit = Math.sqrt(1 - nx * nx);
-  return {
-    x: nx * rainRadius,
-    z: (Math.random() * 2 - 1) * nzLimit * rainRadius
-  };
-};
 const mainLight = new THREE.DirectionalLight(0xffffff, 4.0);
 mainLight.position.set(5, 8, 5);
 mainLight.castShadow = true;
@@ -395,7 +387,7 @@ renderer.setAnimationLoop(() => {
       rainPositions[offset + 4] -= fallDistance;
       if (rainPositions[offset + 4] < -5
         || Math.hypot(rainPositions[offset], rainPositions[offset + 2]) > rainRadius) {
-        const { x, z } = rainSpawnAtWindwardEdge();
+        const { x, z } = randomRainPoint();
         const y = 10 + Math.random() * 5;
         writeRainDrop(i, x, y, z);
         rainColorsChanged = true;
