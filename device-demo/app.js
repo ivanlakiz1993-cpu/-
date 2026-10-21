@@ -26,74 +26,105 @@ scene.add(pivot);
 const wetMaterials = new Map();
 const frostMaterials = new Map();
 
-function createFrostNoiseTexture() {
-  const size = 256;
-  const data = new Uint8Array(size * size * 4);
-  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    const u = x / size * Math.PI * 2, v = y / size * Math.PI * 2;
-    const broad = Math.sin(5 * u + 2 * Math.sin(3 * v)) * Math.cos(4 * v + Math.sin(2 * u));
-    const crystals = Math.sin(17 * u + 9 * v + 2 * Math.sin(7 * v))
-      * Math.cos(13 * v - 6 * u + Math.sin(5 * u));
-    const grain = Math.sin(47 * u + 31 * v) * Math.cos(39 * v - 23 * u);
-    const value = THREE.MathUtils.clamp(.5 + broad * .23 + crystals * .16 + grain * .07, 0, 1);
-    const i = (y * size + x) * 4;
-    data[i] = data[i + 1] = data[i + 2] = Math.round(value * 255);
-    data[i + 3] = 255;
-  }
-  const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
-  texture.colorSpace = THREE.NoColorSpace;
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(1, 1);
-  texture.minFilter = texture.magFilter = THREE.LinearFilter;
-  texture.generateMipmaps = false;
-  texture.needsUpdate = true;
-  return texture;
-}
+function createFrostCrystalMask() {
+  const size = 1024;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, size, size);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
 
-function createFrostMicroTexture() {
-  const size = 256;
-  const cells = 32;
-  const data = new Uint8Array(size * size * 4);
-  let seed = 0x4f1bbcdc;
-  const random = () => {
-    seed = (1664525 * seed + 1013904223) >>> 0;
-    return seed / 4294967296;
+  const drawGrowthLine = (x1, y1, x2, y2) => {
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
   };
-  const points = Array.from({ length: cells * cells }, () => [random(), random()]);
-  const cellIndex = (x, y) => ((y + cells) % cells) * cells + ((x + cells) % cells);
 
-  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    const gx = x / size * cells;
-    const gy = y / size * cells;
-    const cx = Math.floor(gx);
-    const cy = Math.floor(gy);
-    let nearest = 1;
-    for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
-      const px = cx + ox;
-      const py = cy + oy;
-      const point = points[cellIndex(px, py)];
-      const dx = px + point[0] - gx;
-      const dy = py + point[1] - gy;
-      nearest = Math.min(nearest, Math.hypot(dx, dy));
+  const drawCrystal = (cx, cy, radius, rotation) => {
+    const crystalGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+    crystalGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    crystalGradient.addColorStop(.62, 'rgba(176, 186, 198, .9)');
+    crystalGradient.addColorStop(.9, 'rgba(72, 82, 96, .58)');
+    crystalGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.beginPath();
+    for (let arm = 0; arm < 6; arm++) {
+      const angle = rotation + arm * Math.PI / 3;
+      const length = radius * (.82 + Math.random() * .18);
+      const tipX = cx + Math.cos(angle) * length;
+      const tipY = cy + Math.sin(angle) * length;
+      drawGrowthLine(cx, cy, tipX, tipY);
+
+      for (const t of [.34, .59, .8]) {
+        const rootX = cx + Math.cos(angle) * length * t;
+        const rootY = cy + Math.sin(angle) * length * t;
+        const twigLength = radius * (.2 - t * .07);
+        for (const side of [-1, 1]) {
+          const twigAngle = angle + side * Math.PI / 3;
+          const endX = rootX + Math.cos(twigAngle) * twigLength;
+          const endY = rootY + Math.sin(twigAngle) * twigLength;
+          drawGrowthLine(rootX, rootY, endX, endY);
+
+          if (t === .59) {
+            const forkX = rootX + Math.cos(twigAngle) * twigLength * .58;
+            const forkY = rootY + Math.sin(twigAngle) * twigLength * .58;
+            const forkLength = radius * .075;
+            for (const forkSide of [-1, 1]) {
+              const forkAngle = twigAngle + forkSide * Math.PI / 3;
+              drawGrowthLine(
+                forkX, forkY,
+                forkX + Math.cos(forkAngle) * forkLength,
+                forkY + Math.sin(forkAngle) * forkLength
+              );
+            }
+          }
+        }
+      }
+
+      if (arm % 2 === 0) {
+        const rootDistance = .52;
+        const rootX = cx + Math.cos(angle) * radius * rootDistance;
+        const rootY = cy + Math.sin(angle) * radius * rootDistance;
+        const needleLength = radius * .14;
+        for (const side of [-1, 1]) {
+          const needleAngle = angle + side * Math.PI / 2;
+          drawGrowthLine(
+            rootX, rootY,
+            rootX + Math.cos(needleAngle) * needleLength,
+            rootY + Math.sin(needleAngle) * needleLength
+          );
+        }
+      }
     }
-    const u = x / size * Math.PI * 2;
-    const v = y / size * Math.PI * 2;
-    const grit = 0.5 + 0.5 * Math.sin(19 * u + 13 * v) * Math.cos(11 * u - 21 * v);
-    const crystal = THREE.MathUtils.clamp(0.44 + (0.22 - nearest) * 0.65 + (grit - 0.5) * 0.22, 0, 1);
-    const i = (y * size + x) * 4;
-    data[i] = data[i + 1] = data[i + 2] = Math.round(crystal * 255);
-    data[i + 3] = 255;
+
+    ctx.strokeStyle = crystalGradient;
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+    ctx.fillStyle = crystalGradient;
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.max(1, radius * .08), 0, Math.PI * 2);
+    ctx.fill();
+  };
+
+  for (let i = 0; i < 400; i++) {
+    const radius = 5 + Math.random() * 11;
+    const cx = Math.random() * size;
+    const cy = Math.random() * size;
+    const rotation = Math.random() * Math.PI / 3;
+    const offsetsX = [0, ...(cx < radius ? [size] : []), ...(cx > size - radius ? [-size] : [])];
+    const offsetsY = [0, ...(cy < radius ? [size] : []), ...(cy > size - radius ? [-size] : [])];
+    for (const offsetX of offsetsX) for (const offsetY of offsetsY) {
+      drawCrystal(cx + offsetX, cy + offsetY, radius, rotation);
+    }
   }
 
-  const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
-  texture.colorSpace = THREE.NoColorSpace;
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(1, 1);
-  texture.minFilter = THREE.LinearMipmapLinearFilter;
-  texture.magFilter = THREE.LinearFilter;
-  texture.generateMipmaps = true;
-  texture.needsUpdate = true;
-  return texture;
+  const frostCrystalMask = new THREE.CanvasTexture(canvas);
+  frostCrystalMask.name = 'Frost_Crystal_Threshold_Mask';
+  frostCrystalMask.colorSpace = THREE.NoColorSpace;
+  frostCrystalMask.wrapS = frostCrystalMask.wrapT = THREE.RepeatWrapping;
+  frostCrystalMask.repeat.set(4, 4);
+  frostCrystalMask.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  frostCrystalMask.needsUpdate = true;
+  return frostCrystalMask;
 }
 
 function addEdgeIcicles(root, bounds) {
@@ -243,76 +274,71 @@ try {
   brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
   brushedNormal.repeat.set(4, 4);
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const frostNoise = createFrostNoiseTexture();
-  const frostMicroNoise = createFrostMicroTexture();
+  const frostCrystalMask = createFrostCrystalMask();
 
   const makeWetMaterial = options => {
     const material = new THREE.MeshPhysicalMaterial(options);
     // Preserve the dry metal; water is a separate dielectric surface.
     material.normalMap = brushedNormal;
     material.normalScale.set(.08, .08);
-    material.bumpMap = frostMicroNoise;
-    material.bumpScale = 0;
-    material.roughness = .4;
+    material.bumpMap = frostCrystalMask;
+    material.bumpScale = .02;
+    material.roughness = .2;
     material.clearcoat = 0;
     wetMaterials.set(material, true);
     const frostState = { progress: 0, shader: null };
     material.onBeforeCompile = shader => {
       frostState.shader = shader;
-      shader.uniforms.uFrostNoise = { value: frostNoise };
-      shader.uniforms.uFrostMicroNoise = { value: frostMicroNoise };
+      shader.uniforms.uFrostCrystalMask = { value: frostCrystalMask };
       shader.uniforms.uFrostProgress = { value: frostState.progress };
+      shader.uniforms.uFrostBumpScale = { value: 0.02 };
+      // Keep the requested frost map in bumpMap, but disable Three's ungated
+      // bump pass. The custom pass below applies its relief only to revealed ice.
+      shader.uniforms.bumpScale.value = 0;
       shader.fragmentShader = shader.fragmentShader.replace(
         '#include <common>',
         `#include <common>
-uniform sampler2D uFrostNoise;
-uniform sampler2D uFrostMicroNoise;
+uniform sampler2D uFrostCrystalMask;
 uniform float uFrostProgress;
-float frostMaskAt(vec2 uv) {
-  vec2 tile = fract(uv);
-  float edge = 1.0 - smoothstep(0.0, 0.16, min(min(tile.x, 1.0 - tile.x), min(tile.y, 1.0 - tile.y)));
-  vec2 fineUv = uv * 15.0;
-  float fineField = texture2D(uFrostMicroNoise, fineUv).r;
-  float broadField = texture2D(uFrostNoise, uv).r;
-  float field = mix(fineField, broadField, 0.12);
-  float threshold = clamp(uFrostProgress * (0.72 + edge * 0.28), 0.0, 1.0);
-  float edgeNoise = texture2D(uFrostMicroNoise, fineUv).r;
-  float noisyThreshold = threshold + (edgeNoise - 0.5) * 0.04;
-  return smoothstep(field - 0.12, field + 0.12, noisyThreshold) * smoothstep(0.0, 0.035, uFrostProgress);
+uniform float uFrostBumpScale;
+float frostGrowthAt(vec2 uv) {
+  vec4 crystal = texture2D(uFrostCrystalMask, uv);
+  // Canvas crystals encode white at the nucleation point and fade toward
+  // transparent tips, so invert red to reveal the branches from center out.
+  float distanceFromCenter = 1.0 - crystal.r;
+  float reveal = 1.0 - smoothstep(uFrostProgress - 0.02, uFrostProgress + 0.02, distanceFromCenter);
+  return crystal.a * reveal * smoothstep(0.0, 0.035, uFrostProgress);
+}
+float frostHeightAt(vec2 uv) {
+  vec4 crystal = texture2D(uFrostCrystalMask, uv);
+  return crystal.r * frostGrowthAt(uv);
 }
 `
       );
       shader.fragmentShader = shader.fragmentShader.replace(
         '#include <roughnessmap_fragment>',
         `#include <roughnessmap_fragment>
-        vec2 frostUv = vBumpMapUv;
-        vec2 fineUv = vBumpMapUv * 15.0;
-        float frostGrowth = frostMaskAt(frostUv);
-        float frostCrystalNoise = texture2D(uFrostMicroNoise, fineUv).r;
-        float frostFactor = frostGrowth * mix(0.72, 1.0, smoothstep(0.15, 0.85, frostCrystalNoise));
+        float frostFactor = frostGrowthAt(vBumpMapUv);
         vec3 metalColor = diffuseColor.rgb;
-        vec3 frostColor = vec3(0.92, 0.96, 1.0);
+        vec3 frostColor = vec3(0.9, 0.94, 0.98);
         vec3 finalColor = mix(metalColor, frostColor, frostFactor);
         diffuseColor.rgb = finalColor;
-        roughnessFactor = mix(roughnessFactor, 1.0, smoothstep(0.1, 0.12, frostFactor));`
+        roughnessFactor = mix(roughnessFactor, 1.0, frostFactor);`
       );
       shader.fragmentShader = shader.fragmentShader.replace(
         '#include <normal_fragment_maps>',
         `#include <normal_fragment_maps>
         #ifdef USE_BUMPMAP
-          vec2 frostReliefUv = vBumpMapUv * 15.0;
-          vec2 frostReliefDx = dFdx(frostReliefUv);
-          vec2 frostReliefDy = dFdy(frostReliefUv);
-          vec2 frostMaskDx = dFdx(vBumpMapUv);
-          vec2 frostMaskDy = dFdy(vBumpMapUv);
-          float frostHeight = frostGrowth * texture2D(uFrostMicroNoise, frostReliefUv).r;
-          float frostHeightX = frostMaskAt(vBumpMapUv + frostMaskDx) * texture2D(uFrostMicroNoise, frostReliefUv + frostReliefDx).r;
-          float frostHeightY = frostMaskAt(vBumpMapUv + frostMaskDy) * texture2D(uFrostMicroNoise, frostReliefUv + frostReliefDy).r;
-          normal = perturbNormalArb(-vViewPosition, normal, vec2(frostHeightX - frostHeight, frostHeightY - frostHeight) * 3.0, faceDirection);
+          vec2 frostUvDx = dFdx(vBumpMapUv);
+          vec2 frostUvDy = dFdy(vBumpMapUv);
+          float frostHeight = frostHeightAt(vBumpMapUv) * uFrostBumpScale;
+          float frostHeightX = frostHeightAt(vBumpMapUv + frostUvDx) * uFrostBumpScale;
+          float frostHeightY = frostHeightAt(vBumpMapUv + frostUvDy) * uFrostBumpScale;
+          normal = perturbNormalArb(-vViewPosition, normal, vec2(frostHeightX - frostHeight, frostHeightY - frostHeight), faceDirection);
         #endif`
       );
     };
-    material.customProgramCacheKey = () => 'device-frost-growth-v4';
+    material.customProgramCacheKey = () => 'device-frost-crystal-growth-v2';
     frostMaterials.set(material, frostState);
     return material;
   };
