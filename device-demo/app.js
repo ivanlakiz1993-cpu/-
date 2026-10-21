@@ -83,6 +83,9 @@ const upperPanelLight = new THREE.DirectionalLight(0xffffff, 1.8);
 upperPanelLight.position.set(-5, 3.5, 5);
 upperPanelLight.target.position.set(0, 0, 0);
 scene.add(upperPanelLight, upperPanelLight.target);
+const dropletLight = new THREE.PointLight(0xf8fbff, 0, 0, 2);
+dropletLight.position.set(10, 15, 10);
+scene.add(dropletLight);
 let radius = 3;
 let halfHeight = .6;
 function resize() {
@@ -147,7 +150,9 @@ try {
     material.clearcoat = Math.max(material.clearcoat, .12);
     wetMaterials.set(material, {
       dryRoughness: material.roughness,
-      dryMetalness: material.metalness
+      dryMetalness: material.metalness,
+      dryNormalMap: material.normalMap,
+      dryNormalScale: material.normalScale.clone()
     });
     return material;
   };
@@ -308,12 +313,19 @@ try {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     wetMaterials.forEach((state, material) => {
       const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
-      material.clearcoatNormalScale.setScalar(6 * wetness);
+      const nextNormalMap = wetness > .001 ? rainNormal : state.dryNormalMap;
+      if (material.normalMap !== nextNormalMap) {
+        material.normalMap = nextNormalMap;
+        material.needsUpdate = true;
+      }
+      material.normalScale.copy(state.dryNormalScale).lerp(new THREE.Vector2(8, 8), wetness);
+      material.clearcoatNormalScale.setScalar(.6 * wetness);
       material.clearcoat = THREE.MathUtils.lerp(.12, 1, wetness);
       material.clearcoatRoughness = THREE.MathUtils.lerp(.08, .02, wetness);
-      material.metalness = THREE.MathUtils.lerp(state.dryMetalness, .95, wetness);
-      material.roughness = THREE.MathUtils.lerp(state.dryRoughness, .4, wetness);
+      material.metalness = THREE.MathUtils.lerp(state.dryMetalness, .1, wetness);
+      material.roughness = THREE.MathUtils.lerp(state.dryRoughness, 0, wetness);
     });
+    dropletLight.intensity = 500 * progress;
     if (rainMaterial) rainMaterial.opacity = progress * .25;
     // Let the rain build from a light drift into a strong shower as the user
     // moves through the transition between the first two sections.
