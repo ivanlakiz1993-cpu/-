@@ -3,6 +3,8 @@ import { GLTFLoader } from './vendor/GLTFLoader.js';
 
 const canvas = document.querySelector('[data-testing-model], #device');
 const equipment = document.querySelector('[data-testing-equipment]');
+const renderSurface = equipment?.closest('.testing-journey__visual') || equipment;
+if (renderSurface && renderSurface !== equipment) renderSurface.append(canvas);
 const asset = name => {
   const url = new URL(name, import.meta.url);
   url.search = new URL(import.meta.url).search;
@@ -23,16 +25,14 @@ const pivot = new THREE.Group();
 pivot.scale.setScalar(.95);
 scene.add(pivot);
 const wetMaterials = new Map();
-let rainGeometry;
+let rainDrops;
 let rainMaterial;
 let rainNormalMap;
-let rainPositions;
-let rainColors;
-let rainLengths;
-let rainLeans;
+let rainDropStates;
 let rainRadius = 4;
-let rainFallSpeed = 1.5;
+const rainFallSpeed = 4;
 const rainWindRatio = .3;
+const rainDropTransform = new THREE.Object3D();
 const rainEdgeAlpha = (x, y, z) => {
   const cylinderDistance = Math.hypot(x, z) / rainRadius;
   const cylinderAlpha = 1 - THREE.MathUtils.smoothstep(cylinderDistance, .68, 1);
@@ -43,20 +43,19 @@ const rainEdgeAlpha = (x, y, z) => {
   const viewportAlpha = 1 - THREE.MathUtils.smoothstep(viewportDistance, .68, 1);
   return cylinderAlpha * viewportAlpha;
 };
-const writeRainDrop = (index, x, y, z) => {
-  const offset = index * 6;
-  const colorOffset = index * 8;
-  const alpha = rainEdgeAlpha(x, y, z);
-  rainPositions[offset] = x;
-  rainPositions[offset + 1] = y;
-  rainPositions[offset + 2] = z;
-  rainPositions[offset + 3] = x + rainLeans[index];
-  rainPositions[offset + 4] = y - rainLengths[index];
-  rainPositions[offset + 5] = z;
-  rainColors[colorOffset] = rainColors[colorOffset + 1] = rainColors[colorOffset + 2] = 1;
-  rainColors[colorOffset + 3] = alpha;
-  rainColors[colorOffset + 4] = rainColors[colorOffset + 5] = rainColors[colorOffset + 6] = 1;
-  rainColors[colorOffset + 7] = alpha;
+const updateRainDrop = index => {
+  if (!rainDrops || !rainDropStates) return;
+  const drop = rainDropStates[index];
+  const fade = rainEdgeAlpha(drop.x, drop.y, drop.z);
+  rainDropTransform.position.set(drop.x, drop.y, drop.z);
+  rainDropTransform.rotation.set(0, 0, -rainWindRatio * .35);
+  rainDropTransform.scale.set(
+    Math.max(.001, drop.size * .7 * fade),
+    Math.max(.001, drop.size * 1.3 * fade),
+    Math.max(.001, drop.size * .7 * fade)
+  );
+  rainDropTransform.updateMatrix();
+  rainDrops.setMatrixAt(index, rainDropTransform.matrix);
 };
 const randomRainPoint = () => {
   const angle = Math.random() * Math.PI * 2;
@@ -96,25 +95,47 @@ upperPanelLight.target.position.set(0, 0, 0);
 scene.add(upperPanelLight, upperPanelLight.target);
 let radius = 3;
 let halfHeight = .6;
+const updateRainRadius = () => {
+  const verticalHalfView = camera.position.length() * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const visibleHalfWidth = verticalHalfView * camera.aspect;
+  const previousRadius = rainRadius;
+  rainRadius = Math.min(40, Math.max(radius * 2.2, visibleHalfWidth * 1.15, 8));
+  if (!rainDropStates || previousRadius === rainRadius) return;
+
+  const scale = rainRadius / previousRadius;
+  for (let i = 0; i < rainDropStates.length; i++) {
+    rainDropStates[i].x *= scale;
+    rainDropStates[i].z *= scale;
+    updateRainDrop(i);
+  }
+  rainDrops.instanceMatrix.needsUpdate = true;
+};
 function resize() {
-  const bounds = equipment?.getBoundingClientRect();
+  const bounds = renderSurface?.getBoundingClientRect();
+  const fitBounds = equipment?.getBoundingClientRect() || bounds;
   const width = Math.max(1, bounds?.width || window.innerWidth), height = Math.max(1, bounds?.height || window.innerHeight);
+  const fitHeight = Math.max(1, fitBounds?.height || height);
+  const fitAspect = (fitBounds?.width || width) / fitHeight;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(width, height, false);
   camera.aspect = width / height;
   // Fit the entire rotation envelope, including narrow mobile viewports.
   const verticalFov = THREE.MathUtils.degToRad(camera.fov / 2);
-  const horizontalFov = Math.atan(Math.tan(verticalFov) * camera.aspect);
+  const horizontalFov = Math.atan(Math.tan(verticalFov) * fitAspect);
   // Fit the horizontal rotation cylinder, not a sphere with empty space above it.
-  const distance = Math.max(radius / Math.sin(horizontalFov), radius + halfHeight / Math.tan(verticalFov)) * 1.08;
+  const fitDistance = Math.max(radius / Math.sin(horizontalFov), radius + halfHeight / Math.tan(verticalFov)) * 1.08;
+  const distance = fitDistance * (height / fitHeight);
   camera.position.set(-.48, .48, 1).normalize().multiplyScalar(distance);
   camera.lookAt(0, 0, 0);
   camera.updateProjectionMatrix();
   camera.updateMatrixWorld(true);
+  updateRainRadius();
 }
 window.addEventListener('resize', resize);
 resize();
-if (equipment) new ResizeObserver(resize).observe(equipment);
+const resizeObserver = new ResizeObserver(resize);
+if (renderSurface) resizeObserver.observe(renderSurface);
+if (equipment && equipment !== renderSurface) resizeObserver.observe(equipment);
 try {
   const loadAsset = (loader, url, label) => new Promise((resolve, reject) => {
     loader.load(url, resolve, undefined, error => {
@@ -131,29 +152,24 @@ try {
     context.fillRect(0, 0, 2, 2);
     return new THREE.CanvasTexture(fallbackCanvas);
   };
-  const [gltf, brushedNormal, rainNormal] = await Promise.all([
+  const [gltf, rainNormal] = await Promise.all([
     loadAsset(new GLTFLoader(), asset('device.glb'), '3D model'),
-    loadAsset(textureLoader, asset('brushed_normal.jpg'), 'brushed metal normal map'),
-    loadAsset(textureLoader, asset('rain_drops_normal.png'), 'rain drops normal map').catch(error => {
+    loadAsset(textureLoader, asset('rain_drops_normal.png'), 'surface drops normal map').catch(error => {
       console.warn('Rain normal map unavailable; continuing without surface droplets.', error);
       return makeFlatNormalFallback();
     })
   ]);
   rainNormalMap = rainNormal;
-  brushedNormal.colorSpace = THREE.NoColorSpace;
-  brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
-  brushedNormal.repeat.set(4, 4);
-  brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   rainNormal.colorSpace = THREE.NoColorSpace;
   rainNormal.wrapS = rainNormal.wrapT = THREE.RepeatWrapping;
-  rainNormal.repeat.set(1.5, 1.5);
+  rainNormal.repeat.set(2, 2);
   rainNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   const makeWetMaterial = options => {
     const material = new THREE.MeshPhysicalMaterial(options);
-    // Keep the brushed grain on the metal and put the water relief on its own
-    // glossy clearcoat layer, so droplets read as liquid lenses over the plate.
-    material.normalMap = brushedNormal;
-    material.normalScale.set(.08, .08);
+    // The normal map shapes the surface while the independent clearcoat lobe
+    // catches bright, liquid-looking highlights over the same water beads.
+    material.normalMap = rainNormal;
+    material.normalScale.set(0, 0);
     material.clearcoatNormalMap = rainNormal;
     material.clearcoatNormalScale.set(0, 0);
     material.clearcoat = Math.max(material.clearcoat, .12);
@@ -279,30 +295,43 @@ try {
   radius = Math.hypot(size.x, size.z) / 2;
   halfHeight = size.y / 2;
   const dropCount = 1000;
-  rainPositions = new Float32Array(dropCount * 2 * 3);
-  rainColors = new Float32Array(dropCount * 2 * 4);
-  rainLengths = new Float32Array(dropCount);
-  rainLeans = new Float32Array(dropCount);
-  // A circular cylinder keeps the rain local to the device and avoids the
-  // rectangular cutoff created by a box-shaped particle volume.
-  rainRadius = Math.min(25, Math.max(radius * 2.2, 8));
+  rainDropStates = Array.from({ length: dropCount }, () => ({
+    x: 0,
+    y: 0,
+    z: 0,
+    size: THREE.MathUtils.lerp(.018, .04, Math.random())
+  }));
+  // Each falling drop is a small shaded water bead, never a line or streak.
+  rainMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0xd8d8d8,
+    metalness: 0,
+    roughness: .08,
+    clearcoat: 1,
+    clearcoatRoughness: .04,
+    transparent: true,
+    opacity: .5,
+    depthWrite: false
+  });
+  const dropletProfile = new THREE.SplineCurve([
+    new THREE.Vector2(0, -.5), new THREE.Vector2(.2, -.48),
+    new THREE.Vector2(.38, -.32), new THREE.Vector2(.48, -.08),
+    new THREE.Vector2(.44, .16), new THREE.Vector2(.3, .36),
+    new THREE.Vector2(.12, .48), new THREE.Vector2(0, .5)
+  ]).getPoints(20);
+  const dropletGeometry = new THREE.LatheGeometry(dropletProfile, 16);
+  rainDrops = new THREE.InstancedMesh(dropletGeometry, rainMaterial, dropCount);
+  rainDrops.frustumCulled = false;
+  rainDrops.castShadow = false;
+  rainDrops.receiveShadow = false;
+  resize();
   for (let i = 0; i < dropCount; i++) {
     const { x, z } = randomRainPoint();
-    const y = Math.random() * 20 - 5;
-    rainLengths[i] = THREE.MathUtils.lerp(.3, .5, Math.random());
-    rainLeans[i] = rainLengths[i] * rainWindRatio;
-    writeRainDrop(i, x, y, z);
+    rainDropStates[i].x = x;
+    rainDropStates[i].y = Math.random() * 20 - 5;
+    rainDropStates[i].z = z;
+    updateRainDrop(i);
   }
-  rainGeometry = new THREE.BufferGeometry();
-  rainGeometry.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
-  rainGeometry.setAttribute('color', new THREE.BufferAttribute(rainColors, 4));
-  rainMaterial = new THREE.LineBasicMaterial({
-    color: 0xdde9f5, vertexColors: true, transparent: true, opacity: .25,
-    depthWrite: false, blending: THREE.AdditiveBlending
-  });
-  const rainLines = new THREE.LineSegments(rainGeometry, rainMaterial);
-  rainLines.frustumCulled = false;
-  scene.add(rainLines);
+  scene.add(rainDrops);
   resize();
   gsap.registerPlugin(ScrollTrigger);
   const findScrollContainer = () => {
@@ -322,16 +351,13 @@ try {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     wetMaterials.forEach((state, material) => {
       const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
+      material.normalScale.setScalar(6 * wetness);
       material.clearcoatNormalScale.setScalar(6 * wetness);
       material.clearcoat = THREE.MathUtils.lerp(.12, 1, wetness);
       material.clearcoatRoughness = THREE.MathUtils.lerp(.08, .02, wetness);
       material.metalness = THREE.MathUtils.lerp(state.dryMetalness, .95, wetness);
       material.roughness = THREE.MathUtils.lerp(state.dryRoughness, .4, wetness);
     });
-    if (rainMaterial) rainMaterial.opacity = progress * .25;
-    // Let the rain build from a light drift into a strong shower as the user
-    // moves through the transition between the first two sections.
-    rainFallSpeed = THREE.MathUtils.lerp(1.5, 12, progress);
   };
   const updateRainProgress = self => setRainProgress(self.progress);
   gsap.to(pivot.rotation, {
@@ -382,34 +408,22 @@ try {
 const rainClock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const delta = Math.min(rainClock.getDelta(), .05);
-  if (rainPositions && rainLengths) {
-    let rainColorsChanged = false;
-    for (let i = 0; i < rainLengths.length; i++) {
-      const offset = i * 6;
-      const colorOffset = i * 8;
+  if (rainDropStates && rainDrops) {
+    for (let i = 0; i < rainDropStates.length; i++) {
+      const drop = rainDropStates[i];
       const fallDistance = rainFallSpeed * delta;
       const windDistance = fallDistance * rainWindRatio;
-      rainPositions[offset] -= windDistance;
-      rainPositions[offset + 1] -= fallDistance;
-      rainPositions[offset + 3] -= windDistance;
-      rainPositions[offset + 4] -= fallDistance;
-      if (rainPositions[offset + 4] < -5
-        || Math.hypot(rainPositions[offset], rainPositions[offset + 2]) > rainRadius) {
+      drop.x -= windDistance;
+      drop.y -= fallDistance;
+      if (drop.y < -5 || Math.hypot(drop.x, drop.z) > rainRadius) {
         const { x, z } = rainSpawnAtWindwardEdge();
-        const y = 10 + Math.random() * 5;
-        writeRainDrop(i, x, y, z);
-        rainColorsChanged = true;
-      } else {
-        const alpha = rainEdgeAlpha(
-          rainPositions[offset], rainPositions[offset + 1], rainPositions[offset + 2]
-        );
-        rainColors[colorOffset + 3] = alpha;
-        rainColors[colorOffset + 7] = alpha;
-        rainColorsChanged = true;
+        drop.x = x;
+        drop.y = 10 + Math.random() * 5;
+        drop.z = z;
       }
+      updateRainDrop(i);
     }
-    rainGeometry.attributes.position.needsUpdate = true;
-    if (rainColorsChanged) rainGeometry.attributes.color.needsUpdate = true;
+    rainDrops.instanceMatrix.needsUpdate = true;
   }
   if (rainNormalMap) {
     rainNormalMap.offset.y -= .001 * delta * 60;
