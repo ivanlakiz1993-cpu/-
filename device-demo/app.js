@@ -86,7 +86,8 @@ rimLight.position.set(0, 5, -5);
 scene.add(rimLight);
 scene.add(new THREE.AmbientLight(0xffffff, .45));
 const upperPanelLight = new THREE.DirectionalLight(0xffffff, 1.8);
-upperPanelLight.position.set(-3, 7, 3);
+// Low, off-axis fill skims across the lid and catches the wet surface relief.
+upperPanelLight.position.set(-5, 3.5, 5);
 upperPanelLight.target.position.set(0, 0, 0);
 scene.add(upperPanelLight, upperPanelLight.target);
 let radius = 3;
@@ -140,7 +141,7 @@ try {
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   rainNormal.colorSpace = THREE.NoColorSpace;
   rainNormal.wrapS = rainNormal.wrapT = THREE.RepeatWrapping;
-  rainNormal.repeat.set(6, 6);
+  rainNormal.repeat.set(3, 3);
   rainNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   const makeWetMaterial = options => {
     const material = new THREE.MeshPhysicalMaterial(options);
@@ -151,7 +152,10 @@ try {
     material.clearcoatNormalMap = brushedNormal;
     material.clearcoatNormalScale.set(.08, .08);
     material.clearcoat = Math.max(material.clearcoat, .12);
-    wetMaterials.set(material, { dryRoughness: material.roughness });
+    wetMaterials.set(material, {
+      dryRoughness: material.roughness,
+      dryMetalness: material.metalness
+    });
     return material;
   };
   gltf.scene.traverse(child => {
@@ -312,9 +316,11 @@ try {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     wetMaterials.forEach((state, material) => {
       const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
-      material.normalScale.setScalar(4 * wetness);
+      material.normalScale.setScalar(6 * wetness);
       material.clearcoat = THREE.MathUtils.lerp(.12, 1, wetness);
-      material.roughness = THREE.MathUtils.lerp(state.dryRoughness, .05, wetness);
+      material.clearcoatRoughness = THREE.MathUtils.lerp(.08, .02, wetness);
+      material.metalness = THREE.MathUtils.lerp(state.dryMetalness, .95, wetness);
+      material.roughness = THREE.MathUtils.lerp(state.dryRoughness, .02, wetness);
     });
     if (rainMaterial) rainMaterial.opacity = progress * .25;
     // Let the rain build from a light drift into a strong shower as the user
