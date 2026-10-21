@@ -383,3 +383,7 @@
 .testing-journey__visual .testing-stage__equipment{width:min(68vw,78rem)}
 @media(max-width:1000px){.testing-journey__visual .testing-stage__equipment{width:min(88vw,54rem)}}
 @media(max-width:650px){.testing-journey__visual .testing-stage__equipment{width:calc(100% - 1.5rem)}}
+
+/* Keep the shared device and its rotation visible through the FAQ, until the footer. */
+.testing-faq{position:relative;z-index:2;background:rgba(0,0,0,.38)}
+.testing-faq__item{background:rgba(0,0,0,.64)}
