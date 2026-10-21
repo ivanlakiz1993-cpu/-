@@ -91,7 +91,9 @@ try {
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   rainNormal.colorSpace = THREE.NoColorSpace;
   rainNormal.wrapS = rainNormal.wrapT = THREE.RepeatWrapping;
-  rainNormal.repeat.set(3, 3);
+  // Keep the droplets large enough to read on the enclosure instead of
+  // shrinking the full map into a fine, almost invisible grain.
+  rainNormal.repeat.set(1.2, 1.2);
   rainNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   gltf.scene.traverse(child => {
     if (!child.isMesh || !child.material) return;
@@ -150,7 +152,7 @@ try {
           name: 'Dark_Titanium_Front_Panel', color: 0x181818, metalness: .95, roughness: .35,
           normalMap: brushedNormal, normalScale: new THREE.Vector2(.2, .2),
           clearcoat: 0, clearcoatRoughness: .05,
-          clearcoatNormalMap: rainNormal, clearcoatNormalScale: new THREE.Vector2(.4, .4)
+          clearcoatNormalMap: rainNormal, clearcoatNormalScale: new THREE.Vector2(1.15, 1.15)
         });
       }
 
@@ -171,7 +173,7 @@ try {
           name: 'Black_Anodized_Aluminum', color: 0x141414, metalness: .85, roughness: .38,
           normalMap: brushedNormal, normalScale: new THREE.Vector2(.08, .08),
           clearcoat: 0, clearcoatRoughness: .05,
-          clearcoatNormalMap: rainNormal, clearcoatNormalScale: new THREE.Vector2(.4, .4)
+          clearcoatNormalMap: rainNormal, clearcoatNormalScale: new THREE.Vector2(1.15, 1.15)
         });
         return new THREE.MeshStandardMaterial({
           name: 'Plastic_Internal', color: 0x0f0f0f, metalness: 0, roughness: .75
@@ -191,7 +193,7 @@ try {
         return new THREE.MeshPhysicalMaterial({
           name: 'Plastic_Matte', color: 0x0a0a0a, metalness: .15, roughness: .55,
           clearcoat: 0, clearcoatRoughness: .05,
-          clearcoatNormalMap: rainNormal, clearcoatNormalScale: new THREE.Vector2(.4, .4)
+          clearcoatNormalMap: rainNormal, clearcoatNormalScale: new THREE.Vector2(1.15, 1.15)
         });
       }
 
@@ -275,9 +277,21 @@ try {
       trigger: equipment ? '[data-testing-journey]' : '.scroll-area',
       start: 'top top', end: 'bottom bottom', scrub: 1, invalidateOnRefresh: true,
       scroller: scrollContainer,
-      onUpdate: updateRainProgress,
-      onRefresh: updateRainProgress
     }
+  });
+  const weatherSection = equipment
+    ? document.querySelector('.testing-about') || document.querySelector('[data-testing-journey]')
+    : document.querySelector('.scroll-area');
+  ScrollTrigger.create({
+    trigger: weatherSection,
+    // Start as the second section enters the viewport, then build through
+    // the transition instead of waiting until the entire long page ends.
+    start: 'top bottom',
+    end: 'top 30%',
+    scrub: .5,
+    scroller: scrollContainer,
+    onUpdate: updateRainProgress,
+    onRefresh: updateRainProgress
   });
   ScrollTrigger.refresh();
   if (status) status.textContent = '';
