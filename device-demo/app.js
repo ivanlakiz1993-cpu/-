@@ -19,8 +19,6 @@ renderer.setClearColor(0x000000, 0);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
 const rainProjection = new THREE.Vector3();
-let rainNormalMap = null;
-let clearcoatRainNormalMap = null;
 const pivot = new THREE.Group();
 pivot.scale.setScalar(.95);
 scene.add(pivot);
@@ -64,6 +62,91 @@ const randomRainPoint = () => {
     x: Math.cos(angle) * distance * rainRadius,
     z: Math.sin(angle) * distance * rainRadius
   };
+};
+const createProceduralWaterMaps = (size = 512) => {
+  const heights = new Float32Array(size * size);
+  const wetRoughness = new Uint8Array(size * size);
+  const byteData = new Uint8Array(size * size * 4);
+  const wrap = value => (value + size) % size;
+  const randomBetween = (min, max) => min + Math.random() * (max - min);
+  const noise = (x, y) => {
+    const u = x / size * Math.PI * 2;
+    const v = y / size * Math.PI * 2;
+    return .5 * Math.sin(u * 7 + Math.sin(v * 5))
+      + .3 * Math.cos(v * 9 + Math.cos(u * 4))
+      + .2 * Math.sin((u + v) * 6);
+  };
+
+  for (let drop = 0; drop < 230; drop++) {
+    const shape = Math.random() > .5 ? 'circle' : 'trail';
+    const centerX = Math.floor(Math.random() * size);
+    const centerY = Math.floor(Math.random() * size);
+    const radiusX = shape === 'circle' ? randomBetween(4, 12) : randomBetween(2, 5);
+    const radiusY = shape === 'circle' ? randomBetween(4, 12) : randomBetween(18, 58);
+    const amplitude = shape === 'circle' ? randomBetween(.55, 1) : randomBetween(.22, .55);
+    const bend = randomBetween(-1, 1);
+    const phase = Math.random() * Math.PI * 2;
+
+    for (let dy = -Math.ceil(radiusY); dy <= Math.ceil(radiusY); dy++) {
+      const along = dy / radiusY;
+      const taper = shape === 'trail'
+        ? .3 + .7 * Math.sqrt(Math.max(0, 1 - along * along))
+        : 1;
+      const curve = shape === 'trail' ? Math.sin(along * 2.4 + phase) * radiusX * bend : 0;
+      for (let dx = -Math.ceil(radiusX * 1.5); dx <= Math.ceil(radiusX * 1.5); dx++) {
+        const x = centerX + dx;
+        const y = centerY + dy;
+        const warpedX = (dx - curve) / (radiusX * taper);
+        const distance = Math.hypot(warpedX, along) + noise(wrap(x), wrap(y)) * .075;
+        if (distance >= 1) continue;
+        const profile = 1 - distance;
+        const height = amplitude * Math.pow(profile, shape === 'circle' ? 1.45 : .9);
+        const index = wrap(y) * size + wrap(x);
+        heights[index] = Math.max(heights[index], height);
+      }
+    }
+  }
+
+  const normalCanvas = document.createElement('canvas');
+  normalCanvas.width = normalCanvas.height = size;
+  const normalContext = normalCanvas.getContext('2d', { willReadFrequently: true });
+  const normalImage = normalContext.createImageData(size, size);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const index = y * size + x;
+      const left = y * size + wrap(x - 1);
+      const right = y * size + wrap(x + 1);
+      const up = wrap(y - 1) * size + x;
+      const down = wrap(y + 1) * size + x;
+      const nx = -(heights[right] - heights[left]) * 5;
+      const ny = (heights[down] - heights[up]) * 5;
+      const length = Math.hypot(nx, ny, 1);
+      const pixel = index * 4;
+      normalImage.data[pixel] = Math.round((nx / length * .5 + .5) * 255);
+      normalImage.data[pixel + 1] = Math.round((ny / length * .5 + .5) * 255);
+      normalImage.data[pixel + 2] = Math.round((1 / length * .5 + .5) * 255);
+      normalImage.data[pixel + 3] = 255;
+
+      const height = heights[index];
+      wetRoughness[index] = height <= .025 ? 255
+        : height >= .12 ? 0
+          : Math.round(255 * (1 - (height - .025) / .095));
+      byteData[pixel] = byteData[pixel + 1] = byteData[pixel + 2] = 255;
+      byteData[pixel + 3] = 255;
+    }
+  }
+  normalContext.putImageData(normalImage, 0, 0);
+  const normalMap = new THREE.CanvasTexture(normalCanvas);
+  normalMap.colorSpace = THREE.NoColorSpace;
+  normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
+  normalMap.flipY = false;
+  normalMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const roughnessMap = new THREE.DataTexture(byteData, size, size, THREE.RGBAFormat, THREE.UnsignedByteType);
+  roughnessMap.colorSpace = THREE.NoColorSpace;
+  roughnessMap.wrapS = roughnessMap.wrapT = THREE.RepeatWrapping;
+  roughnessMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  roughnessMap.needsUpdate = true;
+  return { normalMap, roughnessMap, wetRoughness, byteData, size };
 };
 const mainLight = new THREE.DirectionalLight(0xffffff, 4.0);
 mainLight.position.set(5, 8, 5);
@@ -117,45 +200,27 @@ try {
     });
   });
   const textureLoader = new THREE.TextureLoader();
-  const makeFlatNormalFallback = () => {
-    const fallbackCanvas = document.createElement('canvas');
-    fallbackCanvas.width = fallbackCanvas.height = 2;
-    const context = fallbackCanvas.getContext('2d');
-    context.fillStyle = 'rgb(128, 128, 255)';
-    context.fillRect(0, 0, 2, 2);
-    return new THREE.CanvasTexture(fallbackCanvas);
-  };
-  const [gltf, brushedNormal, rainNormal] = await Promise.all([
+  const [gltf, brushedNormal] = await Promise.all([
     loadAsset(new GLTFLoader(), asset('device.glb'), '3D model'),
-    loadAsset(textureLoader, asset('brushed_normal.jpg'), 'brushed metal normal map'),
-    loadAsset(textureLoader, asset('rain_drops_normal.png'), 'rain drops normal map').catch(error => {
-      console.warn('Rain normal map unavailable; continuing without surface droplets.', error);
-      return makeFlatNormalFallback();
-    })
+    loadAsset(textureLoader, asset('brushed_normal.jpg'), 'brushed metal normal map')
   ]);
   brushedNormal.colorSpace = THREE.NoColorSpace;
   brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
   brushedNormal.repeat.set(4, 4);
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  rainNormalMap = rainNormal;
-  rainNormalMap.colorSpace = THREE.NoColorSpace;
-  rainNormalMap.wrapS = rainNormalMap.wrapT = THREE.RepeatWrapping;
-  rainNormalMap.repeat.set(1.5, 1.5);
-  rainNormalMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  clearcoatRainNormalMap = rainNormalMap.clone();
-  clearcoatRainNormalMap.repeat.set(3.5, 3.5);
-  clearcoatRainNormalMap.needsUpdate = true;
+  const waterMaps = createProceduralWaterMaps();
   const makeWetMaterial = options => {
     const material = new THREE.MeshPhysicalMaterial(options);
-    // Keep brushed grain while dry; the broad drop pattern and a second,
-    // finer clearcoat pattern build up as the surface gets wet.
+    // Dry metal keeps its brushed grain. Random procedural lenses and runnels
+    // gradually replace it as the surface gets wet.
     material.normalMap = brushedNormal;
     material.normalScale.set(.08, .08);
-    material.clearcoatNormalMap = clearcoatRainNormalMap;
+    material.roughness = .4;
+    material.roughnessMap = waterMaps.roughnessMap;
+    material.clearcoatNormalMap = waterMaps.normalMap;
     material.clearcoatNormalScale.set(0, 0);
     material.clearcoat = Math.max(material.clearcoat, .12);
     wetMaterials.set(material, {
-      dryRoughness: material.roughness,
       dryMetalness: material.metalness,
       dryNormalMap: material.normalMap,
       dryNormalScale: material.normalScale.clone()
@@ -317,19 +382,25 @@ try {
   const scrollContainer = findScrollContainer();
   const setRainProgress = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
+    const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
+    for (let i = 0; i < waterMaps.wetRoughness.length; i++) {
+      const value = Math.round(255 + (waterMaps.wetRoughness[i] - 255) * wetness);
+      const pixel = i * 4;
+      waterMaps.byteData[pixel + 1] = value;
+    }
+    waterMaps.roughnessMap.needsUpdate = true;
     wetMaterials.forEach((state, material) => {
-      const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
-      const nextNormalMap = wetness > .001 ? rainNormalMap : state.dryNormalMap;
+      const nextNormalMap = wetness > .001 ? waterMaps.normalMap : state.dryNormalMap;
       if (material.normalMap !== nextNormalMap) {
         material.normalMap = nextNormalMap;
         material.needsUpdate = true;
       }
-      material.normalScale.copy(state.dryNormalScale).lerp(new THREE.Vector2(8, 8), wetness);
-      material.clearcoatNormalScale.setScalar(5 * wetness);
+      material.normalScale.copy(state.dryNormalScale).lerp(new THREE.Vector2(2, 2), wetness);
+      material.clearcoatNormalScale.setScalar(2 * wetness);
       material.clearcoat = THREE.MathUtils.lerp(.12, 1, wetness);
-      material.clearcoatRoughness = THREE.MathUtils.lerp(.08, 0, wetness);
-      material.metalness = THREE.MathUtils.lerp(state.dryMetalness, .1, wetness);
-      material.roughness = THREE.MathUtils.lerp(state.dryRoughness, 0, wetness);
+      material.clearcoatRoughness = THREE.MathUtils.lerp(.08, .02, wetness);
+      material.metalness = state.dryMetalness;
+      material.roughness = .4;
     });
     dropletLight.intensity = 500 * progress;
     if (rainMaterial) rainMaterial.opacity = progress * .25;
@@ -386,11 +457,6 @@ try {
 const rainClock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const delta = Math.min(rainClock.getDelta(), .05);
-  if (rainNormalMap && clearcoatRainNormalMap) {
-    const waterWave = Math.sin(Date.now() * .001) * .005;
-    rainNormalMap.offset.x = waterWave;
-    clearcoatRainNormalMap.offset.x = waterWave;
-  }
   if (rainPositions && rainLengths) {
     let rainColorsChanged = false;
     for (let i = 0; i < rainLengths.length; i++) {
