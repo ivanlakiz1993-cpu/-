@@ -30,7 +30,7 @@ vec3 frostWeights(vec3 n) {
 }
 float frostHeightAt(vec3 p, vec3 w) {
   // Physical scale is identical on the lid and on the vertical walls.
-  p *= 1.4;
+  p *= 1.65;
   return dot(vec3(texture2D(uFrostHeight, p.yz).r,
                   texture2D(uFrostHeight, p.xz).r,
                   texture2D(uFrostHeight, p.xy).r), w);
@@ -85,13 +85,15 @@ float reach = mix(-0.10, 1.16, 1.0 - sqrt(max(1.0 - uFrostProgress, 0.0)));
 float frostFront = (1.0 - smoothstep(reach - 0.045, reach + 0.045, arrival))
                  * smoothstep(0.0, 0.045, uFrostProgress);
 float crystals = smoothstep(0.24, 0.72, crystalHeight);
-float frostDeposit = frostFront * clamp(0.015 + rim * 0.46 + crystals * (0.17 + rim * 0.32), 0.0, 1.0);
+float fineVeil = mix(0.045, 0.075, frostNoise(vFrostPosition * 2.8));
+float frostDeposit = frostFront * clamp(fineVeil + rim * 0.40 + crystals * (0.20 + rim * 0.24), 0.0, 1.0);
+float frostPresence = frostFront * (0.58 + 0.42 * clamp(rim + crystals * 1.8, 0.0, 1.0));
 // A translucent optical mixture leaves the black finish visible underneath.
 diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.40, 0.46, 0.53), frostDeposit * 0.55);
-roughnessFactor = mix(roughnessFactor, 0.96, frostDeposit);
+roughnessFactor = mix(roughnessFactor, 0.96, frostPresence);
 `)
       .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
-metalnessFactor = mix(metalnessFactor, 0.0, frostDeposit);`)
+metalnessFactor = mix(metalnessFactor, 0.0, frostPresence);`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
 // Standard Three.js gives normalMap priority over bumpMap. Apply the frozen
 // relief after the brushed-metal normal, and only behind the growing front.
