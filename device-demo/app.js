@@ -26,12 +26,50 @@ let rainGeometry;
 let rainMaterial;
 let rainNormalMap;
 let rainPositions;
+let rainColors;
 let rainLengths;
 let rainLeans;
 let rainWidth = 8;
 let rainDepth = 8;
 let rainFallSpeed = 1.5;
 const rainWindRatio = .3;
+const rainEdgeAlpha = (x, z) => {
+  const nx = x / (rainWidth / 2);
+  const nz = z / (rainDepth / 2);
+  const distance = Math.sqrt(nx * nx + nz * nz);
+  return 1 - THREE.MathUtils.smoothstep(distance, .68, 1);
+};
+const writeRainDrop = (index, x, y, z) => {
+  const offset = index * 6;
+  const colorOffset = index * 8;
+  const alpha = rainEdgeAlpha(x, z);
+  rainPositions[offset] = x;
+  rainPositions[offset + 1] = y;
+  rainPositions[offset + 2] = z;
+  rainPositions[offset + 3] = x + rainLeans[index];
+  rainPositions[offset + 4] = y - rainLengths[index];
+  rainPositions[offset + 5] = z;
+  rainColors[colorOffset] = rainColors[colorOffset + 1] = rainColors[colorOffset + 2] = 1;
+  rainColors[colorOffset + 3] = alpha;
+  rainColors[colorOffset + 4] = rainColors[colorOffset + 5] = rainColors[colorOffset + 6] = 1;
+  rainColors[colorOffset + 7] = alpha;
+};
+const randomRainPoint = () => {
+  const angle = Math.random() * Math.PI * 2;
+  const distance = Math.sqrt(Math.random());
+  return {
+    x: Math.cos(angle) * distance * rainWidth / 2,
+    z: Math.sin(angle) * distance * rainDepth / 2
+  };
+};
+const rainSpawnAtWindwardEdge = () => {
+  const nx = THREE.MathUtils.lerp(.82, .98, Math.random());
+  const nzLimit = Math.sqrt(1 - nx * nx);
+  return {
+    x: nx * rainWidth / 2,
+    z: (Math.random() * 2 - 1) * nzLimit * rainDepth / 2
+  };
+};
 const mainLight = new THREE.DirectionalLight(0xffffff, 4.0);
 mainLight.position.set(5, 8, 5);
 mainLight.castShadow = true;
@@ -46,7 +84,11 @@ scene.add(fillLight);
 const rimLight = new THREE.DirectionalLight(0xffffff, 2.0);
 rimLight.position.set(0, 5, -5);
 scene.add(rimLight);
-scene.add(new THREE.AmbientLight(0xffffff, .2));
+scene.add(new THREE.AmbientLight(0xffffff, .45));
+const upperPanelLight = new THREE.DirectionalLight(0xffffff, 1.8);
+upperPanelLight.position.set(-3, 7, 3);
+upperPanelLight.target.position.set(0, 0, 0);
+scene.add(upperPanelLight, upperPanelLight.target);
 let radius = 3;
 let halfHeight = .6;
 function resize() {
@@ -229,28 +271,23 @@ try {
   halfHeight = size.y / 2;
   const dropCount = 1000;
   rainPositions = new Float32Array(dropCount * 2 * 3);
+  rainColors = new Float32Array(dropCount * 2 * 4);
   rainLengths = new Float32Array(dropCount);
   rainLeans = new Float32Array(dropCount);
   rainWidth = Math.max(radius * 2.2, 8);
   rainDepth = Math.max(radius * 2.2, 8);
   for (let i = 0; i < dropCount; i++) {
-    const offset = i * 6;
-    const x = (Math.random() - .5) * rainWidth;
+    const { x, z } = randomRainPoint();
     const y = Math.random() * 20 - 5;
-    const z = (Math.random() - .5) * rainDepth;
     rainLengths[i] = THREE.MathUtils.lerp(.3, .5, Math.random());
     rainLeans[i] = rainLengths[i] * rainWindRatio;
-    rainPositions[offset] = x;
-    rainPositions[offset + 1] = y;
-    rainPositions[offset + 2] = z;
-    rainPositions[offset + 3] = x + rainLeans[i];
-    rainPositions[offset + 4] = y - rainLengths[i];
-    rainPositions[offset + 5] = z;
+    writeRainDrop(i, x, y, z);
   }
   rainGeometry = new THREE.BufferGeometry();
   rainGeometry.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
+  rainGeometry.setAttribute('color', new THREE.BufferAttribute(rainColors, 4));
   rainMaterial = new THREE.LineBasicMaterial({
-    color: 0xdde9f5, transparent: true, opacity: .15,
+    color: 0xdde9f5, vertexColors: true, transparent: true, opacity: .25,
     depthWrite: false, blending: THREE.AdditiveBlending
   });
   const rainLines = new THREE.LineSegments(rainGeometry, rainMaterial);
@@ -279,7 +316,7 @@ try {
       material.clearcoat = THREE.MathUtils.lerp(.12, 1, wetness);
       material.roughness = THREE.MathUtils.lerp(state.dryRoughness, .05, wetness);
     });
-    if (rainMaterial) rainMaterial.opacity = progress * .15;
+    if (rainMaterial) rainMaterial.opacity = progress * .25;
     // Let the rain build from a light drift into a strong shower as the user
     // moves through the transition between the first two sections.
     rainFallSpeed = THREE.MathUtils.lerp(1.5, 12, progress);
@@ -334,8 +371,10 @@ const rainClock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const delta = Math.min(rainClock.getDelta(), .05);
   if (rainPositions && rainLengths) {
+    let rainColorsChanged = false;
     for (let i = 0; i < rainLengths.length; i++) {
       const offset = i * 6;
+      const colorOffset = i * 8;
       const fallDistance = rainFallSpeed * delta;
       const windDistance = fallDistance * rainWindRatio;
       rainPositions[offset] -= windDistance;
@@ -343,18 +382,19 @@ renderer.setAnimationLoop(() => {
       rainPositions[offset + 3] -= windDistance;
       rainPositions[offset + 4] -= fallDistance;
       if (rainPositions[offset + 4] < -5 || rainPositions[offset] < -rainWidth / 2) {
-        const x = rainWidth / 2;
+        const { x, z } = rainSpawnAtWindwardEdge();
         const y = 10 + Math.random() * 5;
-        const z = (Math.random() - .5) * rainDepth;
-        rainPositions[offset] = x;
-        rainPositions[offset + 1] = y;
-        rainPositions[offset + 2] = z;
-        rainPositions[offset + 3] = x + rainLeans[i];
-        rainPositions[offset + 4] = y - rainLengths[i];
-        rainPositions[offset + 5] = z;
+        writeRainDrop(i, x, y, z);
+        rainColorsChanged = true;
+      } else {
+        const alpha = rainEdgeAlpha(rainPositions[offset], rainPositions[offset + 2]);
+        rainColors[colorOffset + 3] = alpha;
+        rainColors[colorOffset + 7] = alpha;
+        rainColorsChanged = true;
       }
     }
     rainGeometry.attributes.position.needsUpdate = true;
+    if (rainColorsChanged) rainGeometry.attributes.color.needsUpdate = true;
   }
   if (rainNormalMap) {
     rainNormalMap.offset.y -= .001 * delta * 60;
