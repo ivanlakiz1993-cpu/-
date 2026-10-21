@@ -97,16 +97,18 @@ function createFrostCrystalMask() {
     }
 
     ctx.strokeStyle = crystalGradient;
-    ctx.lineWidth = 1.0;
+    ctx.lineWidth = 0.5;
+    ctx.globalAlpha = 0.72;
     ctx.stroke();
     ctx.fillStyle = crystalGradient;
     ctx.beginPath();
     ctx.arc(cx, cy, Math.max(1, radius * .08), 0, Math.PI * 2);
     ctx.fill();
+    ctx.globalAlpha = 1;
   };
 
   for (let i = 0; i < 400; i++) {
-    const radius = 5 + Math.random() * 11;
+    const radius = 3 + Math.random() * 7;
     const cx = Math.random() * size;
     const cy = Math.random() * size;
     const rotation = Math.random() * Math.PI / 3;
@@ -276,13 +278,13 @@ try {
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   const frostCrystalMask = createFrostCrystalMask();
 
-  const makeWetMaterial = options => {
+  const makeWetMaterial = (options, geometryBounds) => {
     const material = new THREE.MeshPhysicalMaterial(options);
     // Preserve the dry metal; water is a separate dielectric surface.
     material.normalMap = brushedNormal;
     material.normalScale.set(.08, .08);
     material.bumpMap = frostCrystalMask;
-    material.bumpScale = .02;
+    material.bumpScale = .04;
     material.roughness = .2;
     material.clearcoat = 0;
     wetMaterials.set(material, true);
@@ -291,7 +293,9 @@ try {
       frostState.shader = shader;
       shader.uniforms.uFrostCrystalMask = { value: frostCrystalMask };
       shader.uniforms.uFrostProgress = { value: frostState.progress };
-      shader.uniforms.uFrostBumpScale = { value: 0.02 };
+      shader.uniforms.uFrostBumpScale = { value: 0.04 };
+      shader.uniforms.uFrostBoundsMin = { value: geometryBounds.min.clone() };
+      shader.uniforms.uFrostBoundsMax = { value: geometryBounds.max.clone() };
       // Keep the requested frost map in bumpMap, but disable Three's ungated
       // bump pass. The custom pass below applies its relief only to revealed ice.
       shader.uniforms.bumpScale.value = 0;
@@ -301,29 +305,65 @@ try {
 uniform sampler2D uFrostCrystalMask;
 uniform float uFrostProgress;
 uniform float uFrostBumpScale;
-float frostGrowthAt(vec2 uv) {
+uniform vec3 uFrostBoundsMin;
+uniform vec3 uFrostBoundsMax;
+varying vec3 vFrostLocalPosition;
+varying vec3 vFrostLocalNormal;
+float frostProgressAtEdges() {
+  vec3 extent = max(uFrostBoundsMax - uFrostBoundsMin, vec3(0.0001));
+  vec3 edgeDistance = max(min(vFrostLocalPosition - uFrostBoundsMin, uFrostBoundsMax - vFrostLocalPosition) / extent, vec3(0.0));
+  vec3 tangentWeight = 1.0 - abs(normalize(vFrostLocalNormal));
+  vec3 surfaceEdgeDistance = mix(vec3(1.0), edgeDistance, tangentWeight);
+  float nearestEdge = min(surfaceEdgeDistance.x, min(surfaceEdgeDistance.y, surfaceEdgeDistance.z));
+  float secondNearestEdge = min(
+    max(surfaceEdgeDistance.x, surfaceEdgeDistance.y),
+    min(max(surfaceEdgeDistance.x, surfaceEdgeDistance.z), max(surfaceEdgeDistance.y, surfaceEdgeDistance.z))
+  );
+  float edgeFactor = 1.0 - smoothstep(0.015, 0.2, nearestEdge);
+  float cornerFactor = 1.0 - smoothstep(0.015, 0.2, secondNearestEdge);
+  // A larger exponent delays growth in the middle while preserving full frost
+  // coverage at the end. Two nearby edges accelerate growth at the corners.
+  float edgeExponent = mix(2.2, 1.0, edgeFactor);
+  float growthExponent = mix(edgeExponent, 0.72, cornerFactor);
+  return pow(max(uFrostProgress, 0.0), growthExponent);
+}
+float frostCoverageAt(vec2 uv) {
   vec4 crystal = texture2D(uFrostCrystalMask, uv);
   // Canvas crystals encode white at the nucleation point and fade toward
   // transparent tips, so invert red to reveal the branches from center out.
   float distanceFromCenter = 1.0 - crystal.r;
-  float reveal = 1.0 - smoothstep(uFrostProgress - 0.02, uFrostProgress + 0.02, distanceFromCenter);
+  float localProgress = frostProgressAtEdges();
+  float reveal = 1.0 - smoothstep(localProgress - 0.15, localProgress + 0.05, distanceFromCenter);
   return crystal.a * reveal * smoothstep(0.0, 0.035, uFrostProgress);
 }
 float frostHeightAt(vec2 uv) {
   vec4 crystal = texture2D(uFrostCrystalMask, uv);
-  return crystal.r * frostGrowthAt(uv);
+  return crystal.r * frostCoverageAt(uv);
 }
 `
+      );
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <common>',
+        `#include <common>
+varying vec3 vFrostLocalPosition;
+varying vec3 vFrostLocalNormal;`
+      );
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <begin_vertex>',
+        `#include <begin_vertex>
+vFrostLocalPosition = position;
+vFrostLocalNormal = normalize(normal);`
       );
       shader.fragmentShader = shader.fragmentShader.replace(
         '#include <roughnessmap_fragment>',
         `#include <roughnessmap_fragment>
-        float frostFactor = frostGrowthAt(vBumpMapUv);
+        float frostCoverage = frostCoverageAt(vBumpMapUv);
+        float frostFactor = frostCoverage * 0.55;
         vec3 metalColor = diffuseColor.rgb;
         vec3 frostColor = vec3(0.9, 0.94, 0.98);
         vec3 finalColor = mix(metalColor, frostColor, frostFactor);
         diffuseColor.rgb = finalColor;
-        roughnessFactor = mix(roughnessFactor, 1.0, frostFactor);`
+        roughnessFactor = mix(roughnessFactor, 1.0, frostCoverage);`
       );
       shader.fragmentShader = shader.fragmentShader.replace(
         '#include <normal_fragment_maps>',
@@ -338,7 +378,7 @@ float frostHeightAt(vec2 uv) {
         #endif`
       );
     };
-    material.customProgramCacheKey = () => 'device-frost-crystal-growth-v2';
+    material.customProgramCacheKey = () => 'device-frost-crystal-growth-v3';
     frostMaterials.set(material, frostState);
     return material;
   };
@@ -348,6 +388,8 @@ float frostHeightAt(vec2 uv) {
     child.castShadow = child.receiveShadow = true;
     const oldMaterials = Array.isArray(child.material) ? child.material : [child.material];
     const meshName = (child.name || '').toLowerCase();
+    if (!child.geometry.boundingBox) child.geometry.computeBoundingBox();
+    const localBounds = child.geometry.boundingBox;
     const bounds = new THREE.Box3().setFromObject(child);
     const dimensions = bounds.getSize(new THREE.Vector3());
     const center = bounds.getCenter(new THREE.Vector3());
@@ -398,7 +440,7 @@ float frostHeightAt(vec2 uv) {
         return makeWetMaterial({
           name: 'Dark_Titanium_Front_Panel', color: 0x181818, metalness: .95, roughness: .35,
           clearcoat: 0, clearcoatRoughness: .08
-        });
+        }, localBounds);
       }
 
       // The combined IEC blades retain their own Metal_Power_Pin material
@@ -417,7 +459,7 @@ float frostHeightAt(vec2 uv) {
         if (largestDimension > 1.5) return makeWetMaterial({
           name: 'Black_Anodized_Aluminum', color: 0x141414, metalness: .85, roughness: .38,
           clearcoat: 0, clearcoatRoughness: .08
-        });
+        }, localBounds);
         return new THREE.MeshStandardMaterial({
           name: 'Plastic_Internal', color: 0x0f0f0f, metalness: 0, roughness: .75
         });
@@ -436,7 +478,7 @@ float frostHeightAt(vec2 uv) {
         return makeWetMaterial({
           name: 'Plastic_Matte', color: 0x0a0a0a, metalness: .15, roughness: .55,
           clearcoat: 0, clearcoatRoughness: .08
-        });
+        }, localBounds);
       }
 
       // Printed legends and other non-metal details retain the Blender tone.
