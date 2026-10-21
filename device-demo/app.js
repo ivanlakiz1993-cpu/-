@@ -19,6 +19,8 @@ renderer.setClearColor(0x000000, 0);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
 const rainProjection = new THREE.Vector3();
+let rainNormalMap = null;
+let clearcoatRainNormalMap = null;
 const pivot = new THREE.Group();
 pivot.scale.setScalar(.95);
 scene.add(pivot);
@@ -135,17 +137,21 @@ try {
   brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
   brushedNormal.repeat.set(4, 4);
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  rainNormal.colorSpace = THREE.NoColorSpace;
-  rainNormal.wrapS = rainNormal.wrapT = THREE.RepeatWrapping;
-  rainNormal.repeat.set(1, 1);
-  rainNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  rainNormalMap = rainNormal;
+  rainNormalMap.colorSpace = THREE.NoColorSpace;
+  rainNormalMap.wrapS = rainNormalMap.wrapT = THREE.RepeatWrapping;
+  rainNormalMap.repeat.set(1.5, 1.5);
+  rainNormalMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  clearcoatRainNormalMap = rainNormalMap.clone();
+  clearcoatRainNormalMap.repeat.set(3.5, 3.5);
+  clearcoatRainNormalMap.needsUpdate = true;
   const makeWetMaterial = options => {
     const material = new THREE.MeshPhysicalMaterial(options);
-    // Keep the brushed grain on the metal and put the water relief on its own
-    // glossy clearcoat layer, so droplets read as liquid lenses over the plate.
+    // Keep brushed grain while dry; the broad drop pattern and a second,
+    // finer clearcoat pattern build up as the surface gets wet.
     material.normalMap = brushedNormal;
     material.normalScale.set(.08, .08);
-    material.clearcoatNormalMap = rainNormal;
+    material.clearcoatNormalMap = clearcoatRainNormalMap;
     material.clearcoatNormalScale.set(0, 0);
     material.clearcoat = Math.max(material.clearcoat, .12);
     wetMaterials.set(material, {
@@ -313,15 +319,15 @@ try {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     wetMaterials.forEach((state, material) => {
       const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
-      const nextNormalMap = wetness > .001 ? rainNormal : state.dryNormalMap;
+      const nextNormalMap = wetness > .001 ? rainNormalMap : state.dryNormalMap;
       if (material.normalMap !== nextNormalMap) {
         material.normalMap = nextNormalMap;
         material.needsUpdate = true;
       }
       material.normalScale.copy(state.dryNormalScale).lerp(new THREE.Vector2(8, 8), wetness);
-      material.clearcoatNormalScale.setScalar(.6 * wetness);
+      material.clearcoatNormalScale.setScalar(5 * wetness);
       material.clearcoat = THREE.MathUtils.lerp(.12, 1, wetness);
-      material.clearcoatRoughness = THREE.MathUtils.lerp(.08, .02, wetness);
+      material.clearcoatRoughness = THREE.MathUtils.lerp(.08, 0, wetness);
       material.metalness = THREE.MathUtils.lerp(state.dryMetalness, .1, wetness);
       material.roughness = THREE.MathUtils.lerp(state.dryRoughness, 0, wetness);
     });
@@ -380,6 +386,11 @@ try {
 const rainClock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const delta = Math.min(rainClock.getDelta(), .05);
+  if (rainNormalMap && clearcoatRainNormalMap) {
+    const waterWave = Math.sin(Date.now() * .001) * .005;
+    rainNormalMap.offset.x = waterWave;
+    clearcoatRainNormalMap.offset.x = waterWave;
+  }
   if (rainPositions && rainLengths) {
     let rainColorsChanged = false;
     for (let i = 0; i < rainLengths.length; i++) {
