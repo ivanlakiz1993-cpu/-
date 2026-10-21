@@ -1,5 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
+import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261021-frost-front-1';
 import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-frost-growth-1';
 
 const canvas = document.querySelector('[data-testing-model], #device');
@@ -26,156 +27,6 @@ scene.add(pivot);
 const wetMaterials = new Map();
 const frostMaterials = new Map();
 
-function createFrostCrystalMask() {
-  const size = 1024;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, size, size);
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-
-  const drawGrowthLine = (x1, y1, x2, y2) => {
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-  };
-
-  const drawCrystal = (cx, cy, radius, rotation) => {
-    const crystalGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-    crystalGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    crystalGradient.addColorStop(.62, 'rgba(176, 186, 198, .9)');
-    crystalGradient.addColorStop(.9, 'rgba(72, 82, 96, .58)');
-    crystalGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.beginPath();
-    for (let arm = 0; arm < 6; arm++) {
-      const angle = rotation + arm * Math.PI / 3;
-      const length = radius * (.82 + Math.random() * .18);
-      const tipX = cx + Math.cos(angle) * length;
-      const tipY = cy + Math.sin(angle) * length;
-      drawGrowthLine(cx, cy, tipX, tipY);
-
-      for (const t of [.34, .59, .8]) {
-        const rootX = cx + Math.cos(angle) * length * t;
-        const rootY = cy + Math.sin(angle) * length * t;
-        const twigLength = radius * (.2 - t * .07);
-        for (const side of [-1, 1]) {
-          const twigAngle = angle + side * Math.PI / 3;
-          const endX = rootX + Math.cos(twigAngle) * twigLength;
-          const endY = rootY + Math.sin(twigAngle) * twigLength;
-          drawGrowthLine(rootX, rootY, endX, endY);
-
-          if (t === .59) {
-            const forkX = rootX + Math.cos(twigAngle) * twigLength * .58;
-            const forkY = rootY + Math.sin(twigAngle) * twigLength * .58;
-            const forkLength = radius * .075;
-            for (const forkSide of [-1, 1]) {
-              const forkAngle = twigAngle + forkSide * Math.PI / 3;
-              drawGrowthLine(
-                forkX, forkY,
-                forkX + Math.cos(forkAngle) * forkLength,
-                forkY + Math.sin(forkAngle) * forkLength
-              );
-            }
-          }
-        }
-      }
-
-      if (arm % 2 === 0) {
-        const rootDistance = .52;
-        const rootX = cx + Math.cos(angle) * radius * rootDistance;
-        const rootY = cy + Math.sin(angle) * radius * rootDistance;
-        const needleLength = radius * .14;
-        for (const side of [-1, 1]) {
-          const needleAngle = angle + side * Math.PI / 2;
-          drawGrowthLine(
-            rootX, rootY,
-            rootX + Math.cos(needleAngle) * needleLength,
-            rootY + Math.sin(needleAngle) * needleLength
-          );
-        }
-      }
-    }
-
-    ctx.strokeStyle = crystalGradient;
-    ctx.lineWidth = 0.5;
-    ctx.globalAlpha = 0.72;
-    ctx.stroke();
-    ctx.fillStyle = crystalGradient;
-    ctx.beginPath();
-    ctx.arc(cx, cy, Math.max(1, radius * .08), 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  };
-
-  for (let i = 0; i < 400; i++) {
-    const radius = 3 + Math.random() * 7;
-    const cx = Math.random() * size;
-    const cy = Math.random() * size;
-    const rotation = Math.random() * Math.PI / 3;
-    const offsetsX = [0, ...(cx < radius ? [size] : []), ...(cx > size - radius ? [-size] : [])];
-    const offsetsY = [0, ...(cy < radius ? [size] : []), ...(cy > size - radius ? [-size] : [])];
-    for (const offsetX of offsetsX) for (const offsetY of offsetsY) {
-      drawCrystal(cx + offsetX, cy + offsetY, radius, rotation);
-    }
-  }
-
-  const frostCrystalMask = new THREE.CanvasTexture(canvas);
-  frostCrystalMask.name = 'Frost_Crystal_Threshold_Mask';
-  frostCrystalMask.colorSpace = THREE.NoColorSpace;
-  frostCrystalMask.wrapS = frostCrystalMask.wrapT = THREE.RepeatWrapping;
-  frostCrystalMask.repeat.set(4, 4);
-  frostCrystalMask.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  frostCrystalMask.needsUpdate = true;
-  return frostCrystalMask;
-}
-
-function addEdgeIcicles(root, bounds) {
-  let seed = 86231;
-  const random = () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; };
-  const geometry = new THREE.ConeGeometry(1, 1, 6);
-  const material = new THREE.MeshPhysicalMaterial({
-    color: 0xa9bfd1, metalness: 0, roughness: .22,
-    transmission: .55, thickness: .04, transparent: true, opacity: .72,
-    depthWrite: false
-  });
-  const count = 72;
-  const mesh = new THREE.InstancedMesh(geometry, material, count);
-  mesh.name = 'Growing_Edge_Icicles';
-  mesh.visible = false;
-  mesh.frustumCulled = false;
-  root.add(mesh);
-  const drops = [];
-  const min = bounds.min, max = bounds.max;
-  for (let i = 0; i < count; i++) {
-    const onLongEdge = i < 56;
-    const t = random();
-    const x = onLongEdge ? THREE.MathUtils.lerp(min.x, max.x, t)
-      : (i < 64 ? min.x : max.x);
-    const z = onLongEdge ? (i % 2 ? max.z : min.z)
-      : THREE.MathUtils.lerp(min.z, max.z, t);
-    const length = .035 + random() * .09;
-    const radius = .006 + random() * .006;
-    drops.push({ x, y: max.y - length * .5, z, length, radius });
-  }
-  const matrix = new THREE.Matrix4();
-  const position = new THREE.Vector3();
-  const scale = new THREE.Vector3();
-  const rotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI);
-  let last = -1;
-  return progress => {
-    if (Math.abs(progress - last) < .003) return;
-    last = progress;
-    mesh.visible = progress > .02;
-    drops.forEach((drop, i) => {
-      position.set(drop.x, drop.y, drop.z);
-      scale.set(drop.radius * progress, drop.length * progress, drop.radius * progress);
-      matrix.compose(position, rotation, scale);
-      mesh.setMatrixAt(i, matrix);
-    });
-    mesh.instanceMatrix.needsUpdate = true;
-    material.opacity = .72 * progress;
-  };
-}
 let rainGeometry;
 let rainMaterial;
 let rainPositions;
@@ -268,118 +119,30 @@ try {
     });
   });
   const textureLoader = new THREE.TextureLoader();
-  const [gltf, brushedNormal] = await Promise.all([
+  const [gltf, brushedNormal, frostHeight] = await Promise.all([
     loadAsset(new GLTFLoader(), asset('device.glb'), '3D model'),
-    loadAsset(textureLoader, asset('brushed_normal.jpg'), 'brushed metal normal map')
+    loadAsset(textureLoader, asset('brushed_normal.jpg'), 'brushed metal normal map'),
+    loadAsset(textureLoader, asset('frost-height.png'), 'frost crystal height map')
   ]);
   brushedNormal.colorSpace = THREE.NoColorSpace;
   brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
   brushedNormal.repeat.set(4, 4);
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const frostCrystalMask = createFrostCrystalMask();
-
-  const makeWetMaterial = (options, geometryBounds) => {
+  frostHeight.colorSpace = THREE.NoColorSpace;
+  frostHeight.wrapS = frostHeight.wrapT = THREE.RepeatWrapping;
+  frostHeight.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  gltf.scene.updateMatrixWorld(true);
+  const toDeviceRoot = gltf.scene.matrixWorld.clone().invert();
+  const enclosureBounds = new THREE.Box3();
+  const edgeBounds = new THREE.Box3();
+  const makeWetMaterial = (options, toDevice) => {
     const material = new THREE.MeshPhysicalMaterial(options);
-    // Preserve the dry metal; water is a separate dielectric surface.
     material.normalMap = brushedNormal;
     material.normalScale.set(.08, .08);
-    material.bumpMap = frostCrystalMask;
-    material.bumpScale = .04;
     material.roughness = .2;
     material.clearcoat = 0;
     wetMaterials.set(material, true);
-    const frostState = { progress: 0, shader: null };
-    material.onBeforeCompile = shader => {
-      frostState.shader = shader;
-      shader.uniforms.uFrostCrystalMask = { value: frostCrystalMask };
-      shader.uniforms.uFrostProgress = { value: frostState.progress };
-      shader.uniforms.uFrostBumpScale = { value: 0.04 };
-      shader.uniforms.uFrostBoundsMin = { value: geometryBounds.min.clone() };
-      shader.uniforms.uFrostBoundsMax = { value: geometryBounds.max.clone() };
-      // Keep the requested frost map in bumpMap, but disable Three's ungated
-      // bump pass. The custom pass below applies its relief only to revealed ice.
-      shader.uniforms.bumpScale.value = 0;
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <common>',
-        `#include <common>
-uniform sampler2D uFrostCrystalMask;
-uniform float uFrostProgress;
-uniform float uFrostBumpScale;
-uniform vec3 uFrostBoundsMin;
-uniform vec3 uFrostBoundsMax;
-varying vec3 vFrostLocalPosition;
-varying vec3 vFrostLocalNormal;
-float frostProgressAtEdges() {
-  vec3 extent = max(uFrostBoundsMax - uFrostBoundsMin, vec3(0.0001));
-  vec3 edgeDistance = max(min(vFrostLocalPosition - uFrostBoundsMin, uFrostBoundsMax - vFrostLocalPosition) / extent, vec3(0.0));
-  vec3 tangentWeight = 1.0 - abs(normalize(vFrostLocalNormal));
-  vec3 surfaceEdgeDistance = mix(vec3(1.0), edgeDistance, tangentWeight);
-  float nearestEdge = min(surfaceEdgeDistance.x, min(surfaceEdgeDistance.y, surfaceEdgeDistance.z));
-  float secondNearestEdge = min(
-    max(surfaceEdgeDistance.x, surfaceEdgeDistance.y),
-    min(max(surfaceEdgeDistance.x, surfaceEdgeDistance.z), max(surfaceEdgeDistance.y, surfaceEdgeDistance.z))
-  );
-  float edgeFactor = 1.0 - smoothstep(0.015, 0.2, nearestEdge);
-  float cornerFactor = 1.0 - smoothstep(0.015, 0.2, secondNearestEdge);
-  // A larger exponent delays growth in the middle while preserving full frost
-  // coverage at the end. Two nearby edges accelerate growth at the corners.
-  float edgeExponent = mix(2.2, 1.0, edgeFactor);
-  float growthExponent = mix(edgeExponent, 0.72, cornerFactor);
-  return pow(max(uFrostProgress, 0.0), growthExponent);
-}
-float frostCoverageAt(vec2 uv) {
-  vec4 crystal = texture2D(uFrostCrystalMask, uv);
-  // Canvas crystals encode white at the nucleation point and fade toward
-  // transparent tips, so invert red to reveal the branches from center out.
-  float distanceFromCenter = 1.0 - crystal.r;
-  float localProgress = frostProgressAtEdges();
-  float reveal = 1.0 - smoothstep(localProgress - 0.15, localProgress + 0.05, distanceFromCenter);
-  return crystal.a * reveal * smoothstep(0.0, 0.035, uFrostProgress);
-}
-float frostHeightAt(vec2 uv) {
-  vec4 crystal = texture2D(uFrostCrystalMask, uv);
-  return crystal.r * frostCoverageAt(uv);
-}
-`
-      );
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <common>',
-        `#include <common>
-varying vec3 vFrostLocalPosition;
-varying vec3 vFrostLocalNormal;`
-      );
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <begin_vertex>',
-        `#include <begin_vertex>
-vFrostLocalPosition = position;
-vFrostLocalNormal = normalize(normal);`
-      );
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <roughnessmap_fragment>',
-        `#include <roughnessmap_fragment>
-        float frostCoverage = frostCoverageAt(vBumpMapUv);
-        float frostFactor = frostCoverage * 0.55;
-        vec3 metalColor = diffuseColor.rgb;
-        vec3 frostColor = vec3(0.9, 0.94, 0.98);
-        vec3 finalColor = mix(metalColor, frostColor, frostFactor);
-        diffuseColor.rgb = finalColor;
-        roughnessFactor = mix(roughnessFactor, 1.0, frostCoverage);`
-      );
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <normal_fragment_maps>',
-        `#include <normal_fragment_maps>
-        #ifdef USE_BUMPMAP
-          vec2 frostUvDx = dFdx(vBumpMapUv);
-          vec2 frostUvDy = dFdy(vBumpMapUv);
-          float frostHeight = frostHeightAt(vBumpMapUv) * uFrostBumpScale;
-          float frostHeightX = frostHeightAt(vBumpMapUv + frostUvDx) * uFrostBumpScale;
-          float frostHeightY = frostHeightAt(vBumpMapUv + frostUvDy) * uFrostBumpScale;
-          normal = perturbNormalArb(-vViewPosition, normal, vec2(frostHeightX - frostHeight, frostHeightY - frostHeight), faceDirection);
-        #endif`
-      );
-    };
-    material.customProgramCacheKey = () => 'device-frost-crystal-growth-v3';
-    frostMaterials.set(material, frostState);
+    attachFrostMaterial(material, frostHeight, enclosureBounds, toDevice, frostMaterials);
     return material;
   };
   gltf.scene.traverse(child => {
@@ -390,6 +153,7 @@ vFrostLocalNormal = normalize(normal);`
     const meshName = (child.name || '').toLowerCase();
     if (!child.geometry.boundingBox) child.geometry.computeBoundingBox();
     const localBounds = child.geometry.boundingBox;
+    const toDevice = toDeviceRoot.clone().multiply(child.matrixWorld);
     const bounds = new THREE.Box3().setFromObject(child);
     const dimensions = bounds.getSize(new THREE.Vector3());
     const center = bounds.getCenter(new THREE.Vector3());
@@ -440,7 +204,7 @@ vFrostLocalNormal = normalize(normal);`
         return makeWetMaterial({
           name: 'Dark_Titanium_Front_Panel', color: 0x181818, metalness: .95, roughness: .35,
           clearcoat: 0, clearcoatRoughness: .08
-        }, localBounds);
+        }, toDevice);
       }
 
       // The combined IEC blades retain their own Metal_Power_Pin material
@@ -459,7 +223,7 @@ vFrostLocalNormal = normalize(normal);`
         if (largestDimension > 1.5) return makeWetMaterial({
           name: 'Black_Anodized_Aluminum', color: 0x141414, metalness: .85, roughness: .38,
           clearcoat: 0, clearcoatRoughness: .08
-        }, localBounds);
+        }, toDevice);
         return new THREE.MeshStandardMaterial({
           name: 'Plastic_Internal', color: 0x0f0f0f, metalness: 0, roughness: .75
         });
@@ -478,7 +242,7 @@ vFrostLocalNormal = normalize(normal);`
         return makeWetMaterial({
           name: 'Plastic_Matte', color: 0x0a0a0a, metalness: .15, roughness: .55,
           clearcoat: 0, clearcoatRoughness: .08
-        }, localBounds);
+        }, toDevice);
       }
 
       // Printed legends and other non-metal details retain the Blender tone.
@@ -490,6 +254,11 @@ vFrostLocalNormal = normalize(normal);`
         opacity: source?.opacity ?? 1
       });
     });
+    if (largestDimension > 1.5 && newMaterials.some(material => wetMaterials.has(material))) {
+      const deviceBounds = localBounds.clone().applyMatrix4(toDevice);
+      enclosureBounds.union(deviceBounds);
+      if (!meshName.includes('panel')) edgeBounds.union(deviceBounds);
+    }
     oldMaterials.forEach(source => source?.dispose());
     child.material = Array.isArray(child.material) ? newMaterials : newMaterials[0];
     newMaterials.forEach(material => { material.needsUpdate = true; });
@@ -501,7 +270,7 @@ vFrostLocalNormal = normalize(normal);`
   halfHeight = size.y / 2;
   const waterReflections = createWaterReflections(renderer);
   const surfaceWater = createSurfaceWater(gltf.scene, wetMaterials, waterReflections.texture);
-  const icicleProgress = addEdgeIcicles(gltf.scene, bounds);
+  const icicleProgress = createEdgeFrost(gltf.scene, edgeBounds.isEmpty() ? enclosureBounds : edgeBounds);
   const dropCount = 1000;
   rainPositions = new Float32Array(dropCount * 2 * 3);
   rainColors = new Float32Array(dropCount * 2 * 4);
@@ -554,7 +323,7 @@ vFrostLocalNormal = normalize(normal);`
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     frostMaterials.forEach((state, material) => {
       state.progress = progress;
-      if (state.shader) state.shader.uniforms.uFrostProgress.value = progress;
+      state.uniform.value = progress;
     });
     icicleProgress(progress);
   };
@@ -597,7 +366,7 @@ vFrostLocalNormal = normalize(normal);`
     onLeaveBack: () => setRainProgress(1),
     onLeave: () => setRainProgress(0)
   });
-  const climateSection = document.querySelector('.climate-tests');
+  const climateSection = document.querySelector('.climate-tests') || (!equipment && document.querySelector('.scroll-area'));
   let frostProgressLogBucket = -1;
   const updateFrostProgress = self => {
     const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
@@ -610,8 +379,8 @@ vFrostLocalNormal = normalize(normal);`
   };
   if (climateSection) ScrollTrigger.create({
     trigger: climateSection,
-    start: 'top bottom',
-    end: 'bottom top',
+    start: equipment ? 'top bottom' : 'top -140%',
+    end: equipment ? 'bottom top' : 'bottom bottom',
     scrub: .8,
     scroller: scrollContainer,
     onUpdate: updateFrostProgress,
