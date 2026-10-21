@@ -25,6 +25,7 @@ const wetMaterials = new Set();
 let rainGeometry;
 let rainMaterial;
 let rainPositions;
+let rainFallSpeed = 1.5;
 const mainLight = new THREE.DirectionalLight(0xffffff, 4.0);
 mainLight.position.set(5, 8, 5);
 mainLight.castShadow = true;
@@ -247,16 +248,33 @@ try {
   scene.add(new THREE.Points(rainGeometry, rainMaterial));
   resize();
   gsap.registerPlugin(ScrollTrigger);
+  const findScrollContainer = () => {
+    // Use a scrollable wrapper when the page is embedded in a platform that
+    // scrolls an element inside the document; otherwise this document's
+    // viewport (including an iframe viewport) is the scroller.
+    let node = equipment?.parentElement;
+    while (node && node !== document.body && node !== document.documentElement) {
+      const overflowY = getComputedStyle(node).overflowY;
+      if (/(auto|scroll|overlay)/.test(overflowY) && node.scrollHeight > node.clientHeight + 1) return node;
+      node = node.parentElement;
+    }
+    return window;
+  };
+  const scrollContainer = findScrollContainer();
   const updateRainProgress = self => {
     const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
     wetMaterials.forEach(material => { material.clearcoat = progress; });
     if (rainMaterial) rainMaterial.opacity = progress * .6;
+    // Let the rain build from a light drift into a strong shower as the user
+    // moves through the testing section.
+    rainFallSpeed = THREE.MathUtils.lerp(1.5, 12, progress);
   };
   gsap.to(pivot.rotation, {
     y: Math.PI * 1.5, ease: 'none',
     scrollTrigger: {
       trigger: equipment ? '[data-testing-journey]' : '.scroll-area',
       start: 'top top', end: 'bottom bottom', scrub: 1, invalidateOnRefresh: true,
+      scroller: scrollContainer,
       onUpdate: updateRainProgress,
       onRefresh: updateRainProgress
     }
@@ -273,7 +291,7 @@ renderer.setAnimationLoop(() => {
   const delta = Math.min(rainClock.getDelta(), .05);
   if (rainPositions) {
     for (let i = 1; i < rainPositions.length; i += 3) {
-      rainPositions[i] -= 4.5 * delta;
+      rainPositions[i] -= rainFallSpeed * delta;
       if (rainPositions[i] < -5) rainPositions[i] = 10;
     }
     rainGeometry.attributes.position.needsUpdate = true;
