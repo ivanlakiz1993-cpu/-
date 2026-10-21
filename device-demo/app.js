@@ -65,7 +65,7 @@ const randomRainPoint = () => {
 };
 const createProceduralWaterMaps = (size = 512) => {
   const heights = new Float32Array(size * size);
-  const wetRoughness = new Uint8Array(size * size);
+  const droplets = new Uint8Array(size * size);
   const byteData = new Uint8Array(size * size * 4);
   const wrap = value => (value + size) % size;
   const randomBetween = (min, max) => min + Math.random() * (max - min);
@@ -77,13 +77,21 @@ const createProceduralWaterMaps = (size = 512) => {
       + .2 * Math.sin((u + v) * 6);
   };
 
-  for (let drop = 0; drop < 230; drop++) {
-    const shape = Math.random() > .5 ? 'circle' : 'trail';
+  // Most droplets are tiny beads; a few larger beads and runnels break up
+  // the distribution without turning the lid into broad embossed patches.
+  const groups = [
+    { count: 2600, min: 1.1, max: 2.4 },
+    { count: 520, min: 2.5, max: 5 },
+    { count: 90, min: 5.5, max: 11 },
+    { count: 10, min: 12, max: 21 }
+  ];
+  for (const group of groups) for (let drop = 0; drop < group.count; drop++) {
+    const shape = Math.random() > .995 ? 'trail' : 'circle';
     const centerX = Math.floor(Math.random() * size);
     const centerY = Math.floor(Math.random() * size);
-    const radiusX = shape === 'circle' ? randomBetween(4, 12) : randomBetween(2, 5);
-    const radiusY = shape === 'circle' ? randomBetween(4, 12) : randomBetween(18, 58);
-    const amplitude = shape === 'circle' ? randomBetween(.55, 1) : randomBetween(.22, .55);
+    const radiusX = shape === 'circle' ? randomBetween(group.min, group.max) : randomBetween(1.8, 4);
+    const radiusY = shape === 'circle' ? radiusX * randomBetween(.8, 1.25) : randomBetween(12, 32);
+    const amplitude = shape === 'circle' ? Math.min(1.4, radiusX * .075) : radiusX * .035;
     const bend = randomBetween(-1, 1);
     const phase = Math.random() * Math.PI * 2;
 
@@ -97,12 +105,14 @@ const createProceduralWaterMaps = (size = 512) => {
         const x = centerX + dx;
         const y = centerY + dy;
         const warpedX = (dx - curve) / (radiusX * taper);
-        const distance = Math.hypot(warpedX, along) + noise(wrap(x), wrap(y)) * .075;
+        const warp = radiusX > 4 || shape === 'trail' ? noise(wrap(x), wrap(y)) * .055 : 0;
+        const distance = Math.hypot(warpedX, along) + warp;
         if (distance >= 1) continue;
-        const profile = 1 - distance;
-        const height = amplitude * Math.pow(profile, shape === 'circle' ? 1.45 : .9);
+        const height = amplitude * Math.pow(Math.max(0, 1 - distance * distance), 1.2);
         const index = wrap(y) * size + wrap(x);
         heights[index] = Math.max(heights[index], height);
+        const coverage = Math.min(1, Math.max(0, (1 - distance) * Math.min(radiusX, 7)));
+        droplets[index] = Math.max(droplets[index], Math.round(coverage * 255));
       }
     }
   }
@@ -118,8 +128,8 @@ const createProceduralWaterMaps = (size = 512) => {
       const right = y * size + wrap(x + 1);
       const up = wrap(y - 1) * size + x;
       const down = wrap(y + 1) * size + x;
-      const nx = -(heights[right] - heights[left]) * 5;
-      const ny = (heights[down] - heights[up]) * 5;
+      const nx = -(heights[right] - heights[left]) * 1.6;
+      const ny = (heights[down] - heights[up]) * 1.6;
       const length = Math.hypot(nx, ny, 1);
       const pixel = index * 4;
       normalImage.data[pixel] = Math.round((nx / length * .5 + .5) * 255);
@@ -127,11 +137,8 @@ const createProceduralWaterMaps = (size = 512) => {
       normalImage.data[pixel + 2] = Math.round((1 / length * .5 + .5) * 255);
       normalImage.data[pixel + 3] = 255;
 
-      const height = heights[index];
-      wetRoughness[index] = height <= .025 ? 255
-        : height >= .12 ? 0
-          : Math.round(255 * (1 - (height - .025) / .095));
-      byteData[pixel] = byteData[pixel + 1] = byteData[pixel + 2] = 255;
+      byteData[pixel] = 0;
+      byteData[pixel + 1] = byteData[pixel + 2] = 255;
       byteData[pixel + 3] = 255;
     }
   }
@@ -141,12 +148,12 @@ const createProceduralWaterMaps = (size = 512) => {
   normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
   normalMap.flipY = false;
   normalMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const roughnessMap = new THREE.DataTexture(byteData, size, size, THREE.RGBAFormat, THREE.UnsignedByteType);
-  roughnessMap.colorSpace = THREE.NoColorSpace;
-  roughnessMap.wrapS = roughnessMap.wrapT = THREE.RepeatWrapping;
-  roughnessMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  roughnessMap.needsUpdate = true;
-  return { normalMap, roughnessMap, wetRoughness, byteData, size };
+  const surfaceMap = new THREE.DataTexture(byteData, size, size, THREE.RGBAFormat, THREE.UnsignedByteType);
+  surfaceMap.colorSpace = THREE.NoColorSpace;
+  surfaceMap.wrapS = surfaceMap.wrapT = THREE.RepeatWrapping;
+  surfaceMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  surfaceMap.needsUpdate = true;
+  return { normalMap, surfaceMap, droplets, byteData };
 };
 const mainLight = new THREE.DirectionalLight(0xffffff, 4.0);
 mainLight.position.set(5, 8, 5);
@@ -168,8 +175,8 @@ const upperPanelLight = new THREE.DirectionalLight(0xffffff, 1.8);
 upperPanelLight.position.set(-5, 3.5, 5);
 upperPanelLight.target.position.set(0, 0, 0);
 scene.add(upperPanelLight, upperPanelLight.target);
-const dropletLight = new THREE.PointLight(0xf8fbff, 0, 0, 2);
-dropletLight.position.set(10, 15, 10);
+const dropletLight = new THREE.PointLight(0xffffff, 0, 0, 2);
+dropletLight.position.set(-3.5, 4.5, 4);
 scene.add(dropletLight);
 let radius = 3;
 let halfHeight = .6;
@@ -211,20 +218,18 @@ try {
   const waterMaps = createProceduralWaterMaps();
   const makeWetMaterial = options => {
     const material = new THREE.MeshPhysicalMaterial(options);
-    // Dry metal keeps its brushed grain. Random procedural lenses and runnels
-    // gradually replace it as the surface gets wet.
+    // The metal keeps its brushed normal. A masked clearcoat supplies the
+    // glossy raised water lenses without embossing the whole enclosure.
     material.normalMap = brushedNormal;
     material.normalScale.set(.08, .08);
     material.roughness = .4;
-    material.roughnessMap = waterMaps.roughnessMap;
+    material.roughnessMap = waterMaps.surfaceMap;
+    material.clearcoatMap = waterMaps.surfaceMap;
     material.clearcoatNormalMap = waterMaps.normalMap;
     material.clearcoatNormalScale.set(0, 0);
-    material.clearcoat = Math.max(material.clearcoat, .12);
-    wetMaterials.set(material, {
-      dryMetalness: material.metalness,
-      dryNormalMap: material.normalMap,
-      dryNormalScale: material.normalScale.clone()
-    });
+    material.clearcoat = 1;
+    material.clearcoatRoughness = .025;
+    wetMaterials.set(material, true);
     return material;
   };
   gltf.scene.traverse(child => {
@@ -383,26 +388,17 @@ try {
   const setRainProgress = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
-    for (let i = 0; i < waterMaps.wetRoughness.length; i++) {
-      const value = Math.round(255 + (waterMaps.wetRoughness[i] - 255) * wetness);
+    for (let i = 0; i < waterMaps.droplets.length; i++) {
+      const water = Math.round(waterMaps.droplets[i] * wetness);
       const pixel = i * 4;
-      waterMaps.byteData[pixel + 1] = value;
+      waterMaps.byteData[pixel] = water;
+      waterMaps.byteData[pixel + 1] = 255 - water;
     }
-    waterMaps.roughnessMap.needsUpdate = true;
-    wetMaterials.forEach((state, material) => {
-      const nextNormalMap = wetness > .001 ? waterMaps.normalMap : state.dryNormalMap;
-      if (material.normalMap !== nextNormalMap) {
-        material.normalMap = nextNormalMap;
-        material.needsUpdate = true;
-      }
-      material.normalScale.copy(state.dryNormalScale).lerp(new THREE.Vector2(2, 2), wetness);
-      material.clearcoatNormalScale.setScalar(2 * wetness);
-      material.clearcoat = THREE.MathUtils.lerp(.12, 1, wetness);
-      material.clearcoatRoughness = THREE.MathUtils.lerp(.08, .02, wetness);
-      material.metalness = state.dryMetalness;
-      material.roughness = .4;
+    waterMaps.surfaceMap.needsUpdate = true;
+    wetMaterials.forEach((_, material) => {
+      material.clearcoatNormalScale.setScalar(1.1 * wetness);
     });
-    dropletLight.intensity = 500 * progress;
+    dropletLight.intensity = 120 * progress;
     if (rainMaterial) rainMaterial.opacity = progress * .25;
     // Let the rain build from a light drift into a strong shower as the user
     // moves through the transition between the first two sections.
