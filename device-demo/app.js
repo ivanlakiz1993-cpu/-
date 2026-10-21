@@ -31,7 +31,7 @@ let rainLeans;
 let rainWidth = 8;
 let rainDepth = 8;
 let rainFallSpeed = 1.5;
-const rainWindSpeed = 6;
+const rainWindRatio = .3;
 const mainLight = new THREE.DirectionalLight(0xffffff, 4.0);
 mainLight.position.set(5, 8, 5);
 mainLight.castShadow = true;
@@ -227,7 +227,7 @@ try {
   const size = bounds.getSize(new THREE.Vector3()).divideScalar(pivot.scale.x);
   radius = Math.hypot(size.x, size.z) / 2;
   halfHeight = size.y / 2;
-  const dropCount = 1500;
+  const dropCount = 1000;
   rainPositions = new Float32Array(dropCount * 2 * 3);
   rainLengths = new Float32Array(dropCount);
   rainLeans = new Float32Array(dropCount);
@@ -238,8 +238,8 @@ try {
     const x = (Math.random() - .5) * rainWidth;
     const y = Math.random() * 20 - 5;
     const z = (Math.random() - .5) * rainDepth;
-    rainLengths[i] = THREE.MathUtils.lerp(.65, 1.05, Math.random());
-    rainLeans[i] = THREE.MathUtils.lerp(.04, .14, Math.random());
+    rainLengths[i] = THREE.MathUtils.lerp(.3, .5, Math.random());
+    rainLeans[i] = rainLengths[i] * rainWindRatio;
     rainPositions[offset] = x;
     rainPositions[offset + 1] = y;
     rainPositions[offset + 2] = z;
@@ -250,7 +250,7 @@ try {
   rainGeometry = new THREE.BufferGeometry();
   rainGeometry.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
   rainMaterial = new THREE.LineBasicMaterial({
-    color: 0xdde9f5, transparent: true, opacity: 0,
+    color: 0xdde9f5, transparent: true, opacity: .15,
     depthWrite: false, blending: THREE.AdditiveBlending
   });
   const rainLines = new THREE.LineSegments(rainGeometry, rainMaterial);
@@ -271,19 +271,20 @@ try {
     return window;
   };
   const scrollContainer = findScrollContainer();
-  const updateRainProgress = self => {
-    const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
+  const setRainProgress = progress => {
+    progress = THREE.MathUtils.clamp(progress, 0, 1);
     wetMaterials.forEach((state, material) => {
       const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
       material.normalScale.setScalar(4 * wetness);
       material.clearcoat = THREE.MathUtils.lerp(.12, 1, wetness);
       material.roughness = THREE.MathUtils.lerp(state.dryRoughness, .05, wetness);
     });
-    if (rainMaterial) rainMaterial.opacity = progress * .72;
+    if (rainMaterial) rainMaterial.opacity = progress * .15;
     // Let the rain build from a light drift into a strong shower as the user
-    // moves through the testing section.
+    // moves through the transition between the first two sections.
     rainFallSpeed = THREE.MathUtils.lerp(1.5, 12, progress);
   };
+  const updateRainProgress = self => setRainProgress(self.progress);
   gsap.to(pivot.rotation, {
     y: Math.PI * 1.5, ease: 'none',
     scrollTrigger: {
@@ -297,14 +298,30 @@ try {
     : document.querySelector('.scroll-area');
   ScrollTrigger.create({
     trigger: weatherSection,
-    // Start as the second section enters the viewport, then build through
-    // the transition instead of waiting until the entire long page ends.
+    // Rain builds only as the second section enters from the first.
     start: 'top bottom',
     end: 'top 30%',
     scrub: .5,
     scroller: scrollContainer,
     onUpdate: updateRainProgress,
-    onRefresh: updateRainProgress
+    onRefresh: updateRainProgress,
+    onLeave: () => setRainProgress(1),
+    onLeaveBack: () => setRainProgress(0)
+  });
+  if (equipment && weatherSection.matches('.testing-about')) ScrollTrigger.create({
+    trigger: weatherSection,
+    // Clear the rain as section two settles, leaving the next section
+    // transition free to run its own animation.
+    start: 'top 30%',
+    end: 'top top',
+    scrub: .5,
+    scroller: scrollContainer,
+    onUpdate: self => setRainProgress(1 - self.progress),
+    onRefresh: self => {
+      if (self.isActive || self.progress > 0) setRainProgress(1 - self.progress);
+    },
+    onLeaveBack: () => setRainProgress(1),
+    onLeave: () => setRainProgress(0)
   });
   ScrollTrigger.refresh();
   if (status) status.textContent = '';
@@ -319,10 +336,12 @@ renderer.setAnimationLoop(() => {
   if (rainPositions && rainLengths) {
     for (let i = 0; i < rainLengths.length; i++) {
       const offset = i * 6;
-      rainPositions[offset] -= rainWindSpeed * delta;
-      rainPositions[offset + 1] -= rainFallSpeed * delta;
-      rainPositions[offset + 3] -= rainWindSpeed * delta;
-      rainPositions[offset + 4] -= rainFallSpeed * delta;
+      const fallDistance = rainFallSpeed * delta;
+      const windDistance = fallDistance * rainWindRatio;
+      rainPositions[offset] -= windDistance;
+      rainPositions[offset + 1] -= fallDistance;
+      rainPositions[offset + 3] -= windDistance;
+      rainPositions[offset + 4] -= fallDistance;
       if (rainPositions[offset + 4] < -5 || rainPositions[offset] < -rainWidth / 2) {
         const x = rainWidth / 2;
         const y = 10 + Math.random() * 5;
