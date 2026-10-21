@@ -219,22 +219,44 @@ try {
         `#include <common>
 uniform sampler2D uFrostNoise;
 uniform float uFrostProgress;
+float frostMaskAt(vec2 uv) {
+  vec2 tile = fract(uv);
+  float edge = 1.0 - smoothstep(0.0, 0.16, min(min(tile.x, 1.0 - tile.x), min(tile.y, 1.0 - tile.y)));
+  float field = texture2D(uFrostNoise, uv).r;
+  float threshold = clamp(uFrostProgress * (0.72 + edge * 0.28), 0.0, 1.0);
+  float edgeNoise = texture2D(uFrostNoise, uv * 5.0).r;
+  float noisyThreshold = threshold + (edgeNoise - 0.5) * 0.05;
+  return smoothstep(field - 0.08, field + 0.08, noisyThreshold) * smoothstep(0.0, 0.035, uFrostProgress);
+}
 `
       );
       shader.fragmentShader = shader.fragmentShader.replace(
         '#include <roughnessmap_fragment>',
         `#include <roughnessmap_fragment>
         vec2 frostUv = vBumpMapUv;
-        vec2 frostTile = fract(frostUv);
-        float frostEdge = 1.0 - smoothstep(0.0, 0.16, min(min(frostTile.x, 1.0 - frostTile.x), min(frostTile.y, 1.0 - frostTile.y)));
-        float frostField = texture2D(uFrostNoise, frostUv).r;
-        float frostThreshold = clamp(uFrostProgress * (0.72 + frostEdge * 0.28), 0.0, 1.0);
-        float frostGrowth = smoothstep(frostField - 0.055, frostField + 0.055, frostThreshold) * smoothstep(0.0, 0.035, uFrostProgress);
-        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.48, 0.55, 0.63), frostGrowth * 0.72);
+        float frostGrowth = frostMaskAt(frostUv);
+        float frostCrystalNoise = texture2D(uFrostNoise, frostUv * 8.0).r;
+        vec3 frostCrystalColor = vec3(0.9, 0.95, 1.0) * mix(0.9, 1.0, frostCrystalNoise);
+        diffuseColor.rgb = mix(diffuseColor.rgb, frostCrystalColor, frostGrowth);
         roughnessFactor = mix(roughnessFactor, 1.0, frostGrowth);`
       );
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <normal_fragment_maps>',
+        `#include <normal_fragment_maps>
+        #ifdef USE_BUMPMAP
+          vec2 frostReliefUv = vBumpMapUv * 8.0;
+          vec2 frostReliefDx = dFdx(frostReliefUv);
+          vec2 frostReliefDy = dFdy(frostReliefUv);
+          vec2 frostMaskDx = dFdx(vBumpMapUv);
+          vec2 frostMaskDy = dFdy(vBumpMapUv);
+          float frostHeight = frostMaskAt(vBumpMapUv) * texture2D(uFrostNoise, frostReliefUv).r;
+          float frostHeightX = frostMaskAt(vBumpMapUv + frostMaskDx) * texture2D(uFrostNoise, frostReliefUv + frostReliefDx).r;
+          float frostHeightY = frostMaskAt(vBumpMapUv + frostMaskDy) * texture2D(uFrostNoise, frostReliefUv + frostReliefDy).r;
+          normal = perturbNormalArb(-vViewPosition, normal, vec2(frostHeightX - frostHeight, frostHeightY - frostHeight) * 3.0, faceDirection);
+        #endif`
+      );
     };
-    material.customProgramCacheKey = () => 'device-frost-growth-v2';
+    material.customProgramCacheKey = () => 'device-frost-growth-v3';
     frostMaterials.set(material, frostState);
     return material;
   };
