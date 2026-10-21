@@ -1,5 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
+import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-volume-water-2';
 
 const canvas = document.querySelector('[data-testing-model], #device');
 const equipment = document.querySelector('[data-testing-equipment]');
@@ -23,65 +24,6 @@ const pivot = new THREE.Group();
 pivot.scale.setScalar(.95);
 scene.add(pivot);
 const wetMaterials = new Map();
-
-function createRainNormalTexture() {
-  const size = 1024;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, size, size);
-
-  // Draw a height field first. Its derivatives produce consistent OpenGL
-  // normals; a painted RGB gradient alone would not describe a convex lens.
-  ctx.globalCompositeOperation = 'lighten';
-  for (let i = 0; i < 200; i++) {
-    const x = Math.random() * size, y = Math.random() * size;
-    const round = Math.random() < .5;
-    const radiusX = 5 + Math.random() * 17;
-    const radiusY = round ? radiusX : radiusX * (2 + Math.random());
-    for (const offsetX of [-size, 0, size]) for (const offsetY of [-size, 0, size]) {
-      const cx = x + offsetX, cy = y + offsetY;
-      if (cx + radiusX < 0 || cx - radiusX > size || cy + radiusY < 0 || cy - radiusY > size) continue;
-      ctx.save();
-      ctx.beginPath();
-      if (round) ctx.arc(cx, cy, radiusX, 0, Math.PI * 2);
-      else ctx.ellipse(cx, cy, radiusX, radiusY, 0, 0, Math.PI * 2);
-      ctx.clip();
-      ctx.translate(cx, cy);
-      ctx.scale(radiusX, radiusY);
-      const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-      gradient.addColorStop(0, '#ffffff');
-      gradient.addColorStop(.35, '#eeeeee');
-      gradient.addColorStop(.7, '#aaaaaa');
-      gradient.addColorStop(.9, '#555555');
-      gradient.addColorStop(1, '#000000');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(-1, -1, 2, 2);
-      ctx.restore();
-    }
-  }
-  const height = ctx.getImageData(0, 0, size, size).data;
-  const normals = ctx.createImageData(size, size);
-  const sample = (x, y) => height[(((y + size) % size) * size + (x + size) % size) * 4] / 255;
-  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    const nx = -(sample(x + 1, y) - sample(x - 1, y)) * 2;
-    const ny = (sample(x, y + 1) - sample(x, y - 1)) * 2;
-    const length = Math.hypot(nx, ny, 1);
-    const pixel = (y * size + x) * 4;
-    normals.data[pixel] = Math.round((nx / length * .5 + .5) * 255);
-    normals.data[pixel + 1] = Math.round((ny / length * .5 + .5) * 255);
-    normals.data[pixel + 2] = Math.round((1 / length * .5 + .5) * 255);
-    normals.data[pixel + 3] = 255;
-  }
-  ctx.putImageData(normals, 0, 0);
-  const rainCanvasTexture = new THREE.CanvasTexture(canvas);
-  rainCanvasTexture.colorSpace = THREE.NoColorSpace;
-  rainCanvasTexture.wrapS = rainCanvasTexture.wrapT = THREE.RepeatWrapping;
-  rainCanvasTexture.flipY = false;
-  rainCanvasTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  return rainCanvasTexture;
-}
 let rainGeometry;
 let rainMaterial;
 let rainPositions;
@@ -183,13 +125,14 @@ try {
   brushedNormal.repeat.set(4, 4);
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
-  const rainCanvasTexture = createRainNormalTexture();
   const makeWetMaterial = options => {
     const material = new THREE.MeshPhysicalMaterial(options);
-    material.normalMap = rainCanvasTexture;
-    material.normalScale.set(0, 0);
+    // Preserve the dry metal; water is a separate dielectric surface.
+    material.normalMap = brushedNormal;
+    material.normalScale.set(.08, .08);
+    material.roughness = .4;
     material.clearcoat = 0;
-    wetMaterials.set(material, { roughness: material.roughness, metalness: material.metalness });
+    wetMaterials.set(material, true);
     return material;
   };
   gltf.scene.traverse(child => {
@@ -307,6 +250,8 @@ try {
   const size = bounds.getSize(new THREE.Vector3()).divideScalar(pivot.scale.x);
   radius = Math.hypot(size.x, size.z) / 2;
   halfHeight = size.y / 2;
+  const waterReflections = createWaterReflections(renderer);
+  const surfaceWater = createSurfaceWater(gltf.scene, wetMaterials, waterReflections.texture);
   const dropCount = 1000;
   rainPositions = new Float32Array(dropCount * 2 * 3);
   rainColors = new Float32Array(dropCount * 2 * 4);
@@ -348,11 +293,7 @@ try {
   const setRainProgress = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     const wetness = THREE.MathUtils.smoothstep(progress, 0, 1);
-    wetMaterials.forEach((dry, material) => {
-      material.normalScale.setScalar(3 * wetness);
-      material.roughness = THREE.MathUtils.lerp(dry.roughness, .1, wetness);
-      material.metalness = THREE.MathUtils.lerp(dry.metalness, .8, wetness);
-    });
+    surfaceWater.setWetness(wetness);
     dropletLight.intensity = 35 * progress;
     if (rainMaterial) rainMaterial.opacity = progress * .25;
     // Let the rain build from a light drift into a strong shower as the user
