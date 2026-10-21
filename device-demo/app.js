@@ -25,14 +25,11 @@ scene.add(pivot);
 const wetMaterials = new Map();
 let rainGeometry;
 let rainMaterial;
-let rainNormalMap;
 let rainPositions;
 let rainColors;
 let rainLengths;
-let rainLeans;
 let rainRadius = 4;
 let rainFallSpeed = 1.5;
-const rainWindRatio = .3;
 const rainEdgeAlpha = (x, y, z) => {
   const cylinderDistance = Math.hypot(x, z) / rainRadius;
   const cylinderAlpha = 1 - THREE.MathUtils.smoothstep(cylinderDistance, .68, 1);
@@ -50,7 +47,7 @@ const writeRainDrop = (index, x, y, z) => {
   rainPositions[offset] = x;
   rainPositions[offset + 1] = y;
   rainPositions[offset + 2] = z;
-  rainPositions[offset + 3] = x + rainLeans[index];
+  rainPositions[offset + 3] = x;
   rainPositions[offset + 4] = y - rainLengths[index];
   rainPositions[offset + 5] = z;
   rainColors[colorOffset] = rainColors[colorOffset + 1] = rainColors[colorOffset + 2] = 1;
@@ -131,14 +128,13 @@ try {
       return makeFlatNormalFallback();
     })
   ]);
-  rainNormalMap = rainNormal;
   brushedNormal.colorSpace = THREE.NoColorSpace;
   brushedNormal.wrapS = brushedNormal.wrapT = THREE.RepeatWrapping;
   brushedNormal.repeat.set(4, 4);
   brushedNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   rainNormal.colorSpace = THREE.NoColorSpace;
   rainNormal.wrapS = rainNormal.wrapT = THREE.RepeatWrapping;
-  rainNormal.repeat.set(1.5, 1.5);
+  rainNormal.repeat.set(1, 1);
   rainNormal.anisotropy = renderer.capabilities.getMaxAnisotropy();
   const makeWetMaterial = options => {
     const material = new THREE.MeshPhysicalMaterial(options);
@@ -274,7 +270,6 @@ try {
   rainPositions = new Float32Array(dropCount * 2 * 3);
   rainColors = new Float32Array(dropCount * 2 * 4);
   rainLengths = new Float32Array(dropCount);
-  rainLeans = new Float32Array(dropCount);
   // A circular cylinder keeps the rain local to the device and avoids the
   // rectangular cutoff created by a box-shaped particle volume.
   rainRadius = Math.min(25, Math.max(radius * 2.2, 8));
@@ -282,7 +277,6 @@ try {
     const { x, z } = randomRainPoint();
     const y = Math.random() * 20 - 5;
     rainLengths[i] = THREE.MathUtils.lerp(.3, .5, Math.random());
-    rainLeans[i] = rainLengths[i] * rainWindRatio;
     writeRainDrop(i, x, y, z);
   }
   rainGeometry = new THREE.BufferGeometry();
@@ -380,10 +374,7 @@ renderer.setAnimationLoop(() => {
       const offset = i * 6;
       const colorOffset = i * 8;
       const fallDistance = rainFallSpeed * delta;
-      const windDistance = fallDistance * rainWindRatio;
-      rainPositions[offset] -= windDistance;
       rainPositions[offset + 1] -= fallDistance;
-      rainPositions[offset + 3] -= windDistance;
       rainPositions[offset + 4] -= fallDistance;
       if (rainPositions[offset + 4] < -5
         || Math.hypot(rainPositions[offset], rainPositions[offset + 2]) > rainRadius) {
@@ -402,12 +393,6 @@ renderer.setAnimationLoop(() => {
     }
     rainGeometry.attributes.position.needsUpdate = true;
     if (rainColorsChanged) rainGeometry.attributes.color.needsUpdate = true;
-  }
-  if (rainNormalMap) {
-    rainNormalMap.offset.y -= .001 * delta * 60;
-    rainNormalMap.offset.x += .00025 * delta * 60;
-    if (rainNormalMap.offset.y < 0) rainNormalMap.offset.y += 1;
-    if (rainNormalMap.offset.x > 1) rainNormalMap.offset.x -= 1;
   }
   renderer.render(scene, camera);
 });
