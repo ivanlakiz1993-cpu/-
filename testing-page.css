@@ -454,3 +454,14 @@
 /* Keep the shared device and its rotation visible through the FAQ, until the footer. */
 .testing-faq{position:relative;z-index:2;background:#000}
 .testing-faq__item{background:#000}
+
+/* Desktop alignment with Figma 2461:4034 and 1731:3723. */
+@media(min-width:68.8125rem){
+  .climate-tests__body{grid-template-columns:minmax(0,50%) minmax(0,27.375rem);margin-top:3.125rem}
+  .climate-tests__visuals{aspect-ratio:auto;gap:.9375rem}
+  .climate-tests__camera-stack{aspect-ratio:415/416;border-radius:0}
+  .climate-tests__camera-photo{object-fit:cover}
+  .climate-tests__pagination{flex-direction:column;height:auto}
+  .mechanical-tests__content{margin-top:3.125rem}
+  .mechanical-tests__list li:not(:last-child){border-radius:.625rem}
+}
