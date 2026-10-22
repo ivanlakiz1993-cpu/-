@@ -446,8 +446,10 @@
 .testing-stage__content{left:var(--testing-content-gutter);right:var(--testing-content-gutter)}
 .testing-stage__breadcrumb{left:var(--testing-content-gutter)}
 
-/* Keep the shared device at the Figma reference scale across viewport sizes. */
-.testing-journey__visual .testing-stage__equipment{width:clamp(22.5rem,48.4375vw,58.4375rem)}
+/* Preserve the established desktop scale while matching the tablet reference. */
+.testing-journey__visual .testing-stage__equipment{width:min(70.4vw,80rem)}
+@media(min-width:64.0625rem) and (max-width:90rem){.testing-journey__visual .testing-stage__equipment{width:calc(124.46vw - 48.66rem)}}
+@media(min-width:37.5625rem) and (max-width:64rem){.testing-journey__visual .testing-stage__equipment{width:clamp(22.5rem,calc(32.15vw + 10.43rem),31rem)}}
 @media(max-width:37.5rem){.testing-journey__visual .testing-stage__equipment{width:min(92.3077vw,22.5rem);max-width:calc(100% - 1.5rem)}}
 
 /* Let the sticky device continue through the existing gap before the footer. */
