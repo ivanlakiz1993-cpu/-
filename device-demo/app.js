@@ -67,7 +67,7 @@ const randomRainPoint = () => {
     z: Math.sin(angle) * distance * rainRadius
   };
 };
-const mainLight = new THREE.DirectionalLight(0xffffff, 4.0);
+const mainLight = new THREE.DirectionalLight(0xffffff, 4.8);
 mainLight.position.set(5, 8, 5);
 mainLight.castShadow = true;
 mainLight.shadow.mapSize.set(2048, 2048);
@@ -75,14 +75,14 @@ Object.assign(mainLight.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4,
 mainLight.shadow.normalBias = .015;
 mainLight.shadow.bias = -.00015;
 scene.add(mainLight);
-const fillLight = new THREE.DirectionalLight(0xffffff, .8);
+const fillLight = new THREE.DirectionalLight(0xffffff, .96);
 fillLight.position.set(-5, 3, 2);
 scene.add(fillLight);
-const rimLight = new THREE.DirectionalLight(0xffffff, 2.0);
+const rimLight = new THREE.DirectionalLight(0xffffff, 2.4);
 rimLight.position.set(0, 5, -5);
 scene.add(rimLight);
-scene.add(new THREE.AmbientLight(0xffffff, .65));
-const upperPanelLight = new THREE.DirectionalLight(0xffffff, 1.8);
+scene.add(new THREE.AmbientLight(0xffffff, .78));
+const upperPanelLight = new THREE.DirectionalLight(0xffffff, 2.16);
 // Low, off-axis fill skims across the lid and catches the wet surface relief.
 upperPanelLight.position.set(-5, 3.5, 5);
 upperPanelLight.target.position.set(0, 0, 0);
