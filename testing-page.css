@@ -446,10 +446,10 @@
 .testing-stage__content{left:var(--testing-content-gutter);right:var(--testing-content-gutter)}
 .testing-stage__breadcrumb{left:var(--testing-content-gutter)}
 
-/* Larger shared 3D device; the renderer fits its complete rotation envelope. */
-.testing-journey__visual .testing-stage__equipment{width:min(68vw,78rem)}
-@media(max-width:1000px){.testing-journey__visual .testing-stage__equipment{width:min(88vw,54rem)}}
-@media(max-width:650px){.testing-journey__visual .testing-stage__equipment{width:calc(100% - 1.5rem)}}
+/* Match the mechanical section's Figma device frame (935×604, 50% opacity) only while that section is in view. */
+.testing-journey__visual.is-mechanical-focus .testing-stage__equipment{width:min(48.7vw,58.4375rem);opacity:.5}
+@media(max-width:68.75rem){.testing-journey__visual.is-mechanical-focus .testing-stage__equipment{width:min(48.4375vw,31rem)}}
+@media(max-width:37.5rem){.testing-journey__visual.is-mechanical-focus .testing-stage__equipment{width:min(97.5vw,24.5rem)}}
 
 /* Keep the shared device and its rotation visible through the FAQ, until the footer. */
 .testing-faq{position:relative;z-index:2;background:rgba(0,0,0,.38)}
