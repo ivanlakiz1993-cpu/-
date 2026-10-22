@@ -159,7 +159,7 @@
 }
 
 /* FAQ — Figma 1731:3623, 2588:2105, 2631:2668. */
-.testing-faq{margin-top:3.125rem;padding:0;background:#000;color:#fff}
+.testing-faq{margin-top:3.125rem;padding:0;background:transparent;color:#fff}
 .testing-page>.footer{margin-top:5.625rem}
 .testing-faq__inner{width:100%;margin:0 auto}
 .testing-faq h2{margin:0;text-align:center;font:400 clamp(2.375rem,3.333333vw,4rem)/1 var(--sans);letter-spacing:.01em;color:#fff}
@@ -452,7 +452,7 @@
 @media(max-width:650px){.testing-journey__visual .testing-stage__equipment{width:calc(100% - 1.5rem)}}
 
 /* Keep the shared device and its rotation visible through the FAQ, until the footer. */
-.testing-faq{position:relative;z-index:2;background:#000}
+.testing-faq{position:relative;z-index:2;background:transparent}
 .testing-faq__item{background:transparent}
 
 /* Desktop alignment with Figma 2461:4034 and 1731:3723. */
