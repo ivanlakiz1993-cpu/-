@@ -329,10 +329,12 @@ try {
   };
   const updateRainProgress = self => setRainProgress(self.progress);
   gsap.to(pivot.rotation, {
-    y: Math.PI * 1.5, ease: 'none',
+    y: Math.PI * 2, ease: 'none',
     scrollTrigger: {
       trigger: equipment ? '[data-testing-journey]' : '.scroll-area',
-      start: 'top top', end: 'bottom bottom', scrub: 1, invalidateOnRefresh: true,
+      endTrigger: equipment ? '.footer' : '.scroll-area',
+      start: 'top top', end: equipment ? 'top top' : 'bottom bottom',
+      scrub: 1, invalidateOnRefresh: true,
       scroller: scrollContainer,
     }
   });
