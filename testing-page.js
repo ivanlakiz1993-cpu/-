@@ -17,15 +17,6 @@ document.addEventListener('pointerdown', event => { if (menuButton?.getAttribute
 
 const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 
-const mechanicalSection = document.querySelector('.mechanical-tests');
-const journeyVisual = document.querySelector('.testing-journey__visual');
-if (mechanicalSection && journeyVisual && 'IntersectionObserver' in window) {
-  const mechanicalSectionObserver = new IntersectionObserver(([entry]) => {
-    journeyVisual.classList.toggle('is-mechanical-focus', entry.isIntersecting);
-  }, { threshold: 0.01 });
-  mechanicalSectionObserver.observe(mechanicalSection);
-}
-
 const faqList = document.querySelector('.testing-faq__list');
 if (faqList) {
   const faqItems = [...faqList.querySelectorAll('.testing-faq__item')];
