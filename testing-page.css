@@ -98,7 +98,7 @@
 .mechanical-tests__equipment-row{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:1.875rem;width:100%}
 .mechanical-tests__shaker{position:relative;z-index:1;order:1;flex:0 1 min(37.5rem,34.8837%);min-width:0;aspect-ratio:1;margin:0;border-radius:.625rem;overflow:hidden}
 .mechanical-tests__shaker img{display:block;width:121.87%;height:100%;max-width:none;margin-left:-15.86%;object-fit:cover}
-.mechanical-tests__equipment{position:relative;z-index:1;order:2;flex:0 1 min(53.75rem,50%);min-width:0;display:flex;flex-direction:column;gap:clamp(1.875rem,2.604167vw,3.125rem);padding:1.875rem;background:rgba(0,0,0,.6);overflow:hidden}
+.mechanical-tests__equipment{position:relative;z-index:1;order:2;flex:0 1 min(53.75rem,50%);min-width:0;display:flex;flex-direction:column;gap:clamp(1.875rem,2.604167vw,3.125rem);padding:1.875rem;border-radius:.625rem;background:rgba(0,0,0,.6);overflow:hidden}
 .mechanical-tests__equipment h3{margin:0;font:400 clamp(1.5rem,1.875vw,2.25rem)/1.1 var(--sans);color:#fff}
 .mechanical-tests__group{display:flex;flex-direction:column;gap:1.875rem;width:100%}
 .mechanical-tests__group h4{margin:0;font:400 clamp(1.125rem,1.25vw,1.5rem)/1 var(--sans);letter-spacing:-.05em;color:#fff}
