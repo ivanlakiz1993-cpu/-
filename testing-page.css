@@ -108,6 +108,11 @@
 .mechanical-tests__group dt{color:#979797}
 .mechanical-tests__group dd{color:#ff730d}
 .mechanical-tests__divider{display:block;width:calc(100% + 1.875rem);height:1px;max-width:none;object-fit:fill}
+@media(min-width:68.8125rem){
+  .mechanical-tests__shaker{flex:0 1 25.9375rem;width:25.9375rem}
+  .mechanical-tests__equipment{flex:0 1 min(53.75rem,50%)}
+  .mechanical-tests__group dl{font-size:1.125rem;line-height:1.1}
+}
 @media(max-width:68.75rem){
   .mechanical-tests{margin-top:4rem}
   .mechanical-tests__inner{width:calc(100% - 6rem)}
