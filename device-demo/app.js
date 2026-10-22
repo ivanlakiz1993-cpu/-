@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
-import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261022-frost-corner-softmin-1';
+import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261022-frost-lid-front-warp-1';
 import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-frost-growth-1';
 
 const canvas = document.querySelector('[data-testing-model], #device');
@@ -135,14 +135,14 @@ try {
   const toDeviceRoot = gltf.scene.matrixWorld.clone().invert();
   const enclosureBounds = new THREE.Box3();
   const edgeBounds = new THREE.Box3();
-  const makeWetMaterial = (options, toDevice) => {
+  const makeWetMaterial = (options, toDevice, isLid = false) => {
     const material = new THREE.MeshPhysicalMaterial(options);
     material.normalMap = brushedNormal;
     material.normalScale.set(.08, .08);
     material.roughness = .2;
     material.clearcoat = 0;
     wetMaterials.set(material, true);
-    attachFrostMaterial(material, frostHeight, enclosureBounds, toDevice, frostMaterials);
+    attachFrostMaterial(material, frostHeight, enclosureBounds, toDevice, frostMaterials, isLid);
     return material;
   };
   gltf.scene.traverse(child => {
@@ -223,7 +223,7 @@ try {
         if (largestDimension > 1.5) return makeWetMaterial({
           name: 'Black_Anodized_Aluminum', color: 0x141414, metalness: .85, roughness: .38,
           clearcoat: 0, clearcoatRoughness: .08
-        }, toDevice);
+        }, toDevice, meshName.includes('thin satin lid'));
         return new THREE.MeshStandardMaterial({
           name: 'Plastic_Internal', color: 0x0f0f0f, metalness: 0, roughness: .75
         });

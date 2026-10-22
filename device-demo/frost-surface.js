@@ -6,6 +6,7 @@ const frostFragment = /* glsl */`
 uniform sampler2D uFrostHeight;
 uniform float uFrostProgress;
 uniform float uFrostRelief;
+uniform float uFrostLidMask;
 uniform vec3 uFrostMin;
 uniform vec3 uFrostMax;
 varying vec3 vFrostPosition;
@@ -92,7 +93,7 @@ vec2 frostEdgeDistances(vec3 p, vec3 w) {
 }
 `;
 
-export function attachFrostMaterial(material, heightMap, bounds, toDevice, states) {
+export function attachFrostMaterial(material, heightMap, bounds, toDevice, states, isLid = false) {
   material.bumpMap = heightMap;
   material.bumpScale = 0.04;
   const state = { progress: 0, uniform: { value: 0 }, shader: null };
@@ -103,6 +104,7 @@ export function attachFrostMaterial(material, heightMap, bounds, toDevice, state
       uFrostHeight: { value: heightMap },
       uFrostProgress: state.uniform,
       uFrostRelief: { value: material.bumpScale },
+      uFrostLidMask: { value: isLid ? 1 : 0 },
       uFrostMin: { value: bounds.min },
       uFrostMax: { value: bounds.max },
       uFrostToDevice: { value: toDevice },
@@ -126,7 +128,13 @@ float colony = frostNoise(vFrostPosition * 2.3 + vec3(9.2, 3.1, 0.4));
 float rim = 1.0 - smoothstep(0.008, mix(0.065, 0.22, colony), frostEdges.x);
 float branchRelief = smoothstep(0.22, 0.60, crystalHeight);
 float arrival = frostArrival(vFrostPosition, frostW) - corner * 0.15;
-arrival += (frostNoise(vFrostPosition * 9.0) - 0.5) * 0.08 - branchRelief * 0.085;
+float lidTop = uFrostLidMask * smoothstep(0.72, 0.94, abs(normalize(vFrostNormal).y));
+// Break up the straight meeting line between fronts advancing from the two
+// long lid edges. This warp is confined to the lid's upward-facing surface.
+float lidCoarse = frostNoise(vec3(vFrostPosition.xz * 2.15, 4.7));
+float lidFine = frostNoise(vec3(vFrostPosition.xz * 5.8 + vec2(3.1, 8.4), 1.9));
+float lidFrontWarp = lidTop * ((lidCoarse - 0.5) * 0.46 + (lidFine - 0.5) * 0.16);
+arrival += (frostNoise(vFrostPosition * 9.0) - 0.5) * 0.08 + lidFrontWarp - branchRelief * 0.085;
 float reach = uFrostProgress * 1.12 - 0.08;
 float started = smoothstep(0.0, 0.06, uFrostProgress);
 float frostFront = (1.0 - smoothstep(reach - 0.07, reach + 0.10, arrival)) * started;
