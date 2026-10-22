@@ -369,10 +369,16 @@
 .climate-tests__inner{width:min(calc(100% - var(--testing-content-gutter, 6.25rem)*2),107.5rem);min-height:0}
 .climate-tests h2{font-size:clamp(2.5rem,3.34vw,4rem);line-height:1;letter-spacing:.01em}
 .climate-tests__body{display:grid;grid-template-columns:minmax(0,min(53.75rem,56%)) minmax(18rem,min(26.9375rem,34%));justify-content:space-between;align-items:end;column-gap:clamp(1rem,2vw,2rem);row-gap:clamp(2rem,2.6vw,3.125rem);margin-top:clamp(2rem,2.6vw,3.125rem)}
-.climate-tests__details{width:100%;min-width:0}
+.climate-tests__details{display:flex;flex-direction:column;gap:3.125rem;width:100%;min-width:0}
+.climate-tests__list li{transition:none}
+.climate-tests__list li::before{display:none}
+.climate-tests__list li:hover{background:rgba(0,0,0,.6);transform:none}
+.mechanical-tests__list li{transition:none}
+.mechanical-tests__list li::before{display:none}
+.mechanical-tests__list li:hover{background:#121212;transform:none}
 .climate-tests__list{gap:.625rem}
 .climate-tests__list li{min-height:3.25rem;padding:1.25rem 1.875rem;border-radius:.625rem;background:rgba(0,0,0,.6);font-size:1.125rem;line-height:1.2;white-space:normal}
-.climate-tests__equipment{gap:1.875rem;margin-top:1.875rem;padding:1.875rem;border-radius:.625rem;background:rgba(0,0,0,.6)}
+.climate-tests__equipment{gap:1.875rem;margin-top:0;padding:1.875rem;border-radius:.625rem;background:rgba(0,0,0,.6)}
 .climate-tests__equipment h3{font-size:clamp(1.5rem,1.875vw,2.25rem);line-height:1.1;letter-spacing:0}
 .climate-tests__equipment dl{gap:1.875rem;font-size:1.125rem;line-height:1.2}
 .climate-tests__visuals{display:grid;grid-template-columns:.5rem minmax(0,1fr);gap:.9375rem;align-items:end;width:100%;aspect-ratio:431/431}
