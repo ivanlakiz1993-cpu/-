@@ -122,8 +122,13 @@ float colony = frostNoise(vFrostPosition * 2.3 + vec3(9.2, 3.1, 0.4));
 float rim = 1.0 - smoothstep(0.008, mix(0.065, 0.22, colony), frostEdges.x);
 float branchRelief = smoothstep(0.22, 0.60, crystalHeight);
 float arrival = frostArrival(vFrostPosition, frostW) - corner * 0.15;
-arrival += (frostNoise(vFrostPosition * 9.0) - 0.5) * 0.08 - branchRelief * 0.085;
 float reach = uFrostProgress * 1.12 - 0.08;
+// Break up only the live growth boundary; the established frost pattern and
+// its scroll progress stay unchanged behind the front.
+float frontProximity = 1.0 - smoothstep(0.06, 0.24, abs(arrival - reach));
+float frontCoarse = frostNoise(vFrostPosition * 3.1 + vec3(8.4, 2.7, 5.1));
+float frontFine = frostNoise(vFrostPosition * 11.0 + vec3(2.2, 6.8, 3.4));
+arrival += frontProximity * ((frontCoarse - 0.5) * 0.22 + (frontFine - 0.5) * 0.07) - branchRelief * 0.085;
 float started = smoothstep(0.0, 0.06, uFrostProgress);
 float frostFront = (1.0 - smoothstep(reach - 0.07, reach + 0.10, arrival)) * started;
 // A thin seam coating bridges the separate nuclei late in the transition.
