@@ -451,7 +451,10 @@
 @media(max-width:1000px){.testing-journey__visual .testing-stage__equipment{width:min(88vw,54rem)}}
 @media(max-width:650px){.testing-journey__visual .testing-stage__equipment{width:calc(100% - 1.5rem)}}
 
-/* Keep the shared device and its rotation visible through the FAQ, until the footer. */
+/* Let the sticky device continue through the existing gap before the footer. */
+.testing-journey{padding-bottom:5.625rem;margin-bottom:-5.625rem}
+@media(max-width:1000px){.testing-journey{padding-bottom:3rem;margin-bottom:-3rem}}
+@media(max-width:600px){.testing-journey{padding-bottom:2.5rem;margin-bottom:-2.5rem}}
 .testing-faq{position:relative;z-index:2;background:transparent}
 .testing-faq__item{background:rgba(0,0,0,.6)}
 
