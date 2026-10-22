@@ -311,7 +311,7 @@
 
 /* Mobile testing cover matched to Figma 2628:2548. */
 @media(max-width:37.5rem){
-  .testing-stage{height:39.6875rem;min-height:39.6875rem}
+  .testing-stage{height:40rem;min-height:40rem}
   .testing-stage__content{justify-content:flex-start;gap:1.875rem}
   .testing-journey__visual .testing-stage__equipment{transform:none}
 }
@@ -446,10 +446,9 @@
 .testing-stage__content{left:var(--testing-content-gutter);right:var(--testing-content-gutter)}
 .testing-stage__breadcrumb{left:var(--testing-content-gutter)}
 
-/* Desktop device size reduced by 20%; retain the responsive sizes below. */
-.testing-journey__visual .testing-stage__equipment{width:min(70.4vw,80rem)}
-@media(max-width:1000px){.testing-journey__visual .testing-stage__equipment{width:min(88vw,54rem)}}
-@media(max-width:650px){.testing-journey__visual .testing-stage__equipment{width:calc(100% - 1.5rem)}}
+/* Keep the shared device at the Figma reference scale across viewport sizes. */
+.testing-journey__visual .testing-stage__equipment{width:clamp(22.5rem,48.4375vw,58.4375rem)}
+@media(max-width:37.5rem){.testing-journey__visual .testing-stage__equipment{width:min(92.3077vw,22.5rem);max-width:calc(100% - 1.5rem)}}
 
 /* Let the sticky device continue through the existing gap before the footer. */
 .testing-journey{padding-bottom:5.625rem;margin-bottom:-5.625rem}
