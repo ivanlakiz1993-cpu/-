@@ -446,8 +446,8 @@
 .testing-stage__content{left:var(--testing-content-gutter);right:var(--testing-content-gutter)}
 .testing-stage__breadcrumb{left:var(--testing-content-gutter)}
 
-/* Keep the shared 3D device at its original scale throughout the page. */
-.testing-journey__visual .testing-stage__equipment{width:min(88vw,100rem)}
+/* Desktop device size reduced by 20%; retain the responsive sizes below. */
+.testing-journey__visual .testing-stage__equipment{width:min(70.4vw,80rem)}
 @media(max-width:1000px){.testing-journey__visual .testing-stage__equipment{width:min(88vw,54rem)}}
 @media(max-width:650px){.testing-journey__visual .testing-stage__equipment{width:calc(100% - 1.5rem)}}
 
