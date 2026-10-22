@@ -93,7 +93,7 @@
 .mechanical-tests h2{margin:0;font:400 clamp(2.375rem,3.333333vw,4rem)/1 var(--sans);letter-spacing:.01em;color:#fff}
 .mechanical-tests__content{display:flex;flex-direction:column;gap:1.875rem;margin-top:clamp(1.875rem,2.604167vw,3.125rem)}
 .mechanical-tests__list-row{position:relative;width:100%}
-.mechanical-tests__list{position:relative;z-index:1;width:min(53.75rem,100%);display:flex;flex-direction:column;gap:.625rem;margin:0;padding:0;list-style:none}
+.mechanical-tests__list{position:relative;z-index:1;width:min(53.75rem,50%);display:flex;flex-direction:column;gap:.625rem;margin:0;padding:0;list-style:none}
 .mechanical-tests__list li{display:flex;align-items:flex-start;width:100%;padding:1.25rem 1.875rem;background:rgba(0,0,0,.6);font:400 1.125rem/1.2 var(--sans);color:#fff}
 .mechanical-tests__equipment-row{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:1.875rem;width:100%}
 .mechanical-tests__shaker{position:relative;z-index:1;order:1;flex:0 1 min(37.5rem,34.8837%);min-width:0;aspect-ratio:1;margin:0;border-radius:.625rem;overflow:hidden}
@@ -373,7 +373,7 @@
 .climate-tests{overflow:clip}
 .climate-tests__inner{width:min(calc(100% - var(--testing-content-gutter, 6.25rem)*2),107.5rem);min-height:0}
 .climate-tests h2{font-size:clamp(2.5rem,3.34vw,4rem);line-height:1;letter-spacing:.01em}
-.climate-tests__body{display:grid;grid-template-columns:minmax(0,min(53.75rem,56%)) minmax(18rem,min(26.9375rem,34%));justify-content:space-between;align-items:end;column-gap:clamp(1rem,2vw,2rem);row-gap:clamp(2rem,2.6vw,3.125rem);margin-top:clamp(2rem,2.6vw,3.125rem)}
+.climate-tests__body{display:grid;grid-template-columns:minmax(0,min(53.75rem,50%)) minmax(18rem,min(26.9375rem,34%));justify-content:space-between;align-items:end;column-gap:clamp(1rem,2vw,2rem);row-gap:clamp(2rem,2.6vw,3.125rem);margin-top:clamp(2rem,2.6vw,3.125rem)}
 .climate-tests__details{display:flex;flex-direction:column;gap:3.125rem;width:100%;min-width:0}
 .climate-tests__list li{transition:none}
 .climate-tests__list li::before{display:none}
@@ -395,7 +395,7 @@
 @media(min-width:68.8125rem){
   .climate-tests__track{--climate-stage-height:max(45.625rem,100svh)}
   .climate-tests__stage,.climate-tests__inner{min-height:var(--climate-stage-height)}
-  .climate-tests__body{grid-template-columns:minmax(0,min(53.75rem,56%)) minmax(20rem,min(26.9375rem,34%));column-gap:clamp(1rem,2vw,2rem)}
+  .climate-tests__body{grid-template-columns:minmax(0,min(53.75rem,50%)) minmax(20rem,min(26.9375rem,34%));column-gap:clamp(1rem,2vw,2rem)}
 }
 @media(min-width:43.8125rem) and (max-width:68.75rem){
   .climate-tests{margin-top:clamp(3rem,7vw,5.25rem)}
