@@ -98,7 +98,7 @@
 .mechanical-tests__equipment-row{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:1.875rem;width:100%}
 .mechanical-tests__shaker{position:relative;z-index:1;order:1;flex:0 1 min(37.5rem,34.8837%);min-width:0;aspect-ratio:1;margin:0;border-radius:.625rem;overflow:hidden}
 .mechanical-tests__shaker img{display:block;width:121.87%;height:100%;max-width:none;margin-left:-15.86%;object-fit:cover}
-.mechanical-tests__equipment{position:relative;z-index:1;order:2;flex:0 1 min(53.75rem,50%);min-width:0;display:flex;flex-direction:column;gap:clamp(1.875rem,2.604167vw,3.125rem);padding:1.875rem;background:transparent;overflow:hidden}
+.mechanical-tests__equipment{position:relative;z-index:1;order:2;flex:0 1 min(53.75rem,50%);min-width:0;display:flex;flex-direction:column;gap:clamp(1.875rem,2.604167vw,3.125rem);padding:1.875rem;background:rgba(0,0,0,.6);overflow:hidden}
 .mechanical-tests__equipment h3{margin:0;font:400 clamp(1.5rem,1.875vw,2.25rem)/1.1 var(--sans);color:#fff}
 .mechanical-tests__group{display:flex;flex-direction:column;gap:1.875rem;width:100%}
 .mechanical-tests__group h4{margin:0;font:400 clamp(1.125rem,1.25vw,1.5rem)/1 var(--sans);letter-spacing:-.05em;color:#fff}
@@ -159,7 +159,7 @@
 }
 
 /* FAQ — Figma 1731:3623, 2588:2105, 2631:2668. */
-.testing-faq{margin-top:clamp(2.5rem,2.45vw,3.125rem);padding:0;background:#000;color:#fff}
+.testing-faq{margin-top:3.125rem;padding:0;background:#000;color:#fff}
 .testing-page>.footer{margin-top:5.625rem}
 .testing-faq__inner{width:100%;margin:0 auto}
 .testing-faq h2{margin:0;text-align:center;font:400 clamp(2.375rem,3.333333vw,4rem)/1 var(--sans);letter-spacing:.01em;color:#fff}
@@ -383,7 +383,7 @@
 .mechanical-tests__list li:hover{background:rgba(0,0,0,.6);transform:none}
 .climate-tests__list{gap:.625rem}
 .climate-tests__list li{min-height:3.25rem;padding:1.25rem 1.875rem;border-radius:.625rem;background:rgba(0,0,0,.6);font-size:1.125rem;line-height:1.2;white-space:normal}
-.climate-tests__equipment{gap:1.875rem;margin-top:0;padding:1.875rem;border-radius:.625rem;background:transparent}
+.climate-tests__equipment{gap:1.875rem;margin-top:0;padding:1.875rem;border-radius:.625rem;background:rgba(0,0,0,.6)}
 .climate-tests__equipment h3{font-size:clamp(1.5rem,1.875vw,2.25rem);line-height:1.1;letter-spacing:0}
 .climate-tests__equipment dl{gap:1.875rem;font-size:1.125rem;line-height:1.2}
 .climate-tests__visuals{display:grid;grid-template-columns:.5rem minmax(0,1fr);gap:.9375rem;align-items:end;width:100%;aspect-ratio:431/431}
@@ -453,7 +453,7 @@
 
 /* Keep the shared device and its rotation visible through the FAQ, until the footer. */
 .testing-faq{position:relative;z-index:2;background:#000}
-.testing-faq__item{background:#000}
+.testing-faq__item{background:transparent}
 
 /* Desktop alignment with Figma 2461:4034 and 1731:3723. */
 @media(min-width:68.8125rem){
