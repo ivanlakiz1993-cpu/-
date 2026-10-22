@@ -437,7 +437,7 @@
 /* The shared equipment is rendered and weathered on its actual GLB surfaces. */
 .testing-stage__model{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;opacity:1;pointer-events:none}
 @media(prefers-reduced-motion:reduce){.testing-stage__model{transition:none}}
-.testing-about{margin:var(--testing-section-gap) auto 0}
+.testing-about{margin:clamp(3rem,4.167vw,5rem) auto 0}
 .climate-tests,.mechanical-tests{margin-top:var(--testing-section-gap)}
 
 /* One shared horizontal guide keeps the three sections aligned at each breakpoint. */
