@@ -452,5 +452,5 @@
 @media(max-width:37.5rem){.testing-journey__visual.is-mechanical-focus .testing-stage__equipment{width:min(97.5vw,24.5rem)}}
 
 /* Keep the shared device and its rotation visible through the FAQ, until the footer. */
-.testing-faq{position:relative;z-index:2;background:rgba(0,0,0,.38)}
-.testing-faq__item{background:rgba(0,0,0,.64)}
+.testing-faq{position:relative;z-index:2;background:#000}
+.testing-faq__item{background:#000}
