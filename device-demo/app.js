@@ -30,8 +30,6 @@ const temperatureMaterials = new Map();
 const thermalEmissive = new THREE.Color(0xff4a18);
 const vibrationSvg = document.querySelector('[data-testing-vibration]');
 const heatSvg = document.querySelector('[data-testing-heat]');
-let vibrationIntensity = 0;
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const vibrationChart = (() => {
   if (!vibrationSvg) return { setProgress: () => {} };
@@ -385,11 +383,27 @@ try {
     });
     icicleProgress(progress);
   };
+  const setClimateTransition = progress => {
+    progress = THREE.MathUtils.clamp(progress, 0, 1);
+
+    // Frost forms first, then melts into beads of water, and the surface dries
+    // before the mechanical-testing section enters.
+    const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .4);
+    const frostMelt = THREE.MathUtils.smoothstep(progress, .4, .67);
+    const frost = frostGrowth * (1 - frostMelt);
+    const wetting = THREE.MathUtils.smoothstep(progress, .43, .68);
+    const drying = THREE.MathUtils.smoothstep(progress, .72, 1);
+    const wetness = wetting * (1 - drying);
+
+    setFrostProgress(frost);
+    surfaceWater.setWetness(wetness);
+    // Keep the rain particle system off: the melt is shown only by water
+    // droplets forming on the device surface.
+    if (rainMaterial) rainMaterial.opacity = 0;
+    dropletLight.intensity = 0;
+  };
   const setVibrationProgress = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
-    const fadeIn = THREE.MathUtils.smoothstep(progress, 0, .08);
-    const fadeOut = 1 - THREE.MathUtils.smoothstep(progress, .92, 1);
-    vibrationIntensity = fadeIn * fadeOut;
     vibrationChart.setProgress(progress);
   };
   const setTemperatureProgress = progress => {
@@ -450,13 +464,16 @@ try {
   const climateSection = document.querySelector('.climate-tests') || (!equipment && document.querySelector('.scroll-area'));
   const mechanicalSection = document.querySelector('.mechanical-tests');
   let frostProgressLogBucket = -1;
-  const updateFrostProgress = self => {
+  const updateClimateProgress = self => {
     const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
-    setFrostProgress(progress);
-    const bucket = Math.round(progress * 10);
+    setClimateTransition(progress);
+    const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .4);
+    const frostMelt = THREE.MathUtils.smoothstep(progress, .4, .67);
+    const frost = frostGrowth * (1 - frostMelt);
+    const bucket = Math.round(frost * 10);
     if (bucket !== frostProgressLogBucket) {
       frostProgressLogBucket = bucket;
-      console.log('Frost Progress:', progress.toFixed(2));
+      console.log('Frost Progress:', frost.toFixed(2));
     }
   };
   if (climateSection) ScrollTrigger.create({
@@ -466,10 +483,10 @@ try {
     end: equipment && mechanicalSection ? 'top bottom' : equipment ? 'bottom top' : 'bottom bottom',
     scrub: .8,
     scroller: scrollContainer,
-    onUpdate: updateFrostProgress,
-    onRefresh: updateFrostProgress,
-    onLeave: () => setFrostProgress(1),
-    onLeaveBack: () => setFrostProgress(0)
+    onUpdate: updateClimateProgress,
+    onRefresh: updateClimateProgress,
+    onLeave: () => setClimateTransition(1),
+    onLeaveBack: () => setClimateTransition(0)
   });
   if (equipment && mechanicalSection) ScrollTrigger.create({
     trigger: mechanicalSection,
@@ -505,16 +522,6 @@ try {
 const rainClock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const delta = Math.min(rainClock.getDelta(), .05);
-  if (!reducedMotion.matches && vibrationIntensity > 0) {
-    const time = rainClock.elapsedTime;
-    pivot.position.set(
-      Math.sin(time * 48) * .018 * vibrationIntensity,
-      Math.sin(time * 63 + 1.1) * .012 * vibrationIntensity,
-      Math.sin(time * 54 + 2.2) * .016 * vibrationIntensity
-    );
-  } else if (pivot.position.lengthSq() > 0) {
-    pivot.position.set(0, 0, 0);
-  }
   if (rainPositions && rainLengths) {
     let rainColorsChanged = false;
     for (let i = 0; i < rainLengths.length; i++) {
