@@ -171,7 +171,7 @@ metalnessFactor = mix(metalnessFactor, 0.0, frostPresence);`)
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
 // Keep a restrained warm glow on the remaining frost while it thaws.
 float meltGlow = uFrostMelt * frostPresence * (0.35 + rim * 0.65);
-totalEmissiveRadiance += vec3(1.0, 0.19, 0.045) * meltGlow * 0.18;`)
+totalEmissiveRadiance += vec3(1.0, 0.28, 0.06) * meltGlow * 0.13;`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
 // Standard Three.js gives normalMap priority over bumpMap. Apply the frozen
 // relief after the brushed-metal normal, and only behind the growing front.

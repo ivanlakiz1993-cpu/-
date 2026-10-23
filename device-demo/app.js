@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
-import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261023-melt-glow-1';
+import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261023-melt-glow-ref-2';
 import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-frost-growth-1';
 
 const canvas = document.querySelector('[data-testing-model], #device');
@@ -130,6 +130,9 @@ scene.add(fillLight);
 const rimLight = new THREE.DirectionalLight(0xffffff, 2.88);
 rimLight.position.set(0, 5, -5);
 scene.add(rimLight);
+const meltLight = new THREE.DirectionalLight(0xff963f, 0);
+meltLight.position.set(-4, 2.5, 5);
+scene.add(meltLight);
 scene.add(new THREE.AmbientLight(0xffffff, .936));
 const upperPanelLight = new THREE.DirectionalLight(0xffffff, 2.592);
 // Low, off-axis fill skims across the lid and catches the wet surface relief.
@@ -399,6 +402,7 @@ try {
 
     setFrostProgress(frost, meltGlow);
     journeyVisual?.style.setProperty('--frost-melt-glow', meltGlow.toFixed(3));
+    meltLight.intensity = meltGlow * 2.4;
     surfaceWater.setWetness(wetness);
     // Keep the rain particle system off: the melt is shown only by water
     // droplets forming on the device surface.
