@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="hero-grid.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="metrics-desktop.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="layout-gutters.css?v=20261018-fluid-home-1">
-  <link rel="stylesheet" href="news-page.css?v=20261023-breadcrumb-state-1">
+  <link rel="stylesheet" href="news-page.css?v=20261023-news-filter-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
   <script src="page-transition.js?v=20261023-faster-mosaic-1"></script>
 </head>
@@ -48,7 +48,7 @@
     <nav class="news-page__crumbs" aria-label="Хлебные крошки"><a href="index.html">Главная</a><span aria-hidden="true">/</span><span aria-current="page">Новости</span></nav>
     <section class="news-page__content" aria-labelledby="news-title">
       <h1 class="news-page__title" id="news-title">Наши новости</h1>
-      <div class="news-page__filter-wrap"><label class="visually-hidden" for="news-filter">Категория новостей</label><select class="news-page__filter" id="news-filter"><option value="all">События</option><option value="laboratory">Лаборатория</option><option value="forum">Выставки</option><option value="holidays">Праздники</option></select></div>
+      <div class="news-page__filter-wrap"><label class="visually-hidden" id="news-filter-label" for="news-filter">Категория новостей</label><select class="news-page__filter" id="news-filter"><option value="all">События</option><option value="forum">Выставки</option><option value="laboratory">Разработки</option></select></div>
       <div class="news-page__grid" id="news-stories" aria-live="polite">
         <a class="news-page__card news-page__card--victory" id="story-victory-day" href="#story-victory-day" data-category="holidays" aria-label="Поздравляем с Днем победы, 9 мая 2025 года"><img class="news-page__image" src="assets/news-victory.jpg" alt="Красные гвоздики ко Дню Победы" fetchpriority="high"><span class="news-page__copy"><span class="news-page__headline">Поздравляем с Днем победы!</span><time class="news-page__date" datetime="2025-05-09">09.05.2025</time></span></a>
         <a class="news-page__card news-page__card--laboratory" id="story-laboratory" href="#story-laboratory" data-category="laboratory" aria-label="Расширение испытательной лаборатории, 14 марта 2024 года"><img class="news-page__image" src="assets/news-laboratory.jpg" alt="Климатическая испытательная камера"><span class="news-page__copy"><span class="news-page__headline">Расширение испытательной лаборатории</span><time class="news-page__date" datetime="2024-03-14">14.03.2024</time></span></a>
@@ -98,6 +98,6 @@
     </div>
     <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
   </footer>
-  <script src="news-page.js?v=20261019-news-page-2"></script>
+  <script src="news-page.js?v=20261023-news-filter-1"></script>
 </body>
 </html>
