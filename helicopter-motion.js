@@ -13,6 +13,12 @@
   const splitMedia=matchMedia('(min-width: 37.5625rem), (max-width: 37.5rem)');
   const mobileMedia=matchMedia('(max-width: 37.5rem)');
   const root=document.documentElement,{sample,poses,transitions,matrix,lerp,smooth}=storyboard;
+  const mobileHelicopterTop=progress=>{
+    const positions=[25.12,38.62,52.9,64.62];
+    const entrances=[[.375,.47],[.645,.74],[.895,.97]];
+    return positions[0]+entrances.reduce((offset,[start,end],i)=>
+      offset+(positions[i+1]-positions[i])*smooth((progress-start)/(end-start)),0);
+  };
   let enabled=false,splitEnabled=false,splitOverlay=null,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
   let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;
   let splitIntroTop=0,splitPreTravel=0,splitSeam=0,splitTopTravel=0,splitBottomTravel=0;
@@ -126,6 +132,8 @@
   function compose(){
     state=sample(progress,mobileMedia.matches);sizeFrame();
     stage.dataset.scene=String(state.scene);stage.dataset.progress=state.progress.toFixed(5);
+    if(mobileMedia.matches)stage.style.setProperty('--mobile-helicopter-top',`${mobileHelicopterTop(state.progress)}%`);
+    else stage.style.removeProperty('--mobile-helicopter-top');
     copies.forEach((copy,i)=>{
       copy.style.opacity=String(state.achievement[i]);
       copy.style.setProperty('--copy-shift',`${state.textY[i]*sceneWidth/1920}px`);

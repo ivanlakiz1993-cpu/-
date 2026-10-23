@@ -145,7 +145,7 @@ html.metrics-sequence .metrics-desktop {
   .metrics-desktop__background {
     inset: auto;
     left: 0;
-    top: 34%;
+    top: var(--mobile-helicopter-top, 25.12%);
     width: 100%;
     height: auto;
     aspect-ratio: var(--metrics-canvas-ratio, 1.92);
