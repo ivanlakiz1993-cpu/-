@@ -57,8 +57,8 @@
     let animation;
     try {
       animation = tile.animate(cover ? [transparent, solid] : [solid, transparent], {
-        duration: 760,
-        delay: (cover ? coverWave : revealWave) * 300,
+        duration: cover ? 560 : 440,
+        delay: cover ? coverWave * 180 : revealWave * 280,
         easing: 'cubic-bezier(.2,.75,.25,1)',
         fill: 'both'
       });
@@ -102,18 +102,18 @@
           firstImage?.decode?.().catch(() => {}),
           document.fonts?.ready
         ]),
-        new Promise(resolve => window.setTimeout(resolve, 700))
+        new Promise(resolve => window.setTimeout(resolve, 350))
       ]);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           entryTiles.forEach(({ tile, row, column }) => {
             const distance = Math.hypot(row - centerRow, column - centerColumn) / maxDistance;
             const randomOffset = Math.random() * .35;
-            tile.style.setProperty('--tile-delay', `${distance * 480 + randomOffset * 500}ms`);
+            tile.style.setProperty('--tile-delay', `${distance * 280 + randomOffset * 250}ms`);
             tile.classList.add('is-revealed');
           });
         });
-        window.setTimeout(() => entryRoot.remove(), 1400);
+        window.setTimeout(() => entryRoot.remove(), 1000);
       });
     };
     if (document.readyState === 'loading') {
