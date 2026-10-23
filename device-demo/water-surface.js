@@ -62,7 +62,7 @@ export function createSurfaceWater(root, wetMaterials, environment) {
       }
     }
   });
-  if (!triangles.length) return { setWetness() {}, dispose() {} };
+  if (!triangles.length) return { setWetness() {}, setMeltWetness() {}, dispose() {} };
 
   // Deterministic distribution: many small beads, fewer medium beads and
   // occasional coalesced, asymmetric drops. No scrolling texture or trails.
@@ -125,6 +125,29 @@ export function createSurfaceWater(root, wetMaterials, environment) {
     placements.push({ point, rotation, scale: new THREE.Vector3(radius * elongation, radius * height, radius).multiplyScalar(2.016) });
   }
   root.add(drops);
+  // Thaw beads are a separate, sparse layer with broader, more elongated
+  // lenses than the many tiny beads used for the earlier rain section.
+  const meltCount = Math.min(320, Math.max(90, Math.round(totalArea * 10)));
+  const meltDrops = new THREE.InstancedMesh(geometry, material, meltCount);
+  meltDrops.name = 'Surface_Thaw_Beads';
+  meltDrops.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  meltDrops.frustumCulled = false;
+  meltDrops.receiveShadow = true;
+  meltDrops.visible = false;
+  const meltPlacements = [];
+  for (let i = 0; i < meltCount; i++) {
+    const triangle = sampleTriangle(triangles, totalArea);
+    const point = samplePoint(triangle).addScaledVector(triangle.normal, .00045);
+    const rotation = new THREE.Quaternion().setFromUnitVectors(up, triangle.normal);
+    spin.setFromAxisAngle(up, random() * Math.PI * 2);
+    rotation.multiply(spin);
+    const radius = .014 + random() * .027;
+    const elongation = 1.3 + random() * .85;
+    const height = .34 + random() * .32;
+    const dropScale = new THREE.Vector3(radius * elongation, radius * height, radius).multiplyScalar(2.016);
+    meltPlacements.push({ point, rotation, scale: dropScale, delay: random() * .24 });
+  }
+  root.add(meltDrops);
   // A few shallow pools collect only on the upward-facing lid and ledges.
   // They stay small and appear unevenly as the frost melts into droplets.
   const upwardTriangles = [];
@@ -134,7 +157,7 @@ export function createSurfaceWater(root, wetMaterials, environment) {
     upwardArea += triangle.area;
     upwardTriangles.push({ ...triangle, end: upwardArea });
   }
-  const puddleCount = upwardArea > 0 ? 24 : 0;
+  const puddleCount = upwardArea > 0 ? 16 : 0;
   const puddleGeometry = puddleCount ? geometry.clone() : null;
   const puddles = puddleCount ? new THREE.InstancedMesh(puddleGeometry, material, puddleCount) : null;
   const puddlePlacements = [];
@@ -150,8 +173,8 @@ export function createSurfaceWater(root, wetMaterials, environment) {
       const rotation = new THREE.Quaternion().setFromUnitVectors(up, triangle.normal);
       spin.setFromAxisAngle(up, random() * Math.PI * 2);
       rotation.multiply(spin);
-      const radiusX = .045 + random() * .045;
-      const radiusZ = .035 + random() * .04;
+      const radiusX = .035 + random() * .05;
+      const radiusZ = .028 + random() * .04;
       const depth = .0015 + random() * .0015;
       const scale = new THREE.Vector3(radiusX, depth, radiusZ);
       puddlePlacements.push({ point, rotation, scale, delay: random() * .24 });
@@ -160,14 +183,16 @@ export function createSurfaceWater(root, wetMaterials, environment) {
   }
   const matrix = new THREE.Matrix4();
   const scale = new THREE.Vector3();
-  let previous = -1;
+  let previousRain = -1;
+  let previousMelt = -1;
   return {
     mesh: drops,
+    meltDrops,
     puddles,
     setWetness(value) {
       const wetness = THREE.MathUtils.clamp(value, 0, 1);
-      if (Math.abs(wetness - previous) < .002) return;
-      previous = wetness;
+      if (Math.abs(wetness - previousRain) < .002) return;
+      previousRain = wetness;
       drops.visible = wetness > .002;
       placements.forEach((placement, i) => {
         scale.copy(placement.scale).multiplyScalar(Math.sqrt(Math.max(.0001, wetness)));
@@ -175,10 +200,23 @@ export function createSurfaceWater(root, wetMaterials, environment) {
         drops.setMatrixAt(i, matrix);
       });
       drops.instanceMatrix.needsUpdate = true;
+    },
+    setMeltWetness(value) {
+      const wetness = THREE.MathUtils.clamp(value, 0, 1);
+      if (Math.abs(wetness - previousMelt) < .002) return;
+      previousMelt = wetness;
+      meltDrops.visible = wetness > .002;
+      meltPlacements.forEach((placement, i) => {
+        const localWetness = THREE.MathUtils.smoothstep(wetness, placement.delay, Math.min(1, placement.delay + .42));
+        scale.copy(placement.scale).multiplyScalar(Math.sqrt(Math.max(.0001, localWetness)));
+        matrix.compose(placement.point, placement.rotation, scale);
+        meltDrops.setMatrixAt(i, matrix);
+      });
+      meltDrops.instanceMatrix.needsUpdate = true;
       if (puddles) {
         puddles.visible = wetness > .002;
         puddlePlacements.forEach((placement, i) => {
-          const localWetness = THREE.MathUtils.smoothstep(wetness, placement.delay, Math.min(1, placement.delay + .56));
+          const localWetness = THREE.MathUtils.smoothstep(wetness, placement.delay, Math.min(1, placement.delay + .5));
           scale.copy(placement.scale).multiplyScalar(Math.sqrt(Math.max(.0001, localWetness)));
           matrix.compose(placement.point, placement.rotation, scale);
           puddles.setMatrixAt(i, matrix);
@@ -188,6 +226,7 @@ export function createSurfaceWater(root, wetMaterials, environment) {
     },
     dispose() {
       root.remove(drops);
+      root.remove(meltDrops);
       if (puddles) root.remove(puddles);
       geometry.dispose();
       puddleGeometry?.dispose();

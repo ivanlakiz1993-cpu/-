@@ -267,14 +267,10 @@
 .testing-vibration__cursor line{stroke:rgba(255,158,84,.72);stroke-width:1.5;vector-effect:non-scaling-stroke}
 .testing-vibration__cursor circle{fill:#ff8a32;stroke:#ffe0c2;stroke-width:2;vector-effect:non-scaling-stroke}
 .testing-heat{opacity:var(--heat-progress,0);transition:opacity .3s ease-out}
-.testing-heat__waves{fill:none;stroke:#dce8ef;stroke-width:2;stroke-linecap:round;opacity:.2;filter:url(#testing-heat-soften);transform-box:fill-box;transform-origin:center;animation:testing-heat-shimmer 1.2s ease-in-out infinite alternate;animation-play-state:paused}
-.testing-heat.is-active .testing-heat__waves{animation-play-state:running}
-.testing-heat__waves path{vector-effect:non-scaling-stroke}
-@keyframes testing-heat-shimmer{from{transform:translate(.12%,-.18%) skewX(-.35deg);opacity:.1}to{transform:translate(-.12%,.18%) skewX(.35deg);opacity:.26}}
 .testing-journey__visual .testing-stage__equipment{position:relative;inset:auto;left:auto;top:auto;width:min(48.7vw,58.4375rem);max-width:calc(100% - 1.5rem);height:auto;aspect-ratio:935/604;transform:none;transform-origin:50% 50%;transform-style:flat;will-change:auto;opacity:1}
 .testing-journey__visual .testing-stage__equipment{z-index:1}
 .testing-journey__visual .testing-stage__equipment.is-thermal-haze .testing-stage__model{filter:url(#testing-heat-distortion)}
-@media(prefers-reduced-motion:reduce){.testing-vibration,.testing-heat{transition:none}.testing-heat__waves{animation:none}}
+@media(prefers-reduced-motion:reduce){.testing-vibration,.testing-heat{transition:none}}
 .testing-rain__ambient{position:absolute;z-index:0;inset:0;display:block;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .16s linear}
 .testing-sequence,.testing-stage{background:transparent}
 .testing-sequence,.testing-about{position:relative;z-index:2}
