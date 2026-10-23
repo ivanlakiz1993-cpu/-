@@ -424,6 +424,7 @@ if (climateCarousel) {
   const climateStage = climateCarousel.querySelector('.climate-tests__stage');
   const climateBody = climateCarousel.querySelector('.climate-tests__body');
   const climateVisuals = climateCarousel.querySelector('.climate-tests__visuals');
+  const cameraStack = climateCarousel.querySelector('.climate-tests__camera-stack');
   const cameras = [...climateCarousel.querySelectorAll('[data-climate-camera]')];
   const pages = [...climateCarousel.querySelectorAll('[data-climate-page]')];
   const title = climateCarousel.querySelector('[data-climate-camera-title]');
@@ -436,13 +437,17 @@ if (climateCarousel) {
   ];
   let activeCamera = -1;
   let climateFrame = 0;
-  let manualSelectionUntil = 0;
+  let manualSelectionScrollY = null;
   const clampClimate = value => Math.max(0, Math.min(1, value));
 
   const showClimateState = index => {
     if (index === activeCamera) return;
     activeCamera = index;
-    cameras.forEach((image, imageIndex) => image.classList.toggle('is-active', imageIndex === index));
+    cameras.forEach((image, imageIndex) => {
+      image.classList.toggle('is-active', imageIndex === index);
+      image.classList.toggle('is-before', imageIndex < index);
+      image.classList.toggle('is-after', imageIndex > index);
+    });
     pages.forEach((page, pageIndex) => {
       const active = pageIndex === index;
       page.classList.toggle('is-active', active);
@@ -457,7 +462,11 @@ if (climateCarousel) {
 
   const updateClimateState = () => {
     climateFrame = 0;
-    if (performance.now() < manualSelectionUntil) return;
+    if (manualSelectionScrollY !== null) {
+      const unlockDistance = Math.max(24, window.innerHeight * .12);
+      if (Math.abs(window.scrollY - manualSelectionScrollY) < unlockDistance) return;
+      manualSelectionScrollY = null;
+    }
     const trackBounds = climateTrack?.getBoundingClientRect();
     const pinDistance = climateTrack && climateStage ?
       climateTrack.offsetHeight - climateStage.offsetHeight : 0;
@@ -481,10 +490,29 @@ if (climateCarousel) {
     if (!climateFrame) climateFrame = requestAnimationFrame(updateClimateState);
   };
 
-  pages.forEach((page, index) => page.addEventListener('click', () => {
-    manualSelectionUntil = performance.now() + 1100;
+  const selectClimateManually = index => {
+    manualSelectionScrollY = window.scrollY;
     showClimateState(index);
-  }));
+  };
+  pages.forEach((page, index) => page.addEventListener('click', () => selectClimateManually(index)));
+  let swipeStart = null;
+  cameraStack?.addEventListener('touchstart', event => {
+    if (event.changedTouches.length !== 1) return;
+    const touch = event.changedTouches[0];
+    swipeStart = { x: touch.clientX, y: touch.clientY };
+  }, { passive: true });
+  cameraStack?.addEventListener('touchend', event => {
+    if (!swipeStart || event.changedTouches.length !== 1) return;
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - swipeStart.x;
+    const deltaY = touch.clientY - swipeStart.y;
+    swipeStart = null;
+    if (Math.abs(deltaX) < 36 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+    const current = Math.max(0, activeCamera);
+    const next = Math.max(0, Math.min(cameras.length - 1, current + (deltaX < 0 ? 1 : -1)));
+    if (next !== current) selectClimateManually(next);
+  }, { passive: true });
+  cameraStack?.addEventListener('touchcancel', () => { swipeStart = null; }, { passive: true });
   addEventListener('scroll', scheduleClimateUpdate, { passive: true });
   addEventListener('resize', scheduleClimateUpdate, { passive: true });
   if ('ResizeObserver' in window) new ResizeObserver(scheduleClimateUpdate).observe(climateCarousel);
