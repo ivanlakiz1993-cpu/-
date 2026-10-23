@@ -26,6 +26,55 @@ pivot.scale.setScalar(.95);
 scene.add(pivot);
 const wetMaterials = new Map();
 const frostMaterials = new Map();
+const temperatureMaterials = new Map();
+const thermalEmissive = new THREE.Color(0xff4a18);
+const vibrationSvg = document.querySelector('[data-testing-vibration]');
+const heatSvg = document.querySelector('[data-testing-heat]');
+let vibrationIntensity = 0;
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+const vibrationChart = (() => {
+  if (!vibrationSvg) return { setProgress: () => {} };
+  const scale = vibrationSvg.querySelector('[data-vibration-scale]');
+  const ticks = vibrationSvg.querySelector('[data-vibration-ticks]');
+  const baseTrace = vibrationSvg.querySelector('[data-vibration-trace-base]');
+  const trace = vibrationSvg.querySelector('[data-vibration-trace]');
+  const cursor = vibrationSvg.querySelector('[data-vibration-cursor]');
+  const width = 1920;
+  const centerY = 540;
+  const amplitude = 112;
+  const cycles = 8;
+  const waveY = x => centerY - Math.sin((x / width) * Math.PI * 2 * cycles) * amplitude
+    - Math.sin((x / width) * Math.PI * 6 * cycles) * amplitude * 0.075;
+  let wavePath = '';
+  for (let index = 0; index <= 512; index++) {
+    const x = (width * index) / 512;
+    wavePath += `${index ? 'L' : 'M'}${x.toFixed(2)} ${waveY(x).toFixed(2)} `;
+  }
+  const tickPath = [];
+  for (let index = 0; index <= 48; index++) {
+    const x = (width * index) / 48;
+    const length = index % 4 === 0 ? 36 : 18;
+    tickPath.push(`M${x.toFixed(1)} ${centerY - length}v${length * 2}`);
+  }
+  scale?.setAttribute('d', `M0 ${centerY}H${width}`);
+  ticks?.setAttribute('d', tickPath.join(''));
+  baseTrace?.setAttribute('d', wavePath);
+  trace?.setAttribute('d', wavePath);
+  cursor?.setAttribute('transform', `translate(0 ${centerY})`);
+
+  return {
+    setProgress(progress) {
+      const x = width * progress;
+      const y = waveY(x);
+      const fadeIn = THREE.MathUtils.smoothstep(progress, 0, 0.045);
+      const fadeOut = 1 - THREE.MathUtils.smoothstep(progress, 0.96, 1);
+      vibrationSvg.style.setProperty('--vibration-progress', progress.toFixed(4));
+      vibrationSvg.style.setProperty('--vibration-opacity', (fadeIn * fadeOut).toFixed(3));
+      cursor?.setAttribute('transform', `translate(${x.toFixed(2)} ${y.toFixed(2)})`);
+    }
+  };
+})();
 
 let rainGeometry;
 let rainMaterial;
@@ -91,6 +140,9 @@ scene.add(upperPanelLight, upperPanelLight.target);
 const dropletLight = new THREE.PointLight(0xffffff, 0, 0, 2);
 dropletLight.position.set(-3.5, 4.5, 4);
 scene.add(dropletLight);
+const temperatureLight = new THREE.PointLight(0xff5726, 0, 10, 2);
+temperatureLight.position.set(-2.5, 3.2, 4);
+scene.add(temperatureLight);
 let radius = 3;
 let halfHeight = .6;
 function resize() {
@@ -147,6 +199,7 @@ try {
     material.roughness = .2;
     material.clearcoat = 0;
     wetMaterials.set(material, true);
+    temperatureMaterials.set(material, { emissive: material.emissive.clone() });
     attachFrostMaterial(material, frostHeight, enclosureBounds, toDevice, frostMaterials, isLid);
     return material;
   };
@@ -332,6 +385,25 @@ try {
     });
     icicleProgress(progress);
   };
+  const setVibrationProgress = progress => {
+    progress = THREE.MathUtils.clamp(progress, 0, 1);
+    const fadeIn = THREE.MathUtils.smoothstep(progress, 0, .08);
+    const fadeOut = 1 - THREE.MathUtils.smoothstep(progress, .92, 1);
+    vibrationIntensity = fadeIn * fadeOut;
+    vibrationChart.setProgress(progress);
+  };
+  const setTemperatureProgress = progress => {
+    progress = THREE.MathUtils.clamp(progress, 0, 1);
+    const heat = THREE.MathUtils.smoothstep(progress, 0, 1);
+    temperatureMaterials.forEach((state, material) => {
+      material.emissive.copy(state.emissive).lerp(thermalEmissive, heat * .22);
+    });
+    temperatureLight.intensity = heat * 7.5;
+    if (heatSvg) {
+      heatSvg.style.setProperty('--heat-progress', (heat * .88).toFixed(3));
+      heatSvg.classList.toggle('is-active', heat > .01);
+    }
+  };
   const updateRainProgress = self => setRainProgress(self.progress);
   gsap.to(pivot.rotation, {
     y: frontFacingYaw + Math.PI * 2, ease: 'none',
@@ -376,6 +448,7 @@ try {
     onLeave: () => setRainProgress(0)
   });
   const climateSection = document.querySelector('.climate-tests') || (!equipment && document.querySelector('.scroll-area'));
+  const mechanicalSection = document.querySelector('.mechanical-tests');
   let frostProgressLogBucket = -1;
   const updateFrostProgress = self => {
     const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
@@ -389,13 +462,38 @@ try {
   if (climateSection) ScrollTrigger.create({
     trigger: climateSection,
     start: equipment ? 'top bottom' : 'top -140%',
-    end: equipment ? 'bottom top' : 'bottom bottom',
+    endTrigger: equipment && mechanicalSection ? mechanicalSection : climateSection,
+    end: equipment && mechanicalSection ? 'top bottom' : equipment ? 'bottom top' : 'bottom bottom',
     scrub: .8,
     scroller: scrollContainer,
     onUpdate: updateFrostProgress,
     onRefresh: updateFrostProgress,
     onLeave: () => setFrostProgress(1),
     onLeaveBack: () => setFrostProgress(0)
+  });
+  if (equipment && mechanicalSection) ScrollTrigger.create({
+    trigger: mechanicalSection,
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: .45,
+    scroller: scrollContainer,
+    onUpdate: self => setVibrationProgress(self.progress),
+    onRefresh: self => setVibrationProgress(self.progress),
+    onLeave: () => setVibrationProgress(1),
+    onLeaveBack: () => setVibrationProgress(0)
+  });
+  if (equipment && mechanicalSection) ScrollTrigger.create({
+    trigger: mechanicalSection,
+    // Start only once the mechanical block has fully passed, then build heat
+    // while the shared device moves into the FAQ section.
+    start: 'bottom top',
+    end: 'bottom -70%',
+    scrub: .65,
+    scroller: scrollContainer,
+    onUpdate: self => setTemperatureProgress(self.progress),
+    onRefresh: self => setTemperatureProgress(self.progress),
+    onLeave: () => setTemperatureProgress(1),
+    onLeaveBack: () => setTemperatureProgress(0)
   });
   ScrollTrigger.refresh();
   if (status) status.textContent = '';
@@ -407,6 +505,16 @@ try {
 const rainClock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const delta = Math.min(rainClock.getDelta(), .05);
+  if (!reducedMotion.matches && vibrationIntensity > 0) {
+    const time = rainClock.elapsedTime;
+    pivot.position.set(
+      Math.sin(time * 48) * .018 * vibrationIntensity,
+      Math.sin(time * 63 + 1.1) * .012 * vibrationIntensity,
+      Math.sin(time * 54 + 2.2) * .016 * vibrationIntensity
+    );
+  } else if (pivot.position.lengthSq() > 0) {
+    pivot.position.set(0, 0, 0);
+  }
   if (rainPositions && rainLengths) {
     let rainColorsChanged = false;
     for (let i = 0; i < rainLengths.length; i++) {

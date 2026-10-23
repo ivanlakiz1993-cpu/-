@@ -257,8 +257,25 @@
 .testing-page{overflow-x:clip}
 .testing-journey{position:relative;isolation:isolate;overflow:clip;background:#000}
 .testing-journey__visual{position:sticky;z-index:1;top:0;display:grid;width:100%;height:100svh;margin-bottom:-100svh;place-items:center;pointer-events:none}
+.testing-vibration,.testing-heat{position:absolute;top:0;left:50%;z-index:0;display:block;width:100vw;height:100%;max-width:none;transform:translateX(-50%);overflow:visible;pointer-events:none}
+.testing-vibration{opacity:var(--vibration-opacity,0);transition:opacity .2s linear}
+.testing-vibration__scale{fill:none;stroke:rgba(255,255,255,.24);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.testing-vibration__ticks{fill:none;stroke:rgba(255,255,255,.2);stroke-width:1.25;vector-effect:non-scaling-stroke}
+.testing-vibration__trace-base{fill:none;stroke:rgba(255,115,13,.16);stroke-width:2;vector-effect:non-scaling-stroke}
+.testing-vibration__trace{fill:none;stroke:url(#testing-vibration-gradient);stroke-width:3;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:calc(1 - var(--vibration-progress,0));filter:url(#testing-vibration-glow);vector-effect:non-scaling-stroke}
+.testing-vibration__cursor{opacity:.9}
+.testing-vibration__cursor line{stroke:rgba(255,158,84,.72);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.testing-vibration__cursor circle{fill:#ff8a32;stroke:#ffe0c2;stroke-width:2;vector-effect:non-scaling-stroke}
+.testing-heat{opacity:var(--heat-progress,0);transition:opacity .3s ease-out}
+.testing-heat__halo{transform-box:fill-box;transform-origin:center;animation:testing-heat-breathe 3.6s ease-in-out infinite alternate;animation-play-state:paused}
+.testing-heat__waves{fill:none;stroke:#ff672b;stroke-width:5;stroke-linecap:round;opacity:.6;filter:url(#testing-heat-soften);transform-box:fill-box;transform-origin:center;animation:testing-heat-drift 4.8s ease-in-out infinite alternate;animation-play-state:paused}
+.testing-heat.is-active .testing-heat__halo,.testing-heat.is-active .testing-heat__waves{animation-play-state:running}
+.testing-heat__waves path{vector-effect:non-scaling-stroke}
+@keyframes testing-heat-breathe{from{transform:scale(.96);opacity:.72}to{transform:scale(1.04);opacity:1}}
+@keyframes testing-heat-drift{from{transform:translateY(.7%);opacity:.34}to{transform:translateY(-.7%);opacity:.72}}
 .testing-journey__visual .testing-stage__equipment{position:relative;inset:auto;left:auto;top:auto;width:min(48.7vw,58.4375rem);max-width:calc(100% - 1.5rem);height:auto;aspect-ratio:935/604;transform:none;transform-origin:50% 50%;transform-style:flat;will-change:auto;opacity:1}
 .testing-journey__visual .testing-stage__equipment{z-index:1}
+@media(prefers-reduced-motion:reduce){.testing-vibration,.testing-heat{transition:none}.testing-heat__halo,.testing-heat__waves{animation:none}}
 .testing-rain__ambient{position:absolute;z-index:0;inset:0;display:block;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .16s linear}
 .testing-sequence,.testing-stage{background:transparent}
 .testing-sequence,.testing-about{position:relative;z-index:2}

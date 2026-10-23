@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="hero-grid.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="layout-gutters.css?v=20261018-fluid-home-1">
-  <link rel="stylesheet" href="testing-page.css?v=20261023-breadcrumb-state-1">
+  <link rel="stylesheet" href="testing-page.css?v=20261023-vibration-heat-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
   <script src="page-transition.js?v=20261023-faster-mosaic-1"></script>
 </head>
@@ -49,6 +49,45 @@
   <main id="top">
     <div class="testing-journey" data-testing-journey>
       <div class="testing-journey__visual" aria-hidden="true">
+        <svg class="testing-vibration" data-testing-vibration viewBox="0 0 1920 1080" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="testing-vibration-gradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#ff730d" stop-opacity=".18"></stop>
+              <stop offset=".5" stop-color="#ff9b48" stop-opacity=".82"></stop>
+              <stop offset="1" stop-color="#ff730d" stop-opacity=".18"></stop>
+            </linearGradient>
+            <filter id="testing-vibration-glow" x="-20%" y="-80%" width="140%" height="260%">
+              <feGaussianBlur stdDeviation="5"></feGaussianBlur>
+            </filter>
+          </defs>
+          <path class="testing-vibration__scale" data-vibration-scale></path>
+          <path class="testing-vibration__ticks" data-vibration-ticks></path>
+          <path class="testing-vibration__trace-base" data-vibration-trace-base></path>
+          <path class="testing-vibration__trace" data-vibration-trace pathLength="1"></path>
+          <g class="testing-vibration__cursor" data-vibration-cursor>
+            <line x1="0" y1="-185" x2="0" y2="185"></line>
+            <circle cx="0" cy="0" r="10"></circle>
+          </g>
+        </svg>
+        <svg class="testing-heat" data-testing-heat viewBox="0 0 1920 1080" preserveAspectRatio="none">
+          <defs>
+            <radialGradient id="testing-heat-halo">
+              <stop offset="0" stop-color="#ff5b19" stop-opacity=".2"></stop>
+              <stop offset=".58" stop-color="#ef4212" stop-opacity=".08"></stop>
+              <stop offset="1" stop-color="#ef4212" stop-opacity="0"></stop>
+            </radialGradient>
+            <filter id="testing-heat-soften" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="18"></feGaussianBlur>
+            </filter>
+          </defs>
+          <ellipse class="testing-heat__halo" cx="960" cy="550" rx="700" ry="330" fill="url(#testing-heat-halo)" filter="url(#testing-heat-soften)"></ellipse>
+          <g class="testing-heat__waves">
+            <path d="M420 730 C455 690 390 646 430 604 S466 520 428 474 S395 394 435 350"></path>
+            <path d="M1500 740 C1460 696 1526 650 1488 606 S1450 520 1490 475 S1526 395 1486 350"></path>
+            <path d="M610 350 C646 316 580 280 620 244 S656 174 618 136"></path>
+            <path d="M1310 350 C1274 316 1340 280 1300 244 S1264 174 1302 136"></path>
+          </g>
+        </svg>
         <div class="testing-stage__equipment" data-testing-equipment>
           <canvas class="testing-stage__model" data-testing-model aria-hidden="true"></canvas>
         </div>
@@ -246,7 +285,7 @@
   </footer>
   <script src="device-demo/vendor/gsap.min.js"></script>
   <script src="device-demo/vendor/ScrollTrigger.min.js"></script>
-  <script type="module" src="device-demo/app.js?v=20261023-model-lighting-1"></script>
+  <script type="module" src="device-demo/app.js?v=20261023-vibration-heat-1"></script>
   <script src="testing-page.js?v=20261020-dry-model-1"></script>
 </body>
 </html>
