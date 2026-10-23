@@ -500,6 +500,12 @@
   .testing-journey__visual .testing-stage__equipment{width:min(92.3077vw,22.5rem);max-width:calc(100% - 1.5rem)}
 }
 
+/* On phones, keep the shared 3D scene inside the first cover only. */
+@media(max-width:40.625rem){
+  .testing-journey__visual-track{inset:0 0 auto;height:calc(3rem + 40rem);overflow:clip}
+  .testing-journey__visual{position:relative;top:auto;height:100%}
+}
+
 /* Desktop alignment with Figma 2461:4034 and 1731:3723. */
 @media(min-width:68.8125rem){
   .climate-tests__body{grid-template-columns:minmax(0,50%) minmax(0,27.375rem);margin-top:3.125rem}

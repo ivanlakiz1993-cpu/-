@@ -434,88 +434,124 @@ try {
       heatSvg.classList.toggle('is-active', heat > .01);
     }
   };
-  const updateRainProgress = self => setRainProgress(self.progress);
-  gsap.to(pivot.rotation, {
-    y: frontFacingYaw + Math.PI * 2, ease: 'none',
-    scrollTrigger: {
-      trigger: equipment ? '[data-testing-journey]' : '.scroll-area',
-      endTrigger: equipment ? '.footer' : '.scroll-area',
-      // Finish one complete turn as the footer starts entering the viewport,
-      // before it can cover the model.
-      start: 'top top', end: equipment ? 'top bottom' : 'bottom bottom',
-      scrub: 1, invalidateOnRefresh: true,
-      scroller: scrollContainer,
-    }
-  });
-  const weatherSection = equipment
-    ? document.querySelector('.testing-about') || document.querySelector('[data-testing-journey]')
-    : document.querySelector('.scroll-area');
-  ScrollTrigger.create({
-    trigger: weatherSection,
-    // Rain builds only as the second section enters from the first.
-    start: 'top 90%',
-    end: 'top 30%',
-    scrub: .5,
-    scroller: scrollContainer,
-    onUpdate: updateRainProgress,
-    onRefresh: updateRainProgress,
-    onLeave: () => setRainProgress(1),
-    onLeaveBack: () => setRainProgress(0)
-  });
-  if (equipment && weatherSection.matches('.testing-about')) ScrollTrigger.create({
-    trigger: weatherSection,
-    // Clear the rain as section two settles, leaving the next section
-    // transition free to run its own animation.
-    start: 'top 30%',
-    end: 'top top',
-    scrub: .5,
-    scroller: scrollContainer,
-    onUpdate: self => setRainProgress(1 - self.progress),
-    onRefresh: self => {
-      if (self.isActive || self.progress > 0) setRainProgress(1 - self.progress);
-    },
-    onLeaveBack: () => setRainProgress(1),
-    onLeave: () => setRainProgress(0)
-  });
+  const heroSection = document.querySelector('.testing-stage');
   const climateSection = document.querySelector('.climate-tests') || (!equipment && document.querySelector('.scroll-area'));
   const mechanicalSection = document.querySelector('.mechanical-tests');
-  let frostProgressLogBucket = -1;
-  const updateClimateProgress = self => {
-    const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
-    setClimateTransition(progress);
-    const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .33);
-    const frostMelt = THREE.MathUtils.smoothstep(progress, .33, .55);
-    const frost = frostGrowth * (1 - frostMelt);
-    const bucket = Math.round(frost * 10);
-    if (bucket !== frostProgressLogBucket) {
-      frostProgressLogBucket = bucket;
-      console.log('Frost Progress:', frost.toFixed(2));
-    }
+  const createFullJourneyMotion = () => {
+    gsap.to(pivot.rotation, {
+      y: frontFacingYaw + Math.PI * 2, ease: 'none',
+      scrollTrigger: {
+        trigger: equipment ? '[data-testing-journey]' : '.scroll-area',
+        endTrigger: equipment ? '.footer' : '.scroll-area',
+        // Finish one complete turn as the footer starts entering the viewport,
+        // before it can cover the model.
+        start: 'top top', end: equipment ? 'top bottom' : 'bottom bottom',
+        scrub: 1, invalidateOnRefresh: true,
+        scroller: scrollContainer,
+      }
+    });
+    const weatherSection = equipment
+      ? document.querySelector('.testing-about') || document.querySelector('[data-testing-journey]')
+      : document.querySelector('.scroll-area');
+    const updateRainProgress = self => setRainProgress(self.progress);
+    ScrollTrigger.create({
+      trigger: weatherSection,
+      // Rain builds only as the second section enters from the first.
+      start: 'top 90%', end: 'top 30%', scrub: .5,
+      scroller: scrollContainer,
+      onUpdate: updateRainProgress,
+      onRefresh: updateRainProgress,
+      onLeave: () => setRainProgress(1),
+      onLeaveBack: () => setRainProgress(0)
+    });
+    if (equipment && weatherSection.matches('.testing-about')) ScrollTrigger.create({
+      trigger: weatherSection,
+      // Clear the rain as section two settles, leaving the next section
+      // transition free to run its own animation.
+      start: 'top 30%', end: 'top top', scrub: .5,
+      scroller: scrollContainer,
+      onUpdate: self => setRainProgress(1 - self.progress),
+      onRefresh: self => {
+        if (self.isActive || self.progress > 0) setRainProgress(1 - self.progress);
+      },
+      onLeaveBack: () => setRainProgress(1),
+      onLeave: () => setRainProgress(0)
+    });
+    let frostProgressLogBucket = -1;
+    const updateClimateProgress = self => {
+      const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
+      setClimateTransition(progress);
+      const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .33);
+      const frostMelt = THREE.MathUtils.smoothstep(progress, .33, .55);
+      const frost = frostGrowth * (1 - frostMelt);
+      const bucket = Math.round(frost * 10);
+      if (bucket !== frostProgressLogBucket) {
+        frostProgressLogBucket = bucket;
+        console.log('Frost Progress:', frost.toFixed(2));
+      }
+    };
+    if (climateSection) ScrollTrigger.create({
+      trigger: climateSection,
+      start: equipment ? 'top bottom' : 'top -140%',
+      endTrigger: equipment && mechanicalSection ? mechanicalSection : climateSection,
+      end: equipment && mechanicalSection ? 'top bottom' : equipment ? 'bottom top' : 'bottom bottom',
+      scrub: .8, scroller: scrollContainer,
+      onUpdate: updateClimateProgress,
+      onRefresh: updateClimateProgress,
+      onLeave: () => setClimateTransition(1),
+      onLeaveBack: () => setClimateTransition(0)
+    });
+    if (equipment && mechanicalSection) ScrollTrigger.create({
+      trigger: mechanicalSection.querySelector('h2') || mechanicalSection,
+      start: 'top bottom', endTrigger: mechanicalSection, end: 'bottom top',
+      scrub: .45, scroller: scrollContainer,
+      onUpdate: self => setVibrationProgress(self.progress),
+      onRefresh: self => setVibrationProgress(self.progress),
+      onLeave: () => setVibrationProgress(1),
+      onLeaveBack: () => setVibrationProgress(0)
+    });
   };
-  if (climateSection) ScrollTrigger.create({
-    trigger: climateSection,
-    start: equipment ? 'top bottom' : 'top -140%',
-    endTrigger: equipment && mechanicalSection ? mechanicalSection : climateSection,
-    end: equipment && mechanicalSection ? 'top bottom' : equipment ? 'bottom top' : 'bottom bottom',
-    scrub: .8,
-    scroller: scrollContainer,
-    onUpdate: updateClimateProgress,
-    onRefresh: updateClimateProgress,
-    onLeave: () => setClimateTransition(1),
-    onLeaveBack: () => setClimateTransition(0)
-  });
-  if (equipment && mechanicalSection) ScrollTrigger.create({
-    trigger: mechanicalSection.querySelector('h2') || mechanicalSection,
-    start: 'top bottom',
-    endTrigger: mechanicalSection,
-    end: 'bottom top',
-    scrub: .45,
-    scroller: scrollContainer,
-    onUpdate: self => setVibrationProgress(self.progress),
-    onRefresh: self => setVibrationProgress(self.progress),
-    onLeave: () => setVibrationProgress(1),
-    onLeaveBack: () => setVibrationProgress(0)
-  });
+  const createMobileCoverMotion = () => {
+    if (!equipment || !heroSection) return createFullJourneyMotion();
+
+    const setCoverEffects = progress => {
+      progress = THREE.MathUtils.clamp(progress, 0, 1);
+      const rain = 1 - THREE.MathUtils.smoothstep(progress, .32, .62);
+      const frost = THREE.MathUtils.smoothstep(progress, .12, .92);
+      if (rainMaterial) rainMaterial.opacity = rain * .25;
+      // Keep rainfall speed independent of scroll; only transition from rain
+      // to frost as the cover moves out of view.
+      rainFallSpeed = 12;
+      surfaceWater.setWetness(rain * .45);
+      dropletLight.intensity = 35 * rain;
+      setFrostProgress(frost);
+    };
+
+    setTemperatureProgress(0);
+    setVibrationProgress(0);
+    setCoverEffects(0);
+    gsap.to(pivot.rotation, {
+      y: frontFacingYaw + Math.PI * 2, ease: 'none',
+      scrollTrigger: {
+        trigger: heroSection, start: 'top top', end: 'bottom top',
+        scrub: 1, invalidateOnRefresh: true, scroller: scrollContainer,
+      }
+    });
+    ScrollTrigger.create({
+      trigger: heroSection, start: 'top top', end: 'bottom top',
+      scrub: .5, scroller: scrollContainer,
+      onUpdate: self => setCoverEffects(self.progress),
+      onRefresh: self => setCoverEffects(self.progress),
+      onLeave: () => setCoverEffects(1),
+      onLeaveBack: () => setCoverEffects(0)
+    });
+  };
+
+  // On phones the 3D scene and its two weather effects belong to the cover
+  // only. Tablet and desktop retain the existing journey-wide sequence.
+  const motionMedia = gsap.matchMedia();
+  motionMedia.add('(max-width: 40.625rem)', createMobileCoverMotion);
+  motionMedia.add('(min-width: 40.6251rem)', createFullJourneyMotion);
   ScrollTrigger.refresh();
   if (status) status.textContent = '';
   equipment?.classList.add('testing-model-ready');
