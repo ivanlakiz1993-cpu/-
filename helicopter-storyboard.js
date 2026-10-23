@@ -8,11 +8,15 @@
   const ramp = (p, start, end) => smooth((p - start) / (end - start));
   const lerp = (a, b, t) => a + (b - a) * t;
 
-  // Quaternion for a Y rotation followed by an X rotation.
-  function orientation(yaw, pitch) {
+  // Quaternion for heading, rotor tilt and a final local bank around Z.
+  function orientation(yaw, pitch, bank = 0) {
     const sy = Math.sin(yaw / 2), cy = Math.cos(yaw / 2);
     const sx = Math.sin(pitch / 2), cx = Math.cos(pitch / 2);
-    return [sx * cy, cx * sy, sx * sy, cx * cy];
+    const rotation = [sx * cy, cx * sy, sx * sy, cx * cy];
+    if (!bank) return rotation;
+    const sz = Math.sin(bank / 2), cz = Math.cos(bank / 2);
+    const [x, y, z, w] = rotation;
+    return [x * cz + y * sz, y * cz - x * sz, z * cz + w * sz, w * cz - z * sz];
   }
   function slerp(a, b, t) {
     let dot = a.reduce((sum, value, i) => sum + value * b[i], 0);
@@ -36,7 +40,7 @@
   const poses = [
     { node:'2276:25952', rotation:orientation(-.48,.24), box:[.10,.19,.83,.66], height:1000 },
     { node:'2277:26357', rotation:orientation(-Math.PI/2,.12), box:[-.10,.13,.90,.75], height:1000 },
-    { node:'2277:26369', rotation:orientation(0,Math.PI/2), box:[-.015,.16,.95,.68], height:1053 },
+    { node:'2277:26369', rotation:orientation(0,Math.PI/2), mobileRotation:orientation(.45,.2,-.45), box:[-.015,.16,.95,.68], height:1053 },
     { node:'2278:26375', rotation:orientation(-Math.PI+.48,.18), box:[.13,.12,.77,.68], height:1053 }
   ];
   const transitions = [
@@ -56,7 +60,9 @@
         break;
       } else break;
     }
-    const rotation = slerp(poses[from].rotation, poses[to].rotation, mix);
+    const fromRotation = stackAchievements ? poses[from].mobileRotation || poses[from].rotation : poses[from].rotation;
+    const toRotation = stackAchievements ? poses[to].mobileRotation || poses[to].rotation : poses[to].rotation;
+    const rotation = slerp(fromRotation, toRotation, mix);
     const entrances = [[.12,.20],[.375,.47],[.645,.74],[.895,.97]];
     const exits = [[.30,.395],[.57,.665],[.84,.915],[2,3]];
     const achievement = entrances.map(([a,b],i)=>ramp(progress,a,b)*(stackAchievements?1:1-ramp(progress,...exits[i])));

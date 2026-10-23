@@ -22,7 +22,8 @@
   const mobileHelicopterFlight=progress=>{
     const flight=smooth((progress-.645)/(.74-.645));
     const arc=Math.sin(Math.PI*flight)**2;
-    return {top:mobileHelicopterTop(progress)-arc*7.5,left:arc*5.5};
+    const returnFlight=smooth((progress-.84)/(.895-.84));
+    return {top:mobileHelicopterTop(progress)-arc*7.5,left:flight*(1-returnFlight)*6.5};
   };
   let enabled=false,splitEnabled=false,splitOverlay=null,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
   let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;
@@ -80,9 +81,9 @@
       top=Math.min(top,-y*perspective);bottom=Math.max(bottom,-y*perspective);
     }
     const [bx,by,bw,bh]=pose.box,scale=Math.min(bw*1920/(right-left),bh*pose.height/(bottom-top));
-    const bounds=projectedBounds(m);
+    const mobileBounds=projectedBounds(matrix(pose.mobileRotation||pose.rotation));
     return {scale,x:(bx+bw/2)*1920-(left+right)/2*scale,y:(by+bh/2)*pose.height-(top+bottom)/2*scale,
-      mobileFit:mobileFit(bounds,scale,pose.height),mobileCenterX:bounds.centerX,mobileCenterY:bounds.centerY};
+      mobileFit:mobileFit(mobileBounds,scale,pose.height),mobileCenterX:mobileBounds.centerX,mobileCenterY:mobileBounds.centerY};
   });
   const mobileFitProfiles=transitions.map(transition=>{
     const samples=[];
