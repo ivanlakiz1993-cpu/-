@@ -111,6 +111,10 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 if (equipment) new ResizeObserver(resize).observe(equipment);
+// Align the enclosure's front panel to the camera so the full-turn endpoint
+// returns to the same near-frontal view shown in the FAQ reference.
+const frontFacingYaw = Math.atan2(camera.position.x, camera.position.z);
+pivot.rotation.y = frontFacingYaw;
 try {
   const loadAsset = (loader, url, label) => new Promise((resolve, reject) => {
     loader.load(url, resolve, undefined, error => {
@@ -329,11 +333,13 @@ try {
   };
   const updateRainProgress = self => setRainProgress(self.progress);
   gsap.to(pivot.rotation, {
-    y: Math.PI * 2, ease: 'none',
+    y: frontFacingYaw + Math.PI * 2, ease: 'none',
     scrollTrigger: {
       trigger: equipment ? '[data-testing-journey]' : '.scroll-area',
       endTrigger: equipment ? '.footer' : '.scroll-area',
-      start: 'top top', end: equipment ? 'top top' : 'bottom bottom',
+      // Finish one complete turn as the footer starts entering the viewport,
+      // before it can cover the model.
+      start: 'top top', end: equipment ? 'top bottom' : 'bottom bottom',
       scrub: 1, invalidateOnRefresh: true,
       scroller: scrollContainer,
     }
