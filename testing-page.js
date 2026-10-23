@@ -17,6 +17,43 @@ document.addEventListener('pointerdown', event => { if (menuButton?.getAttribute
 
 const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 
+// Anchor the shared canvas to the responsive hero, then release it into the
+// existing sticky scene as the hero scrolls away. Weather and rotation stay intact.
+const heroStage = document.querySelector('.testing-stage');
+const heroDevice = document.querySelector('[data-testing-equipment]');
+const heroVisual = document.querySelector('.testing-journey__visual');
+if (heroStage && heroDevice && heroVisual) {
+  const anchor = document.createElement('div');
+  anchor.className = 'testing-stage__device-anchor';
+  anchor.setAttribute('aria-hidden', 'true');
+  heroStage.append(anchor);
+  let heroFrame = 0;
+  const positionHeroDevice = () => {
+    heroFrame = 0;
+    if (!matchMedia('(max-width: 68.75rem)').matches) {
+      heroDevice.style.removeProperty('--hero-device-x');
+      heroDevice.style.removeProperty('--hero-device-y');
+      heroDevice.style.removeProperty('--hero-device-scale');
+      return;
+    }
+    const stage = heroStage.getBoundingClientRect();
+    const target = anchor.getBoundingClientRect();
+    const scene = heroVisual.getBoundingClientRect();
+    const progress = Math.max(0, Math.min(1, -stage.top / stage.height));
+    const weight = 1 - progress * progress * (3 - 2 * progress);
+    // Compensate for the camera's rotation-safe empty space inside the canvas.
+    heroDevice.style.setProperty('--hero-device-scale', String(1 + .25 * weight));
+    heroDevice.style.setProperty('--hero-device-x', `${(target.left + target.width / 2 - scene.left - scene.width / 2) * weight}px`);
+    heroDevice.style.setProperty('--hero-device-y', `${(target.top + target.height / 2 - scene.top - scene.height / 2) * weight}px`);
+  };
+  const scheduleHeroDevice = () => { if (!heroFrame) heroFrame = requestAnimationFrame(positionHeroDevice); };
+  addEventListener('scroll', scheduleHeroDevice, { passive: true });
+  addEventListener('resize', scheduleHeroDevice, { passive: true });
+  new ResizeObserver(scheduleHeroDevice).observe(heroStage);
+  document.fonts?.ready.then(scheduleHeroDevice);
+  scheduleHeroDevice();
+}
+
 const faqList = document.querySelector('.testing-faq__list');
 if (faqList) {
   const faqItems = [...faqList.querySelectorAll('.testing-faq__item')];

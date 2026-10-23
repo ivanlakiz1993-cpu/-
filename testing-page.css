@@ -480,6 +480,26 @@
 .testing-faq{position:relative;z-index:2;background:transparent}
 .testing-faq__item{background:rgba(0,0,0,.6)}
 
+/* Figma hero adaptations: keep the mobile device below the CTA in document flow. */
+.testing-stage__device-anchor{display:none}
+@media(max-width:68.75rem){
+  .testing-stage{height:29.1875rem;min-height:29.1875rem}
+  .testing-stage__content{position:relative;inset:auto;padding:3.125rem clamp(1.5rem,4.6875vw,3rem) 0;gap:1.875rem}
+  .testing-stage__copy h1{width:min(40.375rem,100%)}
+  .testing-stage__button{min-height:4.5rem;padding:1.25rem 1rem}
+  .testing-stage__device-anchor{display:block;position:absolute;left:28.125%;top:7.25rem;width:min(48.4375vw,31rem);aspect-ratio:496/321;pointer-events:none}
+  .testing-journey__visual .testing-stage__equipment{width:min(48.4375vw,31rem);translate:var(--hero-device-x,0rem) var(--hero-device-y,0rem);scale:var(--hero-device-scale,1)}
+}
+@media(max-width:40.625rem){
+  .testing-stage{height:auto;min-height:40rem;padding-bottom:1.875rem}
+  .testing-stage__content{padding:3.125rem .75rem 0;justify-content:flex-start;gap:1.875rem}
+  .testing-stage__copy h1{width:min(20.5625rem,100%);font-size:clamp(2rem,9.7436vw,2.375rem)}
+  .testing-stage__button{min-height:3.5rem;padding:.75rem 1rem}
+  .testing-stage__breadcrumb{display:flex;top:.3125rem;left:.75rem;font-size:.75rem;line-height:1.3;gap:.1875rem}
+  .testing-stage__device-anchor{position:relative;inset:auto;width:min(92.3077vw,22.5rem);aspect-ratio:360/233;margin:2.625rem auto 0}
+  .testing-journey__visual .testing-stage__equipment{width:min(92.3077vw,22.5rem);max-width:calc(100% - 1.5rem)}
+}
+
 /* Desktop alignment with Figma 2461:4034 and 1731:3723. */
 @media(min-width:68.8125rem){
   .climate-tests__body{grid-template-columns:minmax(0,50%) minmax(0,27.375rem);margin-top:3.125rem}
