@@ -1,7 +1,7 @@
 import * as THREE from './vendor/three.module.js';
 
-// Device-space coordinates drive edge arrival. Frost detail itself is sampled
-// in world space so it cannot restart at a mesh UV island or polygon seam.
+// Shared device-space coordinates keep the front continuous across panels,
+// independent of UV islands, camera movement and the scroll rotation.
 const frostFragment = /* glsl */`
 uniform sampler2D uFrostHeight;
 uniform float uFrostProgress;
@@ -9,10 +9,8 @@ uniform float uFrostRelief;
 uniform float uFrostLidMask;
 uniform vec3 uFrostMin;
 uniform vec3 uFrostMax;
-varying vec3 vFrostDevicePosition;
-varying vec3 vFrostDeviceNormal;
-varying vec3 vFrostWorldPosition;
-varying vec3 vFrostWorldNormal;
+varying vec3 vFrostPosition;
+varying vec3 vFrostNormal;
 
 float frostHash(vec3 p) {
   p = fract(p * 0.1031);
@@ -41,19 +39,19 @@ vec3 frostWeights(vec3 n) {
   vec3 w = pow(abs(n), vec3(4.0));
   return w / max(dot(w, vec3(1.0)), 0.0001);
 }
-float frostDetail(vec2 planePosition) {
+float frostDetail(vec2 uv) {
   // Two differently oriented scales, with slow domain warping: no repeated
-  // rows of identical fern stamps. Coordinates are projections of world space.
-  vec2 warp = vec2(sin(planePosition.y * 2.7 + sin(planePosition.x * 1.9)),
-                   sin(planePosition.x * 3.1 - cos(planePosition.y * 2.3))) * 0.11;
-  vec2 q = planePosition + warp;
+  // rows of identical fern stamps. Both layers remain fixed to the metal.
+  vec2 warp = vec2(sin(uv.y * 2.7 + sin(uv.x * 1.9)),
+                   sin(uv.x * 3.1 - cos(uv.y * 2.3))) * 0.11;
+  vec2 q = uv + warp;
   float large = texture2D(uFrostHeight, mat2(0.84, 0.54, -0.54, 0.84) * q * 0.62).r;
   float fine = texture2D(uFrostHeight, mat2(0.36, -0.93, 0.93, 0.36) * q * 2.9 + vec2(0.27, 0.61)).r;
-  float blend = smoothstep(0.2, 0.8, frostNoise(vec3(planePosition * 1.3, 8.2)));
+  float blend = smoothstep(0.2, 0.8, frostNoise(vec3(uv * 1.3, 8.2)));
   return mix(fine, large, mix(0.50, 0.85, blend));
 }
-float frostHeightAt(vec3 worldPosition, vec3 worldWeights) {
-  return dot(vec3(frostDetail(worldPosition.yz), frostDetail(worldPosition.xz), frostDetail(worldPosition.xy)), worldWeights);
+float frostHeightAt(vec3 p, vec3 w) {
+  return dot(vec3(frostDetail(p.yz), frostDetail(p.xz), frostDetail(p.xy)), w);
 }
 float frostSmoothMin(float a, float b, float k) {
   float h = max(k - abs(a - b), 0.0) / k;
@@ -127,47 +125,34 @@ export function attachFrostMaterial(material, heightMap, bounds, toDevice, state
     shader.vertexShader = shader.vertexShader.replace('#include <common>', `#include <common>
 uniform mat4 uFrostToDevice;
 uniform mat3 uFrostNormalToDevice;
-varying vec3 vFrostDevicePosition;
-varying vec3 vFrostDeviceNormal;
-varying vec3 vFrostWorldPosition;
-varying vec3 vFrostWorldNormal;`).replace('#include <begin_vertex>', `#include <begin_vertex>
-vFrostDevicePosition = (uFrostToDevice * vec4(position, 1.0)).xyz;
-vFrostDeviceNormal = normalize(uFrostNormalToDevice * normal);`)
-      .replace('#include <project_vertex>', `#include <project_vertex>
-// Use the model matrix after vertex transforms so every frost projection shares
-// the same world-space frame, regardless of this mesh's UV layout.
-vFrostWorldPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;
-mat3 frostModel = mat3(modelMatrix);
-mat3 frostWorldNormalMatrix = mat3(
-  cross(frostModel[1], frostModel[2]),
-  cross(frostModel[2], frostModel[0]),
-  cross(frostModel[0], frostModel[1]));
-vFrostWorldNormal = normalize(frostWorldNormalMatrix * objectNormal);`);
+varying vec3 vFrostPosition;
+varying vec3 vFrostNormal;`).replace('#include <begin_vertex>', `#include <begin_vertex>
+vFrostPosition = (uFrostToDevice * vec4(position, 1.0)).xyz;
+vFrostNormal = normalize(uFrostNormalToDevice * normal);`);
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\n' + frostFragment)
       .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
-vec3 frostWorldW = frostWeights(normalize(vFrostWorldNormal));
-vec3 frostDeviceW = frostWeights(normalize(vFrostDeviceNormal));
-float crystalHeight = frostHeightAt(vFrostWorldPosition, frostWorldW);
-vec2 frostEdges = frostEdgeDistances(vFrostDevicePosition, frostDeviceW);
+vec3 frostW = frostWeights(normalize(vFrostNormal));
+float crystalHeight = frostHeightAt(vFrostPosition, frostW);
+vec2 frostEdges = frostEdgeDistances(vFrostPosition, frostW);
 float corner = 1.0 - smoothstep(0.025, 0.26, frostEdges.y);
-float colony = frostNoise(vFrostWorldPosition * 2.3 + vec3(9.2, 3.1, 0.4));
+float colony = frostNoise(vFrostPosition * 2.3 + vec3(9.2, 3.1, 0.4));
 float rim = 1.0 - smoothstep(0.008, mix(0.065, 0.22, colony), frostEdges.x);
 float branchRelief = smoothstep(0.22, 0.60, crystalHeight);
-float arrival = frostArrival(vFrostDevicePosition, frostDeviceW) - corner * 0.15;
+float arrival = frostArrival(vFrostPosition, frostW) - corner * 0.15;
 // This material is assigned only to the lid mesh, so use its explicit mask
 // rather than a normal threshold that can fade across smoothed lid vertices.
 float lidTop = uFrostLidMask;
 float lidGrowthStrength = smoothstep(0.08, 0.42, uFrostProgress);
-float lidFrontLow = frostNoise(vec3(vFrostWorldPosition.xz * 0.95 + vec2(4.7, 2.1), 6.2));
-float lidFrontMid = frostNoise(vec3(vFrostWorldPosition.xz * 3.4 + vec2(1.3, 8.6), 2.8));
-float lidFrontFine = frostNoise(vec3(vFrostWorldPosition.xz * 10.2 + vec2(7.2, 3.5), 5.1));
+float lidFrontLow = frostNoise(vec3(vFrostPosition.xz * 0.95 + vec2(4.7, 2.1), 6.2));
+float lidFrontMid = frostNoise(vec3(vFrostPosition.xz * 3.4 + vec2(1.3, 8.6), 2.8));
+float lidFrontFine = frostNoise(vec3(vFrostPosition.xz * 10.2 + vec2(7.2, 3.5), 5.1));
 float lidFrontWarp = lidTop * lidGrowthStrength * (
   (lidFrontLow - 0.5) * 0.78 +
   (lidFrontMid - 0.5) * 0.42 +
   (lidFrontFine - 0.5) * 0.18
 );
-arrival += (frostNoise(vFrostWorldPosition * 9.0) - 0.5) * 0.08 - branchRelief * 0.085 + lidFrontWarp;
+arrival += (frostNoise(vFrostPosition * 9.0) - 0.5) * 0.08 - branchRelief * 0.085 + lidFrontWarp;
 float reach = uFrostProgress * 1.12 - 0.08;
 float started = smoothstep(0.0, 0.06, uFrostProgress);
 // Warp arrival itself, not just a narrow band around the estimated front.
@@ -182,7 +167,7 @@ float edgeFans = 1.0 - smoothstep(0.03, 0.45, frostEdges.x);
 float needles = crystals * (edgeFans * 0.75 + smoothstep(0.52, 0.76, colony) * 0.35);
 // Fine rime fills the space between sparse fern-like colonies, instead of
 // covering every face in the same high-contrast branching print.
-float grain = frostNoise(vFrostWorldPosition * 185.0);
+float grain = frostNoise(vFrostPosition * 185.0);
 float grainDetail = smoothstep(0.35, 0.78, grain);
 float fineVeil = mix(0.012, 0.05, colony);
 float frostDeposit = frostFront * clamp(fineVeil + rim * 0.29 + density * (needles * 0.32 + grainDetail * 0.045), 0.0, 1.0);
@@ -200,7 +185,7 @@ float frostRelief = (crystalHeight * edgeFans * 0.65 + grain * 0.035) * frostFro
 normal = perturbFrostNormal(-vViewPosition, normal,
   vec2(dFdx(frostRelief), dFdy(frostRelief)), faceDirection);`);
   };
-  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v6-world-space-triplanar';
+  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v5-device-space-seam-blend';
 }
 
 export function createEdgeFrost(root, bounds) {
