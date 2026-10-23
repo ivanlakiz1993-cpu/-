@@ -128,22 +128,24 @@ float colony = frostNoise(vFrostPosition * 2.3 + vec3(9.2, 3.1, 0.4));
 float rim = 1.0 - smoothstep(0.008, mix(0.065, 0.22, colony), frostEdges.x);
 float branchRelief = smoothstep(0.22, 0.60, crystalHeight);
 float arrival = frostArrival(vFrostPosition, frostW) - corner * 0.15;
-float lidTop = uFrostLidMask * smoothstep(0.72, 0.94, abs(normalize(vFrostNormal).y));
-arrival += (frostNoise(vFrostPosition * 9.0) - 0.5) * 0.08 - branchRelief * 0.085;
+// This material is assigned only to the lid mesh, so use its explicit mask
+// rather than a normal threshold that can fade across smoothed lid vertices.
+float lidTop = uFrostLidMask;
+float lidGrowthStrength = smoothstep(0.08, 0.42, uFrostProgress);
+float lidFrontLow = frostNoise(vec3(vFrostPosition.xz * 0.95 + vec2(4.7, 2.1), 6.2));
+float lidFrontMid = frostNoise(vec3(vFrostPosition.xz * 3.4 + vec2(1.3, 8.6), 2.8));
+float lidFrontFine = frostNoise(vec3(vFrostPosition.xz * 10.2 + vec2(7.2, 3.5), 5.1));
+float lidFrontWarp = lidTop * lidGrowthStrength * (
+  (lidFrontLow - 0.5) * 0.78 +
+  (lidFrontMid - 0.5) * 0.42 +
+  (lidFrontFine - 0.5) * 0.18
+);
+arrival += (frostNoise(vFrostPosition * 9.0) - 0.5) * 0.08 - branchRelief * 0.085 + lidFrontWarp;
 float reach = uFrostProgress * 1.12 - 0.08;
 float started = smoothstep(0.0, 0.06, uFrostProgress);
-// Distort only the moving front on the lid. Multiple noise scales make the
-// two opposing fronts meet as uneven frost fingers instead of a straight band.
-float frontProximity = 1.0 - smoothstep(0.12, 0.42, abs(arrival - reach));
-float lidFrontLow = frostNoise(vec3(vFrostPosition.xz * 1.25 + vec2(4.7, 2.1), 6.2));
-float lidFrontMid = frostNoise(vec3(vFrostPosition.xz * 3.7 + vec2(1.3, 8.6), 2.8));
-float lidFrontFine = frostNoise(vec3(vFrostPosition.xz * 9.4 + vec2(7.2, 3.5), 5.1));
-float lidFrontWarp = lidTop * frontProximity * (
-  (lidFrontLow - 0.5) * 0.46 +
-  (lidFrontMid - 0.5) * 0.28 +
-  (lidFrontFine - 0.5) * 0.14
-);
-float frostFront = (1.0 - smoothstep(reach - 0.07, reach + 0.10, arrival + lidFrontWarp)) * started;
+// Warp arrival itself, not just a narrow band around the estimated front.
+// This prevents opposing edge fronts from drawing a straight meeting contour.
+float frostFront = (1.0 - smoothstep(reach - 0.07, reach + 0.10, arrival)) * started;
 // A thin seam coating bridges the separate nuclei late in the transition.
 // Interior density remains uneven even after the separate fronts have met.
 frostFront = max(frostFront, rim * smoothstep(0.2, 0.85, uFrostProgress));
@@ -171,7 +173,7 @@ float frostRelief = (crystalHeight * edgeFans * 0.65 + grain * 0.035) * frostFro
 normal = perturbNormalArb(-vViewPosition, normal,
   vec2(dFdx(frostRelief), dFdy(frostRelief)), faceDirection);`);
   };
-  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v3-irregular-lid-front';
+  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v4-organic-lid-arrival';
 }
 
 export function createEdgeFrost(root, bounds) {
