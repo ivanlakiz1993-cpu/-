@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
-import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261023-device-space-seam-blend-1';
+import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261023-world-space-triplanar-1';
 import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-frost-growth-1';
 
 const canvas = document.querySelector('[data-testing-model], #device');
