@@ -456,3 +456,39 @@
 
 /* Fluid rem scale for the home layout: reference size is 16px at 1920px wide. */
 html.home-page{font-size:clamp(.9375rem,1vw,1rem)}
+
+/* Shared Figma link treatment for the two homepage action links. */
+.all-news.home-action-link,.benefit-more.home-action-link{
+  display:inline-flex;
+  align-items:center;
+  gap:.25em;
+  width:max-content;
+  min-width:clamp(9.125rem,9.74vw,11.6875rem);
+  max-width:100%;
+  height:auto;
+  color:#fff;
+  font-family:var(--sans);
+  font-size:clamp(1rem,1.25vw,1.5rem);
+  font-weight:400;
+  line-height:1.25;
+  letter-spacing:-.05em;
+  text-decoration:none;
+  text-transform:uppercase;
+  white-space:nowrap;
+  transition:color .18s ease,opacity .45s ease-in-out;
+}
+.all-news.home-action-link>span,.benefit-more.home-action-link>span{
+  padding-left:0;
+  color:inherit;
+  text-decoration:underline;
+  text-underline-position:from-font;
+}
+.home-action-link__icon{
+  display:block;
+  flex:none;
+  width:1.3em;
+  height:1em;
+  overflow:visible;
+}
+.all-news.home-action-link:hover,.all-news.home-action-link:focus-visible,.all-news.home-action-link:active,
+.benefit-more.home-action-link:hover,.benefit-more.home-action-link:focus-visible,.benefit-more.home-action-link:active{color:#979797}
