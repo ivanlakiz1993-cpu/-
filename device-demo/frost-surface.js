@@ -43,16 +43,12 @@ float frostDetail(vec2 uv) {
 float frostHeightAt(vec3 p, vec3 w) {
   return dot(vec3(frostDetail(p.yz), frostDetail(p.xz), frostDetail(p.xy)), w);
 }
-float frostSmoothMin(float a, float b, float k) {
-  float h = max(k - abs(a - b), 0.0) / k;
-  return min(a, b) - h * h * k * 0.25;
-}
-float frostEdgeArrival(float along, float depth, float halfWidth, float seed) {
-  // Separate nuclei along each seam. Each has its own onset, speed and
-  // lateral spread; narrow fast fingers grow between slower broad colonies.
+float frostEdgeCoverage(float along, float depth, float halfWidth, float seed, float reach, float warp) {
+  // Evaluate each frost nucleus as its own soft front, then union coverage.
+  // This avoids a watershed contour where neighboring nuclei meet.
   const float spacing = 0.58;
   float cell = floor(along / spacing);
-  float arrival = 10.0;
+  float uncovered = 1.0;
   for (int i = -2; i <= 2; i++) {
     float id = cell + float(i);
     float h = frostHash(vec3(id, seed, 1.7));
@@ -63,25 +59,29 @@ float frostEdgeArrival(float along, float depth, float halfWidth, float seed) {
     float distanceFromSeed = length(vec2(depth, side));
     float speed = mix(0.48, 1.85, h * h);
     float onset = mix(0.02, 0.24, h2);
-    arrival = frostSmoothMin(arrival, onset + distanceFromSeed / (max(halfWidth, 0.3) * speed), 0.16);
+    float arrival = onset + distanceFromSeed / (max(halfWidth, 0.3) * speed) + warp;
+    float front = 1.0 - smoothstep(reach - 0.07, reach + 0.10, arrival);
+    uncovered *= 1.0 - front;
   }
-  return arrival;
+  return 1.0 - uncovered;
 }
-float frostFaceArrival(vec2 p, vec2 size, float seed) {
-  float a = frostEdgeArrival(p.x, p.y, size.y * 0.5, seed);
-  a = frostSmoothMin(a, frostEdgeArrival(p.x, size.y - p.y, size.y * 0.5, seed + 4.7), 0.16);
-  a = frostSmoothMin(a, frostEdgeArrival(p.y, p.x, size.x * 0.5, seed + 12.3), 0.16);
-  return frostSmoothMin(a, frostEdgeArrival(p.y, size.x - p.x, size.x * 0.5, seed + 19.8), 0.16);
+float frostFaceCoverage(vec2 p, vec2 size, float seed, float reach, float warp) {
+  float frontA = frostEdgeCoverage(p.x, p.y, size.y * 0.5, seed, reach, warp);
+  float frontB = frostEdgeCoverage(p.x, size.y - p.y, size.y * 0.5, seed + 4.7, reach, warp);
+  float frontC = frostEdgeCoverage(p.y, p.x, size.x * 0.5, seed + 12.3, reach, warp);
+  float frontD = frostEdgeCoverage(p.y, size.x - p.x, size.x * 0.5, seed + 19.8, reach, warp);
+  return 1.0 - (1.0 - frontA) * (1.0 - frontB) * (1.0 - frontC) * (1.0 - frontD);
 }
-float frostArrival(vec3 p, vec3 w) {
+float frostCoverage(vec3 p, vec3 w, float reach, float warp, float cornerBoost) {
   vec3 size = max(uFrostMax - uFrostMin, vec3(0.0001));
   vec3 q = clamp(p - uFrostMin, vec3(0.0), size);
-  float a = 0.0;
+  float coverage = 0.0;
+  float boostedReach = reach + cornerBoost;
   // Avoid evaluating the other two faces on flat panels.
-  if (w.x > 0.001) a += w.x * frostFaceArrival(q.yz, size.yz, 2.1 + step(size.x * 0.5, q.x) * 3.2);
-  if (w.y > 0.001) a += w.y * frostFaceArrival(q.xz, size.xz, 8.4 + step(size.y * 0.5, q.y) * 3.2);
-  if (w.z > 0.001) a += w.z * frostFaceArrival(q.xy, size.xy, 14.7 + step(size.z * 0.5, q.z) * 3.2);
-  return a;
+  if (w.x > 0.001) coverage += w.x * frostFaceCoverage(q.yz, size.yz, 2.1 + step(size.x * 0.5, q.x) * 3.2, boostedReach, warp);
+  if (w.y > 0.001) coverage += w.y * frostFaceCoverage(q.xz, size.xz, 8.4 + step(size.y * 0.5, q.y) * 3.2, boostedReach, warp);
+  if (w.z > 0.001) coverage += w.z * frostFaceCoverage(q.xy, size.xy, 14.7 + step(size.z * 0.5, q.z) * 3.2, boostedReach, warp);
+  return clamp(coverage, 0.0, 1.0);
 }
 vec2 frostEdgeDistances(vec3 p, vec3 w) {
   vec3 size = max(uFrostMax - uFrostMin, vec3(0.0001));
@@ -127,7 +127,6 @@ float corner = 1.0 - smoothstep(0.025, 0.26, frostEdges.y);
 float colony = frostNoise(vFrostPosition * 2.3 + vec3(9.2, 3.1, 0.4));
 float rim = 1.0 - smoothstep(0.008, mix(0.065, 0.22, colony), frostEdges.x);
 float branchRelief = smoothstep(0.22, 0.60, crystalHeight);
-float arrival = frostArrival(vFrostPosition, frostW) - corner * 0.15;
 // This material is assigned only to the lid mesh, so use its explicit mask
 // rather than a normal threshold that can fade across smoothed lid vertices.
 float lidTop = uFrostLidMask;
@@ -140,12 +139,12 @@ float lidFrontWarp = lidTop * lidGrowthStrength * (
   (lidFrontMid - 0.5) * 0.42 +
   (lidFrontFine - 0.5) * 0.18
 );
-arrival += (frostNoise(vFrostPosition * 9.0) - 0.5) * 0.08 - branchRelief * 0.085 + lidFrontWarp;
 float reach = uFrostProgress * 1.12 - 0.08;
 float started = smoothstep(0.0, 0.06, uFrostProgress);
-// Warp arrival itself, not just a narrow band around the estimated front.
-// This prevents opposing edge fronts from drawing a straight meeting contour.
-float frostFront = (1.0 - smoothstep(reach - 0.07, reach + 0.10, arrival)) * started;
+float arrivalWarp = (frostNoise(vFrostPosition * 9.0) - 0.5) * 0.08 - branchRelief * 0.085 + lidFrontWarp;
+// Blend edge and nucleus fronts as coverage. No single equal-arrival contour
+// is left behind when fronts meet across a broad planar face.
+float frostFront = frostCoverage(vFrostPosition, frostW, reach, arrivalWarp, corner * 0.15) * started;
 // A thin seam coating bridges the separate nuclei late in the transition.
 // Interior density remains uneven even after the separate fronts have met.
 frostFront = max(frostFront, rim * smoothstep(0.2, 0.85, uFrostProgress));
@@ -173,7 +172,7 @@ float frostRelief = (crystalHeight * edgeFans * 0.65 + grain * 0.035) * frostFro
 normal = perturbNormalArb(-vViewPosition, normal,
   vec2(dFdx(frostRelief), dFdy(frostRelief)), faceDirection);`);
   };
-  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v4-organic-lid-arrival';
+  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v5-soft-front-union';
 }
 
 export function createEdgeFrost(root, bounds) {
