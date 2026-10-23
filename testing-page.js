@@ -421,6 +421,7 @@ if (climateCarousel) {
   ];
   let activeCamera = -1;
   let climateFrame = 0;
+  let manualSelectionUntil = 0;
   const clampClimate = value => Math.max(0, Math.min(1, value));
 
   const showClimateState = index => {
@@ -441,6 +442,7 @@ if (climateCarousel) {
 
   const updateClimateState = () => {
     climateFrame = 0;
+    if (performance.now() < manualSelectionUntil) return;
     const trackBounds = climateTrack?.getBoundingClientRect();
     const pinDistance = climateTrack && climateStage ?
       climateTrack.offsetHeight - climateStage.offsetHeight : 0;
@@ -464,7 +466,10 @@ if (climateCarousel) {
     if (!climateFrame) climateFrame = requestAnimationFrame(updateClimateState);
   };
 
-  pages.forEach((page, index) => page.addEventListener('click', () => showClimateState(index)));
+  pages.forEach((page, index) => page.addEventListener('click', () => {
+    manualSelectionUntil = performance.now() + 1100;
+    showClimateState(index);
+  }));
   addEventListener('scroll', scheduleClimateUpdate, { passive: true });
   addEventListener('resize', scheduleClimateUpdate, { passive: true });
   if ('ResizeObserver' in window) new ResizeObserver(scheduleClimateUpdate).observe(climateCarousel);
