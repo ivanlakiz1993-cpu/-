@@ -257,6 +257,7 @@
 .testing-page{overflow-x:clip}
 .testing-journey{position:relative;isolation:isolate;overflow:clip;background:#000}
 .testing-journey__visual{position:sticky;z-index:1;top:0;display:grid;width:100%;height:100svh;margin-bottom:-100svh;place-items:center;pointer-events:none}
+.testing-journey__visual::before{content:"";position:absolute;z-index:0;left:50%;top:50%;width:min(82vw,100rem);aspect-ratio:1.75;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(255,116,36,.2) 0%,rgba(220,76,22,.105) 34%,rgba(130,43,15,0) 72%);filter:blur(clamp(1rem,3vw,3.5rem));opacity:var(--frost-melt-glow,0);transition:opacity .12s linear;pointer-events:none}
 .testing-vibration,.testing-heat{position:absolute;top:0;left:50%;z-index:0;display:block;width:100vw;height:100%;max-width:none;transform:translateX(-50%);overflow:visible;pointer-events:none}
 .testing-vibration{opacity:var(--vibration-opacity,0);transition:opacity .2s linear}
 .testing-vibration__scale{fill:none;stroke:rgba(255,255,255,.24);stroke-width:1.5;vector-effect:non-scaling-stroke}

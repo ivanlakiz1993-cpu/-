@@ -5,6 +5,7 @@ import * as THREE from './vendor/three.module.js';
 const frostFragment = /* glsl */`
 uniform sampler2D uFrostHeight;
 uniform float uFrostProgress;
+uniform float uFrostMelt;
 uniform float uFrostRelief;
 uniform float uFrostLidMask;
 uniform vec3 uFrostMin;
@@ -97,13 +98,14 @@ vec2 frostEdgeDistances(vec3 p, vec3 w) {
 export function attachFrostMaterial(material, heightMap, bounds, toDevice, states, isLid = false) {
   material.bumpMap = heightMap;
   material.bumpScale = 0.04;
-  const state = { progress: 0, uniform: { value: 0 }, shader: null };
+  const state = { progress: 0, uniform: { value: 0 }, meltUniform: { value: 0 }, shader: null };
   states.set(material, state);
   material.onBeforeCompile = shader => {
     state.shader = shader;
     Object.assign(shader.uniforms, {
       uFrostHeight: { value: heightMap },
       uFrostProgress: state.uniform,
+      uFrostMelt: state.meltUniform,
       uFrostRelief: { value: material.bumpScale },
       uFrostLidMask: { value: isLid ? 1 : 0 },
       uFrostMin: { value: bounds.min },
@@ -166,6 +168,10 @@ roughnessFactor = mix(roughnessFactor, 0.96, frostPresence);
 `)
       .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
 metalnessFactor = mix(metalnessFactor, 0.0, frostPresence);`)
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+// Keep a restrained warm glow on the remaining frost while it thaws.
+float meltGlow = uFrostMelt * frostPresence * (0.35 + rim * 0.65);
+totalEmissiveRadiance += vec3(1.0, 0.19, 0.045) * meltGlow * 0.18;`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
 // Standard Three.js gives normalMap priority over bumpMap. Apply the frozen
 // relief after the brushed-metal normal, and only behind the growing front.
@@ -173,7 +179,7 @@ float frostRelief = (crystalHeight * edgeFans * 0.65 + grain * 0.035) * frostFro
 normal = perturbNormalArb(-vViewPosition, normal,
   vec2(dFdx(frostRelief), dFdy(frostRelief)), faceDirection);`);
   };
-  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v6-continuous-nuclei';
+  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v7-melt-glow';
 }
 
 export function createEdgeFrost(root, bounds) {

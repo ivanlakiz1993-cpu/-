@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
-import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261023-continuous-nuclei-1';
+import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261023-melt-glow-1';
 import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-frost-growth-1';
 
 const canvas = document.querySelector('[data-testing-model], #device');
@@ -29,6 +29,7 @@ const frostMaterials = new Map();
 const vibrationSvg = document.querySelector('[data-testing-vibration]');
 const heatSvg = document.querySelector('[data-testing-heat]');
 const heatDisplacement = document.querySelector('#testing-heat-displacement');
+const journeyVisual = document.querySelector('.testing-journey__visual');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const vibrationChart = (() => {
@@ -371,11 +372,12 @@ try {
     // moves through the transition between the first two sections.
     rainFallSpeed = THREE.MathUtils.lerp(1.5, 12, progress);
   };
-  const setFrostProgress = progress => {
+  const setFrostProgress = (progress, melt = 0) => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     frostMaterials.forEach((state, material) => {
       state.progress = progress;
       state.uniform.value = progress;
+      state.meltUniform.value = melt;
     });
     icicleProgress(progress);
   };
@@ -387,13 +389,16 @@ try {
     const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .33);
     const frostMelt = THREE.MathUtils.smoothstep(progress, .33, .55);
     const frost = frostGrowth * (1 - frostMelt);
+    const meltGlow = THREE.MathUtils.smoothstep(progress, .33, .40)
+      * (1 - THREE.MathUtils.smoothstep(progress, .50, .57));
     const wetting = THREE.MathUtils.smoothstep(progress, .35, .57);
     const drying = THREE.MathUtils.smoothstep(progress, .59, .74);
     const wetness = wetting * (1 - drying);
     const heatIn = THREE.MathUtils.smoothstep(progress, .74, .84);
     const heatOut = 1 - THREE.MathUtils.smoothstep(progress, .96, 1);
 
-    setFrostProgress(frost);
+    setFrostProgress(frost, meltGlow);
+    journeyVisual?.style.setProperty('--frost-melt-glow', meltGlow.toFixed(3));
     surfaceWater.setWetness(wetness);
     // Keep the rain particle system off: the melt is shown only by water
     // droplets forming on the device surface.
