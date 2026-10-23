@@ -1,0 +1,78 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Проверка непрерывности инея</title>
+<pre id="result">Проверка шейдера…</pre>
+<script type="module">
+// Serve the repository over HTTP and open /tools/check_frost_continuity.html.
+// Exercise the production GLSL directly: points on either side of the former
+// moving-window boundaries must agree to within one RGBA8 quantization step.
+try {
+  const source = await fetch('../device-demo/frost-surface.js', { cache: 'no-store' }).then(r => r.text());
+  const definitions = source.match(/const frostFragment = \/\* glsl \*\/`([\s\S]*?)`;/)[1]
+    .replaceAll('varying ', 'in ');
+  const gl = document.createElement('canvas').getContext('webgl2');
+  if (!gl) throw new Error('WebGL2 недоступен');
+  const width = 512, height = 512;
+  gl.canvas.width = width;
+  gl.canvas.height = height;
+  const fragment = `#version 300 es
+precision highp float;
+#define texture2D texture
+${definitions}
+out vec4 color;
+void main() {
+  int pixel = int(gl_FragCoord.y) * 512 + int(gl_FragCoord.x);
+  int sampleId = pixel / 2;
+  float side = float(pixel % 2) * 2.0 - 1.0;
+  float boundary = float(sampleId % 7 + 1) * 0.58;
+  int row = sampleId / 7;
+  float depth = float(row % 70 + 1) * 0.04;
+  row /= 70;
+  float reach = float(row % 50) * 0.025;
+  float warp = float((row / 50) % 3 - 1) * 0.3;
+  float coverage = frostEdgeCoverage(boundary + side * 0.000001,
+    depth, 1.325, 4.8, 11.6, reach, warp);
+  color = vec4(coverage, coverage, coverage, 1.0);
+}`;
+  const vertex = `#version 300 es
+void main() {
+  vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}`;
+  const compile = (type, text) => {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, text);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader));
+    return shader;
+  };
+  const program = gl.createProgram();
+  gl.attachShader(program, compile(gl.VERTEX_SHADER, vertex));
+  gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fragment));
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
+  gl.useProgram(program);
+  gl.viewport(0, 0, width, height);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  const pixels = new Uint8Array(width * height * 4);
+  gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+  if (gl.getError() !== gl.NO_ERROR) throw new Error('Ошибка чтения WebGL');
+  let discontinuities = 0, maxByteJump = 0, minValue = 255, maxValue = 0;
+  for (let i = 0; i < pixels.length; i += 8) {
+    const jump = Math.abs(pixels[i] - pixels[i + 4]);
+    maxByteJump = Math.max(maxByteJump, jump);
+    if (jump > 1) discontinuities++;
+    minValue = Math.min(minValue, pixels[i]);
+    maxValue = Math.max(maxValue, pixels[i]);
+  }
+  if (minValue !== 0 || maxValue !== 255) throw new Error('Тест не охватил чистую и покрытую инеем поверхность');
+  const report = { pairs: width * height / 2, discontinuities, maxByteJump };
+  window.frostContinuityResult = report;
+  if (discontinuities) throw new Error(JSON.stringify(report));
+  document.querySelector('#result').textContent = 'PASS\n' + JSON.stringify(report, null, 2);
+  gl.getExtension('WEBGL_lose_context')?.loseContext();
+} catch (error) {
+  document.querySelector('#result').textContent = 'FAIL\n' + error.message;
+  throw error;
+}
+</script>

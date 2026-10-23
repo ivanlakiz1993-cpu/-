@@ -43,14 +43,15 @@ float frostDetail(vec2 uv) {
 float frostHeightAt(vec3 p, vec3 w) {
   return dot(vec3(frostDetail(p.yz), frostDetail(p.xz), frostDetail(p.xy)), w);
 }
-float frostEdgeCoverage(float along, float depth, float halfWidth, float seed, float reach, float warp) {
-  // Evaluate each frost nucleus as its own soft front, then union coverage.
-  // This avoids a watershed contour where neighboring nuclei meet.
+float frostEdgeCoverage(float along, float depth, float halfWidth, float edgeLength, float seed, float reach, float warp) {
+  // Keep the same nuclei across the entire edge. A moving five-cell window
+  // dropped still-active nuclei at floor(along / spacing), cutting a straight
+  // line through a single growing front, even before opposite fronts met.
   const float spacing = 0.58;
-  float cell = floor(along / spacing);
+  int lastNucleus = int(floor(edgeLength / spacing)) + 2;
   float uncovered = 1.0;
-  for (int i = -2; i <= 2; i++) {
-    float id = cell + float(i);
+  for (int i = -2; i <= lastNucleus; i++) {
+    float id = float(i);
     float h = frostHash(vec3(id, seed, 1.7));
     float h2 = frostHash(vec3(id, seed, 9.1));
     float origin = (id + 0.15 + h * 0.7) * spacing;
@@ -66,10 +67,10 @@ float frostEdgeCoverage(float along, float depth, float halfWidth, float seed, f
   return 1.0 - uncovered;
 }
 float frostFaceCoverage(vec2 p, vec2 size, float seed, float reach, float warp) {
-  float frontA = frostEdgeCoverage(p.x, p.y, size.y * 0.5, seed, reach, warp);
-  float frontB = frostEdgeCoverage(p.x, size.y - p.y, size.y * 0.5, seed + 4.7, reach, warp);
-  float frontC = frostEdgeCoverage(p.y, p.x, size.x * 0.5, seed + 12.3, reach, warp);
-  float frontD = frostEdgeCoverage(p.y, size.x - p.x, size.x * 0.5, seed + 19.8, reach, warp);
+  float frontA = frostEdgeCoverage(p.x, p.y, size.y * 0.5, size.x, seed, reach, warp);
+  float frontB = frostEdgeCoverage(p.x, size.y - p.y, size.y * 0.5, size.x, seed + 4.7, reach, warp);
+  float frontC = frostEdgeCoverage(p.y, p.x, size.x * 0.5, size.y, seed + 12.3, reach, warp);
+  float frontD = frostEdgeCoverage(p.y, size.x - p.x, size.x * 0.5, size.y, seed + 19.8, reach, warp);
   return 1.0 - (1.0 - frontA) * (1.0 - frontB) * (1.0 - frontC) * (1.0 - frontD);
 }
 float frostCoverage(vec3 p, vec3 w, float reach, float warp, float cornerBoost) {
@@ -172,7 +173,7 @@ float frostRelief = (crystalHeight * edgeFans * 0.65 + grain * 0.035) * frostFro
 normal = perturbNormalArb(-vViewPosition, normal,
   vec2(dFdx(frostRelief), dFdy(frostRelief)), faceDirection);`);
   };
-  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v5-soft-front-union';
+  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v6-continuous-nuclei';
 }
 
 export function createEdgeFrost(root, bounds) {
