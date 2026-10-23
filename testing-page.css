@@ -115,18 +115,18 @@
   .mechanical-tests__group dl{font-size:1.125rem;line-height:1.1}
 }
 @media(max-width:68.75rem){
-  .mechanical-tests{margin-top:4rem}
+  .mechanical-tests{--testing-content-gutter:clamp(1.5rem,4.6875vw,3rem);margin-top:4rem}
   .mechanical-tests__inner{width:calc(100% - 6rem)}
   .mechanical-tests h2{font-size:2.375rem;line-height:.9;letter-spacing:.01em}
   .mechanical-tests__content{gap:1.875rem;margin-top:1.875rem}
   .mechanical-tests__list{width:100%}
-  .mechanical-tests__list li{font-size:1rem;letter-spacing:.01em}
+  .mechanical-tests__list li{border-radius:.625rem;font-size:1rem;letter-spacing:.01em}
   .mechanical-tests__equipment-row{flex-direction:column;align-items:stretch;gap:1.875rem}
   .mechanical-tests__equipment{order:1;flex:none;width:100%;gap:1.875rem;padding:.9375rem}
   .mechanical-tests__equipment h3{font-size:1.5rem;line-height:1;letter-spacing:-.075rem}
   .mechanical-tests__group{gap:1.875rem}
   .mechanical-tests__group h4{font-size:1.125rem;letter-spacing:-.05em}
-  .mechanical-tests__group dl{gap:.9375rem;font-size:1rem;line-height:1.2;letter-spacing:.01em}
+  .mechanical-tests__group dl{gap:.9375rem;font-size:1rem;font-weight:400;line-height:1.2;letter-spacing:.01em}
   .mechanical-tests__group dl>div{gap:.625rem}
   .mechanical-tests__group dt,.mechanical-tests__group dd{white-space:normal}
   .mechanical-tests__group dd{text-align:right}
@@ -135,25 +135,28 @@
 }
 @media(min-width:56.3125rem) and (max-width:68.75rem){
   .mechanical-tests__equipment-row{flex-direction:row;align-items:flex-end;gap:0}
-  .mechanical-tests__equipment{flex:0 1 51.08%;width:auto}
+  .mechanical-tests__equipment{flex:0 1 51.077586%;width:auto}
   .mechanical-tests__equipment h3{white-space:nowrap}
-  .mechanical-tests__shaker{flex:0 1 48.92%;align-self:flex-end;width:auto}
+  .mechanical-tests__shaker{flex:0 1 48.922414%;align-self:flex-end;width:auto}
 }
 @media(max-width:43.75rem){
-  .mechanical-tests{margin-top:3.75rem}
-  .mechanical-tests__inner{width:calc(100% - 1.5rem)}
-  .mechanical-tests h2{font-size:clamp(2.125rem,9.75vw,2.375rem);line-height:.9;letter-spacing:.01em}
-  .mechanical-tests__content{gap:1.875rem;margin-top:1.875rem}
+  .mechanical-tests{--testing-content-gutter:.75rem;margin-top:3.75rem}
+  .mechanical-tests__inner{position:relative;width:calc(100% - 1.5rem)}
+  .mechanical-tests__inner::before{content:"";position:absolute;z-index:0;top:22.125rem;left:50%;width:calc(100% + 1.5rem);aspect-ratio:390/252;transform:translateX(-50%);background:url("assets/testing-mechanical-product.png") center/cover no-repeat;opacity:.5;pointer-events:none}
+  .mechanical-tests h2{font-size:clamp(2rem,9.7436vw,2.375rem);line-height:.9;letter-spacing:.01em}
+  .mechanical-tests__content{position:relative;z-index:1;gap:1.875rem;margin-top:1.875rem}
   .mechanical-tests__list{width:100%;gap:.625rem}
   .mechanical-tests__list li{padding:.75rem .5rem;font-size:1rem;line-height:1.2;letter-spacing:.01em}
   .mechanical-tests__equipment-row{flex-direction:column;align-items:stretch;gap:1.875rem}
-  .mechanical-tests__equipment{order:1;flex:none;width:100%;gap:1.875rem;padding:.9375rem 0;background:transparent}
+  .mechanical-tests__equipment{order:1;flex:none;width:100%;gap:1.875rem;padding:.9375rem 0;border-radius:0;background:rgba(0,0,0,.6)}
   .mechanical-tests__equipment h3{font-size:1.5rem;line-height:1;letter-spacing:-.075rem;white-space:normal}
   .mechanical-tests__group{gap:1.875rem}
   .mechanical-tests__group h4{font-size:1.125rem;line-height:1;letter-spacing:-.05em}
   .mechanical-tests__group dl{gap:.9375rem;font-size:1rem;line-height:1.2;letter-spacing:.01em}
-  .mechanical-tests__group dl>div{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:.625rem}
+  .mechanical-tests__group dl>div{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.625rem}
   .mechanical-tests__group dt{max-width:13.25rem;color:#979797}
+  .mechanical-tests__group:first-of-type dl>div:first-child dt{width:min(12.0625rem,100%)}
+  .mechanical-tests__group:first-of-type dl>div:nth-child(2) dt{width:min(13.25rem,100%)}
   .mechanical-tests__group dd{text-align:right;white-space:nowrap}
   .mechanical-tests__divider{width:100%;max-width:100%}
   .mechanical-tests__shaker{order:2;flex:none;align-self:center;width:min(100%,22.875rem)}
