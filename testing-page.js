@@ -28,30 +28,45 @@ if (heroStage && heroDevice && heroVisual) {
   anchor.setAttribute('aria-hidden', 'true');
   heroStage.append(anchor);
   let heroFrame = 0;
-  const positionHeroDevice = () => {
+  let mobileAnchorPositioned = false;
+  const positionHeroDevice = (force = false) => {
     heroFrame = 0;
+    const isMobile = matchMedia('(max-width: 40.625rem)').matches;
     if (!matchMedia('(max-width: 68.75rem)').matches) {
       heroDevice.style.removeProperty('--hero-device-x');
       heroDevice.style.removeProperty('--hero-device-y');
       heroDevice.style.removeProperty('--hero-device-scale');
+      mobileAnchorPositioned = false;
       return;
     }
+    if (isMobile && mobileAnchorPositioned && !force) return;
     const stage = heroStage.getBoundingClientRect();
     const target = anchor.getBoundingClientRect();
     const scene = heroVisual.getBoundingClientRect();
-    const progress = Math.max(0, Math.min(1, -stage.top / stage.height));
+    const progress = isMobile ? 0 : Math.max(0, Math.min(1, -stage.top / stage.height));
     const weight = 1 - progress * progress * (3 - 2 * progress);
     // Compensate for the camera's rotation-safe empty space inside the canvas.
     heroDevice.style.setProperty('--hero-device-scale', String(1 + .25 * weight));
     heroDevice.style.setProperty('--hero-device-x', `${(target.left + target.width / 2 - scene.left - scene.width / 2) * weight}px`);
     heroDevice.style.setProperty('--hero-device-y', `${(target.top + target.height / 2 - scene.top - scene.height / 2) * weight}px`);
+    mobileAnchorPositioned = isMobile;
   };
-  const scheduleHeroDevice = () => { if (!heroFrame) heroFrame = requestAnimationFrame(positionHeroDevice); };
-  addEventListener('scroll', scheduleHeroDevice, { passive: true });
-  addEventListener('resize', scheduleHeroDevice, { passive: true });
-  new ResizeObserver(scheduleHeroDevice).observe(heroStage);
-  document.fonts?.ready.then(scheduleHeroDevice);
-  scheduleHeroDevice();
+  let forceHeroUpdate = false;
+  const scheduleHeroDevice = (force = false) => {
+    forceHeroUpdate ||= force;
+    if (!heroFrame) heroFrame = requestAnimationFrame(() => {
+      const shouldForce = forceHeroUpdate;
+      forceHeroUpdate = false;
+      positionHeroDevice(shouldForce);
+    });
+  };
+  addEventListener('scroll', () => {
+    if (!matchMedia('(max-width: 40.625rem)').matches) scheduleHeroDevice();
+  }, { passive: true });
+  addEventListener('resize', () => scheduleHeroDevice(true), { passive: true });
+  new ResizeObserver(() => scheduleHeroDevice(true)).observe(heroStage);
+  document.fonts?.ready.then(() => scheduleHeroDevice(true));
+  scheduleHeroDevice(true);
 }
 
 const faqList = document.querySelector('.testing-faq__list');

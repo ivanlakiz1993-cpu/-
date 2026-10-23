@@ -519,6 +519,7 @@ try {
       const rain = 1 - THREE.MathUtils.smoothstep(progress, .32, .62);
       const frost = THREE.MathUtils.smoothstep(progress, .12, .92);
       if (rainMaterial) rainMaterial.opacity = rain * .25;
+      journeyVisual?.style.setProperty('--mobile-cover-opacity', (1 - THREE.MathUtils.smoothstep(progress, .88, 1)).toFixed(3));
       // Keep rainfall speed independent of scroll; only transition from rain
       // to frost as the cover moves out of view.
       rainFallSpeed = 12;
