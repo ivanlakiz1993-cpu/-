@@ -534,3 +534,36 @@
  .testing-about__number{font-size:clamp(5.75rem,28.2051vw,6.875rem);text-align:center}
  .testing-about__label{text-align:center}
 }
+
+/* Climate adaptations: Figma 2512:2050 and 2631:2576. */
+@media(min-width:43.8125rem) and (max-width:68.75rem){
+ .climate-tests__inner{width:calc(100% - clamp(3rem,9.375vw,6rem));padding:0}
+ .climate-tests h2{max-width:100%;font-size:2.375rem;line-height:.9;letter-spacing:.01em}
+ .climate-tests__body{display:block;position:relative;min-height:47.625rem;margin-top:1.875rem}
+ .climate-tests__details{width:100%;gap:1.875rem}
+ .climate-tests__list{gap:.625rem}
+ .climate-tests__list li{padding:1.25rem 1.875rem;min-height:0;font-size:1rem;line-height:1.2;letter-spacing:.01em}
+ .climate-tests__equipment{width:50.9698%;padding:.9375rem;gap:1.875rem;margin:0}
+ .climate-tests__equipment h3{font-size:1.5rem;line-height:1;letter-spacing:-.05em}
+ .climate-tests__equipment dl{font-size:1rem;line-height:1.2;letter-spacing:.01em;gap:.9375rem}
+ .climate-tests__visuals{position:absolute;top:18.5rem;right:0;width:46.875%;aspect-ratio:auto;grid-template-columns:.5rem minmax(0,1fr);gap:.75rem}
+ .climate-tests__pagination{position:relative;inset:auto;flex-direction:column;align-self:end;width:.5rem;height:auto}
+ .climate-tests__camera-stack{aspect-ratio:1;border-radius:0}
+ .climate-tests__camera-photo{object-fit:cover}
+}
+@media(max-width:43.75rem){
+ .climate-tests__inner{width:calc(100% - 1.5rem);padding:0}
+ .climate-tests h2{max-width:100%;font-size:clamp(2rem,9.7436vw,2.375rem);line-height:.9;letter-spacing:.01em}
+ .climate-tests__body{margin-top:1.875rem;gap:.625rem}
+ .climate-tests__details{gap:1.875rem}
+ .climate-tests__list{gap:.625rem}
+ .climate-tests__list li{padding:.75rem .5rem;font-size:1rem;line-height:1.2;letter-spacing:.01em}
+ .climate-tests__equipment{margin:0;padding:.9375rem;gap:1.875rem}
+ .climate-tests__equipment h3{font-size:1.5rem;line-height:1;letter-spacing:-.05em}
+ .climate-tests__equipment dl{font-size:1rem;line-height:1.2;letter-spacing:.01em;gap:.9375rem}
+ .climate-tests__equipment dl>div{gap:.5rem}
+ .climate-tests__visuals{width:100%;margin-top:0;display:block;aspect-ratio:1}
+ .climate-tests__pagination{display:none}
+ .climate-tests__camera-stack{aspect-ratio:1;border-radius:0}
+ .climate-tests__camera-photo{object-fit:cover}
+}
