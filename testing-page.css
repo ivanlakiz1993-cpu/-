@@ -537,7 +537,7 @@
 
 /* Climate adaptations: Figma 2512:2050 and 2631:2576. */
 @media(min-width:43.8125rem) and (max-width:68.75rem){
- .climate-tests__inner{width:calc(100% - clamp(3rem,9.375vw,6rem));padding:0}
+ .climate-tests__inner{width:calc(100% - clamp(3rem,9.375vw,6rem));padding:6rem 0 0}
  .climate-tests h2{max-width:100%;font-size:2.375rem;line-height:.9;letter-spacing:.01em}
  .climate-tests__body{display:block;position:relative;min-height:47.625rem;margin-top:1.875rem}
  .climate-tests__details{width:100%;gap:1.875rem}
@@ -552,9 +552,9 @@
  .climate-tests__camera-photo{object-fit:cover}
 }
 @media(max-width:43.75rem){
- .climate-tests__inner{width:calc(100% - 1.5rem);padding:0}
+ .climate-tests__inner{width:calc(100% - 1.5rem);padding:clamp(3rem,12vw,3.5rem) 0 0}
  .climate-tests h2{max-width:100%;font-size:clamp(2rem,9.7436vw,2.375rem);line-height:.9;letter-spacing:.01em}
- .climate-tests__body{margin-top:1.875rem;gap:.625rem}
+ .climate-tests__body{margin-top:1.875rem;gap:0}
  .climate-tests__details{gap:1.875rem}
  .climate-tests__list{gap:.625rem}
  .climate-tests__list li{padding:.75rem .5rem;font-size:1rem;line-height:1.2;letter-spacing:.01em}
@@ -562,7 +562,7 @@
  .climate-tests__equipment h3{font-size:1.5rem;line-height:1;letter-spacing:-.05em}
  .climate-tests__equipment dl{font-size:1rem;line-height:1.2;letter-spacing:.01em;gap:.9375rem}
  .climate-tests__equipment dl>div{gap:.5rem}
- .climate-tests__visuals{width:100%;margin-top:0;display:block;aspect-ratio:1}
+ .climate-tests__visuals{width:100%;margin-top:-.5rem;display:block;aspect-ratio:1}
  .climate-tests__pagination{display:none}
  .climate-tests__camera-stack{aspect-ratio:1;border-radius:0}
  .climate-tests__camera-photo{object-fit:cover}
