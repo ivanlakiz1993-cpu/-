@@ -399,16 +399,18 @@ try {
     const wetness = wetting * (1 - drying);
     const heatIn = THREE.MathUtils.smoothstep(progress, .74, .84);
     const heatOut = 1 - THREE.MathUtils.smoothstep(progress, .96, 1);
+    const heat = heatIn * heatOut;
+    const warmGlow = Math.max(meltGlow, heat);
 
     setFrostProgress(frost, meltGlow);
-    journeyVisual?.style.setProperty('--frost-melt-glow', meltGlow.toFixed(3));
-    meltLight.intensity = meltGlow * 2.4;
+    journeyVisual?.style.setProperty('--frost-melt-glow', warmGlow.toFixed(3));
+    meltLight.intensity = warmGlow * 2.4;
     surfaceWater.setWetness(wetness);
     // Keep the rain particle system off: the melt is shown only by water
     // droplets forming on the device surface.
     if (rainMaterial) rainMaterial.opacity = 0;
     dropletLight.intensity = 0;
-    setTemperatureProgress(heatIn * heatOut);
+    setTemperatureProgress(heat);
   };
   const setVibrationProgress = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
@@ -417,6 +419,7 @@ try {
   const setTemperatureProgress = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     const heat = progress;
+    equipment?.style.setProperty('--thermal-contour', heat.toFixed(3));
     if (heatDisplacement) heatDisplacement.setAttribute('scale', (reducedMotion.matches ? 0 : heat * 6).toFixed(2));
     equipment?.classList.toggle('is-thermal-haze', heat > .001 && !reducedMotion.matches);
     if (heatSvg) {

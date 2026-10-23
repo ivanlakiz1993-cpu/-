@@ -272,6 +272,9 @@
 .testing-journey__visual .testing-stage__equipment{position:relative;inset:auto;left:auto;top:auto;width:min(48.7vw,58.4375rem);max-width:calc(100% - 1.5rem);height:auto;aspect-ratio:935/604;transform:none;transform-origin:50% 50%;transform-style:flat;will-change:auto;opacity:1}
 .testing-journey__visual .testing-stage__equipment{z-index:1}
 .testing-journey__visual .testing-stage__equipment.is-thermal-haze .testing-stage__model{filter:url(#testing-heat-distortion)}
+/* The canvas alpha follows the rotating device silhouette; the parent glow
+   surrounds that silhouette after the child heat distortion has been applied. */
+.testing-journey__visual .testing-stage__equipment{filter:drop-shadow(0 0 .25rem rgb(255 158 57 / calc(var(--thermal-contour,0) * .65))) drop-shadow(0 0 1.1rem rgb(255 115 25 / calc(var(--thermal-contour,0) * .48))) drop-shadow(0 0 2.8rem rgb(255 97 17 / calc(var(--thermal-contour,0) * .32)))}
 @media(prefers-reduced-motion:reduce){.testing-vibration,.testing-heat{transition:none}}
 .testing-rain__ambient{position:absolute;z-index:0;inset:0;display:block;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .16s linear}
 .testing-sequence,.testing-stage{background:transparent}
