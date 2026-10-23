@@ -26,10 +26,10 @@ pivot.scale.setScalar(.95);
 scene.add(pivot);
 const wetMaterials = new Map();
 const frostMaterials = new Map();
-const temperatureMaterials = new Map();
-const thermalEmissive = new THREE.Color(0xff4a18);
 const vibrationSvg = document.querySelector('[data-testing-vibration]');
 const heatSvg = document.querySelector('[data-testing-heat]');
+const heatDisplacement = document.querySelector('#testing-heat-displacement');
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const vibrationChart = (() => {
   if (!vibrationSvg) return { setProgress: () => {} };
@@ -138,9 +138,6 @@ scene.add(upperPanelLight, upperPanelLight.target);
 const dropletLight = new THREE.PointLight(0xffffff, 0, 0, 2);
 dropletLight.position.set(-3.5, 4.5, 4);
 scene.add(dropletLight);
-const temperatureLight = new THREE.PointLight(0xff5726, 0, 10, 2);
-temperatureLight.position.set(-2.5, 3.2, 4);
-scene.add(temperatureLight);
 let radius = 3;
 let halfHeight = .6;
 function resize() {
@@ -197,7 +194,6 @@ try {
     material.roughness = .2;
     material.clearcoat = 0;
     wetMaterials.set(material, true);
-    temperatureMaterials.set(material, { emissive: material.emissive.clone() });
     attachFrostMaterial(material, frostHeight, enclosureBounds, toDevice, frostMaterials, isLid);
     return material;
   };
@@ -386,14 +382,16 @@ try {
   const setClimateTransition = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
 
-    // Frost forms first, then melts into beads of water, and the surface dries
-    // before the mechanical-testing section enters.
-    const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .4);
-    const frostMelt = THREE.MathUtils.smoothstep(progress, .4, .67);
+    // Frost forms, melts into surface beads and dries before the heat haze;
+    // mechanical vibration begins only after this climate sequence finishes.
+    const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .33);
+    const frostMelt = THREE.MathUtils.smoothstep(progress, .33, .55);
     const frost = frostGrowth * (1 - frostMelt);
-    const wetting = THREE.MathUtils.smoothstep(progress, .43, .68);
-    const drying = THREE.MathUtils.smoothstep(progress, .72, 1);
+    const wetting = THREE.MathUtils.smoothstep(progress, .35, .57);
+    const drying = THREE.MathUtils.smoothstep(progress, .59, .74);
     const wetness = wetting * (1 - drying);
+    const heatIn = THREE.MathUtils.smoothstep(progress, .74, .84);
+    const heatOut = 1 - THREE.MathUtils.smoothstep(progress, .96, 1);
 
     setFrostProgress(frost);
     surfaceWater.setWetness(wetness);
@@ -401,6 +399,7 @@ try {
     // droplets forming on the device surface.
     if (rainMaterial) rainMaterial.opacity = 0;
     dropletLight.intensity = 0;
+    setTemperatureProgress(heatIn * heatOut);
   };
   const setVibrationProgress = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
@@ -408,13 +407,11 @@ try {
   };
   const setTemperatureProgress = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
-    const heat = THREE.MathUtils.smoothstep(progress, 0, 1);
-    temperatureMaterials.forEach((state, material) => {
-      material.emissive.copy(state.emissive).lerp(thermalEmissive, heat * .22);
-    });
-    temperatureLight.intensity = heat * 7.5;
+    const heat = progress;
+    if (heatDisplacement) heatDisplacement.setAttribute('scale', (reducedMotion.matches ? 0 : heat * 6).toFixed(2));
+    equipment?.classList.toggle('is-thermal-haze', heat > .001 && !reducedMotion.matches);
     if (heatSvg) {
-      heatSvg.style.setProperty('--heat-progress', (heat * .88).toFixed(3));
+      heatSvg.style.setProperty('--heat-progress', (heat * .72).toFixed(3));
       heatSvg.classList.toggle('is-active', heat > .01);
     }
   };
@@ -467,8 +464,8 @@ try {
   const updateClimateProgress = self => {
     const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
     setClimateTransition(progress);
-    const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .4);
-    const frostMelt = THREE.MathUtils.smoothstep(progress, .4, .67);
+    const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .33);
+    const frostMelt = THREE.MathUtils.smoothstep(progress, .33, .55);
     const frost = frostGrowth * (1 - frostMelt);
     const bucket = Math.round(frost * 10);
     if (bucket !== frostProgressLogBucket) {
@@ -498,19 +495,6 @@ try {
     onRefresh: self => setVibrationProgress(self.progress),
     onLeave: () => setVibrationProgress(1),
     onLeaveBack: () => setVibrationProgress(0)
-  });
-  if (equipment && mechanicalSection) ScrollTrigger.create({
-    trigger: mechanicalSection,
-    // Start only once the mechanical block has fully passed, then build heat
-    // while the shared device moves into the FAQ section.
-    start: 'bottom top',
-    end: 'bottom -70%',
-    scrub: .65,
-    scroller: scrollContainer,
-    onUpdate: self => setTemperatureProgress(self.progress),
-    onRefresh: self => setTemperatureProgress(self.progress),
-    onLeave: () => setTemperatureProgress(1),
-    onLeaveBack: () => setTemperatureProgress(0)
   });
   ScrollTrigger.refresh();
   if (status) status.textContent = '';
