@@ -19,6 +19,11 @@
     return positions[0]+entrances.reduce((offset,[start,end],i)=>
       offset+(positions[i+1]-positions[i])*smooth((progress-start)/(end-start)),0);
   };
+  const mobileHelicopterFlight=progress=>{
+    const flight=smooth((progress-.645)/(.74-.645));
+    const arc=Math.sin(Math.PI*flight)**2;
+    return {top:mobileHelicopterTop(progress)-arc*7.5,left:arc*5.5};
+  };
   let enabled=false,splitEnabled=false,splitOverlay=null,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
   let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;
   let splitIntroTop=0,splitPreTravel=0,splitSeam=0,splitTopTravel=0,splitBottomTravel=0;
@@ -132,8 +137,14 @@
   function compose(){
     state=sample(progress,mobileMedia.matches);sizeFrame();
     stage.dataset.scene=String(state.scene);stage.dataset.progress=state.progress.toFixed(5);
-    if(mobileMedia.matches)stage.style.setProperty('--mobile-helicopter-top',`${mobileHelicopterTop(state.progress)}%`);
-    else stage.style.removeProperty('--mobile-helicopter-top');
+    if(mobileMedia.matches){
+      const flight=mobileHelicopterFlight(state.progress);
+      stage.style.setProperty('--mobile-helicopter-top',`${flight.top}%`);
+      stage.style.setProperty('--mobile-helicopter-left',`${flight.left}%`);
+    }else{
+      stage.style.removeProperty('--mobile-helicopter-top');
+      stage.style.removeProperty('--mobile-helicopter-left');
+    }
     copies.forEach((copy,i)=>{
       copy.style.opacity=String(state.achievement[i]);
       copy.style.setProperty('--copy-shift',`${state.textY[i]*sceneWidth/1920}px`);
