@@ -58,7 +58,7 @@ export function createSurfaceWater(root, wetMaterials, environment) {
         normal.normalize();
         if (normal.y < -.25) continue;
         totalArea += area;
-        triangles.push({ a: a.clone(), b: b.clone(), c: c.clone(), normal, end: totalArea });
+        triangles.push({ a: a.clone(), b: b.clone(), c: c.clone(), normal, area, end: totalArea });
       }
     }
   });
@@ -95,14 +95,24 @@ export function createSurfaceWater(root, wetMaterials, environment) {
   const placements = [];
   const up = new THREE.Vector3(0, 1, 0);
   const spin = new THREE.Quaternion();
-  for (let i = 0; i < count; i++) {
-    const target = random() * totalArea;
-    let low = 0, high = triangles.length - 1;
-    while (low < high) { const mid = (low + high) >> 1; if (triangles[mid].end < target) low = mid + 1; else high = mid; }
-    const triangle = triangles[low];
+  const sampleTriangle = (pool, area) => {
+    const target = random() * area;
+    let low = 0, high = pool.length - 1;
+    while (low < high) {
+      const mid = (low + high) >> 1;
+      if (pool[mid].end < target) low = mid + 1;
+      else high = mid;
+    }
+    return pool[low];
+  };
+  const samplePoint = triangle => {
     const u = Math.sqrt(random()), v = random();
-    const point = triangle.a.clone().multiplyScalar(1 - u)
+    return triangle.a.clone().multiplyScalar(1 - u)
       .addScaledVector(triangle.b, u * (1 - v)).addScaledVector(triangle.c, u * v);
+  };
+  for (let i = 0; i < count; i++) {
+    const triangle = sampleTriangle(triangles, totalArea);
+    const point = samplePoint(triangle);
     point.addScaledVector(triangle.normal, .0003);
     const category = random();
     const radius = category < .78 ? .006 + random() * .007
@@ -115,11 +125,45 @@ export function createSurfaceWater(root, wetMaterials, environment) {
     placements.push({ point, rotation, scale: new THREE.Vector3(radius * elongation, radius * height, radius).multiplyScalar(2.016) });
   }
   root.add(drops);
+  // A few shallow pools collect only on the upward-facing lid and ledges.
+  // They stay small and appear unevenly as the frost melts into droplets.
+  const upwardTriangles = [];
+  let upwardArea = 0;
+  for (const triangle of triangles) {
+    if (triangle.normal.y <= 0.78) continue;
+    upwardArea += triangle.area;
+    upwardTriangles.push({ ...triangle, end: upwardArea });
+  }
+  const puddleCount = upwardArea > 0 ? 24 : 0;
+  const puddleGeometry = puddleCount ? geometry.clone() : null;
+  const puddles = puddleCount ? new THREE.InstancedMesh(puddleGeometry, material, puddleCount) : null;
+  const puddlePlacements = [];
+  if (puddles) {
+    puddles.name = 'Surface_Water_Pools';
+    puddles.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    puddles.frustumCulled = false;
+    puddles.receiveShadow = true;
+    puddles.visible = false;
+    for (let i = 0; i < puddleCount; i++) {
+      const triangle = sampleTriangle(upwardTriangles, upwardArea);
+      const point = samplePoint(triangle).addScaledVector(triangle.normal, .0005);
+      const rotation = new THREE.Quaternion().setFromUnitVectors(up, triangle.normal);
+      spin.setFromAxisAngle(up, random() * Math.PI * 2);
+      rotation.multiply(spin);
+      const radiusX = .045 + random() * .045;
+      const radiusZ = .035 + random() * .04;
+      const depth = .0015 + random() * .0015;
+      const scale = new THREE.Vector3(radiusX, depth, radiusZ);
+      puddlePlacements.push({ point, rotation, scale, delay: random() * .24 });
+    }
+    root.add(puddles);
+  }
   const matrix = new THREE.Matrix4();
   const scale = new THREE.Vector3();
   let previous = -1;
   return {
     mesh: drops,
+    puddles,
     setWetness(value) {
       const wetness = THREE.MathUtils.clamp(value, 0, 1);
       if (Math.abs(wetness - previous) < .002) return;
@@ -131,7 +175,23 @@ export function createSurfaceWater(root, wetMaterials, environment) {
         drops.setMatrixAt(i, matrix);
       });
       drops.instanceMatrix.needsUpdate = true;
+      if (puddles) {
+        puddles.visible = wetness > .002;
+        puddlePlacements.forEach((placement, i) => {
+          const localWetness = THREE.MathUtils.smoothstep(wetness, placement.delay, Math.min(1, placement.delay + .56));
+          scale.copy(placement.scale).multiplyScalar(Math.sqrt(Math.max(.0001, localWetness)));
+          matrix.compose(placement.point, placement.rotation, scale);
+          puddles.setMatrixAt(i, matrix);
+        });
+        puddles.instanceMatrix.needsUpdate = true;
+      }
     },
-    dispose() { root.remove(drops); geometry.dispose(); material.dispose(); }
+    dispose() {
+      root.remove(drops);
+      if (puddles) root.remove(puddles);
+      geometry.dispose();
+      puddleGeometry?.dispose();
+      material.dispose();
+    }
   };
 }

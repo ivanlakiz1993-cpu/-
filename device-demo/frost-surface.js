@@ -5,6 +5,7 @@ import * as THREE from './vendor/three.module.js';
 const frostFragment = /* glsl */`
 uniform sampler2D uFrostHeight;
 uniform float uFrostProgress;
+uniform float uFrostMelt;
 uniform float uFrostRelief;
 uniform float uFrostLidMask;
 uniform vec3 uFrostMin;
@@ -94,16 +95,19 @@ vec2 frostEdgeDistances(vec3 p, vec3 w) {
 `;
 
 export function attachFrostMaterial(material, heightMap, bounds, toDevice, states, isLid = false) {
-  material.bumpMap = heightMap;
-  material.bumpScale = 0.04;
-  const state = { progress: 0, uniform: { value: 0 }, shader: null };
+  // Frost relief is applied in the custom shader so it can melt away instead
+  // of leaving a permanent height-map bump on the dry device.
+  material.bumpMap = null;
+  material.bumpScale = 0;
+  const state = { progress: 0, uniform: { value: 0 }, melt: 0, meltUniform: { value: 0 }, shader: null };
   states.set(material, state);
   material.onBeforeCompile = shader => {
     state.shader = shader;
     Object.assign(shader.uniforms, {
       uFrostHeight: { value: heightMap },
       uFrostProgress: state.uniform,
-      uFrostRelief: { value: material.bumpScale },
+      uFrostMelt: state.meltUniform,
+      uFrostRelief: { value: 0.04 },
       uFrostLidMask: { value: isLid ? 1 : 0 },
       uFrostMin: { value: bounds.min },
       uFrostMax: { value: bounds.max },
@@ -152,6 +156,14 @@ float grainDetail = smoothstep(0.35, 0.78, grain);
 float fineVeil = mix(0.012, 0.05, colony);
 float frostDeposit = frostFront * clamp(fineVeil + rim * 0.29 + density * (needles * 0.32 + grainDetail * 0.045), 0.0, 1.0);
 float frostPresence = frostFront * clamp(0.25 + rim * 0.55 + density * (0.25 + needles * 0.65 + grainDetail * 0.25), 0.0, 1.0);
+// Melt crystals where they formed. Static surface-space variation gives each
+// patch a slightly different melt rate without pulling the frost front back.
+float meltNoise = frostNoise(vFrostPosition * 7.3 + vec3(21.3, 7.1, 3.4));
+float meltOnset = meltNoise * 0.16;
+float localMelt = clamp((uFrostMelt - meltOnset) / (1.0 - meltOnset), 0.0, 1.0);
+float meltRemaining = 1.0 - smoothstep(0.0, 1.0, localMelt);
+frostDeposit *= meltRemaining;
+frostPresence *= meltRemaining;
 // A translucent optical mixture leaves the black finish visible underneath.
 diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.40, 0.46, 0.53), frostDeposit * 0.55);
 roughnessFactor = mix(roughnessFactor, 0.96, frostPresence);
@@ -159,13 +171,12 @@ roughnessFactor = mix(roughnessFactor, 0.96, frostPresence);
       .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
 metalnessFactor = mix(metalnessFactor, 0.0, frostPresence);`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
-// Standard Three.js gives normalMap priority over bumpMap. Apply the frozen
-// relief after the brushed-metal normal, and only behind the growing front.
-float frostRelief = (crystalHeight * edgeFans * 0.65 + grain * 0.035) * frostFront * mix(0.35, 1.0, density) * uFrostRelief;
+// Apply crystal relief only while frost remains on the surface.
+float frostRelief = (crystalHeight * edgeFans * 0.65 + grain * 0.035) * frostFront * meltRemaining * mix(0.35, 1.0, density) * uFrostRelief;
 normal = perturbNormalArb(-vViewPosition, normal,
   vec2(dFdx(frostRelief), dFdy(frostRelief)), faceDirection);`);
   };
-  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v2';
+  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v3-in-place-melt';
 }
 
 export function createEdgeFrost(root, bounds) {
@@ -188,6 +199,7 @@ export function createEdgeFrost(root, bounds) {
     color: 0xc2ccd6, roughness: 0.88, metalness: 0,
     transparent: true, opacity: 0.58, depthWrite: false
   });
+  const grainBaseOpacity = grainMaterial.opacity;
   const grains = new THREE.InstancedMesh(new THREE.OctahedronGeometry(1, 0), grainMaterial, 1100);
   grains.name = 'Frost_Crystalline_Edge_Rime';
   grains.visible = false;
@@ -213,6 +225,7 @@ export function createEdgeFrost(root, bounds) {
     transmission: 0.45, thickness: 0.035,
     transparent: true, opacity: 0.65, depthWrite: false
   });
+  const iceBaseOpacity = iceMaterial.opacity;
   const icicles = new THREE.InstancedMesh(new THREE.ConeGeometry(1, 1, 7), iceMaterial, 112);
   icicles.name = 'Frost_Hanging_Edge_Icicles';
   icicles.visible = false;
@@ -233,12 +246,17 @@ export function createEdgeFrost(root, bounds) {
   });
   const matrix = new THREE.Matrix4(), position = new THREE.Vector3(), scale = new THREE.Vector3();
   const downward = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI);
-  let last = -1;
-  return progress => {
-    if (progress === last) return;
-    last = progress;
-    grains.visible = progress > 0;
-    icicles.visible = progress > 0.1;
+  let lastProgress = -1;
+  let lastMelt = -1;
+  return (progress, melt = 0) => {
+    if (progress === lastProgress && melt === lastMelt) return;
+    lastProgress = progress;
+    lastMelt = melt;
+    const remaining = 1 - THREE.MathUtils.clamp(melt, 0, 1);
+    grainMaterial.opacity = grainBaseOpacity * remaining;
+    iceMaterial.opacity = iceBaseOpacity * remaining;
+    grains.visible = progress > 0 && remaining > 0.001;
+    icicles.visible = progress > 0.1 && remaining > 0.001;
     grainData.forEach((grain, i) => {
       const growth = THREE.MathUtils.smoothstep(progress, grain.delay, grain.delay + 0.45);
       scale.set(grain.radius, grain.radius * grain.elongation, grain.radius).multiplyScalar(growth);

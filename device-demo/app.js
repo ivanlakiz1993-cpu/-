@@ -1,7 +1,7 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
-import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261022-frost-lid-front-warp-1';
-import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-frost-growth-1';
+import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261023-in-place-melt-1';
+import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261023-melt-pools-1';
 
 const canvas = document.querySelector('[data-testing-model], #device');
 const equipment = document.querySelector('[data-testing-equipment]');
@@ -371,29 +371,31 @@ try {
     // moves through the transition between the first two sections.
     rainFallSpeed = THREE.MathUtils.lerp(1.5, 12, progress);
   };
-  const setFrostProgress = progress => {
-    progress = THREE.MathUtils.clamp(progress, 0, 1);
+  const setFrostState = (growth, melt) => {
+    growth = THREE.MathUtils.clamp(growth, 0, 1);
+    melt = THREE.MathUtils.clamp(melt, 0, 1);
     frostMaterials.forEach((state, material) => {
-      state.progress = progress;
-      state.uniform.value = progress;
+      state.progress = growth;
+      state.uniform.value = growth;
+      state.melt = melt;
+      state.meltUniform.value = melt;
     });
-    icicleProgress(progress);
+    icicleProgress(growth, melt);
   };
   const setClimateTransition = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
 
-    // Frost forms, melts into surface beads and dries before the heat haze;
-    // mechanical vibration begins only after this climate sequence finishes.
+    // Frost advances to its full edge-grown pattern, then thins in place while
+    // droplets and small pools collect. The water dries before heat begins.
     const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .33);
     const frostMelt = THREE.MathUtils.smoothstep(progress, .33, .55);
-    const frost = frostGrowth * (1 - frostMelt);
     const wetting = THREE.MathUtils.smoothstep(progress, .35, .57);
     const drying = THREE.MathUtils.smoothstep(progress, .59, .74);
     const wetness = wetting * (1 - drying);
     const heatIn = THREE.MathUtils.smoothstep(progress, .74, .84);
     const heatOut = 1 - THREE.MathUtils.smoothstep(progress, .96, 1);
 
-    setFrostProgress(frost);
+    setFrostState(frostGrowth, frostMelt);
     surfaceWater.setWetness(wetness);
     // Keep the rain particle system off: the melt is shown only by water
     // droplets forming on the device surface.
