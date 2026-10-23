@@ -23,7 +23,8 @@
     const flight=smooth((progress-.645)/(.74-.645));
     const arc=Math.sin(Math.PI*flight)**2;
     const returnFlight=smooth((progress-.84)/(.895-.84));
-    return {top:mobileHelicopterTop(progress)-arc*7.5,left:flight*(1-returnFlight)*6.5};
+    const travel=flight*(1-returnFlight);
+    return {top:mobileHelicopterTop(progress)-arc*7.5,left:-travel*6.5,depth:travel*1.2};
   };
   let enabled=false,splitEnabled=false,splitOverlay=null,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
   let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;
@@ -192,9 +193,11 @@
     const centerX=mobile?(960-mobilePose.centerX*animatedScale)*unit:lerp(a.x,b.x,state.mix)*unit;
     const centerY=mobile?(state.height/2-mobilePose.centerY*animatedScale)*unit:
       lerp(a.y,b.y,state.mix)*unit-arc*sceneHeight*.035;
+    const mobileFlight=mobile?mobileHelicopterFlight(state.progress):null;
     renderer.render({matrix:state.matrix,
       scale:animatedScale*unit,
       centerX,centerY,
+      depth:mobileFlight?.depth||0,
       angle:rotorTime*.0032});
     stage.classList.add('is-rendered');
     raf=requestAnimationFrame(draw);

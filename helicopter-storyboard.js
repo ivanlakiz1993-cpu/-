@@ -40,7 +40,7 @@
   const poses = [
     { node:'2276:25952', rotation:orientation(-.48,.24), box:[.10,.19,.83,.66], height:1000 },
     { node:'2277:26357', rotation:orientation(-Math.PI/2,.12), box:[-.10,.13,.90,.75], height:1000 },
-    { node:'2277:26369', rotation:orientation(0,Math.PI/2), mobileRotation:orientation(.45,.2,-.45), box:[-.015,.16,.95,.68], height:1053 },
+    { node:'2277:26369', rotation:orientation(0,Math.PI/2), mobileRotation:orientation(Math.PI,.2,-.45), box:[-.015,.16,.95,.68], height:1053 },
     { node:'2278:26375', rotation:orientation(-Math.PI+.48,.18), box:[.13,.12,.77,.68], height:1053 }
   ];
   const transitions = [

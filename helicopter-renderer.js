@@ -5,7 +5,7 @@
     attribute float a_tone, a_group;
     uniform mat3 u_rotation;
     uniform vec2 u_size, u_center;
-    uniform float u_scale, u_angle;
+    uniform float u_scale, u_angle, u_depth;
     uniform vec3 u_main, u_tail;
     varying vec3 v_normal;
     varying float v_tone;
@@ -18,7 +18,7 @@
         float c=cos(u_angle*3.2),s=sin(u_angle*3.2);p-=u_tail;
         p.xy=mat2(c,s,-s,c)*p.xy;n.xy=mat2(c,s,-s,c)*n.xy;p+=u_tail;
       }
-      p=u_rotation*p;v_normal=u_rotation*n;v_tone=a_tone;
+      p=u_rotation*p;p.z+=u_depth;v_normal=u_rotation*n;v_tone=a_tone;
       float d=22.-p.z;
       vec2 offset=vec2(u_center.x/u_size.x*2.-1.,1.-u_center.y/u_size.y*2.);
       vec2 clip=offset*d+p.xy*u_scale*44./u_size;
@@ -78,7 +78,7 @@
     try {
       const meshProgram=program(meshVertex,meshFragment),asciiProgram=program(screenVertex,asciiFragment);
       const location=(p,n)=>gl.getUniformLocation(p,n);
-      const meshUniforms=Object.fromEntries(['rotation','size','center','scale','angle','main','tail'].map(n=>[n,location(meshProgram,'u_'+n)]));
+      const meshUniforms=Object.fromEntries(['rotation','size','center','scale','angle','depth','main','tail'].map(n=>[n,location(meshProgram,'u_'+n)]));
       const asciiUniforms=Object.fromEntries(['scene','glyphs','resolution','cell'].map(n=>[n,location(asciiProgram,'u_'+n)]));
       const attributes=['position','normal','tone','group'].map(n=>gl.getAttribLocation(meshProgram,'a_'+n));
       const screenAttribute=gl.getAttribLocation(asciiProgram,'a_position');
@@ -116,7 +116,7 @@
         gl.bindFramebuffer(gl.FRAMEBUFFER,framebuffer);
         if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('Helicopter framebuffer is incomplete');
       }
-      function render({matrix,scale,centerX,centerY,angle}){
+      function render({matrix,scale,centerX,centerY,depth=0,angle}){
         if(gl.isContextLost())return;
         gl.viewport(0,0,canvas.width,canvas.height);
         gl.bindFramebuffer(gl.FRAMEBUFFER,framebuffer);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
@@ -125,7 +125,7 @@
         [3,3,1,1].forEach((size,i)=>{gl.enableVertexAttribArray(attributes[i]);gl.vertexAttribPointer(attributes[i],size,gl.FLOAT,false,32,[0,12,24,28][i]);});
         gl.uniformMatrix3fv(meshUniforms.rotation,false,new Float32Array([matrix[0],matrix[3],matrix[6],matrix[1],matrix[4],matrix[7],matrix[2],matrix[5],matrix[8]]));
         gl.uniform2f(meshUniforms.size,width,height);gl.uniform2f(meshUniforms.center,centerX,centerY);
-        gl.uniform1f(meshUniforms.scale,scale);gl.uniform1f(meshUniforms.angle,angle);
+        gl.uniform1f(meshUniforms.scale,scale);gl.uniform1f(meshUniforms.angle,angle);gl.uniform1f(meshUniforms.depth,depth);
         gl.uniform3fv(meshUniforms.main,model.mainRotor);gl.uniform3fv(meshUniforms.tail,model.tailRotor);
         gl.drawArrays(gl.TRIANGLES,0,count);attributes.forEach(a=>gl.disableVertexAttribArray(a));
         gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.disable(gl.DEPTH_TEST);gl.useProgram(asciiProgram);
