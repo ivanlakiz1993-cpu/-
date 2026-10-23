@@ -6,7 +6,6 @@ const frostFragment = /* glsl */`
 uniform sampler2D uFrostHeight;
 uniform float uFrostProgress;
 uniform float uFrostMelt;
-uniform float uSurfaceWetness;
 uniform float uFrostRelief;
 uniform float uFrostLidMask;
 uniform vec3 uFrostMin;
@@ -100,11 +99,7 @@ export function attachFrostMaterial(material, heightMap, bounds, toDevice, state
   // of leaving a permanent height-map bump on the dry device.
   material.bumpMap = null;
   material.bumpScale = 0;
-  const state = {
-    progress: 0, uniform: { value: 0 },
-    melt: 0, meltUniform: { value: 0 },
-    wetness: 0, wetUniform: { value: 0 }, shader: null
-  };
+  const state = { progress: 0, uniform: { value: 0 }, melt: 0, meltUniform: { value: 0 }, shader: null };
   states.set(material, state);
   material.onBeforeCompile = shader => {
     state.shader = shader;
@@ -112,7 +107,6 @@ export function attachFrostMaterial(material, heightMap, bounds, toDevice, state
       uFrostHeight: { value: heightMap },
       uFrostProgress: state.uniform,
       uFrostMelt: state.meltUniform,
-      uSurfaceWetness: state.wetUniform,
       uFrostRelief: { value: 0.04 },
       uFrostLidMask: { value: isLid ? 1 : 0 },
       uFrostMin: { value: bounds.min },
@@ -162,17 +156,17 @@ float grainDetail = smoothstep(0.35, 0.78, grain);
 float fineVeil = mix(0.012, 0.05, colony);
 float frostDeposit = frostFront * clamp(fineVeil + rim * 0.29 + density * (needles * 0.32 + grainDetail * 0.045), 0.0, 1.0);
 float frostPresence = frostFront * clamp(0.25 + rim * 0.55 + density * (0.25 + needles * 0.65 + grainDetail * 0.25), 0.0, 1.0);
-// Keep the fully-grown frost pattern fixed in place and thin every patch
-// gradually. There is no moving edge or return toward the original seams.
-float meltRemaining = 1.0 - smoothstep(0.0, 1.0, uFrostMelt);
+// Melt crystals where they formed. Static surface-space variation gives each
+// patch a slightly different melt rate without pulling the frost front back.
+float meltNoise = frostNoise(vFrostPosition * 7.3 + vec3(21.3, 7.1, 3.4));
+float meltOnset = meltNoise * 0.16;
+float localMelt = clamp((uFrostMelt - meltOnset) / (1.0 - meltOnset), 0.0, 1.0);
+float meltRemaining = 1.0 - smoothstep(0.0, 1.0, localMelt);
 frostDeposit *= meltRemaining;
 frostPresence *= meltRemaining;
 // A translucent optical mixture leaves the black finish visible underneath.
 diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.40, 0.46, 0.53), frostDeposit * 0.55);
 roughnessFactor = mix(roughnessFactor, 0.96, frostPresence);
-// As crystals melt, a thin glossy film appears smoothly beneath them.
-float exposedWetness = uSurfaceWetness * (1.0 - frostPresence);
-roughnessFactor = mix(roughnessFactor, 0.11, exposedWetness);
 `)
       .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
 metalnessFactor = mix(metalnessFactor, 0.0, frostPresence);`)
@@ -182,7 +176,7 @@ float frostRelief = (crystalHeight * edgeFans * 0.65 + grain * 0.035) * frostFro
 normal = perturbNormalArb(-vViewPosition, normal,
   vec2(dFdx(frostRelief), dFdy(frostRelief)), faceDirection);`);
   };
-  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v4-fixed-melt-wet-film';
+  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v3-in-place-melt';
 }
 
 export function createEdgeFrost(root, bounds) {

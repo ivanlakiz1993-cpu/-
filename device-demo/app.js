@@ -1,7 +1,7 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
-import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261023-natural-thaw-1';
-import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261023-natural-thaw-1';
+import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261023-in-place-melt-1';
+import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261023-melt-pools-1';
 
 const canvas = document.querySelector('[data-testing-model], #device');
 const equipment = document.querySelector('[data-testing-equipment]');
@@ -371,39 +371,34 @@ try {
     // moves through the transition between the first two sections.
     rainFallSpeed = THREE.MathUtils.lerp(1.5, 12, progress);
   };
-  const setFrostState = (growth, melt, wetness) => {
+  const setFrostState = (growth, melt) => {
     growth = THREE.MathUtils.clamp(growth, 0, 1);
     melt = THREE.MathUtils.clamp(melt, 0, 1);
-    wetness = THREE.MathUtils.clamp(wetness, 0, 1);
     frostMaterials.forEach((state, material) => {
       state.progress = growth;
       state.uniform.value = growth;
       state.melt = melt;
       state.meltUniform.value = melt;
-      state.wetness = wetness;
-      state.wetUniform.value = wetness;
     });
     icicleProgress(growth, melt);
   };
   const setClimateTransition = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
 
-    // Let the heat shimmer start after frost has fully grown. The fixed frost
-    // pattern then thins in place as a sparse, separate set of melt beads and
-    // shallow pools appears; all water fades away before mechanical testing.
-    const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .30);
-    const heatIn = THREE.MathUtils.smoothstep(progress, .30, .40);
-    const frostMelt = THREE.MathUtils.smoothstep(progress, .40, .83);
-    const wetting = THREE.MathUtils.smoothstep(progress, .46, .76);
-    const drying = THREE.MathUtils.smoothstep(progress, .78, 1);
+    // Frost advances to its full edge-grown pattern, then thins in place while
+    // droplets and small pools collect. The water dries before heat begins.
+    const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .33);
+    const frostMelt = THREE.MathUtils.smoothstep(progress, .33, .55);
+    const wetting = THREE.MathUtils.smoothstep(progress, .35, .57);
+    const drying = THREE.MathUtils.smoothstep(progress, .59, .74);
     const wetness = wetting * (1 - drying);
-    const heatOut = 1 - THREE.MathUtils.smoothstep(progress, .88, .99);
+    const heatIn = THREE.MathUtils.smoothstep(progress, .74, .84);
+    const heatOut = 1 - THREE.MathUtils.smoothstep(progress, .96, 1);
 
-    // Rain beads belong to the earlier weather section. Thaw uses its own
-    // larger, much sparser droplets and puddles.
-    setFrostState(frostGrowth, frostMelt, wetness);
-    surfaceWater.setWetness(0);
-    surfaceWater.setMeltWetness(wetness);
+    setFrostState(frostGrowth, frostMelt);
+    surfaceWater.setWetness(wetness);
+    // Keep the rain particle system off: the melt is shown only by water
+    // droplets forming on the device surface.
     if (rainMaterial) rainMaterial.opacity = 0;
     dropletLight.intensity = 0;
     setTemperatureProgress(heatIn * heatOut);
@@ -471,8 +466,8 @@ try {
   const updateClimateProgress = self => {
     const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
     setClimateTransition(progress);
-    const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .30);
-    const frostMelt = THREE.MathUtils.smoothstep(progress, .40, .83);
+    const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .33);
+    const frostMelt = THREE.MathUtils.smoothstep(progress, .33, .55);
     const frost = frostGrowth * (1 - frostMelt);
     const bucket = Math.round(frost * 10);
     if (bucket !== frostProgressLogBucket) {
