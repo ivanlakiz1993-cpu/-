@@ -25,8 +25,18 @@ float frostNoise(vec3 p) {
              mix(mix(frostHash(i + vec3(0,0,1)), frostHash(i + vec3(1,0,1)), f.x),
                  mix(frostHash(i + vec3(0,1,1)), frostHash(i + vec3(1,1,1)), f.x), f.y), f.z);
 }
+vec3 perturbFrostNormal(vec3 surfPos, vec3 surfNorm, vec2 dHdxy, float faceDirection) {
+  vec3 sigmaX = normalize(dFdx(surfPos));
+  vec3 sigmaY = normalize(dFdy(surfPos));
+  vec3 r1 = cross(sigmaY, surfNorm);
+  vec3 r2 = cross(surfNorm, sigmaX);
+  float det = dot(sigmaX, r1) * faceDirection;
+  vec3 gradient = sign(det) * (dHdxy.x * r1 + dHdxy.y * r2);
+  return normalize(abs(det) * surfNorm - gradient);
+}
 vec3 frostWeights(vec3 n) {
-  vec3 w = pow(abs(n), vec3(8.0));
+  // Blend neighboring projections gradually across bevels and polygon seams.
+  vec3 w = pow(abs(n), vec3(4.0));
   return w / max(dot(w, vec3(1.0)), 0.0001);
 }
 float frostDetail(vec2 uv) {
@@ -94,8 +104,10 @@ vec2 frostEdgeDistances(vec3 p, vec3 w) {
 `;
 
 export function attachFrostMaterial(material, heightMap, bounds, toDevice, states, isLid = false) {
-  material.bumpMap = heightMap;
-  material.bumpScale = 0.04;
+  // Frost uses device-space triplanar sampling and its own normal perturbation;
+  // a standard bumpMap would reintroduce UV-island seams.
+  material.bumpMap = null;
+  material.bumpScale = 0;
   const state = { progress: 0, uniform: { value: 0 }, shader: null };
   states.set(material, state);
   material.onBeforeCompile = shader => {
@@ -103,7 +115,7 @@ export function attachFrostMaterial(material, heightMap, bounds, toDevice, state
     Object.assign(shader.uniforms, {
       uFrostHeight: { value: heightMap },
       uFrostProgress: state.uniform,
-      uFrostRelief: { value: material.bumpScale },
+      uFrostRelief: { value: 0.04 },
       uFrostLidMask: { value: isLid ? 1 : 0 },
       uFrostMin: { value: bounds.min },
       uFrostMax: { value: bounds.max },
@@ -170,10 +182,10 @@ metalnessFactor = mix(metalnessFactor, 0.0, frostPresence);`)
 // Standard Three.js gives normalMap priority over bumpMap. Apply the frozen
 // relief after the brushed-metal normal, and only behind the growing front.
 float frostRelief = (crystalHeight * edgeFans * 0.65 + grain * 0.035) * frostFront * mix(0.35, 1.0, density) * uFrostRelief;
-normal = perturbNormalArb(-vViewPosition, normal,
+normal = perturbFrostNormal(-vViewPosition, normal,
   vec2(dFdx(frostRelief), dFdy(frostRelief)), faceDirection);`);
   };
-  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v4-organic-lid-arrival';
+  material.customProgramCacheKey = () => 'device-frost-colonies-pbr-v5-device-space-seam-blend';
 }
 
 export function createEdgeFrost(root, bounds) {
