@@ -510,3 +510,27 @@
   .mechanical-tests__content{margin-top:3.125rem}
   .mechanical-tests__list li:not(:last-child){border-radius:.625rem}
 }
+
+/* Figma 2466:4112 / 2628:2558: laboratory statistics adaptations. */
+@media(max-width:68.75rem){
+ .testing-about{padding-inline:clamp(1.5rem,4.6875vw,3rem);padding-bottom:0}
+ .testing-about h2{font-size:2.375rem;line-height:.9;letter-spacing:.01em;margin-bottom:1.875rem}
+ .testing-about__content{gap:3.125rem;min-height:0}
+ .testing-about__text{width:min(39.5625rem,100%);font-size:1.125rem;line-height:1.2;gap:.9375rem}
+ .testing-about__metrics{display:flex;flex-direction:row;align-items:flex-start;justify-content:space-between;gap:1.875rem}
+ .testing-about__metric-row{display:flex;flex-direction:row;flex:0 1 auto;align-items:flex-start;gap:1.875rem}
+ .testing-about__metric,.testing-about__metric--wide,.testing-about__metric--experience,.testing-about__metric--repeat{flex:0 1 auto;width:auto;height:auto;min-height:0;padding:.9375rem;flex-direction:column;align-items:flex-start;gap:.625rem;border-radius:.625rem}
+ .testing-about__number{width:auto;font-size:clamp(4.75rem,10.7422vw,6.875rem);line-height:.9;text-align:left;text-box-trim:trim-both;text-box-edge:cap alphabetic}
+ .testing-about__label{font-size:1rem;line-height:1.2;letter-spacing:.01em;text-align:left}
+ .testing-about__metric--experience .testing-about__label{width:14.5rem;max-width:100%}
+ .testing-about__metric--repeat .testing-about__label{width:14.25rem;max-width:100%}
+}
+@media(max-width:40.625rem){
+ .testing-about{padding-inline:.75rem}
+ .testing-about__content{gap:.9375rem}
+ .testing-about__text{width:100%;font-size:1rem;letter-spacing:.01em}
+ .testing-about__metrics,.testing-about__metric-row{flex-direction:column;align-items:center;gap:0;width:100%}
+ .testing-about__metric,.testing-about__metric--wide,.testing-about__metric--experience,.testing-about__metric--repeat{align-items:center;max-width:100%}
+ .testing-about__number{font-size:clamp(5.75rem,28.2051vw,6.875rem);text-align:center}
+ .testing-about__label{text-align:center}
+}
