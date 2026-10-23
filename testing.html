@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="hero-grid.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="layout-gutters.css?v=20261018-fluid-home-1">
-  <link rel="stylesheet" href="testing-page.css?v=20261023-heat-haze-1">
+  <link rel="stylesheet" href="testing-page.css?v=20261023-no-heat-lines-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
   <script src="page-transition.js?v=20261023-faster-mosaic-1"></script>
 </head>
@@ -71,9 +71,6 @@
         </svg>
         <svg class="testing-heat" data-testing-heat viewBox="0 0 1920 1080" preserveAspectRatio="none">
           <defs>
-            <filter id="testing-heat-soften" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="2.5"></feGaussianBlur>
-            </filter>
             <filter id="testing-heat-distortion" x="-8%" y="-8%" width="116%" height="116%">
               <feTurbulence type="fractalNoise" baseFrequency=".014 .055" numOctaves="1" seed="7" result="heatNoise">
                 <animate attributeName="baseFrequency" values=".011 .045;.018 .07;.011 .045" dur="1.2s" repeatCount="indefinite"></animate>
@@ -81,12 +78,6 @@
               <feDisplacementMap id="testing-heat-displacement" in="SourceGraphic" in2="heatNoise" scale="0" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
             </filter>
           </defs>
-          <g class="testing-heat__waves">
-            <path d="M420 730 C455 690 390 646 430 604 S466 520 428 474 S395 394 435 350"></path>
-            <path d="M1500 740 C1460 696 1526 650 1488 606 S1450 520 1490 475 S1526 395 1486 350"></path>
-            <path d="M610 350 C646 316 580 280 620 244 S656 174 618 136"></path>
-            <path d="M1310 350 C1274 316 1340 280 1300 244 S1264 174 1302 136"></path>
-          </g>
         </svg>
         <div class="testing-stage__equipment" data-testing-equipment>
           <canvas class="testing-stage__model" data-testing-model aria-hidden="true"></canvas>
