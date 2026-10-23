@@ -267,7 +267,7 @@
 .testing-vibration__scale{fill:none;stroke:rgba(255,255,255,.24);stroke-width:1.5;vector-effect:non-scaling-stroke}
 .testing-vibration__ticks{fill:none;stroke:rgba(255,255,255,.2);stroke-width:1.25;vector-effect:non-scaling-stroke}
 .testing-vibration__trace-base{fill:none;stroke:rgba(255,115,13,.16);stroke-width:2;vector-effect:non-scaling-stroke}
-.testing-vibration__trace{fill:none;stroke:url(#testing-vibration-gradient);stroke-width:3;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:calc(1 - var(--vibration-progress,0));filter:url(#testing-vibration-glow);vector-effect:non-scaling-stroke}
+.testing-vibration__trace{fill:none;stroke:url(#testing-vibration-gradient);stroke-width:3;stroke-linecap:round;filter:url(#testing-vibration-glow);vector-effect:non-scaling-stroke}
 .testing-vibration__cursor{opacity:.9}
 .testing-vibration__cursor line{stroke:rgba(255,158,84,.72);stroke-width:1.5;vector-effect:non-scaling-stroke}
 .testing-vibration__cursor circle{fill:#ff8a32;stroke:#ffe0c2;stroke-width:2;vector-effect:non-scaling-stroke}

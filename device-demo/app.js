@@ -33,7 +33,7 @@ const journeyVisual = document.querySelector('.testing-journey__visual');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const vibrationChart = (() => {
-  if (!vibrationSvg) return { setProgress: () => {} };
+  if (!vibrationSvg) return { setProgress: () => {}, update: () => {} };
   const scale = vibrationSvg.querySelector('[data-vibration-scale]');
   const ticks = vibrationSvg.querySelector('[data-vibration-ticks]');
   const baseTrace = vibrationSvg.querySelector('[data-vibration-trace-base]');
@@ -42,14 +42,25 @@ const vibrationChart = (() => {
   const width = 1920;
   const centerY = 540;
   const amplitude = 112;
-  const cycles = 8;
-  const waveY = x => centerY - Math.sin((x / width) * Math.PI * 2 * cycles) * amplitude
-    - Math.sin((x / width) * Math.PI * 6 * cycles) * amplitude * 0.075;
-  let wavePath = '';
-  for (let index = 0; index <= 512; index++) {
-    const x = (width * index) / 512;
-    wavePath += `${index ? 'L' : 'M'}${x.toFixed(2)} ${waveY(x).toFixed(2)} `;
-  }
+  const historySeconds = 8;
+  const sweepRate = Math.PI * 2 / 24;
+  let elapsed = 0;
+  let visible = false;
+  // Integrate a smooth frequency sweep (0.6–1.5 Hz). Sampling its history
+  // carries each crest to the left without changing phase discontinuously.
+  const phase = t => Math.PI * 2 * (1.05 * t - .45 / sweepRate * Math.sin(sweepRate * t));
+  const waveY = t => centerY - Math.sin(phase(t)) * amplitude;
+  const draw = () => {
+    let wavePath = '';
+    for (let index = 0; index <= 512; index++) {
+      const x = width * index / 512;
+      const t = elapsed - historySeconds * (1 - index / 512);
+      wavePath += `${index ? 'L' : 'M'}${x.toFixed(2)} ${waveY(t).toFixed(2)} `;
+    }
+    baseTrace?.setAttribute('d', wavePath);
+    trace?.setAttribute('d', wavePath);
+    cursor?.setAttribute('transform', `translate(${width} ${waveY(elapsed).toFixed(2)})`);
+  };
   const tickPath = [];
   for (let index = 0; index <= 48; index++) {
     const x = (width * index) / 48;
@@ -58,19 +69,19 @@ const vibrationChart = (() => {
   }
   scale?.setAttribute('d', `M0 ${centerY}H${width}`);
   ticks?.setAttribute('d', tickPath.join(''));
-  baseTrace?.setAttribute('d', wavePath);
-  trace?.setAttribute('d', wavePath);
-  cursor?.setAttribute('transform', `translate(0 ${centerY})`);
+  draw();
 
   return {
     setProgress(progress) {
-      const x = width * progress;
-      const y = waveY(x);
       const fadeIn = THREE.MathUtils.smoothstep(progress, 0, 0.045);
       const fadeOut = 1 - THREE.MathUtils.smoothstep(progress, 0.96, 1);
-      vibrationSvg.style.setProperty('--vibration-progress', progress.toFixed(4));
+      visible = progress > 0 && progress < 1;
       vibrationSvg.style.setProperty('--vibration-opacity', (fadeIn * fadeOut).toFixed(3));
-      cursor?.setAttribute('transform', `translate(${x.toFixed(2)} ${y.toFixed(2)})`);
+    },
+    update(delta) {
+      if (!visible || reducedMotion.matches) return;
+      elapsed += delta;
+      draw();
     }
   };
 })();
@@ -494,8 +505,9 @@ try {
     onLeaveBack: () => setClimateTransition(0)
   });
   if (equipment && mechanicalSection) ScrollTrigger.create({
-    trigger: mechanicalSection,
+    trigger: mechanicalSection.querySelector('h2') || mechanicalSection,
     start: 'top bottom',
+    endTrigger: mechanicalSection,
     end: 'bottom top',
     scrub: .45,
     scroller: scrollContainer,
@@ -514,6 +526,7 @@ try {
 const rainClock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const delta = Math.min(rainClock.getDelta(), .05);
+  vibrationChart.update(delta);
   if (rainPositions && rainLengths) {
     let rainColorsChanged = false;
     for (let i = 0; i < rainLengths.length; i++) {
