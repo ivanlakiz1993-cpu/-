@@ -533,9 +533,9 @@ try {
     gsap.to(pivot.rotation, {
       y: frontFacingYaw + Math.PI * 2, ease: 'none',
       scrollTrigger: {
-        trigger: heroSection, start: 'bottom bottom',
-        end: () => `+=${Math.round(window.innerHeight * 1.5)}`,
-        pin: true, pinSpacing: true, anticipatePin: 1,
+        trigger: heroSection.parentElement,
+        start: () => `top+=${Math.max(0, -parseFloat(getComputedStyle(heroSection).top) || 0)} top`,
+        end: () => `+=${Math.max(1, heroSection.parentElement.offsetHeight - heroSection.offsetHeight)}`,
         scrub: 1, invalidateOnRefresh: true, scroller: scrollContainer,
         onUpdate: self => setCoverEffects(self.progress),
         onRefresh: self => setCoverEffects(self.progress),

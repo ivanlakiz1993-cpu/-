@@ -40,6 +40,8 @@ if (heroStage && heroDevice && heroVisual) {
   const positionHeroDevice = (force = false) => {
     heroFrame = 0;
     const isMobile = matchMedia('(max-width: 40.625rem)').matches;
+    if (isMobile) heroStage.parentElement.style.setProperty('--mobile-cover-height', `${heroStage.offsetHeight}px`);
+    else heroStage.parentElement.style.removeProperty('--mobile-cover-height');
     if (isMobile || !matchMedia('(max-width: 68.75rem)').matches) {
       heroDevice.style.removeProperty('--hero-device-x');
       heroDevice.style.removeProperty('--hero-device-y');
@@ -467,6 +469,11 @@ if (climateCarousel) {
 
   const updateClimateState = () => {
     climateFrame = 0;
+    // Responsive layouts use their paginator/swipes, not an empty scroll runway.
+    if (matchMedia('(max-width: 68.75rem)').matches) {
+      if (activeCamera < 0) showClimateState(0);
+      return;
+    }
     if (manualSelectionScrollY !== null) {
       const unlockDistance = Math.max(24, window.innerHeight * .12);
       if (Math.abs(window.scrollY - manualSelectionScrollY) < unlockDistance) return;
