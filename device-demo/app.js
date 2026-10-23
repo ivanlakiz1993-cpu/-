@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
-import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261023-melt-glow-ref-2';
+import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261023-heat-only-1';
 import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-frost-growth-1';
 
 const canvas = document.querySelector('[data-testing-model], #device');
@@ -375,12 +375,11 @@ try {
     // moves through the transition between the first two sections.
     rainFallSpeed = THREE.MathUtils.lerp(1.5, 12, progress);
   };
-  const setFrostProgress = (progress, melt = 0) => {
+  const setFrostProgress = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     frostMaterials.forEach((state, material) => {
       state.progress = progress;
       state.uniform.value = progress;
-      state.meltUniform.value = melt;
     });
     icicleProgress(progress);
   };
@@ -392,19 +391,14 @@ try {
     const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .33);
     const frostMelt = THREE.MathUtils.smoothstep(progress, .33, .55);
     const frost = frostGrowth * (1 - frostMelt);
-    const meltGlow = THREE.MathUtils.smoothstep(progress, .33, .40)
-      * (1 - THREE.MathUtils.smoothstep(progress, .50, .57));
     const wetting = THREE.MathUtils.smoothstep(progress, .35, .57);
     const drying = THREE.MathUtils.smoothstep(progress, .59, .74);
     const wetness = wetting * (1 - drying);
     const heatIn = THREE.MathUtils.smoothstep(progress, .74, .84);
     const heatOut = 1 - THREE.MathUtils.smoothstep(progress, .96, 1);
     const heat = heatIn * heatOut;
-    const warmGlow = Math.max(meltGlow, heat);
 
-    setFrostProgress(frost, meltGlow);
-    journeyVisual?.style.setProperty('--frost-melt-glow', warmGlow.toFixed(3));
-    meltLight.intensity = warmGlow * 2.4;
+    setFrostProgress(frost);
     surfaceWater.setWetness(wetness);
     // Keep the rain particle system off: the melt is shown only by water
     // droplets forming on the device surface.
@@ -419,6 +413,8 @@ try {
   const setTemperatureProgress = progress => {
     progress = THREE.MathUtils.clamp(progress, 0, 1);
     const heat = progress;
+    journeyVisual?.style.setProperty('--frost-melt-glow', heat.toFixed(3));
+    meltLight.intensity = heat * 2.4;
     equipment?.style.setProperty('--thermal-contour', heat.toFixed(3));
     if (heatDisplacement) heatDisplacement.setAttribute('scale', (reducedMotion.matches ? 0 : heat * 6).toFixed(2));
     equipment?.classList.toggle('is-thermal-haze', heat > .001 && !reducedMotion.matches);
