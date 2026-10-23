@@ -17,8 +17,7 @@ document.addEventListener('pointerdown', event => { if (menuButton?.getAttribute
 
 const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 
-// Anchor the shared canvas to the responsive hero, then release it into the
-// existing sticky scene as the hero scrolls away. Weather and rotation stay intact.
+// Phones own their scene inside the cover; larger screens use the shared journey.
 const heroStage = document.querySelector('.testing-stage');
 const heroDevice = document.querySelector('[data-testing-equipment]');
 const heroVisual = document.querySelector('.testing-journey__visual');
@@ -27,29 +26,35 @@ if (heroStage && heroDevice && heroVisual) {
   anchor.className = 'testing-stage__device-anchor';
   anchor.setAttribute('aria-hidden', 'true');
   heroStage.append(anchor);
+  const visualTrack = heroVisual.parentElement;
+  const originalTrackParent = visualTrack.parentElement;
+  const originalTrackNext = visualTrack.nextSibling;
+  const mobileCover = matchMedia('(max-width: 40.625rem)');
+  const mountCoverScene = () => {
+    if (mobileCover.matches) anchor.append(visualTrack);
+    else originalTrackParent.insertBefore(visualTrack, originalTrackNext);
+  };
+  mobileCover.addEventListener('change', mountCoverScene);
+  mountCoverScene();
   let heroFrame = 0;
-  let mobileAnchorPositioned = false;
   const positionHeroDevice = (force = false) => {
     heroFrame = 0;
     const isMobile = matchMedia('(max-width: 40.625rem)').matches;
-    if (!matchMedia('(max-width: 68.75rem)').matches) {
+    if (isMobile || !matchMedia('(max-width: 68.75rem)').matches) {
       heroDevice.style.removeProperty('--hero-device-x');
       heroDevice.style.removeProperty('--hero-device-y');
       heroDevice.style.removeProperty('--hero-device-scale');
-      mobileAnchorPositioned = false;
       return;
     }
-    if (isMobile && mobileAnchorPositioned && !force) return;
     const stage = heroStage.getBoundingClientRect();
     const target = anchor.getBoundingClientRect();
     const scene = heroVisual.getBoundingClientRect();
-    const progress = isMobile ? 0 : Math.max(0, Math.min(1, -stage.top / stage.height));
+    const progress = Math.max(0, Math.min(1, -stage.top / stage.height));
     const weight = 1 - progress * progress * (3 - 2 * progress);
     // Compensate for the camera's rotation-safe empty space inside the canvas.
     heroDevice.style.setProperty('--hero-device-scale', String(1 + .25 * weight));
     heroDevice.style.setProperty('--hero-device-x', `${(target.left + target.width / 2 - scene.left - scene.width / 2) * weight}px`);
     heroDevice.style.setProperty('--hero-device-y', `${(target.top + target.height / 2 - scene.top - scene.height / 2) * weight}px`);
-    mobileAnchorPositioned = isMobile;
   };
   let forceHeroUpdate = false;
   const scheduleHeroDevice = (force = false) => {

@@ -502,8 +502,9 @@
 
 /* On phones, keep the shared 3D scene inside the first cover only. */
 @media(max-width:40.625rem){
-  .testing-journey__visual-track{inset:0 0 auto;height:calc(100svh + 3rem + 40rem)}
-  .testing-journey__visual{position:sticky;top:0;height:100svh;opacity:var(--mobile-cover-opacity,1)}
+  .testing-stage__device-anchor>.testing-journey__visual-track{position:absolute;inset:0;height:100%}
+  .testing-stage__device-anchor .testing-journey__visual{position:absolute;inset:0;height:100%;opacity:1}
+  .testing-stage__device-anchor .testing-stage__equipment{width:100%;max-width:none;translate:none;scale:1.25}
 }
 
 /* Desktop alignment with Figma 2461:4034 and 1731:3723. */

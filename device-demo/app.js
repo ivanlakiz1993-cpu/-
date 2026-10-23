@@ -519,9 +519,8 @@ try {
       const rain = 1 - THREE.MathUtils.smoothstep(progress, .32, .62);
       const frost = THREE.MathUtils.smoothstep(progress, .12, .92);
       if (rainMaterial) rainMaterial.opacity = rain * .25;
-      journeyVisual?.style.setProperty('--mobile-cover-opacity', (1 - THREE.MathUtils.smoothstep(progress, .88, 1)).toFixed(3));
       // Keep rainfall speed independent of scroll; only transition from rain
-      // to frost as the cover moves out of view.
+      // to frost while the cover is pinned.
       rainFallSpeed = 12;
       surfaceWater.setWetness(rain * .45);
       dropletLight.intensity = 35 * rain;
@@ -534,17 +533,15 @@ try {
     gsap.to(pivot.rotation, {
       y: frontFacingYaw + Math.PI * 2, ease: 'none',
       scrollTrigger: {
-        trigger: heroSection, start: 'top top', end: 'bottom top',
+        trigger: heroSection, start: 'bottom bottom',
+        end: () => `+=${Math.round(window.innerHeight * 1.5)}`,
+        pin: true, pinSpacing: true, anticipatePin: 1,
         scrub: 1, invalidateOnRefresh: true, scroller: scrollContainer,
+        onUpdate: self => setCoverEffects(self.progress),
+        onRefresh: self => setCoverEffects(self.progress),
+        onLeave: () => setCoverEffects(1),
+        onLeaveBack: () => setCoverEffects(0),
       }
-    });
-    ScrollTrigger.create({
-      trigger: heroSection, start: 'top top', end: 'bottom top',
-      scrub: .5, scroller: scrollContainer,
-      onUpdate: self => setCoverEffects(self.progress),
-      onRefresh: self => setCoverEffects(self.progress),
-      onLeave: () => setCoverEffects(1),
-      onLeaveBack: () => setCoverEffects(0)
     });
   };
 
