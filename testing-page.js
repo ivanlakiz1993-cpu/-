@@ -464,7 +464,11 @@ if (climateCarousel) {
     if (title) title.textContent = spec.title;
     if (highTemperature) highTemperature.textContent = spec.highTemperature;
     if (lowTemperature) lowTemperature.textContent = spec.lowTemperature;
-    if (humidityRow) humidityRow.hidden = !spec.humidity;
+    if (humidityRow) {
+      // Keep the fourth specification's slot so the aligned photo never shifts.
+      humidityRow.classList.toggle('is-unavailable', !spec.humidity);
+      humidityRow.setAttribute('aria-hidden', String(!spec.humidity));
+    }
   };
 
   const updateClimateState = () => {
