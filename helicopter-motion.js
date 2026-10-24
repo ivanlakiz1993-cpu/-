@@ -57,9 +57,11 @@
     for(const particle of sparkParticles){
       const fall=Math.max(0,Math.min(1,(amountClamped-particle.seed*.22)/(1-particle.seed*.22)));
       if(fall<=0)continue;
-      const eased=smooth(fall),fade=1-smooth((fall-.24)/.76);
-      const x=particle.x+(particle.seed-.5)*sceneWidth*.018*eased+Math.sin(fall*5+particle.seed*19)*sceneWidth*.004*eased;
-      const y=particle.y+viewport*1.5*eased*(.86+particle.seed*.28);
+      const travel=Math.pow(fall,1.25+particle.curve*.95)*(.5+particle.velocity*1.05);
+      const fadeStart=.28+particle.fade*.42,fade=1-smooth((fall-fadeStart)/(1-fadeStart));
+      const x=particle.x+(particle.drift-.5)*sceneWidth*.04*travel+
+        Math.sin(fall*(4+particle.sway*5)+particle.sway*6.28)*sceneWidth*.006*travel;
+      const y=particle.y+viewport*.78*travel;
       const alpha=particle.strength*fade*Math.min(1,fall*6);
       if(alpha<.015)continue;
       sparksContext.globalAlpha=alpha;

@@ -149,6 +149,11 @@
         gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
         const cell=Math.max(4.2,width/320)*dpr,cellHeight=cell*1.18;
         const columns=Math.ceil(canvas.width/cell),rows=Math.ceil(canvas.height/cellHeight),particles=[],symbols=[...' .:-+*<>01'];
+        const randomCell=(x,y,salt)=>{
+          let hash=Math.imul(x+1,374761393)^Math.imul(y+1,668265263)^Math.imul(salt+1,2246822519);
+          hash=Math.imul(hash^(hash>>>13),1274126177);hash^=hash>>>16;
+          return (hash>>>0)/4294967296;
+        };
         const sample=(x,y)=>{
           const px=Math.max(0,Math.min(canvas.width-1,x-.5)),py=Math.max(0,Math.min(canvas.height-1,y-.5));
           const x0=Math.floor(px),y0=Math.floor(py),x1=Math.min(canvas.width-1,x0+1),y1=Math.min(canvas.height-1,y0+1);
@@ -168,7 +173,10 @@
           if(glyph===' ')continue;
           const seed=((sourceCellX*17+sourceCellY*31+sourceCellX*sourceCellY*7)%97)/97;
           particles.push({x:(left+cell/2)/dpr,y:(top+cellHeight/2)/dpr,
-            symbol:glyph,strength:Math.min(1,.24+brightness*1.05),seed});
+            symbol:glyph,strength:Math.min(1,.24+brightness*1.05),seed,
+            velocity:randomCell(sourceCellX,sourceCellY,1),curve:randomCell(sourceCellX,sourceCellY,2),
+            drift:randomCell(sourceCellX,sourceCellY,3),sway:randomCell(sourceCellX,sourceCellY,4),
+            fade:randomCell(sourceCellX,sourceCellY,5)});
         }
         return particles;
       }
