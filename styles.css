@@ -171,7 +171,7 @@
 @media(prefers-reduced-motion:reduce){.text-reveal .text-reveal__word{color:inherit;background:none!important}}
 
 /* Footer: Figma 1756:6495 */
-.footer{background:#121212;border-radius:0.625rem 0.625rem 0 0}
+.footer{background:#121212;border-radius:0.625rem 0.625rem 0 0;overflow-x:clip}
 .footer-main{min-height:0;padding-top:1.875rem;padding-bottom:0;display:grid;align-items:start;gap:0}
 .footer-main>div{display:block}
 .footer-main .footer-brand{align-self:start;gap:0.25rem;color:var(--orange)}
@@ -194,7 +194,8 @@
 .footer-social-link--rutube img{height:1.3125rem}
 .footer-social-link--max img{width:1.5rem;height:1.5rem}
 .footer-social-link--telegram img{width:1.6875rem;height:1.5rem}
-.footer-bottom{display:block;padding:0.625rem 0 0;border-top:0.0625rem solid #6e6e6e;color:#fff;font-size:0.875rem;line-height:1.2}
+.footer-bottom{position:relative;display:block;padding:0.625rem 0 0;border-top:0.0625rem solid transparent;color:#fff;font-size:0.875rem;line-height:1.2}
+.footer-bottom::before{content:"";position:absolute;top:-0.0625rem;left:50%;width:100vw;height:0.0625rem;transform:translateX(-50%);background:#6e6e6e;pointer-events:none}
 @media(min-width:75rem){
   .footer{height:21.5rem}
   .footer-main{height:19.125rem;grid-template-columns:373fr 288fr 187fr 290fr;column-gap:clamp(1.25rem,calc(1.25rem + (100vw - 75rem)*.2416667),12.125rem)}
