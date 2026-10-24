@@ -145,28 +145,30 @@
       function captureParticles(){
         if(gl.isContextLost()||!canvas.width||!canvas.height)return [];
         const pixels=new Uint8Array(canvas.width*canvas.height*4);
-        gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER,framebuffer);
         gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
         const cell=Math.max(4.2,width/320)*dpr,cellHeight=cell*1.18;
-        const columns=Math.ceil(canvas.width/cell),rows=Math.ceil(canvas.height/cellHeight),particles=[];
+        const columns=Math.ceil(canvas.width/cell),rows=Math.ceil(canvas.height/cellHeight),particles=[],symbols=[...' .:-+*<>01'];
+        const sample=(x,y)=>{
+          const px=Math.max(0,Math.min(canvas.width-1,x-.5)),py=Math.max(0,Math.min(canvas.height-1,y-.5));
+          const x0=Math.floor(px),y0=Math.floor(py),x1=Math.min(canvas.width-1,x0+1),y1=Math.min(canvas.height-1,y0+1);
+          const tx=px-x0,ty=py-y0;
+          const at=(sx,sy)=>pixels[(sy*canvas.width+sx)*4]/255;
+          const top=at(x0,y0)*(1-tx)+at(x1,y0)*tx,bottom=at(x0,y1)*(1-tx)+at(x1,y1)*tx;
+          return top*(1-ty)+bottom*ty;
+        };
         for(let row=0;row<rows;row++)for(let column=0;column<columns;column++){
           const left=Math.floor(column*cell),top=Math.floor(row*cellHeight);
-          let brightness=0,sourceCellX=column,sourceCellY=0;
-          for(let sampleY=0;sampleY<3;sampleY++)for(let sampleX=0;sampleX<3;sampleX++){
-            const x=Math.min(canvas.width-1,left+Math.floor((sampleX+.5)*cell/3));
-            const y=Math.max(0,canvas.height-1-top-Math.floor((sampleY+.5)*cellHeight/3));
-            const offset=(y*canvas.width+x)*4;
-            const sampleBrightness=pixels[offset]*.2126+pixels[offset+1]*.7152+pixels[offset+2]*.0722;
-            if(sampleBrightness>brightness){
-              brightness=sampleBrightness;
-              sourceCellX=Math.floor((x+.5)/cell);
-              sourceCellY=Math.floor((y+.5)/cellHeight);
-            }
-          }
-          if(brightness<18)continue;
+          const sourceCellX=column,sourceCellY=Math.floor((canvas.height-(top+cellHeight*.5))/cellHeight);
+          const centerX=(sourceCellX+.5)*cell,centerY=(sourceCellY+.5)*cellHeight,tapX=cell*.3,tapY=cellHeight*.3;
+          const brightness=Math.max(sample(centerX,centerY),sample(centerX-tapX,centerY)*.9,
+            sample(centerX+tapX,centerY)*.9,sample(centerX,centerY-tapY)*.9,sample(centerX,centerY+tapY)*.9);
+          if(brightness<.022)continue;
+          const glyph=symbols[Math.floor(Math.min(.999,brightness*1.65)*10)];
+          if(glyph===' ')continue;
           const seed=((sourceCellX*17+sourceCellY*31+sourceCellX*sourceCellY*7)%97)/97;
           particles.push({x:(left+cell/2)/dpr,y:(top+cellHeight/2)/dpr,
-            strength:Math.min(1,brightness/210),seed});
+            symbol:glyph,strength:Math.min(1,.24+brightness*1.05),seed});
         }
         return particles;
       }

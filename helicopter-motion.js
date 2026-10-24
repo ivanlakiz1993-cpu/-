@@ -4,12 +4,14 @@
   const hero=intro?.querySelector('.hero'),section=intro?.querySelector('.metrics');
   const stage=section?.querySelector('.metrics-desktop');
   const sceneFrame=stage?.querySelector('.metrics-desktop__frame'),canvas=stage?.querySelector('.metrics-desktop__particles');
+  const background=stage?.querySelector('.metrics-desktop__background'),benefitsStage=document.querySelector('.benefits-stage');
   const sparksCanvas=stage?.querySelector('.metrics-desktop__sparks'),sparksContext=sparksCanvas?.getContext('2d');
   const copies=[...(stage?.querySelectorAll('[data-achievement]')||[])];
   const model=window.HelicopterModel,storyboard=window.HelicopterStoryboard;
   if(!intro||!hero||!sceneFrame||!canvas||!model||!storyboard||!window.HelicopterRenderer)return;
   const renderer=window.HelicopterRenderer.create(canvas,model);
   if(!renderer)return;
+  if(sparksCanvas&&benefitsStage)benefitsStage.prepend(sparksCanvas);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const splitMedia=matchMedia('(min-width: 37.5625rem), (max-width: 37.5rem)');
   const mobileMedia=matchMedia('(max-width: 37.5rem)');
@@ -47,59 +49,23 @@
     if(!sparksContext)return;
     sparksContext.clearRect(0,0,sparkWidth,sparkHeight);
     if(!sparkParticles||amount<=0)return;
-    const bins=Array.from({length:24},()=>[]),amountClamped=Math.max(0,Math.min(1,amount));
-    const mobileFlight=mobileMedia.matches?mobileHelicopterFlight(state.progress):null;
-    const originOffsetX=mobileFlight?mobileFlight.left/100*sceneWidth:0;
-    const originOffsetY=mobileFlight?mobileFlight.top/100*sparkHeight:0;
+    const amountClamped=Math.max(0,Math.min(1,amount));
+    sparksContext.globalCompositeOperation='source-over';
+    sparksContext.textAlign='center';sparksContext.textBaseline='middle';
+    sparksContext.font=`${Math.max(4.2,sceneWidth/320)}px monospace`;
+    sparksContext.fillStyle='#e8e3d7';
     for(const particle of sparkParticles){
       const fall=Math.max(0,Math.min(1,(amountClamped-particle.seed*.22)/(1-particle.seed*.22)));
       if(fall<=0)continue;
-      const eased=smooth(fall),fade=1-smooth((fall-.31)/.69);
-      const sourceX=mobileFlight?originOffsetX+sceneWidth-particle.x:particle.x;
-      const sourceY=particle.y+originOffsetY;
-      const availableFall=Math.max(0,sparkHeight-sourceY);
-      const fallDistance=availableFall;
-      const drift=(particle.seed-.5)*sceneWidth*.045;
-      const sway=Math.sin(fall*7.5+particle.seed*19)*sceneWidth*.0035;
-      const x=sourceX+drift*eased+sway;
-      const y=sourceY+fallDistance*eased;
-      const edgeFadeDistance=Math.max(1,Math.min(sceneHeight*.3,availableFall*.24));
-      const edgeFade=1-smooth((y-(sparkHeight-edgeFadeDistance))/edgeFadeDistance);
-      const alpha=particle.strength*fade*edgeFade*Math.min(1,fall*7);
-      if(alpha<.025)continue;
-      const bin=Math.min(bins.length-1,Math.floor(alpha*bins.length));
-      bins[bin].push(particle);
+      const eased=smooth(fall),fade=1-smooth((fall-.24)/.76);
+      const x=particle.x+(particle.seed-.5)*sceneWidth*.018*eased+Math.sin(fall*5+particle.seed*19)*sceneWidth*.004*eased;
+      const y=particle.y+viewport*1.5*eased*(.86+particle.seed*.28);
+      const alpha=particle.strength*fade*Math.min(1,fall*6);
+      if(alpha<.015)continue;
+      sparksContext.globalAlpha=alpha;
+      sparksContext.fillText(particle.symbol,x,y);
     }
-    sparksContext.globalCompositeOperation='lighter';
-    for(let i=0;i<bins.length;i++){
-      if(!bins[i].length)continue;
-      const opacity=(i+1)/bins.length;
-      sparksContext.fillStyle=`rgba(255,${Math.round(143+opacity*76)},${Math.round(61+opacity*66)},${opacity*.18})`;
-      sparksContext.beginPath();
-      for(const particle of bins[i]){
-        const fall=Math.max(0,Math.min(1,(amountClamped-particle.seed*.22)/(1-particle.seed*.22))),eased=smooth(fall);
-        const sourceX=mobileFlight?originOffsetX+sceneWidth-particle.x:particle.x;
-        const sourceY=particle.y+originOffsetY,availableFall=Math.max(0,sparkHeight-sourceY);
-        const fallDistance=availableFall;
-        const x=sourceX+(particle.seed-.5)*sceneWidth*.045*eased+Math.sin(fall*7.5+particle.seed*19)*sceneWidth*.0035;
-        const y=sourceY+fallDistance*eased,size=(.7+particle.seed*1.15)*Math.max(.72,sceneWidth/1920);
-        sparksContext.rect(x-size*.55,y-size*1.6,size*1.1,size*3.2);
-      }
-      sparksContext.fill();
-      sparksContext.fillStyle=`rgba(255,${Math.round(205+opacity*45)},${Math.round(139+opacity*90)},${opacity*.62})`;
-      sparksContext.beginPath();
-      for(const particle of bins[i]){
-        const fall=Math.max(0,Math.min(1,(amountClamped-particle.seed*.22)/(1-particle.seed*.22))),eased=smooth(fall);
-        const sourceX=mobileFlight?originOffsetX+sceneWidth-particle.x:particle.x;
-        const sourceY=particle.y+originOffsetY,availableFall=Math.max(0,sparkHeight-sourceY);
-        const fallDistance=availableFall;
-        const x=sourceX+(particle.seed-.5)*sceneWidth*.045*eased+Math.sin(fall*7.5+particle.seed*19)*sceneWidth*.0035;
-        const y=sourceY+fallDistance*eased,size=(.7+particle.seed*1.15)*Math.max(.72,sceneWidth/1920);
-        sparksContext.rect(x-size*.3,y-size*.35,size*.6,size*.7);
-      }
-      sparksContext.fill();
-    }
-    sparksContext.globalCompositeOperation='source-over';
+    sparksContext.globalAlpha=1;
   }
   const rotorAngles=Array.from({length:12},(_,i)=>{
     const angle=i/12*Math.PI*2;
@@ -204,7 +170,6 @@
     sceneFrame.style.setProperty('--metrics-frame-width',`${width}px`);
     sceneFrame.style.setProperty('--metrics-frame-height',`${height}px`);
     sceneFrame.style.setProperty('--metrics-canvas-ratio',String(width/height));
-    resizeSparks(sceneFrame.clientWidth,sceneFrame.clientHeight);
     renderer.resize(width,height,devicePixelRatio||1);
   }
   function compose(){
@@ -275,7 +240,10 @@
       angle:rotorTime*.0032};
     if(sparksProgress>0&&sparkParticles===null){
       renderer.render({...helicopterFrame,disintegration:0});
-      sparkParticles=renderer.captureParticles();
+      const source=background.getBoundingClientRect(),scaleX=source.width/sceneWidth,scaleY=source.height/sceneHeight;
+      sparkParticles=renderer.captureParticles().map(particle=>({...particle,
+        x:source.left+(mobile?source.width-particle.x*scaleX:particle.x*scaleX),
+        y:source.top+particle.y*scaleY}));
     }
     renderer.render({...helicopterFrame,disintegration:sparksProgress});
     drawSparks(sparksProgress);
@@ -286,6 +254,7 @@
   function measure(){
     resizeFrame=0;if(!enabled)return;
     viewport=innerHeight;
+    resizeSparks(root.clientWidth||innerWidth,viewport);
     const heroHeight=hero.offsetHeight,introTop=intro.getBoundingClientRect().top+scrollY;
     sequenceDistance=viewport*(mobileMedia.matches?4.2:4.8);
     entryDistance=splitEnabled?viewport*.85:0;
