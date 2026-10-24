@@ -3,7 +3,8 @@
   const intro=document.querySelector('.intro-sequence');
   const hero=intro?.querySelector('.hero'),section=intro?.querySelector('.metrics');
   const stage=section?.querySelector('.metrics-desktop');
-  const sceneFrame=stage?.querySelector('.metrics-desktop__frame'),canvas=stage?.querySelector('canvas');
+  const sceneFrame=stage?.querySelector('.metrics-desktop__frame'),canvas=stage?.querySelector('.metrics-desktop__particles');
+  const sparksCanvas=stage?.querySelector('.metrics-desktop__sparks'),sparksContext=sparksCanvas?.getContext('2d');
   const copies=[...(stage?.querySelectorAll('[data-achievement]')||[])];
   const model=window.HelicopterModel,storyboard=window.HelicopterStoryboard;
   if(!intro||!hero||!sceneFrame||!canvas||!model||!storyboard||!window.HelicopterRenderer)return;
@@ -30,7 +31,60 @@
   let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;
   let splitIntroTop=0,splitPreTravel=0,splitSeam=0,splitTopTravel=0,splitBottomTravel=0;
   let layoutWidth=0,layoutHeight=0,lastTime=0,rotorTime=0,lastScroll=NaN,target=0,progress=0;
+  let sparksTarget=0,sparksProgress=0,sparkParticles=null,sparkRatio=1;
   let state=sample(0);
+  function resizeSparks(width,height){
+    if(!sparksContext)return;
+    sparkRatio=Math.min(devicePixelRatio||1,1.5);
+    const pixelWidth=Math.max(1,Math.round(width*sparkRatio)),pixelHeight=Math.max(1,Math.round(height*sparkRatio));
+    if(sparksCanvas.width!==pixelWidth||sparksCanvas.height!==pixelHeight){
+      sparksCanvas.width=pixelWidth;sparksCanvas.height=pixelHeight;sparkParticles=null;
+    }
+    sparksContext.setTransform(sparkRatio,0,0,sparkRatio,0,0);
+  }
+  function drawSparks(amount){
+    if(!sparksContext)return;
+    sparksContext.clearRect(0,0,sceneWidth,sceneHeight);
+    if(!sparkParticles||amount<=0)return;
+    const bins=Array.from({length:6},()=>[]),amountClamped=Math.max(0,Math.min(1,amount));
+    for(const particle of sparkParticles){
+      const fall=Math.max(0,Math.min(1,(amountClamped-particle.seed*.22)/(1-particle.seed*.22)));
+      if(fall<=0)continue;
+      const eased=smooth(fall),fade=1-smooth((fall-.31)/.69);
+      const drift=(particle.seed-.5)*sceneWidth*.045;
+      const sway=Math.sin(fall*7.5+particle.seed*19)*sceneWidth*.0035;
+      const x=particle.x+drift*eased+sway;
+      const y=particle.y+sceneHeight*(1.22*eased);
+      const alpha=particle.strength*fade*Math.min(1,fall*7);
+      if(alpha<.025)continue;
+      const bin=Math.min(5,Math.floor(alpha*6));
+      bins[bin].push(particle);
+    }
+    sparksContext.globalCompositeOperation='lighter';
+    for(let i=0;i<bins.length;i++){
+      if(!bins[i].length)continue;
+      const opacity=(i+1)/bins.length;
+      sparksContext.fillStyle=`rgba(255,${Math.round(143+opacity*76)},${Math.round(61+opacity*66)},${opacity*.18})`;
+      sparksContext.beginPath();
+      for(const particle of bins[i]){
+        const fall=Math.max(0,Math.min(1,(amountClamped-particle.seed*.22)/(1-particle.seed*.22))),eased=smooth(fall);
+        const x=particle.x+(particle.seed-.5)*sceneWidth*.045*eased+Math.sin(fall*7.5+particle.seed*19)*sceneWidth*.0035;
+        const y=particle.y+sceneHeight*(1.22*eased),size=(.7+particle.seed*1.15)*Math.max(.72,sceneWidth/1920);
+        sparksContext.rect(x-size*.55,y-size*1.6,size*1.1,size*3.2);
+      }
+      sparksContext.fill();
+      sparksContext.fillStyle=`rgba(255,${Math.round(205+opacity*45)},${Math.round(139+opacity*90)},${opacity*.62})`;
+      sparksContext.beginPath();
+      for(const particle of bins[i]){
+        const fall=Math.max(0,Math.min(1,(amountClamped-particle.seed*.22)/(1-particle.seed*.22))),eased=smooth(fall);
+        const x=particle.x+(particle.seed-.5)*sceneWidth*.045*eased+Math.sin(fall*7.5+particle.seed*19)*sceneWidth*.0035;
+        const y=particle.y+sceneHeight*(1.22*eased),size=(.7+particle.seed*1.15)*Math.max(.72,sceneWidth/1920);
+        sparksContext.rect(x-size*.3,y-size*.35,size*.6,size*.7);
+      }
+      sparksContext.fill();
+    }
+    sparksContext.globalCompositeOperation='source-over';
+  }
   const rotorAngles=Array.from({length:12},(_,i)=>{
     const angle=i/12*Math.PI*2;
     return [Math.cos(angle),Math.sin(angle)];
@@ -134,11 +188,13 @@
     sceneFrame.style.setProperty('--metrics-frame-width',`${width}px`);
     sceneFrame.style.setProperty('--metrics-frame-height',`${height}px`);
     sceneFrame.style.setProperty('--metrics-canvas-ratio',String(width/height));
+    resizeSparks(width,height);
     renderer.resize(width,height,devicePixelRatio||1);
   }
   function compose(){
     state=sample(progress,mobileMedia.matches);sizeFrame();
     stage.dataset.scene=String(state.scene);stage.dataset.progress=state.progress.toFixed(5);
+    stage.style.setProperty('--metrics-helicopter-opacity',String(1-sparksProgress));
     if(mobileMedia.matches){
       const flight=mobileHelicopterFlight(state.progress);
       stage.style.setProperty('--mobile-helicopter-top',`${flight.top}%`);
@@ -170,19 +226,22 @@
       }
     }
     target=Math.max(0,Math.min(1,(scroll-sequenceStart)/sequenceDistance));
-    if(scroll<=entryStart||scroll>=end){progress=target;compose();}
+    sparksTarget=sparksContext?Math.max(0,Math.min(1,(scroll-(sequenceStart+sequenceDistance))/Math.max(1,end-(sequenceStart+sequenceDistance)))):0;
+    if(scroll<=entryStart||scroll>=end){progress=target;sparksProgress=sparksTarget;compose();}
     lastScroll=scroll;
   }
   function draw(time){
     raf=0;if(!enabled||document.hidden)return;
     if(window.scrollY!==lastScroll)updateScroll();
-    if(window.scrollY<entryStart||window.scrollY>=end||root.classList.contains('menu-open')){lastTime=0;return;}
+    if(window.scrollY<entryStart||window.scrollY>=end||root.classList.contains('menu-open')){drawSparks(sparksProgress);lastTime=0;return;}
     const dt=lastTime?Math.min(50,time-lastTime):16.67;lastTime=time;rotorTime+=dt;
     // Short scrub smoothing removes wheel-event steps. It settles to the exact
     // scroll pose; there is no autonomous rotation or breathing of the airframe.
-    if(progress!==target){
+    if(progress!==target||sparksProgress!==sparksTarget){
       progress=lerp(progress,target,1-Math.exp(-dt/95));
       if(Math.abs(progress-target)<.000015)progress=target;
+      sparksProgress=lerp(sparksProgress,sparksTarget,1-Math.exp(-dt/120));
+      if(Math.abs(sparksProgress-sparksTarget)<.000015)sparksProgress=sparksTarget;
       compose();
     }
     const a=calibrations[state.from],b=calibrations[state.to],unit=sceneWidth/1920;
@@ -199,6 +258,8 @@
       centerX,centerY,
       depth:mobileFlight?.depth||0,
       angle:rotorTime*.0032});
+    if(sparksProgress>0&&sparkParticles===null)sparkParticles=renderer.captureParticles();
+    drawSparks(sparksProgress);
     stage.classList.add('is-rendered');
     raf=requestAnimationFrame(draw);
   }

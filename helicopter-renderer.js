@@ -137,7 +137,30 @@
         gl.uniform2f(asciiUniforms.cell,cell,cell*1.18);
         gl.drawArrays(gl.TRIANGLES,0,6);gl.disableVertexAttribArray(screenAttribute);
       }
-      return {resize,render,destroy(){resources.forEach(([type,r])=>gl['delete'+type](r));}};
+      function captureParticles(){
+        if(gl.isContextLost()||!canvas.width||!canvas.height)return [];
+        const pixels=new Uint8Array(canvas.width*canvas.height*4);
+        gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+        gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
+        const cell=Math.max(4.2,width/320)*dpr,cellHeight=cell*1.18;
+        const columns=Math.ceil(canvas.width/cell),rows=Math.ceil(canvas.height/cellHeight),particles=[];
+        for(let row=0;row<rows;row++)for(let column=0;column<columns;column++){
+          const left=Math.floor(column*cell),top=Math.floor(row*cellHeight);
+          let brightness=0;
+          for(let sampleY=0;sampleY<3;sampleY++)for(let sampleX=0;sampleX<3;sampleX++){
+            const x=Math.min(canvas.width-1,left+Math.floor((sampleX+.5)*cell/3));
+            const y=Math.max(0,canvas.height-1-top-Math.floor((sampleY+.5)*cellHeight/3));
+            const offset=(y*canvas.width+x)*4;
+            brightness=Math.max(brightness,pixels[offset]*.2126+pixels[offset+1]*.7152+pixels[offset+2]*.0722);
+          }
+          if(brightness<18)continue;
+          const raw=Math.sin(column*127.1+row*311.7)*43758.5453,seed=raw-Math.floor(raw);
+          particles.push({x:(left+cell/2)/dpr,y:(top+cellHeight/2)/dpr,
+            strength:Math.min(1,brightness/210),seed});
+        }
+        return particles;
+      }
+      return {resize,render,captureParticles,destroy(){resources.forEach(([type,r])=>gl['delete'+type](r));}};
     } catch(error) {
       resources.forEach(([type,r])=>gl['delete'+type](r));
       console.warn('Helicopter rendering unavailable:',error.message);
