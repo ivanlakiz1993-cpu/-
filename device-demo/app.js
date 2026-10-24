@@ -361,6 +361,9 @@ try {
   const rainLines = new THREE.LineSegments(rainGeometry, rainMaterial);
   rainLines.frustumCulled = false;
   scene.add(rainLines);
+  // Font metrics determine section boundaries; measure after they settle.
+  await document.fonts?.ready;
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   resize();
   gsap.registerPlugin(ScrollTrigger);
   const findScrollContainer = () => {
@@ -438,6 +441,18 @@ try {
   const climateSection = document.querySelector('.climate-tests') || (!equipment && document.querySelector('.scroll-area'));
   const mechanicalSection = document.querySelector('.mechanical-tests');
   const createFullJourneyMotion = () => {
+    let rainBuild, rainClear, climateMotion, vibrationMotion;
+    // One writer owns weather state, regardless of callback/refresh order.
+    const syncJourneyEffects = () => {
+      const climate = climateMotion?.progress || 0;
+      if (climate > 0) setClimateTransition(climate);
+      else {
+        setFrostProgress(0);
+        setTemperatureProgress(0);
+        setRainProgress((rainBuild?.progress || 0) * (1 - (rainClear?.progress || 0)));
+      }
+      setVibrationProgress(vibrationMotion?.progress || 0);
+    };
     gsap.to(pivot.rotation, {
       y: frontFacingYaw + Math.PI * 2, ease: 'none',
       scrollTrigger: {
@@ -453,63 +468,38 @@ try {
     const weatherSection = equipment
       ? document.querySelector('.testing-about') || document.querySelector('[data-testing-journey]')
       : document.querySelector('.scroll-area');
-    const updateRainProgress = self => setRainProgress(self.progress);
-    ScrollTrigger.create({
+    rainBuild = ScrollTrigger.create({
       trigger: weatherSection,
       // Rain builds only as the second section enters from the first.
       start: 'top 90%', end: 'top 30%', scrub: .5,
       scroller: scrollContainer,
-      onUpdate: updateRainProgress,
-      onRefresh: updateRainProgress,
-      onLeave: () => setRainProgress(1),
-      onLeaveBack: () => setRainProgress(0)
+      onUpdate: syncJourneyEffects
     });
-    if (equipment && weatherSection.matches('.testing-about')) ScrollTrigger.create({
+    if (equipment && weatherSection.matches('.testing-about')) rainClear = ScrollTrigger.create({
       trigger: weatherSection,
       // Clear the rain as section two settles, leaving the next section
       // transition free to run its own animation.
       start: 'top 30%', end: 'top top', scrub: .5,
       scroller: scrollContainer,
-      onUpdate: self => setRainProgress(1 - self.progress),
-      onRefresh: self => {
-        if (self.isActive || self.progress > 0) setRainProgress(1 - self.progress);
-      },
-      onLeaveBack: () => setRainProgress(1),
-      onLeave: () => setRainProgress(0)
+      onUpdate: syncJourneyEffects
     });
-    let frostProgressLogBucket = -1;
-    const updateClimateProgress = self => {
-      const progress = THREE.MathUtils.clamp(self.progress, 0, 1);
-      setClimateTransition(progress);
-      const frostGrowth = THREE.MathUtils.smoothstep(progress, 0, .33);
-      const frostMelt = THREE.MathUtils.smoothstep(progress, .33, .55);
-      const frost = frostGrowth * (1 - frostMelt);
-      const bucket = Math.round(frost * 10);
-      if (bucket !== frostProgressLogBucket) {
-        frostProgressLogBucket = bucket;
-        console.log('Frost Progress:', frost.toFixed(2));
-      }
-    };
-    if (climateSection) ScrollTrigger.create({
+    if (climateSection) climateMotion = ScrollTrigger.create({
       trigger: climateSection,
       start: equipment ? 'top bottom' : 'top -140%',
       endTrigger: equipment && mechanicalSection ? mechanicalSection : climateSection,
       end: equipment && mechanicalSection ? 'top bottom' : equipment ? 'bottom top' : 'bottom bottom',
       scrub: .8, scroller: scrollContainer,
-      onUpdate: updateClimateProgress,
-      onRefresh: updateClimateProgress,
-      onLeave: () => setClimateTransition(1),
-      onLeaveBack: () => setClimateTransition(0)
+      onUpdate: syncJourneyEffects
     });
-    if (equipment && mechanicalSection) ScrollTrigger.create({
+    if (equipment && mechanicalSection) vibrationMotion = ScrollTrigger.create({
       trigger: mechanicalSection.querySelector('h2') || mechanicalSection,
       start: 'top bottom', endTrigger: mechanicalSection, end: 'bottom top',
       scrub: .45, scroller: scrollContainer,
-      onUpdate: self => setVibrationProgress(self.progress),
-      onRefresh: self => setVibrationProgress(self.progress),
-      onLeave: () => setVibrationProgress(1),
-      onLeaveBack: () => setVibrationProgress(0)
+      onUpdate: syncJourneyEffects
     });
+    ScrollTrigger.addEventListener('refresh', syncJourneyEffects);
+    syncJourneyEffects();
+    return () => ScrollTrigger.removeEventListener('refresh', syncJourneyEffects);
   };
   const createMobileCoverMotion = () => {
     if (!equipment || !heroSection) return createFullJourneyMotion();
@@ -550,7 +540,27 @@ try {
   const motionMedia = gsap.matchMedia();
   motionMedia.add('(max-width: 40.625rem)', createMobileCoverMotion);
   motionMedia.add('(min-width: 40.6251rem)', createFullJourneyMotion);
+  let layoutRefreshFrame = 0;
+  const refreshSettledLayout = () => {
+    if (layoutRefreshFrame) return;
+    layoutRefreshFrame = requestAnimationFrame(() => {
+      layoutRefreshFrame = requestAnimationFrame(() => {
+        layoutRefreshFrame = 0;
+        ScrollTrigger.refresh();
+        ScrollTrigger.update();
+      });
+    });
+  };
+  addEventListener('load', refreshSettledLayout, { once: true });
+  addEventListener('pageshow', refreshSettledLayout);
+  if (equipment && 'ResizeObserver' in window) {
+    const layoutObserver = new ResizeObserver(refreshSettledLayout);
+    const journey = document.querySelector('[data-testing-journey]');
+    if (journey) layoutObserver.observe(journey);
+    if (heroSection) layoutObserver.observe(heroSection);
+  }
   ScrollTrigger.refresh();
+  refreshSettledLayout();
   if (status) status.textContent = '';
   equipment?.classList.add('testing-model-ready');
 } catch (error) {
