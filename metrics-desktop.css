@@ -152,15 +152,6 @@ html.metrics-sequence .metrics-desktop {
     aspect-ratio: var(--metrics-canvas-ratio, 1.92);
     transform: scaleX(-1);
   }
-  .metrics-desktop__sparks {
-    inset:auto;
-    left:var(--mobile-helicopter-left,0%);
-    top:var(--mobile-helicopter-top,25.12%);
-    width:100%;
-    height:auto;
-    aspect-ratio:var(--metrics-canvas-ratio,1.92);
-    transform:scaleX(-1);
-  }
   .metrics-desktop__copy,
   .metrics-desktop__copy--area,
   .metrics-desktop__copy--staff,
