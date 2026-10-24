@@ -1,0 +1,44 @@
+import { getNews, photoUrl, formatNewsDate } from './news-source.js?v=20261024-news-template-1';
+
+const article = document.querySelector('[data-news-article]');
+const status = document.querySelector('[data-news-status]');
+const content = document.querySelector('[data-news-content]');
+const heading = document.querySelector('[data-news-title]');
+const crumb = document.querySelector('[data-news-crumb]');
+const date = document.querySelector('[data-news-date]');
+const photo = document.querySelector('[data-news-photo]');
+const text = document.querySelector('[data-news-text]');
+
+try {
+  const item = await getNews(new URLSearchParams(location.search).get('slug'));
+  if (!item) {
+    heading.textContent = 'Новость не найдена';
+    crumb.textContent = 'Новость не найдена';
+    status.textContent = 'Эта новость недоступна. Вернитесь к списку новостей.';
+    document.title = 'Новость не найдена — СпецЭлектроника';
+  } else {
+    heading.textContent = crumb.textContent = item.title;
+    document.title = `${item.title} — СпецЭлектроника`;
+    document.querySelector('meta[name="description"]').content = item.text.replace(/\s+/g, ' ').slice(0, 180) || item.title;
+    date.dateTime = item.date;
+    date.textContent = formatNewsDate(item.date);
+    photo.src = photoUrl(item.photo);
+    photo.alt = item.title;
+    const paragraphs = item.text.replace(/\r\n?/g, '\n').split(/\n\s*\n/).filter(part => part.trim());
+    text.replaceChildren(...paragraphs.map(part => {
+      const p = document.createElement('p');
+      p.textContent = part;
+      return p;
+    }));
+    status.hidden = true;
+    date.hidden = false;
+    content.hidden = false;
+  }
+} catch (error) {
+  console.error('News could not be loaded', error);
+  heading.textContent = 'Не удалось загрузить новость';
+  crumb.textContent = 'Новость';
+  status.textContent = 'Попробуйте обновить страницу или вернитесь к списку новостей.';
+} finally {
+  article.setAttribute('aria-busy', 'false');
+}

@@ -28,7 +28,7 @@
   if (!filter || !grid) return;
   const filterWrap = filter.closest('.news-page__filter-wrap');
   const filterLabel = filterWrap?.querySelector('label');
-  const cards = [...grid.querySelectorAll('.news-page__card')];
+  let cards = [...grid.querySelectorAll('.news-page__card')];
   const trigger = document.createElement('button');
   const currentLabel = document.createElement('span');
   const optionsList = document.createElement('div');
@@ -142,5 +142,9 @@
     if (isOpen && !filterWrap.contains(event.target)) setOpen(false);
   });
   filter.addEventListener('change', update);
+  document.addEventListener('news:loaded', () => {
+    cards = [...grid.querySelectorAll('.news-page__card')];
+    update();
+  });
   update();
 })();
