@@ -142,7 +142,6 @@
 @media(max-width:43.75rem){
   .mechanical-tests{--testing-content-gutter:.75rem;--testing-section-gap:3.75rem;margin-top:3.75rem}
   .mechanical-tests__inner{position:relative;width:calc(100% - 1.5rem)}
-  .mechanical-tests__inner::before{content:"";position:absolute;z-index:0;top:22.125rem;left:50%;width:calc(100% + 1.5rem);aspect-ratio:390/252;transform:translateX(-50%);background:url("assets/testing-mechanical-product.png") center/cover no-repeat;opacity:.5;pointer-events:none}
   .mechanical-tests h2{font-size:clamp(2rem,9.7436vw,2.375rem);line-height:.9;letter-spacing:.01em}
   .mechanical-tests__content{position:relative;z-index:1;gap:1.875rem;margin-top:1.875rem}
   .mechanical-tests__list{width:100%;gap:.625rem}
