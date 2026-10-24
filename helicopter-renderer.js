@@ -41,6 +41,7 @@
     precision highp float;
     uniform sampler2D u_scene,u_glyphs;
     uniform vec2 u_resolution,u_cell;
+    uniform float u_disintegration;
     void main(){
       vec2 cell=floor(gl_FragCoord.xy/u_cell);
       vec2 uv=(cell+.5)*u_cell/u_resolution;
@@ -58,6 +59,9 @@
       float glyph=texture2D(u_glyphs,atlas).r;
       float halo=texture2D(u_glyphs,atlas+vec2(.0015,0.)).r+texture2D(u_glyphs,atlas-vec2(.0015,0.)).r;
       float ink=(glyph+.16*halo)*(.24+lum*1.05);
+      float seed=mod(cell.x*17.+cell.y*31.+cell.x*cell.y*7.,97.)/97.;
+      float fall=clamp((u_disintegration-seed*.22)/(1.-seed*.22),0.,1.);
+      ink*=1.-smoothstep(.02,.23,fall);
       gl_FragColor=vec4(vec3(.91,.89,.84)*ink,1.);
     }`;
 
@@ -79,7 +83,7 @@
       const meshProgram=program(meshVertex,meshFragment),asciiProgram=program(screenVertex,asciiFragment);
       const location=(p,n)=>gl.getUniformLocation(p,n);
       const meshUniforms=Object.fromEntries(['rotation','size','center','scale','angle','depth','main','tail'].map(n=>[n,location(meshProgram,'u_'+n)]));
-      const asciiUniforms=Object.fromEntries(['scene','glyphs','resolution','cell'].map(n=>[n,location(asciiProgram,'u_'+n)]));
+      const asciiUniforms=Object.fromEntries(['scene','glyphs','resolution','cell','disintegration'].map(n=>[n,location(asciiProgram,'u_'+n)]));
       const attributes=['position','normal','tone','group'].map(n=>gl.getAttribLocation(meshProgram,'a_'+n));
       const screenAttribute=gl.getAttribLocation(asciiProgram,'a_position');
       const data=[];
@@ -116,7 +120,7 @@
         gl.bindFramebuffer(gl.FRAMEBUFFER,framebuffer);
         if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('Helicopter framebuffer is incomplete');
       }
-      function render({matrix,scale,centerX,centerY,depth=0,angle}){
+      function render({matrix,scale,centerX,centerY,depth=0,angle,disintegration=0}){
         if(gl.isContextLost())return;
         gl.viewport(0,0,canvas.width,canvas.height);
         gl.bindFramebuffer(gl.FRAMEBUFFER,framebuffer);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
@@ -135,6 +139,7 @@
         gl.uniform2f(asciiUniforms.resolution,canvas.width,canvas.height);
         const cell=Math.max(4.2,width/320)*dpr;
         gl.uniform2f(asciiUniforms.cell,cell,cell*1.18);
+        gl.uniform1f(asciiUniforms.disintegration,disintegration);
         gl.drawArrays(gl.TRIANGLES,0,6);gl.disableVertexAttribArray(screenAttribute);
       }
       function captureParticles(){
@@ -146,15 +151,20 @@
         const columns=Math.ceil(canvas.width/cell),rows=Math.ceil(canvas.height/cellHeight),particles=[];
         for(let row=0;row<rows;row++)for(let column=0;column<columns;column++){
           const left=Math.floor(column*cell),top=Math.floor(row*cellHeight);
-          let brightness=0;
+          let brightness=0,sourceCellX=column,sourceCellY=0;
           for(let sampleY=0;sampleY<3;sampleY++)for(let sampleX=0;sampleX<3;sampleX++){
             const x=Math.min(canvas.width-1,left+Math.floor((sampleX+.5)*cell/3));
             const y=Math.max(0,canvas.height-1-top-Math.floor((sampleY+.5)*cellHeight/3));
             const offset=(y*canvas.width+x)*4;
-            brightness=Math.max(brightness,pixels[offset]*.2126+pixels[offset+1]*.7152+pixels[offset+2]*.0722);
+            const sampleBrightness=pixels[offset]*.2126+pixels[offset+1]*.7152+pixels[offset+2]*.0722;
+            if(sampleBrightness>brightness){
+              brightness=sampleBrightness;
+              sourceCellX=Math.floor((x+.5)/cell);
+              sourceCellY=Math.floor((y+.5)/cellHeight);
+            }
           }
           if(brightness<18)continue;
-          const raw=Math.sin(column*127.1+row*311.7)*43758.5453,seed=raw-Math.floor(raw);
+          const seed=((sourceCellX*17+sourceCellY*31+sourceCellX*sourceCellY*7)%97)/97;
           particles.push({x:(left+cell/2)/dpr,y:(top+cellHeight/2)/dpr,
             strength:Math.min(1,brightness/210),seed});
         }

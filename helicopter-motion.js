@@ -194,7 +194,6 @@
   function compose(){
     state=sample(progress,mobileMedia.matches);sizeFrame();
     stage.dataset.scene=String(state.scene);stage.dataset.progress=state.progress.toFixed(5);
-    stage.style.setProperty('--metrics-helicopter-opacity',String(1-sparksProgress));
     if(mobileMedia.matches){
       const flight=mobileHelicopterFlight(state.progress);
       stage.style.setProperty('--mobile-helicopter-top',`${flight.top}%`);
@@ -253,12 +252,16 @@
     const centerY=mobile?(state.height/2-mobilePose.centerY*animatedScale)*unit:
       lerp(a.y,b.y,state.mix)*unit-arc*sceneHeight*.035;
     const mobileFlight=mobile?mobileHelicopterFlight(state.progress):null;
-    renderer.render({matrix:state.matrix,
+    const helicopterFrame={matrix:state.matrix,
       scale:animatedScale*unit,
       centerX,centerY,
       depth:mobileFlight?.depth||0,
-      angle:rotorTime*.0032});
-    if(sparksProgress>0&&sparkParticles===null)sparkParticles=renderer.captureParticles();
+      angle:rotorTime*.0032};
+    if(sparksProgress>0&&sparkParticles===null){
+      renderer.render({...helicopterFrame,disintegration:0});
+      sparkParticles=renderer.captureParticles();
+    }
+    renderer.render({...helicopterFrame,disintegration:sparksProgress});
     drawSparks(sparksProgress);
     stage.classList.add('is-rendered');
     raf=requestAnimationFrame(draw);
