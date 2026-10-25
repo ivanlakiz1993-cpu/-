@@ -14,36 +14,12 @@
   <link rel="stylesheet" href="news-page.css?v=20261023-news-filter-1">
   <link rel="stylesheet" href="news-article.css?v=20261024-news-template-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
+  <script src="site-header.js?v=20261025-common-header-component-1"></script>
   <script src="page-transition.js?v=20261023-faster-mosaic-1"></script>
 </head>
 <body>
 
-  <header class="topbar">
-    <a class="brand" href="index.html#top" aria-label="СпецЭлектроника — главная"><img class="brand-mark" src="assets/footer-logo.svg" width="53" height="65" fetchpriority="high" alt=""><span>СПЕЦ<br>ЭЛЕКТРОНИКА</span></a>
-  </header>
-  <div class="menu-drawer">
-    <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Открыть меню">
-      <span>МЕНЮ</span>
-      <span class="menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
-    </button>
-    <nav id="site-nav" class="nav" aria-label="Основная навигация">
-      <div class="menu-nav-links">
-        <a href="index.html#work">Производство</a>
-        <a href="#work">Разработка</a>
-        <a href="testing.html">Испытания</a>
-        <a href="about.html">О нас</a>
-        <a href="news.html">Новости</a>
-        <a href="index.html#contact">Контакты</a>
-      </div>
-      <div class="menu-social" role="group" aria-label="Мы в социальных сетях">
-        <a class="menu-social__link menu-social__link--vk" href="#contact" aria-label="ВКонтакте"><img src="assets/social/vk.svg" alt=""></a>
-        <a class="menu-social__link menu-social__link--rutube" href="#contact" aria-label="Rutube"><img src="assets/social/rutube.svg" alt=""></a>
-        <a class="menu-social__link menu-social__link--dzen" href="#contact" aria-label="Дзен"><img src="assets/social/dzen.svg" alt=""></a>
-        <a class="menu-social__link menu-social__link--max" href="#contact" aria-label="MAX"><img src="assets/social/max.svg" alt=""></a>
-        <a class="menu-social__link menu-social__link--telegram" href="#contact" aria-label="Telegram"><img src="assets/social/telegram.svg" alt=""></a>
-      </div>
-    </nav>
-  </div>
+    <site-header page="news-article"></site-header>
   <main class="news-article__main" id="top">
     <nav class="news-page__crumbs" aria-label="Хлебные крошки"><a href="index.html">Главная</a><span aria-hidden="true">/</span><a href="news.html">Новости</a><span aria-hidden="true">/</span><span aria-current="page" data-news-crumb>Новость</span></nav>
     <article class="news-article" data-news-article aria-labelledby="article-title" aria-busy="true">
@@ -97,7 +73,7 @@
     </div>
     <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
   </footer>
-  <script src="news-page.js?v=20261024-news-template-1"></script>
+  <script src="news-page.js?v=20261025-common-header-component-1"></script>
   <script src="site-text-reveal.js?v=20261025-mechanical-subtitle-static-1"></script>
   <script type="module" src="news-article.js?v=20261025-responsive-images-1"></script>
 </body>

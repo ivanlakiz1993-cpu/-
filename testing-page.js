@@ -1,20 +1,3 @@
-const menuButton = document.querySelector('.menu-toggle');
-const menuDrawer = document.querySelector('.menu-drawer');
-const navigation = document.querySelector('#site-nav');
-const setMenuOpen = open => {
-  if (!menuButton || !menuDrawer) return;
-  menuButton.setAttribute('aria-expanded', String(open));
-  menuButton.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
-  menuDrawer.classList.toggle('is-open', open);
-  document.documentElement.classList.toggle('menu-open', open);
-  document.body.classList.toggle('menu-open', open);
-};
-menuButton?.addEventListener('click', () => setMenuOpen(menuButton.getAttribute('aria-expanded') !== 'true'));
-navigation?.addEventListener('click', event => { if (event.target.closest('a')) setMenuOpen(false); });
-menuDrawer?.addEventListener('click', event => { if (menuButton?.getAttribute('aria-expanded') === 'true' && event.target === menuDrawer) setMenuOpen(false); });
-document.addEventListener('keydown', event => { if (event.key === 'Escape' && menuButton?.getAttribute('aria-expanded') === 'true') { setMenuOpen(false); menuButton.focus(); } });
-document.addEventListener('pointerdown', event => { if (menuButton?.getAttribute('aria-expanded') === 'true' && !menuDrawer?.contains(event.target)) setMenuOpen(false); });
-
 const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 
 // Count the laboratory metrics once when they enter the viewport.

@@ -14,39 +14,11 @@
   <link rel="stylesheet" href="layout-gutters.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="testing-page.css?v=20261025-mobile-sections-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
+  <script src="site-header.js?v=20261025-common-header-component-1"></script>
   <script src="page-transition.js?v=20261023-faster-mosaic-1"></script>
 </head>
 <body class="testing-page">
-  <header class="topbar">
-    <a class="brand" href="index.html#top" aria-label="СпецЭлектроника — главная">
-      <img class="brand-mark" src="assets/footer-logo.svg" width="53" height="65" alt="">
-      <span>СПЕЦ<br>ЭЛЕКТРОНИКА</span>
-    </a>
-  </header>
-  <div class="menu-drawer">
-    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Открыть меню">
-      <span>МЕНЮ</span>
-      <span class="menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
-    </button>
-    <nav id="site-nav" class="nav" aria-label="Основная навигация">
-      <div class="menu-nav-links">
-        <a href="index.html#work">Производство</a>
-        <a href="index.html#work">Разработка</a>
-        <a href="testing.html" aria-current="page">Испытания</a>
-        <a href="about.html">О нас</a>
-        <a href="news.html">Новости</a>
-        <a href="index.html#contact">Контакты</a>
-      </div>
-      <div class="menu-social" role="group" aria-label="Социальные сети">
-        <a class="menu-social__link menu-social__link--vk" href="index.html#contact" aria-label="ВКонтакте"><img src="assets/social/vk.svg" alt=""></a>
-        <a class="menu-social__link menu-social__link--rutube" href="index.html#contact" aria-label="Rutube"><img src="assets/social/rutube.svg" alt=""></a>
-        <a class="menu-social__link menu-social__link--dzen" href="index.html#contact" aria-label="Дзен"><img src="assets/social/dzen.svg" alt=""></a>
-        <a class="menu-social__link menu-social__link--max" href="index.html#contact" aria-label="MAX"><img src="assets/social/max.svg" alt=""></a>
-        <a class="menu-social__link menu-social__link--telegram" href="index.html#contact" aria-label="Telegram"><img src="assets/social/telegram.svg" alt=""></a>
-      </div>
-    </nav>
-  </div>
-
+    <site-header page="testing"></site-header>
   <main id="top">
     <div class="testing-journey" data-testing-journey>
       <div class="testing-journey__visual-track" aria-hidden="true">
@@ -281,6 +253,6 @@
   <script src="device-demo/vendor/ScrollTrigger.min.js"></script>
   <script type="module" src="device-demo/app.js?v=20261025-visibility-loop-1"></script>
   <script src="site-text-reveal.js?v=20261025-mechanical-subtitle-static-1"></script>
-  <script src="testing-page.js?v=20261025-counter-write-1"></script>
+  <script src="testing-page.js?v=20261025-common-header-component-1"></script>
 </body>
 </html>

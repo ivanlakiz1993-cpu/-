@@ -1,20 +1,3 @@
-const menuButton = document.querySelector('.menu-toggle');
-const navigation = document.querySelector('#site-nav');
-const menuDrawer = document.querySelector('.menu-drawer');
-
-navigation.querySelectorAll('.menu-nav-links a').forEach((link, rowIndex) => {
-  const label = link.textContent.trim();
-  link.setAttribute('aria-label', label);
-  link.replaceChildren(...Array.from(label, (character, letterIndex) => {
-    const letter = document.createElement('span');
-    letter.className = 'menu-letter';
-    letter.setAttribute('aria-hidden', 'true');
-    letter.textContent = character;
-    letter.style.setProperty('--letter-delay', `${70 + rowIndex * 35 + letterIndex * 12}ms`);
-    return letter;
-  }));
-});
-
 const hero = document.querySelector('.hero');
 const heroReveals = [...document.querySelectorAll('.hero-reveal')];
 const benefitsSection = document.querySelector('.benefits');
@@ -448,37 +431,6 @@ if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: r
     }
   }
 }
-
-const setMenuOpen = (open) => {
-  menuButton.setAttribute('aria-expanded', String(open));
-  menuButton.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
-  menuDrawer.classList.toggle('is-open', open);
-  document.documentElement.classList.toggle('menu-open', open);
-  document.body.classList.toggle('menu-open', open);
-};
-
-menuButton.addEventListener('click', () => {
-  setMenuOpen(menuButton.getAttribute('aria-expanded') !== 'true');
-});
-
-navigation.addEventListener('click', (event) => {
-  if (event.target.closest('a')) setMenuOpen(false);
-});
-
-menuDrawer.addEventListener('click', (event) => {
-  if (menuButton.getAttribute('aria-expanded') === 'true' && event.target === menuDrawer) setMenuOpen(false);
-});
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && menuButton.getAttribute('aria-expanded') === 'true') {
-    setMenuOpen(false);
-    menuButton.focus();
-  }
-});
-
-document.addEventListener('pointerdown', (event) => {
-  if (menuButton.getAttribute('aria-expanded') === 'true' && !menuDrawer.contains(event.target)) setMenuOpen(false);
-});
 
 const contactForm = document.querySelector('.contact-form');
 const contactSubmitButton = contactForm.querySelector('.submit');
