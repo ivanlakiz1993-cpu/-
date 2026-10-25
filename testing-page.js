@@ -259,7 +259,7 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   });
   const revealGroup = (selector, stagger = 0) => reveal([...document.querySelectorAll(selector)], stagger);
   revealGroup('.topbar .brand-mark, .topbar .brand > span, .menu-toggle > span, .menu-toggle .menu-icon > i', 75);
-  revealGroup('.nav .menu-nav-links a, .nav .menu-social__link, .testing-stage__breadcrumb > *', 55);
+  revealGroup('.nav .menu-nav-links a, .nav .menu-social__link', 55);
   revealGroup('.testing-stage__button', 125);
   revealGroup('.climate-tests__visuals', 120);
   revealGroup('.climate-tests__pagination button', 100);
@@ -279,126 +279,6 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
       document.documentElement.classList.remove('testing-motion-ready');
     }
   }, 1800);
-}
-
-// Scroll-linked text treatment follows the homepage timing. Keep it on section
-// headings and plain copy; metric cards, list cards, spec rows, and FAQ dropdowns
-// retain their existing text behavior.
-if (!pageMotionPreference.matches) {
-  const textTargets = [...document.querySelectorAll([
-    'main h1', 'main h2', 'main h3',
-    '.testing-stage__copy p', '.testing-about__text p'
-  ].join(','))];
-  const linesByElement = new Map();
-  let textFrame = 0;
-  let textLayoutDirty = true;
-  const clampTextProgress = value => Math.max(0, Math.min(1, value));
-
-  const wrapTextWords = element => {
-    if (element.querySelector('.text-reveal__word')) return;
-    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-    const nodes = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach(node => {
-      if (!node.textContent.trim()) return;
-      const fragment = document.createDocumentFragment();
-      node.textContent.split(/(\s+)/u).forEach(part => {
-        if (!part) return;
-        if (/^\s+$/u.test(part)) {
-          fragment.append(document.createTextNode(part));
-          return;
-        }
-        const word = document.createElement('span');
-        word.className = 'text-reveal__word';
-        word.textContent = part;
-        fragment.append(word);
-      });
-      node.replaceWith(fragment);
-    });
-    element.classList.add('text-reveal');
-    element.style.setProperty('--text-final-color', getComputedStyle(element).color);
-  };
-
-  const measureTextLines = element => {
-    const lines = [];
-    element.querySelectorAll('.text-reveal__word').forEach(word => {
-      const y = word.getBoundingClientRect().top;
-      let line = lines[lines.length - 1];
-      if (!line || Math.abs(line.y - y) > 2) {
-        line = { y, length: 0, words: [] };
-        lines.push(line);
-      }
-      const length = Array.from(word.textContent).length;
-      line.words.push({ word, start: line.length, length });
-      line.length += length + 1;
-    });
-    lines.forEach(line => { line.length = Math.max(1, line.length - 1); });
-    return lines;
-  };
-
-  const requestTextFrame = () => {
-    if (!textFrame) textFrame = requestAnimationFrame(updateTextReveal);
-  };
-  const updateTextReveal = () => {
-    textFrame = 0;
-    if (textLayoutDirty) {
-      textTargets.forEach(element => linesByElement.set(element, measureTextLines(element)));
-      textLayoutDirty = false;
-    }
-    const viewport = innerHeight;
-    const scroll = scrollY;
-    const maxScroll = Math.max(1, document.documentElement.scrollHeight - viewport);
-    textTargets.forEach(element => {
-      const rect = element.getBoundingClientRect();
-      const lines = linesByElement.get(element) || [];
-      if (!rect.width || !rect.height || !lines.length) return;
-      const top = rect.top + scroll;
-      const start = top - viewport * .9;
-      const end = Math.min(top - viewport * .48, maxScroll);
-      const groupSelector = '.testing-stage__copy, .testing-about, .climate-tests__inner, .mechanical-tests__inner, .testing-faq__inner';
-      const group = element.closest(groupSelector) || element;
-      const siblings = textTargets.filter(target => (target.closest(groupSelector) || target) === group);
-      const groupTop = Math.min(...siblings.map(target => target.getBoundingClientRect().top + scrollY - viewport * .9));
-      const groupEnd = Math.max(...siblings.map(target => target.getBoundingClientRect().top + scrollY - viewport * .48));
-      const groupStart = groupTop;
-      const groupFinish = Math.min(maxScroll, Math.max(groupEnd, groupStart + (siblings.length > 1 ? viewport * .7 : end - start)));
-      const progress = clampTextProgress((scroll - groupStart) / Math.max(1, groupFinish - groupStart));
-      const groupLines = siblings.flatMap(target => linesByElement.get(target) || []);
-      const firstLineIndex = groupLines.indexOf(lines[0]);
-      lines.forEach((line, lineIndex) => {
-        const lineProgress = clampTextProgress(progress * groupLines.length - firstLineIndex - lineIndex);
-        const frontier = lineProgress * (line.length + 8) - 4;
-        line.words.forEach(({ word, start: wordStart, length }) => {
-          const left = (frontier - wordStart - 4) / length * 100;
-          const right = (frontier - wordStart + 4) / length * 100;
-          const color = getComputedStyle(element).getPropertyValue('--text-final-color').trim() || '#fff';
-          const gradient = `linear-gradient(90deg,${color} ${left.toFixed(2)}%,#777 ${right.toFixed(2)}%)`;
-          if (word.style.backgroundImage !== gradient) word.style.backgroundImage = gradient;
-        });
-      });
-    });
-  };
-
-  textTargets.forEach(element => {
-    wrapTextWords(element);
-    const observer = new MutationObserver(() => {
-      if (!element.querySelector('.text-reveal__word')) wrapTextWords(element);
-      textLayoutDirty = true;
-      requestTextFrame();
-    });
-    observer.observe(element, { childList: true, characterData: true, subtree: true });
-  });
-  if ('ResizeObserver' in window) {
-    const textResizeObserver = new ResizeObserver(() => {
-      textLayoutDirty = true;
-      requestTextFrame();
-    });
-    textTargets.forEach(element => textResizeObserver.observe(element));
-  }
-  addEventListener('scroll', requestTextFrame, { passive: true });
-  addEventListener('resize', () => { textLayoutDirty = true; requestTextFrame(); }, { passive: true });
-  document.fonts?.ready.then(() => { textLayoutDirty = true; requestTextFrame(); });
-  requestTextFrame();
 }
 
 document.querySelectorAll('.testing-stage__button').forEach(button => {

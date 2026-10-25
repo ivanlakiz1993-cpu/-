@@ -27,53 +27,7 @@ const benefitMore = document.querySelector('[data-benefit-more]');
 const benefitImage = document.querySelector('[data-benefit-image]');
 const benefitButtons = [...document.querySelectorAll('[data-benefit-index]')];
 let restartBenefitTextReveal = () => {};
-const prepareTextLines = (element) => {
-  element.querySelector(':scope > .text-reveal__accessible')?.remove();
-  const accessibleText = element.innerText.replace(/\s+/gu, ' ').trim();
-  if (!element.querySelector('.text-reveal__word')) {
-    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-    const textNodes = [];
-    while (walker.nextNode()) textNodes.push(walker.currentNode);
-    textNodes.forEach((node) => {
-      if (node.nodeType !== Node.TEXT_NODE || !node.textContent.trim()) return;
-      const hasFlexLayout = getComputedStyle(node.parentElement).display.includes('flex');
-      const fragment = document.createDocumentFragment();
-      node.textContent.split(/(\s+)/u).forEach((part) => {
-        if (!part) return;
-        if (/^\s+$/u.test(part)) {
-          fragment.append(document.createTextNode(part));
-        } else {
-          const word = document.createElement('span');
-          word.className = 'text-reveal__word';
-          word.textContent = part;
-          fragment.append(word);
-        }
-      });
-      if (hasFlexLayout) {
-        const content = document.createElement('span');
-        content.className = 'text-reveal__content';
-        content.append(fragment);
-        node.replaceWith(content);
-      } else {
-        node.replaceWith(fragment);
-      }
-    });
-  }
-  element.querySelectorAll('.text-reveal__word').forEach((word) => {
-    if (word.querySelector('.text-reveal__letter')) return;
-    word.replaceChildren(...Array.from(word.textContent, (character) => {
-      const letter = document.createElement('span');
-      letter.className = 'text-reveal__letter';
-      letter.setAttribute('aria-hidden', 'true');
-      letter.textContent = character;
-      return letter;
-    }));
-  });
-  const accessibleCopy = document.createElement('span');
-  accessibleCopy.className = 'visually-hidden text-reveal__accessible';
-  accessibleCopy.textContent = accessibleText;
-  element.prepend(accessibleCopy);
-};
+const prepareTextLines = (element) => window.siteTextReveal?.prepare(element);
 document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
   const images = [...card.querySelectorAll('[data-card-background]')];
   const modes = [...card.querySelectorAll('[data-card-mode]')];
@@ -339,69 +293,10 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   updateBenefitFromScroll();
 }
 
-const textRevealSelector = [
-  'main h2', 'main h3', '[data-benefit-description]',
-  '.project-cta__copy p',
-  '.news-intro p',
-  '.contact-heading p'
-].join(',');
-
-{
-  const targets = [...document.querySelectorAll(textRevealSelector)]
-    .filter((element) => !element.closest('.hero, .metrics, .work-card, .news-card, .footer'));
-  const groups = new Map();
-  const groupsByTarget = new Map();
-  const characterDelay = 22;
-  targets.forEach((element) => {
-    element.classList.add('text-reveal');
-    prepareTextLines(element);
-    const groupElement = element.closest('.benefits-stage, .project-cta__copy, .news-intro__copy, .contact-heading') || element;
-    let group = groups.get(groupElement);
-    if (!group) {
-      group = { elements: [], started: false };
-      groups.set(groupElement, group);
-    }
-    group.elements.push(element);
-    groupsByTarget.set(element, group);
-  });
-  const animateElements = (elements, restart = false) => {
-    if (restart) elements.forEach((element) => element.classList.remove('text-reveal--active'));
-    let delay = 0;
-    elements.forEach((element) => {
-      const speed = element.matches('h1, h2, h3, h4, h5, h6') ? 1 : 1.2;
-      element.style.setProperty('--text-letter-duration', `${240 / speed}ms`);
-      element.querySelectorAll('.text-reveal__letter').forEach((letter) => {
-        letter.style.setProperty('--text-letter-delay', `${delay}ms`);
-        delay += characterDelay / speed;
-      });
-    });
-    // Commit the hidden state and delays before starting the one-way reveal.
-    elements.forEach((element) => { void element.offsetWidth; });
-    elements.forEach((element) => element.classList.add('text-reveal--active'));
-  };
-  restartBenefitTextReveal = () => {
-    const group = groupsByTarget.get(benefitTitle);
-    if (group?.started) animateElements([benefitTitle, benefitDescription], true);
-  };
-
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        const group = groupsByTarget.get(entry.target);
-        if (!entry.isIntersecting || !group || group.started) return;
-        group.started = true;
-        animateElements(group.elements);
-        group.elements.forEach((element) => observer.unobserve(element));
-      });
-    }, { threshold: 0 });
-    targets.forEach((element) => observer.observe(element));
-  } else {
-    groups.forEach((group) => {
-      group.started = true;
-      animateElements(group.elements);
-    });
-  }
-}
+restartBenefitTextReveal = () => {
+  if (!benefitTitle?.classList.contains('text-reveal--active')) return;
+  window.siteTextReveal?.animate([benefitTitle, benefitDescription], { restart: true });
+};
 if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   if (window.siteMosaicIncoming || document.querySelector('.mosaic-transition')) {
     // The incoming page mosaic reveals the cover itself; a second black grid
