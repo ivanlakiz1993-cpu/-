@@ -273,7 +273,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   let benefitScrollActivationLocked = false;
   let benefitScrollActivationTimer = 0;
   let benefitTargetIndex = null;
-  advanceBenefitCardByScroll = (scrollDirection, originScrollY = window.scrollY, inputType = 'touch') => {
+  advanceBenefitCardByScroll = (scrollDirection, originScrollY = window.scrollY, inputType = 'touch', wheelBurst = false) => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !benefitScrollStep) return false;
     const direction = Math.sign(scrollDirection);
     if (!direction) return false;
@@ -291,17 +291,17 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     if (benefitTargetIndex === null) benefitTargetIndex = visibleIndex;
     const nextIndex = benefitTargetIndex + direction;
     if (nextIndex < 0 || nextIndex >= benefitStates.length) return false;
-    if (inputType === 'wheel' && benefitScrollActivationLocked) {
+    if (inputType === 'wheel' && wheelBurst && benefitScrollActivationLocked) {
       window.clearTimeout(benefitScrollActivationTimer);
-      benefitScrollActivationTimer = window.setTimeout(() => { benefitScrollActivationLocked = false; }, 240);
+      benefitScrollActivationTimer = window.setTimeout(() => { benefitScrollActivationLocked = false; }, 160);
       return true;
     }
 
     benefitTargetIndex = nextIndex;
-    if (inputType === 'wheel') {
+    if (inputType === 'wheel' && wheelBurst) {
       benefitScrollActivationLocked = true;
       window.clearTimeout(benefitScrollActivationTimer);
-      benefitScrollActivationTimer = window.setTimeout(() => { benefitScrollActivationLocked = false; }, 240);
+      benefitScrollActivationTimer = window.setTimeout(() => { benefitScrollActivationLocked = false; }, 160);
     }
     window.scrollTo({
       top: sectionTop + benefitScrollStep * nextIndex,
@@ -581,7 +581,7 @@ contactForm.addEventListener('submit', async (event) => {
         Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
         event.target.closest('textarea, .menu-drawer') ||
         document.documentElement.classList.contains('menu-open')) return;
-    if (advanceBenefitCardByScroll?.(event.deltaY, window.scrollY, 'wheel')) {
+    if (advanceBenefitCardByScroll?.(event.deltaY, window.scrollY, 'wheel', Math.abs(event.deltaY) < 35)) {
       if (event.cancelable) event.preventDefault();
       stop();
       return;
