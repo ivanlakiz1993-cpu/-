@@ -316,9 +316,8 @@ if (climateCarousel) {
 
   const showClimateState = index => {
     if (index === activeCamera) return;
-    const preserveVisualPosition = climateVisuals && activeCamera >= 0 &&
-      matchMedia('(max-width: 43.75rem)').matches;
-    const visualTop = preserveVisualPosition ? climateVisuals.getBoundingClientRect().top : null;
+    const preserveVisualPosition = climateVisuals && activeCamera >= 0;
+    const visualBottom = preserveVisualPosition ? climateVisuals.getBoundingClientRect().bottom : null;
     activeCamera = index;
     cameras.forEach((image, imageIndex) => {
       image.classList.toggle('is-active', imageIndex === index);
@@ -338,10 +337,10 @@ if (climateCarousel) {
       humidityRow.classList.toggle('is-unavailable', !spec.humidity);
       humidityRow.setAttribute('aria-hidden', String(!spec.humidity));
     }
-    if (preserveVisualPosition && visualTop !== null) {
-      // Removing a missing spec changes the mobile content height; compensate on the image only.
-      const layoutTop = climateVisuals.getBoundingClientRect().top - climateVisualOffset;
-      climateVisualOffset += visualTop - (layoutTop + climateVisualOffset);
+    if (preserveVisualPosition && visualBottom !== null) {
+      // Keep the camera's bottom edge fixed while specs change the content height.
+      const layoutBottom = climateVisuals.getBoundingClientRect().bottom - climateVisualOffset;
+      climateVisualOffset = visualBottom - layoutBottom;
       climateVisuals.style.setProperty('--climate-visual-y', `${climateVisualOffset}px`);
     }
   };
