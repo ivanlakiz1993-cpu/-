@@ -170,9 +170,9 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   let copySwapVersion = 0;
 
   const benefitArtwork = [
-    { src: 'assets/benefit-warranty.png', className: 'benefit-image--guarantee' },
-    { src: 'assets/benefit-quality.png', className: 'benefit-image--quality' },
-    { src: 'assets/benefit-production.png', className: 'benefit-image--production' },
+    { src: 'assets/benefit-warranty.webp', className: 'benefit-image--guarantee' },
+    { src: 'assets/benefit-quality.webp', className: 'benefit-image--quality' },
+    { src: 'assets/benefit-production.webp', className: 'benefit-image--production' },
   ];
   const preloadedBenefitArtwork = benefitArtwork.map(({ src }) => {
     const image = new Image();
