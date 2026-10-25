@@ -29,6 +29,8 @@ const benefitButtons = [...document.querySelectorAll('[data-benefit-index]')];
 let requestTextReveal = () => {};
 let refreshTextRevealLayout = () => {};
 const prepareTextLines = (element) => {
+  element.querySelector(':scope > .text-reveal__accessible')?.remove();
+  const accessibleText = element.innerText.replace(/\s+/gu, ' ').trim();
   if (!element.querySelector('.text-reveal__word')) {
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
     const textNodes = [];
@@ -65,20 +67,20 @@ const prepareTextLines = (element) => {
     offset += Number(word.dataset.revealLength) + 1;
   });
   element.dataset.revealLength = String(Math.max(1, offset - 1));
-  element.style.setProperty('--text-final-color', getComputedStyle(element).color);
-  if (element.closest('.benefits')) {
-    element.classList.add('benefit-text-reveal');
-    element.querySelectorAll('.text-reveal__word').forEach((word) => {
-      if (!word.querySelector('.benefit-text__letter')) {
-        word.replaceChildren(...Array.from(word.textContent, (character) => {
-          const letter = document.createElement('span');
-          letter.className = 'benefit-text__letter';
-          letter.textContent = character;
-          return letter;
-        }));
-      }
-    });
-  }
+  element.querySelectorAll('.text-reveal__word').forEach((word) => {
+    if (word.querySelector('.text-reveal__letter')) return;
+    word.replaceChildren(...Array.from(word.textContent, (character) => {
+      const letter = document.createElement('span');
+      letter.className = 'text-reveal__letter';
+      letter.setAttribute('aria-hidden', 'true');
+      letter.textContent = character;
+      return letter;
+    }));
+  });
+  const accessibleCopy = document.createElement('span');
+  accessibleCopy.className = 'visually-hidden text-reveal__accessible';
+  accessibleCopy.textContent = accessibleText;
+  element.prepend(accessibleCopy);
 };
 document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
   const images = [...card.querySelectorAll('[data-card-background]')];
@@ -311,7 +313,7 @@ const textRevealSelector = [
 {
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
   const targets = [...document.querySelectorAll(textRevealSelector)]
-    .filter((element) => !element.closest('.hero, .metrics, .work-card, .news-card'));
+    .filter((element) => !element.closest('.hero, .metrics, .work-card, .news-card, .footer'));
   let revealFrame = 0;
   let layoutDirty = true;
   const linesByElement = new Map();
@@ -330,7 +332,7 @@ const textRevealSelector = [
         lines.push(line);
       }
       const length = Array.from(word.textContent).length;
-      line.words.push({ word, start: line.length, length, letters: [...word.querySelectorAll('.benefit-text__letter')] });
+      line.words.push({ start: line.length, length, letters: [...word.querySelectorAll('.text-reveal__letter')] });
       line.length += length + 1;
     });
     lines.forEach((line) => { line.length = Math.max(1, line.length - 1); });
@@ -364,7 +366,7 @@ const textRevealSelector = [
       }
       let start = top - viewport * .9;
       let end = Math.min(top - viewport * .48, maxScroll);
-      let group = element.closest('.benefits-stage, .project-cta__copy, .news-intro__copy, .contact-heading, .footer-main > div') || element;
+      let group = element.closest('.benefits-stage, .project-cta__copy, .news-intro__copy, .contact-heading') || element;
       if (group === benefitsStage && benefitState > 0 && element === benefitsStage.querySelector('h2')) group = element;
       if (!groups.has(group)) groups.set(group, { start, end, elements: [] });
       const sequence = groups.get(group);
@@ -388,23 +390,17 @@ const textRevealSelector = [
         end = Math.min(end, sectionTop - viewport * .2);
       }
       const progress = motionPreference.matches ? 1 : clamp((scroll - start) / Math.max(1, end - start));
+      const lineStagger = 0.82;
+      const sequenceLength = 1 + (lines.length - 1) * lineStagger;
       lines.forEach((line, lineIndex) => {
-        // A line completes before the next starts, including between a heading and its copy.
-        const lineProgress = clamp(progress * lines.length - lineIndex);
-        const frontier = lineProgress * (line.length + 8) - 4;
-        line.words.forEach(({ word, start, length, letters }) => {
-          if (letters.length) {
-            letters.forEach((letter, index) => {
-              const amount = clamp((frontier - start - index) / 3);
-              const ink = `${(amount * amount * (3 - 2 * amount) * 100).toFixed(2)}%`;
-              if (letter.style.getPropertyValue('--letter-ink') !== ink) letter.style.setProperty('--letter-ink', ink);
-            });
-          } else {
-            const left = (frontier - start - 4) / length * 100;
-            const right = (frontier - start + 4) / length * 100;
-            const gradient = `linear-gradient(90deg,var(--text-final-color) ${left.toFixed(2)}%,#777 ${right.toFixed(2)}%)`;
-            if (word.style.backgroundImage !== gradient) word.style.backgroundImage = gradient;
-          }
+        const lineProgress = clamp(progress * sequenceLength - lineIndex * lineStagger);
+        const typedLength = lineProgress * line.length;
+        line.words.forEach(({ start, letters }) => {
+          letters.forEach((letter, index) => {
+            const amount = clamp(typedLength - start - index);
+            const opacity = (amount * amount * (3 - 2 * amount)).toFixed(2);
+            if (letter.style.opacity !== opacity) letter.style.opacity = opacity;
+          });
         });
       });
     });

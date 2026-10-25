@@ -164,11 +164,9 @@
 .benefit-copy h3,.benefit-copy p{transition:opacity .24s ease-in-out}
 .benefit-copy.is-switching h3,.benefit-copy.is-switching p{opacity:0;transition-duration:.18s}
 @media(prefers-reduced-motion:reduce){.benefit-copy h3,.benefit-copy p,.benefit-copy.is-switching h3,.benefit-copy.is-switching p{transition:none}}
-.text-reveal .text-reveal__word{font:inherit;letter-spacing:inherit;text-transform:inherit;margin:0;padding:0;color:transparent;background-image:linear-gradient(#777,#777);background-clip:text;-webkit-background-clip:text;box-decoration-break:clone;-webkit-box-decoration-break:clone;transition:none}
-.benefits .benefit-text-reveal .text-reveal__word{white-space:nowrap;color:inherit;background:none}
-.benefits .benefit-text__letter{color:color-mix(in srgb,#777,var(--text-final-color) var(--letter-ink,0%));transition:none}
-@media(prefers-reduced-motion:reduce){.benefits .benefit-text__letter{color:var(--text-final-color)}}
-@media(prefers-reduced-motion:reduce){.text-reveal .text-reveal__word{color:inherit;background:none!important}}
+.text-reveal .text-reveal__word{font:inherit;letter-spacing:inherit;text-transform:inherit;margin:0;padding:0;color:inherit;background:none;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.text-reveal .text-reveal__letter{opacity:0}
+@media(prefers-reduced-motion:reduce){.text-reveal .text-reveal__letter{opacity:1!important}}
 
 /* Footer: Figma 1756:6495 */
 .footer{background:#121212;border-radius:0.625rem 0.625rem 0 0;overflow-x:clip}
