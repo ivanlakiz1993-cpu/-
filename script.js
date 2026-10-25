@@ -27,7 +27,7 @@ const benefitMore = document.querySelector('[data-benefit-more]');
 const benefitImage = document.querySelector('[data-benefit-image]');
 const benefitButtons = [...document.querySelectorAll('[data-benefit-index]')];
 let restartBenefitTextReveal = () => {
-  if (!benefitTitle || !benefitDescription) return;
+  if (!benefitTitle || !benefitDescription || benefitCopy?.dataset.state !== '0') return;
   window.siteTextReveal?.animate([benefitTitle, benefitDescription], { restart: true });
 };
 const prepareTextLines = (element) => window.siteTextReveal?.prepare(element);
@@ -239,7 +239,17 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     benefitTitle.textContent = state.title;
     benefitDescription.textContent = state.description;
     benefitCopy.dataset.state = String(index);
-    [benefitTitle, benefitDescription].forEach(prepareTextLines);
+    if (index === 0) {
+      [benefitTitle, benefitDescription].forEach(prepareTextLines);
+    } else {
+      [benefitTitle, benefitDescription].forEach((element) => {
+        element.classList.remove('text-reveal');
+        delete element.dataset.textRevealReady;
+        delete element.dataset.textRevealContent;
+      });
+      // The orange square marks the subtitle even when letter animation is off.
+      benefitTitle.classList.add('text-reveal--active');
+    }
     benefitCopy.classList.add('is-visible');
     syncBenefitMore(index);
     benefitButtons.forEach((button, buttonIndex) => {
@@ -287,19 +297,20 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     setBenefitCard(index);
 
     const version = ++copySwapVersion;
-    benefitCopy.classList.add('is-switching');
+    const animateCopy = index === 0 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    benefitCopy.classList.toggle('is-switching', animateCopy);
     const swapText = () => {
       if (version !== copySwapVersion) return;
       updateBenefitText(index);
       requestAnimationFrame(() => requestAnimationFrame(() => {
         if (version === copySwapVersion) {
           benefitCopy.classList.remove('is-switching');
-          restartBenefitTextReveal();
+          if (index === 0) restartBenefitTextReveal();
         }
       }));
     };
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) swapText();
+    if (!animateCopy) swapText();
     else window.setTimeout(swapText, 180);
   };
 
