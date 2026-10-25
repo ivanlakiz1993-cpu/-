@@ -8,7 +8,8 @@
   const excludedSelector = [
     '.hero', '.metrics', '.work-card', '.news-card', '.news-page__card',
     '.footer', '.testing-about__metric', '.climate-tests__list',
-    '.mechanical-tests__list', '.testing-faq__item', '.news-page__filter-wrap',
+    '.mechanical-tests__list', '.mechanical-tests__equipment h3',
+    '.mechanical-tests__group h4', '.testing-faq__item', '.news-page__filter-wrap',
     '.news-article__status', '.form-feedback', '.visually-hidden'
   ].join(',');
   const groupSelector = [
