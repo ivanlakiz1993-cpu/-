@@ -17,6 +17,40 @@ document.addEventListener('pointerdown', event => { if (menuButton?.getAttribute
 
 const pageMotionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 
+// Count the laboratory metrics once when they enter the viewport.
+if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
+  const counters = [...document.querySelectorAll('[data-count-up]')].map(element => ({
+    element,
+    target: Number(element.dataset.countUpValue),
+    suffix: element.dataset.countUpSuffix || ''
+  })).filter(counter => Number.isFinite(counter.target));
+
+  counters.forEach(({ element, suffix }) => { element.textContent = `0${suffix}`; });
+
+  const counterObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      counterObserver.unobserve(entry.target);
+      const counter = counters.find(item => item.element === entry.target);
+      if (!counter) return;
+
+      const duration = 1400;
+      const startTime = performance.now();
+      const animate = now => {
+        const progress = Math.min(1, (now - startTime) / duration);
+        const easedProgress = 1 - Math.pow(1 - progress, 3);
+        const value = Math.round(counter.target * easedProgress).toLocaleString('ru-RU');
+        entry.target.textContent = `${value}${counter.suffix}`;
+        if (progress < 1 && !pageMotionPreference.matches) requestAnimationFrame(animate);
+        else entry.target.textContent = `${counter.target.toLocaleString('ru-RU')}${counter.suffix}`;
+      };
+      requestAnimationFrame(animate);
+    });
+  }, { threshold: 0.35 });
+
+  counters.forEach(({ element }) => counterObserver.observe(element));
+}
+
 // Phones own their scene inside the cover; larger screens use the shared journey.
 const heroStage = document.querySelector('.testing-stage');
 const heroDevice = document.querySelector('[data-testing-equipment]');
