@@ -573,8 +573,9 @@
  .climate-tests__body{margin-top:1.875rem;gap:0;padding-bottom:0}
  .climate-tests__details{gap:1.875rem}
  .climate-tests__list{gap:.625rem}
- .climate-tests__list li{padding:.75rem .5rem;font-size:1rem;line-height:1.2;letter-spacing:.01em}
- .climate-tests__equipment{margin:0;padding:.9375rem;gap:1.875rem}
+ .climate-tests__list li{padding:.75rem .5rem;border-radius:.625rem;background:#121212;font-size:1rem;line-height:1.2;letter-spacing:.01em}
+ .climate-tests__list li:hover{background:#121212}
+ .climate-tests__equipment{margin:0;padding:.9375rem;gap:1.875rem;border-radius:.625rem;background:#121212}
  .climate-tests__equipment h3{font-size:1.5rem;line-height:1;letter-spacing:-.05em}
  .climate-tests__equipment dl{font-size:1rem;line-height:1.2;letter-spacing:.01em;gap:.9375rem}
  .climate-tests__equipment dl>div{gap:.5rem}
@@ -589,4 +590,12 @@
  .climate-tests__camera-photo.is-before{transform:translateX(-100%)}
  .climate-tests__camera-photo.is-after{transform:translateX(100%)}
  .climate-tests__camera-photo.is-active{transform:translateX(0)}
+}
+
+/* Mobile mechanical tests — match Figma 2631:2614 card surfaces and spacing. */
+@media(max-width:43.75rem){
+ .mechanical-tests__list li{border-radius:.625rem;background:#121212}
+ .mechanical-tests__list li:hover{background:#121212}
+ .mechanical-tests__equipment{padding:.75rem .5rem;border-radius:.625rem;background:#121212}
+ .mechanical-tests__equipment h3{font-size:clamp(1rem,6.15vw,1.5rem);white-space:nowrap}
 }
