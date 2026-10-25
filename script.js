@@ -271,8 +271,12 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   };
 
   let benefitScrollActivationLocked = false;
-  advanceBenefitCardByScroll = (scrollDirection, originScrollY = window.scrollY) => {
+  let benefitScrollActivationTimer = 0;
+  let benefitTargetIndex = null;
+  advanceBenefitCardByScroll = (scrollDirection, originScrollY = window.scrollY, inputType = 'touch') => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !benefitScrollStep) return false;
+    const direction = Math.sign(scrollDirection);
+    if (!direction) return false;
     const sectionTop = benefitsSection.getBoundingClientRect().top + window.scrollY;
     const mobile = window.matchMedia('(max-width:37.5rem)').matches;
     const stickyTop = mobile ? (parseFloat(getComputedStyle(benefitsStage).top) || 0) : 0;
@@ -282,14 +286,23 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     const sourceScrollY = originScrollY >= sectionTop && originScrollY <= sectionTop + availableScroll
       ? originScrollY
       : window.scrollY;
-    const currentIndex = Math.max(0, Math.min(benefitStates.length - 1,
+    const visibleIndex = Math.max(0, Math.min(benefitStates.length - 1,
       Math.floor((sourceScrollY - sectionTop) / benefitScrollStep)));
-    const nextIndex = currentIndex + Math.sign(scrollDirection);
+    if (benefitTargetIndex === null) benefitTargetIndex = visibleIndex;
+    const nextIndex = benefitTargetIndex + direction;
     if (nextIndex < 0 || nextIndex >= benefitStates.length) return false;
-    if (benefitScrollActivationLocked) return true;
+    if (inputType === 'wheel' && benefitScrollActivationLocked) {
+      window.clearTimeout(benefitScrollActivationTimer);
+      benefitScrollActivationTimer = window.setTimeout(() => { benefitScrollActivationLocked = false; }, 240);
+      return true;
+    }
 
-    benefitScrollActivationLocked = true;
-    window.setTimeout(() => { benefitScrollActivationLocked = false; }, 650);
+    benefitTargetIndex = nextIndex;
+    if (inputType === 'wheel') {
+      benefitScrollActivationLocked = true;
+      window.clearTimeout(benefitScrollActivationTimer);
+      benefitScrollActivationTimer = window.setTimeout(() => { benefitScrollActivationLocked = false; }, 240);
+    }
     window.scrollTo({
       top: sectionTop + benefitScrollStep * nextIndex,
       behavior: 'smooth',
@@ -317,6 +330,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   benefitButtons.forEach((button) => {
     button.addEventListener('click', () => {
       const index = Number(button.dataset.benefitIndex);
+      benefitTargetIndex = index;
       const sectionTop = benefitsSection.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({ top: sectionTop + (benefitScrollStep || benefitsStage.offsetHeight) * index, behavior: 'smooth' });
     });
@@ -567,7 +581,7 @@ contactForm.addEventListener('submit', async (event) => {
         Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
         event.target.closest('textarea, .menu-drawer') ||
         document.documentElement.classList.contains('menu-open')) return;
-    if (advanceBenefitCardByScroll?.(event.deltaY)) {
+    if (advanceBenefitCardByScroll?.(event.deltaY, window.scrollY, 'wheel')) {
       if (event.cancelable) event.preventDefault();
       stop();
       return;
