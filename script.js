@@ -192,6 +192,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
 
   const updateBenefitText = (index) => {
     const state = benefitStates[index];
+    [benefitTitle, benefitDescription].forEach((element) => element.classList.remove('text-reveal--active'));
     benefitTitle.textContent = state.title;
     benefitDescription.textContent = state.description;
     benefitCopy.dataset.state = String(index);
@@ -308,7 +309,7 @@ const textRevealSelector = [
     .filter((element) => !element.closest('.hero, .metrics, .work-card, .news-card, .footer'));
   const groups = new Map();
   const groupsByTarget = new Map();
-  const characterDelay = 8;
+  const characterDelay = 22;
   targets.forEach((element) => {
     element.classList.add('text-reveal');
     prepareTextLines(element);
@@ -322,10 +323,7 @@ const textRevealSelector = [
     groupsByTarget.set(element, group);
   });
   const animateElements = (elements, restart = false) => {
-    if (restart) {
-      elements.forEach((element) => element.classList.remove('text-reveal--active'));
-      elements.forEach((element) => { void element.offsetWidth; });
-    }
+    if (restart) elements.forEach((element) => element.classList.remove('text-reveal--active'));
     let characterIndex = 0;
     elements.forEach((element) => {
       element.querySelectorAll('.text-reveal__letter').forEach((letter) => {
@@ -333,11 +331,13 @@ const textRevealSelector = [
         characterIndex += 1;
       });
     });
+    // Commit the hidden state and delays before starting the one-way reveal.
+    elements.forEach((element) => { void element.offsetWidth; });
     elements.forEach((element) => element.classList.add('text-reveal--active'));
   };
   restartBenefitTextReveal = () => {
     const group = groupsByTarget.get(benefitTitle);
-    if (group?.started) animateElements(group.elements, true);
+    if (group?.started) animateElements([benefitTitle, benefitDescription], true);
   };
 
   if ('IntersectionObserver' in window) {
