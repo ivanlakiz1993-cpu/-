@@ -324,11 +324,13 @@ const textRevealSelector = [
   });
   const animateElements = (elements, restart = false) => {
     if (restart) elements.forEach((element) => element.classList.remove('text-reveal--active'));
-    let characterIndex = 0;
+    let delay = 0;
     elements.forEach((element) => {
+      const speed = element.matches('h1, h2, h3, h4, h5, h6') ? 1 : 1.2;
+      element.style.setProperty('--text-letter-duration', `${240 / speed}ms`);
       element.querySelectorAll('.text-reveal__letter').forEach((letter) => {
-        letter.style.setProperty('--text-letter-delay', `${characterIndex * characterDelay}ms`);
-        characterIndex += 1;
+        letter.style.setProperty('--text-letter-delay', `${delay}ms`);
+        delay += characterDelay / speed;
       });
     });
     // Commit the hidden state and delays before starting the one-way reveal.

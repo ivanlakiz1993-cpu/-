@@ -166,7 +166,7 @@
 @media(prefers-reduced-motion:reduce){.benefit-copy h3,.benefit-copy p,.benefit-copy.is-switching h3,.benefit-copy.is-switching p{transition:none}}
 .text-reveal .text-reveal__word{font:inherit;letter-spacing:inherit;text-transform:inherit;margin:0;padding:0;color:inherit;background:none;white-space:nowrap;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 .text-reveal .text-reveal__letter{opacity:0}
-.text-reveal.text-reveal--active .text-reveal__letter{opacity:1;transition:opacity .24s ease-out var(--text-letter-delay,0ms)}
+.text-reveal.text-reveal--active .text-reveal__letter{opacity:1;transition:opacity var(--text-letter-duration,.24s) ease-out var(--text-letter-delay,0ms)}
 @media(prefers-reduced-motion:reduce){.text-reveal .text-reveal__letter{opacity:1!important;transition:none!important}}
 
 /* Footer: Figma 1756:6495 */
