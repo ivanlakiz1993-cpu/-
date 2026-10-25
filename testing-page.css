@@ -1,6 +1,6 @@
 .testing-page{min-width:20rem;overflow-x:hidden;background:#000;color:#fff}
 .testing-about{position:relative;z-index:2;width:100%;max-width:120rem;min-height:38.75rem;margin:9.375rem auto 0;padding:0 clamp(1.5rem,5.2083333333vw,6.25rem);color:var(--text)}
-.testing-about h2{position:relative;z-index:1;margin:0 0 3.125rem;font:400 4rem/1 var(--sans);letter-spacing:.04rem;color:#fff}
+.testing-about h2{position:relative;z-index:1;margin:0 0 3.125rem;font:400 4rem/1 var(--sans);letter-spacing:.04rem}
 .testing-about__content{position:relative;z-index:1;display:flex;min-height:31.625rem;flex-direction:column;justify-content:space-between;gap:2.25rem}
 .testing-about__text{position:relative;z-index:1;width:min(53.75rem,100%);display:flex;flex-direction:column;gap:.9375rem;font:400 1.125rem/1.2 var(--sans);color:#fff}
 .testing-about__text p{margin:0}
@@ -68,7 +68,7 @@
 .climate-tests__track{position:relative;height:auto}
 .climate-tests__stage{position:relative;min-height:45.625rem;background:transparent;overflow:visible}
 .climate-tests__inner{position:relative;width:var(--wrap);min-height:45.625rem;margin-inline:auto}
-.climate-tests h2{margin:0;font:400 clamp(2.375rem,3.333333vw,4rem)/1 var(--sans);letter-spacing:.01em;color:#fff}
+.climate-tests h2{margin:0;font:400 clamp(2.375rem,3.333333vw,4rem)/1 var(--sans);letter-spacing:.01em}
 .climate-tests__body{position:relative;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:1.875rem;margin-top:clamp(1.875rem,2.604167vw,3.125rem)}
 .climate-tests__details{position:relative;z-index:2;flex:0 1 min(53.75rem,50%);min-width:0}
 .climate-tests__list{display:flex;flex-direction:column;gap:.625rem;margin:0;padding:0;list-style:none}
@@ -91,7 +91,7 @@
 /* Mechanical tests — Figma 1731:3723, 2588:2051, 2631:2614. */
 .mechanical-tests{position:relative;z-index:2;margin-top:clamp(4rem,7.8125vw,9.375rem);background:transparent;color:#fff}
 .mechanical-tests__inner{width:var(--wrap);margin-inline:auto}
-.mechanical-tests h2{margin:0;font:400 clamp(2.375rem,3.333333vw,4rem)/1 var(--sans);letter-spacing:.01em;color:#fff}
+.mechanical-tests h2{margin:0;font:400 clamp(2.375rem,3.333333vw,4rem)/1 var(--sans);letter-spacing:.01em}
 .mechanical-tests__content{display:flex;flex-direction:column;gap:1.875rem;margin-top:clamp(1.875rem,2.604167vw,3.125rem)}
 .mechanical-tests__list-row{position:relative;width:100%}
 .mechanical-tests__list{position:relative;z-index:1;width:min(53.75rem,50%);display:flex;flex-direction:column;gap:.625rem;margin:0;padding:0;list-style:none}
@@ -165,7 +165,7 @@
 .testing-faq{margin-top:9.375rem;padding:0;background:transparent;color:#fff}
 .testing-page>.footer{margin-top:5.625rem}
 .testing-faq__inner{width:100%;margin:0 auto}
-.testing-faq h2{margin:0;text-align:center;font:400 clamp(2.375rem,3.333333vw,4rem)/1 var(--sans);letter-spacing:.01em;color:#fff}
+.testing-faq h2{margin:0;text-align:center;font:400 clamp(2.375rem,3.333333vw,4rem)/1 var(--sans);letter-spacing:.01em}
 .testing-faq__list{margin-top:3.125rem;border-top:.0625rem solid #333}
 .testing-faq__item{border-bottom:.0625rem solid #333;background:#000;color:#fff;transition:background-color .34s ease,color .34s ease,border-color .34s ease}
 .testing-faq__item[open]{background:#fff;color:#171717;border-color:#d9d9d9}
