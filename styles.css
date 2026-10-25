@@ -450,6 +450,7 @@
     font-size:0.933333rem;
     line-height:1.2;
     letter-spacing:0;
+    text-align:left;
   }
   .benefit-copy,.benefit-copy[data-state="0"]{
     box-sizing:border-box;
