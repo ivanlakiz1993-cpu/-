@@ -309,7 +309,7 @@ const textRevealSelector = [
   const groups = new Map();
   const groupsByTarget = new Map();
   const linePause = 6;
-  const characterDelay = 18;
+  const characterDelay = 8;
   targets.forEach((element) => {
     element.classList.add('text-reveal');
     prepareTextLines(element);
