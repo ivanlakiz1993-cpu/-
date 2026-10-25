@@ -15,6 +15,7 @@
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const splitMedia=matchMedia('(min-width: 37.5625rem), (max-width: 37.5rem)');
   const mobileMedia=matchMedia('(max-width: 37.5rem)');
+  const tabletMedia=matchMedia('(min-width: 37.5625rem) and (max-width: 56.25rem)');
   const root=document.documentElement,{sample,poses,transitions,matrix,lerp,smooth}=storyboard;
   const mobileHelicopterTop=progress=>{
     const positions=[25.12,38.62,52.9,64.62];
@@ -258,7 +259,7 @@
     viewport=innerHeight;
     resizeSparks(root.clientWidth||innerWidth,viewport);
     const heroHeight=hero.offsetHeight,introTop=intro.getBoundingClientRect().top+scrollY;
-    sequenceDistance=viewport*(mobileMedia.matches?3.15:3.6);
+    sequenceDistance=viewport*(mobileMedia.matches?1.15:tabletMedia.matches?1.4:1.8);
     entryDistance=splitEnabled?viewport*.85:0;
     splitIntroTop=introTop;
     splitPreTravel=splitEnabled?Math.max(0,heroHeight-viewport):0;
