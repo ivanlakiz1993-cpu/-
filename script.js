@@ -26,7 +26,10 @@ const benefitArt = document.querySelector('[data-benefit-art]');
 const benefitMore = document.querySelector('[data-benefit-more]');
 const benefitImage = document.querySelector('[data-benefit-image]');
 const benefitButtons = [...document.querySelectorAll('[data-benefit-index]')];
-let restartBenefitTextReveal = () => {};
+let restartBenefitTextReveal = () => {
+  if (!benefitTitle || !benefitDescription) return;
+  window.siteTextReveal?.animate([benefitTitle, benefitDescription], { restart: true });
+};
 const prepareTextLines = (element) => window.siteTextReveal?.prepare(element);
 document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
   const images = [...card.querySelectorAll('[data-card-background]')];
@@ -293,10 +296,6 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   updateBenefitFromScroll();
 }
 
-restartBenefitTextReveal = () => {
-  if (!benefitTitle?.classList.contains('text-reveal--active')) return;
-  window.siteTextReveal?.animate([benefitTitle, benefitDescription], { restart: true });
-};
 if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   if (window.siteMosaicIncoming || document.querySelector('.mosaic-transition')) {
     // The incoming page mosaic reveals the cover itself; a second black grid
