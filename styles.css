@@ -167,7 +167,6 @@
 .text-reveal .text-reveal__word{font:inherit;letter-spacing:inherit;text-transform:inherit;margin:0;padding:0;color:inherit;background:none;white-space:nowrap;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 .text-reveal .text-reveal__letter{opacity:0}
 .text-reveal.text-reveal--active .text-reveal__letter{animation:text-reveal-type 0.08s steps(1,end) var(--text-letter-delay,0ms) both}
-.text-reveal.text-reveal--complete .text-reveal__letter{opacity:1!important;animation:none!important}
 @keyframes text-reveal-type{to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.text-reveal .text-reveal__letter{opacity:1!important;animation:none!important}}
 

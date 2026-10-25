@@ -308,8 +308,6 @@ const textRevealSelector = [
     .filter((element) => !element.closest('.hero, .metrics, .work-card, .news-card, .footer'));
   const groups = new Map();
   const groupsByTarget = new Map();
-  const completionTimers = new WeakMap();
-  const linePause = 6;
   const characterDelay = 8;
   targets.forEach((element) => {
     element.classList.add('text-reveal');
@@ -323,50 +321,23 @@ const textRevealSelector = [
     group.elements.push(element);
     groupsByTarget.set(element, group);
   });
-  const measureLines = (elements) => {
-    const lines = [];
-    elements.forEach((element) => {
-      element.querySelectorAll('.text-reveal__word').forEach((word) => {
-        const y = word.getBoundingClientRect().top;
-        let line = lines[lines.length - 1];
-        if (!line || Math.abs(line.y - y) > 2) {
-          line = { y, length: 0, words: [] };
-          lines.push(line);
-        }
-        const length = Array.from(word.textContent).length;
-        line.words.push({ start: line.length, letters: [...word.querySelectorAll('.text-reveal__letter')] });
-        line.length += length + 1;
-      });
-    });
-    lines.forEach((line) => { line.length = Math.max(1, line.length - 1); });
-    return lines;
-  };
   const animateElements = (elements, restart = false) => {
-    const lines = measureLines(elements);
-    let sequenceOffset = 0;
-    lines.forEach((line) => {
-      line.words.forEach(({ start, letters }) => {
-        letters.forEach((letter, index) => {
-          const delay = (sequenceOffset + start + index) * characterDelay;
-          letter.style.setProperty('--text-letter-delay', `${delay.toFixed(1)}ms`);
-        });
-      });
-      sequenceOffset += line.length + linePause;
-    });
     if (restart) {
-      window.clearTimeout(completionTimers.get(elements[0]));
-      elements.forEach((element) => element.classList.remove('text-reveal--active', 'text-reveal--complete'));
+      elements.forEach((element) => element.classList.remove('text-reveal--active'));
       elements.forEach((element) => { void element.offsetWidth; });
     }
+    let characterIndex = 0;
+    elements.forEach((element) => {
+      element.querySelectorAll('.text-reveal__letter').forEach((letter) => {
+        letter.style.setProperty('--text-letter-delay', `${characterIndex * characterDelay}ms`);
+        characterIndex += 1;
+      });
+    });
     elements.forEach((element) => element.classList.add('text-reveal--active'));
-    const completionDelay = (sequenceOffset + 1) * characterDelay + 80;
-    completionTimers.set(elements[0], window.setTimeout(() => {
-      elements.forEach((element) => element.classList.add('text-reveal--complete'));
-    }, completionDelay));
   };
   restartBenefitTextReveal = () => {
     const group = groupsByTarget.get(benefitTitle);
-    if (group?.started) animateElements([benefitTitle, benefitDescription], true);
+    if (group?.started) animateElements(group.elements, true);
   };
 
   if ('IntersectionObserver' in window) {
