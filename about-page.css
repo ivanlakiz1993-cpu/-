@@ -1,6 +1,6 @@
 site-header{display:contents}
 .about-page{background:#000}
-.about-page .topbar{background:transparent;backdrop-filter:none;border-bottom-color:transparent}
+.about-page .topbar{position:relative;inset:auto}
 .about-cover{position:relative;display:flex;flex-direction:column;align-items:flex-start;width:min(120rem,100%);aspect-ratio:1920/886;margin:0 auto;padding:5.625rem 6.25rem 38.875rem;overflow:hidden;border-radius:.3125rem;background:#a9bfd3;isolation:isolate}
 .about-cover__image{position:absolute;inset:0;overflow:hidden;border-radius:inherit}
 .about-cover__image img{position:absolute;top:0;left:-.33%;display:block;width:100.66%;height:121.78%;max-width:none;object-fit:cover;object-position:center top}
