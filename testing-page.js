@@ -40,9 +40,13 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
         const progress = Math.min(1, (now - startTime) / duration);
         const easedProgress = 1 - Math.pow(1 - progress, 3);
         const value = Math.round(counter.target * easedProgress).toLocaleString('ru-RU');
-        entry.target.textContent = `${value}${counter.suffix}`;
+        const nextText = `${value}${counter.suffix}`;
+        if (entry.target.textContent !== nextText) entry.target.textContent = nextText;
         if (progress < 1 && !pageMotionPreference.matches) requestAnimationFrame(animate);
-        else entry.target.textContent = `${counter.target.toLocaleString('ru-RU')}${counter.suffix}`;
+        else {
+          const finalText = `${counter.target.toLocaleString('ru-RU')}${counter.suffix}`;
+          if (entry.target.textContent !== finalText) entry.target.textContent = finalText;
+        }
       };
       requestAnimationFrame(animate);
     });

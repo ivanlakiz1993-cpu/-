@@ -37,8 +37,17 @@ document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
   let selectedState = card.dataset.defaultState;
   let touchSelectionActive = false;
   const setState = (state) => {
-    images.forEach((image) => image.classList.toggle('is-active', image.dataset.cardBackground === state));
+    images.forEach((image) => {
+      const isActive = image.dataset.cardBackground === state;
+      image.classList.toggle('is-active', isActive);
+      if (!isActive || !image.dataset.src) return;
+      if (image.dataset.sizes) image.sizes = image.dataset.sizes;
+      if (image.dataset.srcset) image.srcset = image.dataset.srcset;
+      image.src = image.dataset.src;
+      delete image.dataset.src;
+    });
   };
+  setState(selectedState);
   const restoreState = () => {
     if (touchSelectionActive) {
       setState(selectedState);
@@ -88,9 +97,69 @@ document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
 
 const projectCtaVideo = document.querySelector('.project-cta__video');
 if (projectCtaVideo) {
+  const videoSource = projectCtaVideo.querySelector('source[data-src]');
+  let videoNearViewport = false;
+  let shouldSkipBackgroundVideo = matchMedia('(prefers-reduced-motion: reduce)').matches
+    || navigator.connection?.saveData;
+  const playVideo = () => {
+    if (!videoSource || shouldSkipBackgroundVideo) return;
+    if (!videoSource.src) {
+      videoSource.src = videoSource.dataset.src;
+      projectCtaVideo.load();
+    }
+    if (!document.hidden && videoNearViewport) projectCtaVideo.play().catch(() => {});
+  };
   projectCtaVideo.addEventListener('loadeddata', () => projectCtaVideo.classList.add('is-ready'), { once: true });
   projectCtaVideo.addEventListener('error', () => projectCtaVideo.classList.remove('is-ready'));
   if (projectCtaVideo.readyState >= 2) projectCtaVideo.classList.add('is-ready');
+  if (!shouldSkipBackgroundVideo && 'IntersectionObserver' in window) {
+    const videoObserver = new IntersectionObserver(([entry]) => {
+      videoNearViewport = Boolean(entry?.isIntersecting);
+      if (videoNearViewport) playVideo();
+      else projectCtaVideo.pause();
+    }, { rootMargin: '240px 0px' });
+    videoObserver.observe(projectCtaVideo);
+  } else if (!shouldSkipBackgroundVideo) {
+    videoNearViewport = true;
+    playVideo();
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) projectCtaVideo.pause();
+    else if (videoNearViewport) playVideo();
+  });
+  matchMedia('(prefers-reduced-motion: reduce)').addEventListener?.('change', event => {
+    shouldSkipBackgroundVideo = event.matches || navigator.connection?.saveData;
+    if (shouldSkipBackgroundVideo) projectCtaVideo.pause();
+    else if (videoNearViewport) playVideo();
+  });
+}
+
+const newsCards = [...document.querySelectorAll('.news-card[data-news-background]')];
+const setNewsCardBackground = card => {
+  const original = card.dataset.newsBackground;
+  const pixelWidth = Math.ceil(card.getBoundingClientRect().width * (window.devicePixelRatio || 1));
+  const candidates = [640, 1280, 1920];
+  const selectedWidth = candidates.find(width => width >= pixelWidth);
+  const source = selectedWidth && /\.webp$/i.test(original)
+    ? original.replace(/\.webp$/i, `-${selectedWidth}w.webp`)
+    : original;
+  if (card.dataset.loadedBackground === source) return;
+  card.style.backgroundImage = `url("${source}")`;
+  card.dataset.loadedBackground = source;
+};
+if ('IntersectionObserver' in window) {
+  const newsCardObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const card = entry.target;
+      setNewsCardBackground(card);
+      newsCardObserver.unobserve(card);
+      if ('ResizeObserver' in window) new ResizeObserver(() => setNewsCardBackground(card)).observe(card);
+    });
+  }, { rootMargin: '320px' });
+  newsCards.forEach(card => newsCardObserver.observe(card));
+} else {
+  newsCards.forEach(setNewsCardBackground);
 }
 
 document.querySelectorAll('.project-cta__button, .submit').forEach((button) => {
@@ -128,16 +197,32 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   let copySwapVersion = 0;
 
   const benefitArtwork = [
-    { src: 'assets/benefit-warranty.webp', className: 'benefit-image--guarantee' },
-    { src: 'assets/benefit-quality.webp', className: 'benefit-image--quality' },
-    { src: 'assets/benefit-production.webp', className: 'benefit-image--production' },
+    { src: 'assets/benefit-warranty.webp', srcset: 'assets/benefit-warranty-640w.webp 640w, assets/benefit-warranty.webp 1024w', className: 'benefit-image--guarantee' },
+    { src: 'assets/benefit-quality.webp', srcset: 'assets/benefit-quality-640w.webp 640w, assets/benefit-quality-1280w.webp 1280w, assets/benefit-quality.webp 1878w', className: 'benefit-image--quality' },
+    { src: 'assets/benefit-production.webp', srcset: 'assets/benefit-production-640w.webp 640w, assets/benefit-production-1280w.webp 1280w, assets/benefit-production.webp 1432w', className: 'benefit-image--production' },
   ];
-  const preloadedBenefitArtwork = benefitArtwork.map(({ src }) => {
+  const preloadedBenefitArtwork = new Array(benefitArtwork.length);
+  preloadedBenefitArtwork[0] = benefitImage;
+  const preloadBenefitArtwork = index => {
+    if (preloadedBenefitArtwork[index]) return preloadedBenefitArtwork[index];
+    const { src } = benefitArtwork[index];
     const image = new Image();
+    image.sizes = '(max-width: 37.5rem) 100vw, (max-width: 56.25rem) 58vw, 60vw';
+    image.srcset = benefitArtwork[index].srcset;
+    image.decoding = 'async';
     image.src = src;
     image.decode?.().catch(() => {});
+    preloadedBenefitArtwork[index] = image;
     return image;
-  });
+  };
+  if ('IntersectionObserver' in window) {
+    const benefitArtworkObserver = new IntersectionObserver(([entry]) => {
+      if (!entry?.isIntersecting) return;
+      preloadBenefitArtwork(1);
+      benefitArtworkObserver.disconnect();
+    }, { rootMargin: '480px 0px' });
+    benefitArtworkObserver.observe(benefitsSection);
+  }
 
 
 
@@ -173,15 +258,18 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     }
 
     const nextArtwork = benefitArtwork[index];
+    const nextImage = preloadBenefitArtwork(index);
     benefitImage.classList.add('is-changing');
 
     const swapImage = async () => {
       if (version !== imageSwapVersion) return;
+      benefitImage.sizes = '(max-width: 37.5rem) 100vw, (max-width: 56.25rem) 58vw, 60vw';
+      benefitImage.srcset = nextArtwork.srcset;
       benefitImage.src = nextArtwork.src;
       benefitImage.className = `benefit-image ${nextArtwork.className} is-active is-changing`;
       benefitImage.dataset.imageIndex = String(index);
       try {
-        await (preloadedBenefitArtwork[index]?.decode?.() ?? benefitImage.decode?.());
+        await (nextImage.decode?.() ?? benefitImage.decode?.());
       } catch {}
       if (version !== imageSwapVersion) return;
       requestAnimationFrame(() => {

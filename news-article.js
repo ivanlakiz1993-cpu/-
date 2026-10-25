@@ -1,4 +1,4 @@
-import { getNews, photoUrl, formatNewsDate } from './news-source.js?v=20261024-news-template-1';
+import { getNews, photoUrl, formatNewsDate, responsivePhotoSrcset } from './news-source.js?v=20261025-performance-1';
 
 const article = document.querySelector('[data-news-article]');
 const status = document.querySelector('[data-news-status]');
@@ -22,8 +22,16 @@ try {
     document.querySelector('meta[name="description"]').content = item.text.replace(/\s+/g, ' ').slice(0, 180) || item.title;
     date.dateTime = item.date;
     date.textContent = formatNewsDate(item.date);
-    photo.src = photoUrl(item.photo);
     photo.alt = item.title;
+    photo.loading = 'eager';
+    photo.decoding = 'async';
+    photo.fetchPriority = 'high';
+    const srcset = responsivePhotoSrcset(item.photo);
+    if (srcset) {
+      photo.sizes = '(max-width: 56.25rem) 100vw, 50vw';
+      photo.srcset = srcset;
+    }
+    photo.src = photoUrl(item.photo);
     const paragraphs = item.text.replace(/\r\n?/g, '\n').split(/\n\s*\n/).filter(part => part.trim());
     text.replaceChildren(...paragraphs.map(part => {
       const p = document.createElement('p');
@@ -41,4 +49,5 @@ try {
   status.textContent = 'Попробуйте обновить страницу или вернитесь к списку новостей.';
 } finally {
   article.setAttribute('aria-busy', 'false');
+  window.siteTextReveal?.scan(article);
 }

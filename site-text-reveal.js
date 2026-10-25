@@ -21,7 +21,6 @@
   const groupsByTarget = new WeakMap();
   const registeredTargets = new WeakSet();
   const characterDelay = 22;
-  let scanFrame = 0;
 
   const normalizedText = (element) => {
     const copy = element.cloneNode(true);
@@ -41,11 +40,13 @@
 
   const prepare = (element) => {
     if (!element || motionPreference.matches) return;
+    if (element.dataset.textRevealReady === 'true') {
+      const currentText = normalizedText(element);
+      if (currentText === element.dataset.textRevealContent) return;
+    }
     const accessibleCopy = element.querySelector(':scope > .text-reveal__accessible');
     const sourceText = normalizedText(element);
     if (!sourceText) return;
-    if (element.dataset.textRevealReady === 'true'
-      && sourceText === element.dataset.textRevealContent) return;
 
     accessibleCopy?.remove();
     if (element.dataset.textRevealReady === 'true') unwrapRevealMarkup(element);
@@ -142,10 +143,13 @@
     }
   };
 
-  const scan = () => {
-    scanFrame = 0;
+  const scan = (root = document) => {
     if (motionPreference.matches) return;
-    document.querySelectorAll(targetSelector).forEach((element) => {
+    const elements = [
+      ...(root.matches?.(targetSelector) ? [root] : []),
+      ...root.querySelectorAll(targetSelector)
+    ];
+    elements.forEach((element) => {
       if (element.matches(excludedSelector)
         || element.closest(`${excludedSelector}, [hidden], [aria-hidden="true"], [aria-busy="true"]`)) return;
 
@@ -175,22 +179,8 @@
     }, { threshold: 0, rootMargin: '0px 0px -5% 0px' })
     : null;
 
-  window.siteTextReveal = { prepare, animate };
+  window.siteTextReveal = { prepare, animate, scan };
   scan();
-
-  if (document.body && 'MutationObserver' in window) {
-    const mutationObserver = new MutationObserver(() => {
-      if (scanFrame) return;
-      scanFrame = requestAnimationFrame(scan);
-    });
-    mutationObserver.observe(document.body, {
-      attributes: true,
-      attributeFilter: ['aria-busy', 'hidden'],
-      characterData: true,
-      childList: true,
-      subtree: true
-    });
-  }
 
   if (!observer) {
     groups.forEach((group) => {

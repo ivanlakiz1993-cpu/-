@@ -13,6 +13,23 @@ export function photoUrl(photo) {
   return url.href;
 }
 
+const responsiveNewsPhotos = new Map([
+  ['news-forum.webp', 2528], ['news-victory.webp', 4096],
+  ['news-womens-day.webp', 2730], ['news-laboratory.webp', 2730]
+]);
+
+export function responsivePhotoSrcset(photo) {
+  const url = new URL(photoUrl(photo));
+  const parts = url.pathname.split('/');
+  const filename = decodeURIComponent(parts[parts.length - 1] || '');
+  const originalWidth = responsiveNewsPhotos.get(filename);
+  if (!originalWidth) return '';
+  const stem = url.pathname.slice(0, -'.webp'.length);
+  const variants = [640, 1280, 1920].map(width => `${url.origin}${stem}-${width}w.webp ${width}w`);
+  variants.push(`${url.href} ${originalWidth}w`);
+  return variants.join(', ');
+}
+
 function validateNews(item) {
   if (!item || typeof item.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)
     || typeof item.title !== 'string' || !item.title.trim()

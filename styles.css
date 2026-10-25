@@ -58,10 +58,6 @@
 .news-card--march span{white-space:nowrap}
 .news-card--forum{grid-column:1 / span 2;grid-row:2;height:22.1875rem;background-size:100% 166.25%;background-position:center 18.75%}
 .news-card--forum span{width:17.4375rem}
-.news-card--victory{background-image:url('assets/news-victory.webp')}
-.news-card--lab{background-image:url('assets/news-laboratory.webp')}
-.news-card--march{background-image:url('assets/news-womens-day.webp')}
-.news-card--forum{background-image:url('assets/news-forum.webp')}
 @media(max-width:56.25rem){.news{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:16.25rem 20rem 20rem 20rem;gap:1.125rem;padding-top:1.875rem;padding-bottom:5.625rem}.news-intro{grid-column:1 / -1;grid-row:1;height:auto;min-height:16.25rem}.news-card--victory{grid-column:1;grid-row:2;height:20rem}.news-card--lab{grid-column:2;grid-row:2 / span 2;height:41.125rem}.news-card--march{grid-column:1;grid-row:3 / span 2;height:41.125rem}.news-card--forum{grid-column:1 / -1;grid-row:4;height:20rem}.news-card span{font-size:1.25rem}.news-card--victory span{font-size:1rem}.news-card--march span{white-space:normal}}
 @media(max-width:37.5rem){.news{grid-template-columns:1fr;grid-template-rows:auto repeat(4,minmax(14.375rem,60vw));gap:0.75rem;padding-top:1.25rem;padding-bottom:5rem}.news-intro{grid-column:1;grid-row:1;min-height:17.5rem;height:auto}.news-intro h2{font-size:2.8125rem}.news-intro p{font-size:0.875rem;line-height:1.25;letter-spacing:-0.028125rem}.all-news{font-size:1.0625rem}.news-card{grid-column:1!important;grid-row:auto!important;height:auto!important;min-height:14.375rem;padding:1rem;background-size:cover;background-position:center}.news-card span{font-size:1.125rem;white-space:normal}.news-card--victory span{font-size:1rem}}
 @media(max-width:56.25rem){.news{grid-template-rows:16.25rem repeat(4,20rem)}.news-card--victory{grid-column:1;grid-row:2;height:20rem}.news-card--lab{grid-column:2;grid-row:2;height:20rem}.news-card--march{grid-column:1;grid-row:3;height:20rem}.news-card--forum{grid-column:2;grid-row:3;height:20rem}}

@@ -1,4 +1,4 @@
-import { listNews, newsUrl, photoUrl, formatNewsDate } from './news-source.js?v=20261024-news-template-1';
+import { listNews, newsUrl, photoUrl, formatNewsDate, responsivePhotoSrcset } from './news-source.js?v=20261025-performance-1';
 
 const grid = document.querySelector('#news-stories');
 const legacyCategories = { 'victory-day': 'holidays', laboratory: 'laboratory', forum: 'forum', 'womens-day': 'holidays' };
@@ -6,7 +6,7 @@ const legacyStyles = { 'victory-day': 'victory', laboratory: 'laboratory', forum
 
 try {
   const items = await listNews();
-  const cards = items.map(item => {
+  const cards = items.map((item, index) => {
     const card = document.createElement('a');
     card.className = 'news-page__card';
     if (legacyStyles[item.slug]) card.classList.add(`news-page__card--${legacyStyles[item.slug]}`);
@@ -15,8 +15,15 @@ try {
     card.dataset.category = legacyCategories[item.slug] || 'events';
     const image = document.createElement('img');
     image.className = 'news-page__image';
+    const srcset = responsivePhotoSrcset(item.photo);
+    if (srcset) {
+      image.sizes = '(max-width: 37.5rem) calc(100vw - 2.25rem), (max-width: 56.25rem) 45vw, 30vw';
+      image.srcset = srcset;
+    }
     image.src = photoUrl(item.photo);
     image.alt = item.title;
+    image.loading = index === 0 ? 'eager' : 'lazy';
+    image.fetchPriority = index === 0 ? 'high' : 'low';
     image.decoding = 'async';
     const copy = document.createElement('span');
     copy.className = 'news-page__copy';

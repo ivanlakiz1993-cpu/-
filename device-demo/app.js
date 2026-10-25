@@ -3,15 +3,37 @@ import { GLTFLoader } from './vendor/GLTFLoader.js';
 import { attachFrostMaterial, createEdgeFrost } from './frost-surface.js?v=20261023-heat-only-1';
 import { createSurfaceWater, createWaterReflections } from './water-surface.js?v=20261021-frost-growth-1';
 
+async function startTestingScene() {
 const canvas = document.querySelector('[data-testing-model], #device');
 const equipment = document.querySelector('[data-testing-equipment]');
 const asset = name => {
   const url = new URL(name, import.meta.url);
-  url.search = new URL(import.meta.url).search;
+  const versions = {
+    'device.glb': '20261024-reload-sync-1',
+    'brushed_normal.jpg': '20261024-reload-sync-1',
+    'frost-height.png': '20261025-grayscale-1'
+  };
+  url.search = `?v=${versions[name] || '20261025-performance-1'}`;
   return url.href;
 };
 const status = document.querySelector('#status');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+canvas?.addEventListener('webglcontextlost', event => {
+  event.preventDefault();
+  webglAvailable = false;
+  renderer.setAnimationLoop(null);
+  animationLoopRunning = false;
+  showStaticTestingModel();
+});
+canvas?.addEventListener('webglcontextrestored', () => {
+  webglAvailable = true;
+  canvas.hidden = false;
+  equipment?.classList.remove('testing-model-fallback');
+  equipment?.querySelector('[data-testing-model-fallback]')?.remove();
+  if (status) status.textContent = '';
+  resize();
+  syncAnimationLoop();
+});
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -31,6 +53,11 @@ const heatSvg = document.querySelector('[data-testing-heat]');
 const heatDisplacement = document.querySelector('#testing-heat-displacement');
 const journeyVisual = document.querySelector('.testing-journey__visual');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+let modelReady = false;
+let sceneVisible = false;
+let webglAvailable = true;
+let animationLoopRunning = false;
+let staticRenderFrame = 0;
 
 const vibrationChart = (() => {
   if (!vibrationSvg) return { setProgress: () => {}, update: () => {} };
@@ -158,7 +185,10 @@ let halfHeight = .6;
 function resize() {
   const bounds = equipment?.getBoundingClientRect();
   const width = Math.max(1, bounds?.width || window.innerWidth), height = Math.max(1, bounds?.height || window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const pixelRatioLimit = matchMedia('(max-width: 68.75rem)').matches ? 1.5 : 2;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, pixelRatioLimit));
+  const shadowResolution = pixelRatioLimit < 2 ? 1024 : 2048;
+  mainLight.shadow.mapSize.set(shadowResolution, shadowResolution);
   renderer.setSize(width, height, false);
   camera.aspect = width / height;
   // Fit the entire rotation envelope, including narrow mobile viewports.
@@ -563,15 +593,16 @@ try {
   refreshSettledLayout();
   if (status) status.textContent = '';
   equipment?.classList.add('testing-model-ready');
+  modelReady = true;
 } catch (error) {
   console.error(error);
   if (status) status.textContent = 'Не удалось загрузить модель или текстуры. Откройте страницу через HTTP-сервер.';
 }
 const rainClock = new THREE.Clock();
-renderer.setAnimationLoop(() => {
+const renderFrame = () => {
   const delta = Math.min(rainClock.getDelta(), .05);
   vibrationChart.update(delta);
-  if (rainPositions && rainLengths) {
+  if (rainPositions && rainLengths && rainMaterial?.opacity > .001) {
     let rainColorsChanged = false;
     for (let i = 0; i < rainLengths.length; i++) {
       const offset = i * 6;
@@ -598,4 +629,65 @@ renderer.setAnimationLoop(() => {
     if (rainColorsChanged) rainGeometry.attributes.color.needsUpdate = true;
   }
   renderer.render(scene, camera);
+};
+function syncAnimationLoop() {
+  const shouldAnimate = webglAvailable && modelReady && sceneVisible && !document.hidden && !reducedMotion.matches;
+  if (shouldAnimate === animationLoopRunning) {
+    if (!shouldAnimate && webglAvailable && modelReady && sceneVisible && !document.hidden) renderer.render(scene, camera);
+    return;
+  }
+  animationLoopRunning = shouldAnimate;
+  if (shouldAnimate) {
+    rainClock.start();
+    renderer.setAnimationLoop(renderFrame);
+  } else {
+    renderer.setAnimationLoop(null);
+    if (webglAvailable && modelReady && sceneVisible && !document.hidden) renderer.render(scene, camera);
+  }
+}
+const renderStaticScene = () => {
+  if (!webglAvailable || !reducedMotion.matches || !modelReady || !sceneVisible || document.hidden || staticRenderFrame) return;
+  staticRenderFrame = requestAnimationFrame(() => {
+    staticRenderFrame = 0;
+    renderer.render(scene, camera);
+  });
+};
+if ('IntersectionObserver' in window) {
+  const sceneObserver = new IntersectionObserver(([entry]) => {
+    sceneVisible = Boolean(entry?.isIntersecting);
+    syncAnimationLoop();
+  }, { rootMargin: '100px' });
+  sceneObserver.observe(equipment || canvas);
+} else {
+  sceneVisible = true;
+}
+document.addEventListener('visibilitychange', syncAnimationLoop);
+reducedMotion.addEventListener?.('change', syncAnimationLoop);
+document.addEventListener('scroll', renderStaticScene, { passive: true, capture: true });
+window.addEventListener('resize', renderStaticScene, { passive: true });
+syncAnimationLoop();
+}
+
+function showStaticTestingModel() {
+  const equipment = document.querySelector('[data-testing-equipment]');
+  const canvas = document.querySelector('[data-testing-model], #device');
+  if (!equipment || !canvas) return;
+  canvas.hidden = true;
+  equipment.classList.add('testing-model-fallback');
+  if (!equipment.querySelector('[data-testing-model-fallback]')) {
+    const image = document.createElement('img');
+    image.src = new URL('../assets/models/testing-equipment-preview.webp', import.meta.url).href;
+    image.alt = '';
+    image.setAttribute('aria-hidden', 'true');
+    image.dataset.testingModelFallback = '';
+    image.decoding = 'async';
+    equipment.append(image);
+  }
+  const status = document.querySelector('#status');
+  if (status) status.textContent = '3D-модель недоступна в этом браузере; показано статичное изображение.';
+}
+
+startTestingScene().catch(error => {
+  console.error('Testing scene could not start', error);
+  showStaticTestingModel();
 });
