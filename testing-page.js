@@ -311,10 +311,14 @@ if (climateCarousel) {
   let activeCamera = -1;
   let climateFrame = 0;
   let manualSelectionScrollY = null;
+  let climateVisualOffset = 0;
   const clampClimate = value => Math.max(0, Math.min(1, value));
 
   const showClimateState = index => {
     if (index === activeCamera) return;
+    const preserveVisualPosition = climateVisuals && activeCamera >= 0 &&
+      matchMedia('(max-width: 43.75rem)').matches;
+    const visualTop = preserveVisualPosition ? climateVisuals.getBoundingClientRect().top : null;
     activeCamera = index;
     cameras.forEach((image, imageIndex) => {
       image.classList.toggle('is-active', imageIndex === index);
@@ -331,9 +335,14 @@ if (climateCarousel) {
     if (highTemperature) highTemperature.textContent = spec.highTemperature;
     if (lowTemperature) lowTemperature.textContent = spec.lowTemperature;
     if (humidityRow) {
-      // Keep the fourth specification's slot so the aligned photo never shifts.
       humidityRow.classList.toggle('is-unavailable', !spec.humidity);
       humidityRow.setAttribute('aria-hidden', String(!spec.humidity));
+    }
+    if (preserveVisualPosition && visualTop !== null) {
+      // Removing a missing spec changes the mobile content height; compensate on the image only.
+      const layoutTop = climateVisuals.getBoundingClientRect().top - climateVisualOffset;
+      climateVisualOffset += visualTop - (layoutTop + climateVisualOffset);
+      climateVisuals.style.setProperty('--climate-visual-y', `${climateVisualOffset}px`);
     }
   };
 
@@ -396,7 +405,11 @@ if (climateCarousel) {
   }, { passive: true });
   cameraStack?.addEventListener('touchcancel', () => { swipeStart = null; }, { passive: true });
   addEventListener('scroll', scheduleClimateUpdate, { passive: true });
-  addEventListener('resize', scheduleClimateUpdate, { passive: true });
+  addEventListener('resize', () => {
+    climateVisualOffset = 0;
+    climateVisuals?.style.removeProperty('--climate-visual-y');
+    scheduleClimateUpdate();
+  }, { passive: true });
   if ('ResizeObserver' in window) new ResizeObserver(scheduleClimateUpdate).observe(climateCarousel);
   scheduleClimateUpdate();
 }

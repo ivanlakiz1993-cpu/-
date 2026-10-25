@@ -77,7 +77,7 @@
 .climate-tests__equipment h3{margin:0;font:400 clamp(1.5rem,1.875vw,2.25rem)/1.1 var(--sans);color:#fff}
 .climate-tests__equipment dl{display:flex;flex-direction:column;gap:1.875rem;margin:0;font:400 1.125rem/1.2 var(--sans);color:#f5f5f5}
 .climate-tests__equipment dl>div{display:flex;align-items:center;justify-content:space-between;gap:1.25rem}
-.climate-tests__equipment [data-climate-humidity].is-unavailable{visibility:hidden}
+.climate-tests__equipment [data-climate-humidity].is-unavailable{display:none}
 .climate-tests__equipment dt,.climate-tests__equipment dd{margin:0}
 .climate-tests__equipment dt{color:#979797}
 .climate-tests__visuals{position:relative;z-index:1;display:grid;grid-template-columns:.5rem minmax(0,1fr);gap:1.875rem;align-items:end;flex:0 1 min(39.4375rem,37%);min-width:0;aspect-ratio:631/594}
@@ -415,6 +415,7 @@
 .climate-tests__pagination button.is-active{width:.5rem;height:5.5625rem}
 .climate-tests__camera-stack{width:100%;aspect-ratio:1;overflow:hidden;border-radius:.125rem}
 .climate-tests__camera-photo{object-fit:contain}
+.climate-tests__visuals{align-self:start}
 @media(min-width:68.8125rem){
   .climate-tests__track{--climate-stage-height:max(45.625rem,100svh)}
   .climate-tests__stage,.climate-tests__inner{min-height:var(--climate-stage-height)}
@@ -575,7 +576,7 @@
  .climate-tests__equipment h3{font-size:1.5rem;line-height:1;letter-spacing:-.05em}
  .climate-tests__equipment dl{font-size:1rem;line-height:1.2;letter-spacing:.01em;gap:.9375rem}
  .climate-tests__equipment dl>div{gap:.5rem}
- .climate-tests__visuals{position:relative;top:auto;width:100%;margin-top:.625rem;display:flex;flex-direction:column;gap:.75rem;aspect-ratio:auto}
+ .climate-tests__visuals{position:relative;top:auto;width:100%;margin-top:.625rem;display:flex;flex-direction:column;gap:.75rem;aspect-ratio:auto;translate:0 var(--climate-visual-y,0)}
  .climate-tests__pagination{position:relative;z-index:3;inset:auto;order:2;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:.3125rem;width:auto;height:auto}
  .climate-tests__pagination button{position:relative;flex:none;width:.5625rem;height:.5rem;padding:0;cursor:pointer;touch-action:manipulation}
  .climate-tests__pagination button::before{content:"";position:absolute;inset:-.5rem;}
