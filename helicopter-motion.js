@@ -31,6 +31,7 @@
     return {top:mobileHelicopterTop(progress)-arc*7.5,left:-travel*6.5,depth:travel*1.2};
   };
   let enabled=false,splitEnabled=false,splitOverlay=null,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
+  let restoreSyncPending=false,restoreSyncTimer=0;
   let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;
   let splitIntroTop=0,splitPreTravel=0,splitSeam=0,splitTopTravel=0,splitBottomTravel=0;
   let layoutWidth=0,layoutHeight=0,lastTime=0,rotorTime=0,lastScroll=NaN,target=0,progress=0;
@@ -210,8 +211,20 @@
     }
     target=Math.max(0,Math.min(1,(scroll-sequenceStart)/sequenceDistance));
     sparksTarget=sparksContext?Math.max(0,Math.min(1,(scroll-(sequenceStart+sequenceDistance))/Math.max(1,end-(sequenceStart+sequenceDistance)))):0;
+    const fallStart=sequenceStart+sequenceDistance;
     if(scroll<=entryStart||scroll>=end){progress=target;sparksProgress=sparksTarget;compose();}
+    else if(scroll>=fallStart){progress=target;compose();}
+    if(scroll<fallStart&&(sparkParticles!==null||sparksProgress>0)){
+      sparkParticles=null;sparksProgress=0;drawSparks(0);
+    }
     lastScroll=scroll;
+  }
+  function syncRestoredScroll(){
+    if(!restoreSyncPending||!enabled)return;
+    updateScroll();progress=target;sparksProgress=sparksTarget;compose();wake();
+  }
+  function finishRestoreSync(){
+    restoreSyncPending=false;clearTimeout(restoreSyncTimer);
   }
   function draw(time){
     raf=0;if(!enabled||document.hidden)return;
@@ -281,7 +294,7 @@
       }
     }
     intro.style.setProperty('--metrics-run-height',`${runHeight}px`);
-    updateScroll();progress=target;compose();wake();
+    updateScroll();progress=target;sparksProgress=sparksTarget;compose();wake();
   }
   function requestMeasure(){if(!resizeFrame)resizeFrame=requestAnimationFrame(measure);}
   function configure(){
@@ -296,8 +309,15 @@
     if(enabled)measure();
     else {intro.style.removeProperty('--metrics-run-height');intro.style.removeProperty('--intro-hero-height');stage.classList.remove('is-rendered');}
   }
-  window.addEventListener('scroll',()=>{if(enabled){updateScroll();wake();}},{passive:true});
+  window.addEventListener('scroll',()=>{if(enabled){updateScroll();if(restoreSyncPending)syncRestoredScroll();wake();}},{passive:true});
   window.addEventListener('resize',requestMeasure,{passive:true});
+  window.addEventListener('pageshow',()=>{
+    restoreSyncPending=true;clearTimeout(restoreSyncTimer);
+    requestAnimationFrame(()=>requestMeasure());
+    requestAnimationFrame(()=>requestAnimationFrame(syncRestoredScroll));
+    restoreSyncTimer=setTimeout(finishRestoreSync,900);
+  },{passive:true});
+  ['wheel','touchstart','pointerdown','keydown'].forEach(type=>addEventListener(type,finishRestoreSync,{passive:true,capture:true}));
   reduced.addEventListener('change',configure);splitMedia.addEventListener('change',configure);
   document.addEventListener('visibilitychange',()=>{stop();wake();});
   canvas.addEventListener('webglcontextlost',()=>{contextLost=true;configure();});
