@@ -308,6 +308,7 @@ const textRevealSelector = [
     .filter((element) => !element.closest('.hero, .metrics, .work-card, .news-card, .footer'));
   const groups = new Map();
   const groupsByTarget = new Map();
+  const completionTimers = new WeakMap();
   const linePause = 6;
   const characterDelay = 8;
   targets.forEach((element) => {
@@ -353,10 +354,15 @@ const textRevealSelector = [
       sequenceOffset += line.length + linePause;
     });
     if (restart) {
-      elements.forEach((element) => element.classList.remove('text-reveal--active'));
+      window.clearTimeout(completionTimers.get(elements[0]));
+      elements.forEach((element) => element.classList.remove('text-reveal--active', 'text-reveal--complete'));
       elements.forEach((element) => { void element.offsetWidth; });
     }
     elements.forEach((element) => element.classList.add('text-reveal--active'));
+    const completionDelay = (sequenceOffset + 1) * characterDelay + 80;
+    completionTimers.set(elements[0], window.setTimeout(() => {
+      elements.forEach((element) => element.classList.add('text-reveal--complete'));
+    }, completionDelay));
   };
   restartBenefitTextReveal = () => {
     const group = groupsByTarget.get(benefitTitle);
