@@ -162,6 +162,7 @@ const benefitStates = [
   },
 ];
 let benefitScrollStep = 0;
+let advanceBenefitCardByScroll = null;
 
 if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && benefitCopy && benefitArt && benefitImage) {
   let activeBenefit = 0;
@@ -267,6 +268,33 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     benefitScrollStep = mobile ? availableScroll / benefitStates.length : stageHeight;
     const stateIndex = clamp(Math.floor((window.scrollY - sectionTop) / benefitScrollStep), 0, benefitStates.length - 1);
     showBenefit(stateIndex);
+  };
+
+  let benefitScrollActivationLocked = false;
+  advanceBenefitCardByScroll = (scrollDirection, originScrollY = window.scrollY) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !benefitScrollStep) return false;
+    const sectionTop = benefitsSection.getBoundingClientRect().top + window.scrollY;
+    const mobile = window.matchMedia('(max-width:37.5rem)').matches;
+    const stickyTop = mobile ? (parseFloat(getComputedStyle(benefitsStage).top) || 0) : 0;
+    const availableScroll = Math.max(1, benefitsSection.offsetHeight - benefitsStage.offsetHeight - stickyTop);
+    if (window.scrollY < sectionTop || window.scrollY > sectionTop + availableScroll) return false;
+
+    const sourceScrollY = originScrollY >= sectionTop && originScrollY <= sectionTop + availableScroll
+      ? originScrollY
+      : window.scrollY;
+    const currentIndex = Math.max(0, Math.min(benefitStates.length - 1,
+      Math.floor((sourceScrollY - sectionTop) / benefitScrollStep)));
+    const nextIndex = currentIndex + Math.sign(scrollDirection);
+    if (nextIndex < 0 || nextIndex >= benefitStates.length) return false;
+    if (benefitScrollActivationLocked) return true;
+
+    benefitScrollActivationLocked = true;
+    window.setTimeout(() => { benefitScrollActivationLocked = false; }, 650);
+    window.scrollTo({
+      top: sectionTop + benefitScrollStep * nextIndex,
+      behavior: 'smooth',
+    });
+    return true;
   };
 
   const requestBenefitUpdate = () => {
@@ -539,6 +567,11 @@ contactForm.addEventListener('submit', async (event) => {
         Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
         event.target.closest('textarea, .menu-drawer') ||
         document.documentElement.classList.contains('menu-open')) return;
+    if (advanceBenefitCardByScroll?.(event.deltaY)) {
+      if (event.cancelable) event.preventDefault();
+      stop();
+      return;
+    }
     const distance = event.deltaY * (event.deltaMode === 1 ? 40 : event.deltaMode === 2 ? innerHeight : 1) * wheelDistanceScale;
     const limit = Math.max(0, document.documentElement.scrollHeight - innerHeight);
     if (!event.cancelable || !limit) return;
@@ -592,7 +625,7 @@ contactForm.addEventListener('submit', async (event) => {
         event.target.closest('input, textarea, select, video, .menu-drawer, [contenteditable]')) return;
     const touch = event.touches[0];
     gesture = { startX: touch.clientX, startY: touch.clientY, lastY: touch.clientY,
-      lastTime: performance.now(), velocity: 0, dragging: false };
+      startScrollY: window.scrollY, lastTime: performance.now(), velocity: 0, dragging: false };
   }, { passive: true });
 
   window.addEventListener('touchmove', (event) => {
@@ -615,7 +648,10 @@ contactForm.addEventListener('submit', async (event) => {
 
   window.addEventListener('touchend', (event) => {
     if (!gesture || event.touches.length) return;
-    if (gesture.dragging && !reducedMotion.matches && performance.now() - gesture.lastTime < 80) {
+    const benefitCardAdvanced = gesture.dragging &&
+      Math.abs(gesture.startY - gesture.lastY) >= Math.max(48, innerHeight * .08) &&
+      advanceBenefitCardByScroll?.(gesture.startY - gesture.lastY, gesture.startScrollY);
+    if (!benefitCardAdvanced && gesture.dragging && !reducedMotion.matches && performance.now() - gesture.lastTime < 80) {
       glideVelocity = Math.max(-.8, Math.min(.8, gesture.velocity));
       if (Math.abs(glideVelocity) > .025) glideFrame = requestAnimationFrame(glide);
     }
