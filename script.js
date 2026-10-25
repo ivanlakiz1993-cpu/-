@@ -308,7 +308,7 @@ const textRevealSelector = [
     .filter((element) => !element.closest('.hero, .metrics, .work-card, .news-card, .footer'));
   const groups = new Map();
   const groupsByTarget = new Map();
-  const lineStagger = 0.82;
+  const linePause = 6;
   const characterDelay = 18;
   targets.forEach((element) => {
     element.classList.add('text-reveal');
@@ -350,7 +350,7 @@ const textRevealSelector = [
           letter.style.setProperty('--text-letter-delay', `${delay.toFixed(1)}ms`);
         });
       });
-      sequenceOffset += line.length * lineStagger;
+      sequenceOffset += line.length + linePause;
     });
     if (restart) {
       elements.forEach((element) => element.classList.remove('text-reveal--active'));
