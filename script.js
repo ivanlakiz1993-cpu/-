@@ -447,6 +447,7 @@ contactForm.addEventListener('submit', async (event) => {
 {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const hasTouchInput = navigator.maxTouchPoints > 0 || window.matchMedia('(any-pointer: coarse)').matches;
   const wheelDistanceScale = .5;
   const settlingTime = 280;
   let frame = 0;
@@ -471,7 +472,7 @@ contactForm.addEventListener('submit', async (event) => {
   };
 
   window.addEventListener('wheel', (event) => {
-    if (reducedMotion.matches || !finePointer.matches || event.ctrlKey || event.metaKey || !event.deltaY ||
+    if (reducedMotion.matches || !finePointer.matches || hasTouchInput || event.ctrlKey || event.metaKey || !event.deltaY ||
         Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
         event.target.closest('textarea, .menu-drawer') ||
         document.documentElement.classList.contains('menu-open')) return;
@@ -497,77 +498,4 @@ contactForm.addEventListener('submit', async (event) => {
   reducedMotion.addEventListener('change', stop);
   window.addEventListener('resize', stop, { passive: true });
 }
-
-// Keep touch swipes deliberate on phones and tablets. A short, capped glide
-// replaces the much longer native fling without affecting taps or pinch zoom.
-{
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const touchScale = .46;
-  let gesture = null;
-  let glideFrame = 0;
-  let glideVelocity = 0;
-  let glideTime = 0;
-
-  const stopGlide = () => {
-    cancelAnimationFrame(glideFrame);
-    glideFrame = 0;
-    glideTime = 0;
-  };
-  const glide = (time) => {
-    const elapsed = glideTime ? Math.min(32, time - glideTime) : 16.67;
-    glideTime = time;
-    const before = window.scrollY;
-    window.scrollTo({ top: before + glideVelocity * elapsed, behavior: 'instant' });
-    glideVelocity *= Math.exp(-elapsed / 180);
-    if (Math.abs(glideVelocity) < .025 || Math.abs(window.scrollY - before) < .5) {
-      stopGlide();
-    } else {
-      glideFrame = requestAnimationFrame(glide);
-    }
-  };
-
-  window.addEventListener('touchstart', (event) => {
-    stopGlide();
-    gesture = null;
-    if (event.touches.length !== 1 || document.documentElement.classList.contains('menu-open') ||
-        event.target.closest('input, textarea, select, video, .menu-drawer, [contenteditable]')) return;
-    const touch = event.touches[0];
-    gesture = { startX: touch.clientX, startY: touch.clientY, lastY: touch.clientY,
-      startScrollY: window.scrollY, lastTime: performance.now(), velocity: 0, dragging: false };
-  }, { passive: true });
-
-  window.addEventListener('touchmove', (event) => {
-    if (!gesture || event.touches.length !== 1) return;
-    const touch = event.touches[0];
-    const vertical = Math.abs(touch.clientY - gesture.startY);
-    if (!gesture.dragging && vertical < 2) return;
-    if (!gesture.dragging && vertical <= Math.abs(touch.clientX - gesture.startX)) return;
-    if (!event.cancelable) return;
-    event.preventDefault();
-    gesture.dragging = true;
-    const now = performance.now();
-    const elapsed = Math.max(1, now - gesture.lastTime);
-    const distance = (gesture.lastY - touch.clientY) * touchScale;
-    window.scrollTo({ top: window.scrollY + distance, behavior: 'instant' });
-    gesture.velocity = gesture.velocity * .35 + distance / elapsed * .65;
-    gesture.lastY = touch.clientY;
-    gesture.lastTime = now;
-  }, { passive: false });
-
-  window.addEventListener('touchend', (event) => {
-    if (!gesture || event.touches.length) return;
-    const benefitCardAdvanced = gesture.dragging &&
-      Math.abs(gesture.startY - gesture.lastY) >= Math.max(48, innerHeight * .08) &&
-      advanceBenefitCardByScroll?.(gesture.startY - gesture.lastY, gesture.startScrollY);
-    if (!benefitCardAdvanced && gesture.dragging && !reducedMotion.matches && performance.now() - gesture.lastTime < 80) {
-      glideVelocity = Math.max(-.8, Math.min(.8, gesture.velocity));
-      if (Math.abs(glideVelocity) > .025) glideFrame = requestAnimationFrame(glide);
-    }
-    gesture = null;
-  }, { passive: true });
-  window.addEventListener('touchcancel', () => { gesture = null; stopGlide(); }, { passive: true });
-  window.addEventListener('keydown', stopGlide, { passive: true });
-  window.addEventListener('hashchange', stopGlide, { passive: true });
-}
-
 

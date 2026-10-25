@@ -145,6 +145,7 @@ if (faqList) {
 // the browser abruptly to section boundaries.
 {
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+  const hasTouchInput = navigator.maxTouchPoints > 0 || matchMedia('(any-pointer: coarse)').matches;
   const wheelDistanceScale = .5;
   const settlingTime = 280;
   let frame = 0;
@@ -170,7 +171,7 @@ if (faqList) {
 
   addEventListener('wheel', event => {
     const target = event.target instanceof Element ? event.target : null;
-    if (pageMotionPreference.matches || !finePointer.matches || event.ctrlKey || event.metaKey || !event.deltaY ||
+    if (pageMotionPreference.matches || !finePointer.matches || hasTouchInput || event.ctrlKey || event.metaKey || !event.deltaY ||
         Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
         target?.closest('input, textarea, select, .menu-drawer, [contenteditable]') ||
         document.documentElement.classList.contains('menu-open')) return;
@@ -188,65 +189,6 @@ if (faqList) {
   ['pointerdown', 'touchstart', 'keydown', 'hashchange', 'popstate'].forEach(type => addEventListener(type, stop, { passive: true }));
   pageMotionPreference.addEventListener('change', stop);
   addEventListener('resize', stop, { passive: true });
-}
-
-{
-  const touchScale = .46;
-  let gesture = null;
-  let glideFrame = 0;
-  let glideVelocity = 0;
-  let glideTime = 0;
-  const stopGlide = () => {
-    cancelAnimationFrame(glideFrame);
-    glideFrame = 0;
-    glideTime = 0;
-  };
-  const glide = time => {
-    const elapsed = glideTime ? Math.min(32, time - glideTime) : 16.67;
-    glideTime = time;
-    const before = scrollY;
-    scrollTo({ top: before + glideVelocity * elapsed, behavior: 'instant' });
-    glideVelocity *= Math.exp(-elapsed / 180);
-    if (Math.abs(glideVelocity) < .025 || Math.abs(scrollY - before) < .5) stopGlide();
-    else glideFrame = requestAnimationFrame(glide);
-  };
-  addEventListener('touchstart', event => {
-    stopGlide();
-    gesture = null;
-    const target = event.target instanceof Element ? event.target : null;
-    if (event.touches.length !== 1 || document.documentElement.classList.contains('menu-open') ||
-        target?.closest('input, textarea, select, video, .menu-drawer, [contenteditable]')) return;
-    const touch = event.touches[0];
-    gesture = { startX: touch.clientX, startY: touch.clientY, lastY: touch.clientY, lastTime: performance.now(), velocity: 0, dragging: false };
-  }, { passive: true });
-  addEventListener('touchmove', event => {
-    if (!gesture || event.touches.length !== 1) return;
-    const touch = event.touches[0];
-    const vertical = Math.abs(touch.clientY - gesture.startY);
-    if (!gesture.dragging && vertical < 2) return;
-    if (!gesture.dragging && vertical <= Math.abs(touch.clientX - gesture.startX)) return;
-    if (!event.cancelable) return;
-    event.preventDefault();
-    gesture.dragging = true;
-    const now = performance.now();
-    const elapsed = Math.max(1, now - gesture.lastTime);
-    const distance = (gesture.lastY - touch.clientY) * touchScale;
-    scrollTo({ top: scrollY + distance, behavior: 'instant' });
-    gesture.velocity = gesture.velocity * .35 + distance / elapsed * .65;
-    gesture.lastY = touch.clientY;
-    gesture.lastTime = now;
-  }, { passive: false });
-  addEventListener('touchend', event => {
-    if (!gesture || event.touches.length) return;
-    if (gesture.dragging && !pageMotionPreference.matches && performance.now() - gesture.lastTime < 80) {
-      glideVelocity = Math.max(-.8, Math.min(.8, gesture.velocity));
-      if (Math.abs(glideVelocity) > .025) glideFrame = requestAnimationFrame(glide);
-    }
-    gesture = null;
-  }, { passive: true });
-  addEventListener('touchcancel', () => { gesture = null; stopGlide(); }, { passive: true });
-  addEventListener('keydown', stopGlide, { passive: true });
-  addEventListener('hashchange', stopGlide, { passive: true });
 }
 
 if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
