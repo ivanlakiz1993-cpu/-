@@ -60,13 +60,6 @@ const prepareTextLines = (element) => {
       }
     });
   }
-  let offset = 0;
-  element.querySelectorAll('.text-reveal__word').forEach((word) => {
-    word.dataset.revealStart = String(offset);
-    word.dataset.revealLength = String(Array.from(word.textContent).length);
-    offset += Number(word.dataset.revealLength) + 1;
-  });
-  element.dataset.revealLength = String(Math.max(1, offset - 1));
   element.querySelectorAll('.text-reveal__word').forEach((word) => {
     if (word.querySelector('.text-reveal__letter')) return;
     word.replaceChildren(...Array.from(word.textContent, (character) => {
@@ -332,7 +325,7 @@ const textRevealSelector = [
         lines.push(line);
       }
       const length = Array.from(word.textContent).length;
-      line.words.push({ start: line.length, length, letters: [...word.querySelectorAll('.text-reveal__letter')] });
+      line.words.push({ start: line.length, letters: [...word.querySelectorAll('.text-reveal__letter')] });
       line.length += length + 1;
     });
     lines.forEach((line) => { line.length = Math.max(1, line.length - 1); });
