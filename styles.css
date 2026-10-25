@@ -499,7 +499,3 @@ html.home-page{font-size:clamp(.9375rem,1vw,1rem)}
 }
 .all-news.home-action-link:hover,.all-news.home-action-link:focus-visible,.all-news.home-action-link:active,
 .benefit-more.home-action-link:hover,.benefit-more.home-action-link:focus-visible,.benefit-more.home-action-link:active{color:#979797}
-
-/* Shared heading color across site pages. */
-:root{--heading-h2-color:#ff0000}
-h2{color:var(--heading-h2-color)}
