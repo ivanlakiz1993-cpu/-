@@ -13,6 +13,10 @@
 
   gsap.registerPlugin(ScrollTrigger);
 
+  const initialFrameHeight = () => cover.clientWidth * 886 / 1920;
+  const initialFrameHeightPercent = () => `${initialFrameHeight() / cover.clientHeight * 100}%`;
+  const initialFrameCenterPercent = () => `${initialFrameHeight() / cover.clientHeight * 50}%`;
+
   const motion = gsap.matchMedia();
   motion.add("(min-width: 64.001rem) and (prefers-reduced-motion: no-preference)", () => {
     gsap.set(documentsCard, { left: "-100%", autoAlpha: 0 });
@@ -31,7 +35,14 @@
     });
 
     timeline
-      .to(imageFrame, {
+      .fromTo(imageFrame, {
+        left: "50%",
+        top: initialFrameCenterPercent,
+        width: "100%",
+        height: initialFrameHeightPercent,
+        xPercent: -50,
+        yPercent: -50
+      }, {
         left: "50%",
         top: "50%",
         width: "75.4167%",
@@ -77,11 +88,11 @@
       }, 0)
       .to(imageFrame, {
         left: "50%",
-        top: "31.4%",
+        top: "51.81665%",
         width: "41.6667%",
         height: "40.8333%",
         xPercent: -50,
-        yPercent: 0,
+        yPercent: -50,
         duration: 0.5,
         ease: "none"
       }, 0.5)
