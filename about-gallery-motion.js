@@ -16,8 +16,9 @@
     const timeline = gsap.timeline({
       scrollTrigger: {
         trigger: gallery,
-        start: "top 90%",
-        end: () => `top ${Math.max(0, window.innerHeight - container.clientHeight)}px`,
+        start: () => `top ${Math.max(0, window.innerHeight - container.clientHeight)}px`,
+        end: () => `+=${Math.round(Math.min(window.innerHeight * 0.55, container.clientHeight * 0.9))}`,
+        pin: true,
         scrub: true,
         anticipatePin: 1,
         invalidateOnRefresh: true
