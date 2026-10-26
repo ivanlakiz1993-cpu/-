@@ -56,3 +56,7 @@
 .about-gallery__item--laboratory{grid-column:1;grid-row:1/3}
 .about-gallery__item--equipment{grid-column:3;grid-row:2}
 .about-gallery__item--work{grid-column:2;grid-row:4}
+/* The final centered image occupies 55.125% of the cover height. */
+@media(min-width:64.001rem){
+  .about-description{position:relative;margin-top:calc(9.375rem - min(22.4375vh,9.348958vw,11.21875rem));margin-top:calc(9.375rem - min(22.4375svh,9.348958vw,11.21875rem))}
+}
