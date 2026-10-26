@@ -19,10 +19,10 @@
     const timeline = gsap.timeline({
       scrollTrigger: {
         trigger: cover,
-        start: "top top",
+        start: () => `top ${parseFloat(getComputedStyle(cover.closest("main")).paddingTop)}px`,
         end: () => `+=${Math.round(window.innerHeight * 1.5)}`,
         pin: true,
-        scrub: 0.8,
+        scrub: true,
         anticipatePin: 1,
         invalidateOnRefresh: true
       }
@@ -30,12 +30,12 @@
 
     timeline
       .fromTo(imageFrame, {
-        left: "0%",
-        top: "0%",
+        left: "50%",
+        top: "50%",
         width: "100%",
         height: "100%",
-        xPercent: 0,
-        yPercent: 0
+        xPercent: -50,
+        yPercent: -50
       }, {
         left: "50%",
         top: "50%",

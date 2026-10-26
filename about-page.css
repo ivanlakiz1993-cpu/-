@@ -10,7 +10,7 @@
 .about-cover h2{margin:0;font-family:var(--sans);font-size:clamp(2rem,3.3333vw,4rem);font-weight:400;line-height:1;letter-spacing:.01em;white-space:nowrap}
 .about-cover__copy>p{width:min(31.3021vw,37.5625rem);margin:0;font-family:var(--sans);font-size:clamp(1rem,1.25vw,1.5rem);font-weight:400;line-height:1.1;letter-spacing:0}
 .about-cover__cards{position:absolute;z-index:3;inset:0;pointer-events:none}
-.about-cover__card{position:absolute;top:min(23.90625vw,28.6875rem);display:flex;width:22.5%;height:min(8.85417vw,10.625rem);flex-direction:column;align-items:flex-start;justify-content:space-between;overflow:hidden;padding:1.5625%;border:.0625rem solid var(--line,#303030);border-radius:.3125rem;background:rgba(16,16,16,.45);-webkit-backdrop-filter:blur(.225rem);backdrop-filter:blur(.225rem);color:#fff;text-decoration:none;pointer-events:auto;isolation:isolate;opacity:0;visibility:hidden}
+.about-cover__card{position:absolute;top:50%;transform:translateY(-50%);display:flex;width:22.5%;height:min(8.85417vw,10.625rem);flex-direction:column;align-items:flex-start;justify-content:space-between;overflow:hidden;padding:1.5625%;border:.0625rem solid var(--line,#303030);border-radius:.3125rem;background:rgba(16,16,16,.45);-webkit-backdrop-filter:blur(.225rem);backdrop-filter:blur(.225rem);color:#fff;text-decoration:none;pointer-events:auto;isolation:isolate;opacity:0;visibility:hidden}
 .about-cover__card--documents{left:-100%}
 .about-cover__card--licenses{right:-100%}
 .about-cover__card::after{position:absolute;z-index:1;inset:0;background:rgba(0,0,0,.4);content:"";opacity:0;pointer-events:none}
@@ -34,7 +34,7 @@
   .about-cover h2{font-size:clamp(2rem,8vw,3.5rem)}
   .about-cover__copy>p{width:min(100%,30rem);font-size:clamp(.875rem,3.5vw,1rem);line-height:1.2}
   .about-cover__cards{position:relative;inset:auto;grid-column:1;grid-row:2;display:grid;gap:.75rem;margin-top:1rem;padding-inline:1.5rem;pointer-events:auto}
-  .about-cover__card{position:relative;top:auto;left:auto;right:auto;width:100%;height:auto;min-height:8rem;gap:1.5rem;padding:1rem 1.125rem;opacity:1;visibility:visible}
+  .about-cover__card{position:relative;transform:none;top:auto;left:auto;right:auto;width:100%;height:auto;min-height:8rem;gap:1.5rem;padding:1rem 1.125rem;opacity:1;visibility:visible}
   .about-cover__card-title{font-size:clamp(1rem,2.5vw,1.25rem);letter-spacing:-.04rem;white-space:normal}
   .about-cover__card-details{font-size:.875rem}
   .about-cover__card-details>span{width:calc(100% - 3rem)}
