@@ -6,6 +6,7 @@
   const image = imageFrame?.querySelector("img");
   const documentsCard = cover.querySelector(".about-cover__card--documents");
   const licensesCard = cover.querySelector(".about-cover__card--licenses");
+  const description = document.querySelector(".about-description");
 
   if (!imageFrame || !image || !documentsCard || !licensesCard) return;
 
@@ -20,7 +21,7 @@
       scrollTrigger: {
         trigger: cover,
         start: () => `top ${parseFloat(getComputedStyle(cover.closest("main")).paddingTop)}px`,
-        end: () => `+=${Math.round(window.innerHeight * 1.5)}`,
+        end: () => `+=${Math.round(window.innerHeight * 1.875)}`,
         pin: true,
         scrub: true,
         anticipatePin: 1,
@@ -93,9 +94,29 @@
         right: "5.2083%",
         duration: 0.5,
         ease: "none"
-      }, 0.5);
+      }, 0.5)
+      // Hold the completed cover for an additional quarter of the timeline.
+      .to({}, { duration: 0.25 }, 1);
 
-    return () => timeline.scrollTrigger?.kill();
+    const descriptionReveal = description && gsap.fromTo(description,
+      { autoAlpha: 0 },
+      {
+        autoAlpha: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: cover,
+          start: () => timeline.scrollTrigger.end,
+          end: () => timeline.scrollTrigger.end + window.innerHeight * 0.15,
+          scrub: true,
+          invalidateOnRefresh: true
+        }
+      }
+    );
+
+    return () => {
+      descriptionReveal?.scrollTrigger?.kill();
+      timeline.scrollTrigger?.kill();
+    };
   });
 
   const refresh = () => requestAnimationFrame(() => ScrollTrigger.refresh());
