@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=20261025-site-performance-1">
   <link rel="stylesheet" href="hero-grid.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
-  <link rel="stylesheet" href="about-page.css?v=20261026-about-h2-1">
+  <link rel="stylesheet" href="about-page.css?v=20261026-about-cover-journey-1">
   <script src="site-header.js?v=20261025-common-header-component-1"></script>
   <script src="page-transition.js?v=20261023-faster-mosaic-1"></script>
 </head>
@@ -29,11 +29,32 @@
         <h2 id="about-cover-title">О нас</h2>
         <p>Компания занимается проектированием и выпуском радиоэлектронной продукции для авиационной и морской отрасли</p>
       </div>
+      <div class="about-cover__cards" role="group" aria-label="Документы компании">
+        <a class="about-cover__card about-cover__card--documents" href="documents.html" aria-label="Документы: официальные документы и рекламная информация">
+          <img class="about-cover__card-art" src="assets/about-documents-illustration.png" alt="" aria-hidden="true">
+          <span class="about-cover__card-title">Документы</span>
+          <span class="about-cover__card-details">
+            <span>Официальные документы и рекламная информация</span>
+            <img class="about-cover__card-arrow" src="assets/about-card-arrow.svg" alt="" aria-hidden="true">
+          </span>
+        </a>
+        <a class="about-cover__card about-cover__card--licenses" href="licenses.html" aria-label="Лицензии и сертификаты: лицензии, сертификаты и свидетельства компании">
+          <img class="about-cover__card-art" src="assets/about-licenses-illustration.png" alt="" aria-hidden="true">
+          <span class="about-cover__card-title">Лицензии и сертификаты</span>
+          <span class="about-cover__card-details">
+            <span>Лицензии, сертификаты и свидетельства компании</span>
+            <img class="about-cover__card-arrow" src="assets/about-card-arrow.svg" alt="" aria-hidden="true">
+          </span>
+        </a>
+      </div>
     </section>
     <section class="about-description" aria-label="О компании">
       <p>Ключевое направление — системы связи для судов и блоки управления авиационными силовыми установками. Многолетний опыт и безупречная репутация позволили завоевать доверие ведущих предприятий отрасли. Компания оперативно решает задачи любой сложности — от разработки до серийного производства электронных систем.</p>
     </section>
   </main>
+  <script src="device-demo/vendor/gsap.min.js"></script>
+  <script src="device-demo/vendor/ScrollTrigger.min.js"></script>
+  <script src="about-cover-motion.js?v=20261026-about-cover-journey-1"></script>
   <script src="site-text-reveal.js?v=20261025-mechanical-subtitle-static-1"></script>
 </body>
 </html>
