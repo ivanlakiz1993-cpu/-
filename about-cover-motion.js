@@ -105,8 +105,8 @@
         ease: "none"
       }, 0.5)
       .to(copy, {
-        left: "7.2917%",
-        top: "14.074%",
+        left: "5.2083%",
+        top: "14.6327%",
         duration: 0.5,
         ease: "none"
       }, 0.5)
