@@ -80,14 +80,16 @@ document.querySelectorAll('.work-card[data-default-state]').forEach((card) => {
 
 const projectCtaVideo = document.querySelector('.project-cta__video');
 if (projectCtaVideo) {
-  const videoSource = projectCtaVideo.querySelector('source[data-src]');
+  const videoSources = [...projectCtaVideo.querySelectorAll('source[data-src]')];
   let videoNearViewport = false;
   let shouldSkipBackgroundVideo = matchMedia('(prefers-reduced-motion: reduce)').matches
     || navigator.connection?.saveData;
   const playVideo = () => {
-    if (!videoSource || shouldSkipBackgroundVideo) return;
-    if (!videoSource.src) {
-      videoSource.src = videoSource.dataset.src;
+    if (!videoSources.length || shouldSkipBackgroundVideo) return;
+    if (videoSources.some(source => !source.src)) {
+      videoSources.forEach(source => {
+        source.src = source.dataset.src;
+      });
       projectCtaVideo.load();
     }
     if (!document.hidden && videoNearViewport) projectCtaVideo.play().catch(() => {});
