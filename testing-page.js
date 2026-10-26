@@ -238,7 +238,7 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   document.querySelectorAll('[data-scroll-reveal]').forEach(element => revealObserver.observe(element));
   document.documentElement.classList.add('testing-motion-ready');
   window.setTimeout(() => {
-    if (!document.querySelector('.testing-stage__copy h1.is-visible')) {
+    if (!document.querySelector('.testing-stage__copy h2.is-visible')) {
       document.documentElement.classList.remove('testing-motion-ready');
     }
   }, 1800);

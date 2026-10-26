@@ -44,7 +44,7 @@
 @media(prefers-reduced-motion:reduce){.hero-reveal{display:none}}
 .hero-bg{inset:0;overflow:hidden;background:none;filter:none}.hero-bg img{position:absolute;left:0;top:-14.75%;width:107.08%;height:114.75%;max-width:none;object-fit:cover;object-position:right center}
 .hero-shade{display:none}
-.hero-title{left:7.6563%;right:7.6563%;top:10.875rem;z-index:4;font-size:clamp(3.5rem,8.75vw,10.5rem);line-height:.9;letter-spacing:0.105rem;text-shadow:none}.hero-title span+span{margin-top:0.9375rem}
+.hero-title{left:7.6563%;right:7.6563%;top:10.875rem;z-index:4;margin:0;font-size:clamp(3.5rem,8.75vw,10.5rem);line-height:.9;letter-spacing:0.105rem;text-shadow:none}.hero-title span+span{margin-top:0.9375rem}
 .hero-services{left:5.2083%;top:52.9%;display:flex;flex-direction:column;gap:0.625rem;padding:1.875rem;font-family:var(--sans);font-size:1.125rem;font-weight:400;line-height:1.2;letter-spacing:0;font-synthesis:none;white-space:nowrap;background:rgba(0,0,0,.4);backdrop-filter:blur(0.125rem)}.hero-services li{margin:0;font:inherit}
 .hero-description-anchor{position:absolute;left:69.21875%;right:5.2083%;bottom:3.375rem;z-index:3}
 .hero-description{position:relative;inset:auto;width:100%;height:auto;min-height:7.8125rem;margin:0;padding:1.875rem;overflow-wrap:break-word;border-left:0;color:#fff;font-family:var(--sans);font-size:1.125rem;font-weight:400;line-height:1.2;letter-spacing:0;font-synthesis:none;background:rgba(0,0,0,.4);backdrop-filter:blur(0.125rem)}
