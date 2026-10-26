@@ -4,9 +4,6 @@
     --desktop-inset:min(6.25rem,5.2083333333vw);
     --wrap:min(107.5rem,89.5833333333%);
   }
-  .topbar { padding-inline:max(5.2083333333%,calc((100% - 107.5rem)/2)); }
-  .menu-toggle { right:max(5.2083333333vw,calc((100vw - 107.5rem)/2)); }
-
   /* Full-width service photography; its text follows the page content edge. */
   .work-card { padding-inline:var(--desktop-inset); }
 

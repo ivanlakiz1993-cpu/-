@@ -162,8 +162,7 @@
 }
 
 /* FAQ — Figma 1731:3623, 2588:2105, 2631:2668. */
-.testing-faq{margin-top:9.375rem;padding:0;background:transparent;color:#fff}
-.testing-page>.footer{margin-top:5.625rem}
+.testing-faq{margin-top:9.375rem;margin-bottom:5.625rem;padding:0;background:transparent;color:#fff}
 .testing-faq__inner{width:100%;margin:0 auto}
 .testing-faq h2{margin:0;text-align:center;font:400 clamp(2.375rem,3.333333vw,4rem)/1 var(--sans);letter-spacing:.01em;color:#fff}
 .testing-faq__list{margin-top:3.125rem;border-top:.0625rem solid #333}
@@ -192,23 +191,20 @@
 @media(max-width:1000px){
   .climate-tests{margin-top:84px}
   .mechanical-tests{margin-top:4rem}
-  .testing-page>.footer{margin-top:3rem}
 }
 @media(max-width:600px){
   .climate-tests{margin-top:64px}
   .mechanical-tests{margin-top:3.75rem}
-  .testing-page>.footer{margin-top:2.5rem}
 }
 @media(min-width:37.5625rem) and (max-width:68.75rem){
-  .testing-faq{margin-top:3.125rem;padding:3.875rem 0 4.375rem}
-  .testing-page>.footer{margin-top:3rem}
+  .testing-faq{margin-top:3.125rem;margin-bottom:3rem;padding:3.875rem 0 4.375rem}
   .testing-faq h2{font-size:2.375rem;line-height:.9;letter-spacing:.01em}
   .testing-faq__list{margin-top:2.125rem}
   .testing-faq__item summary{min-height:5.125rem;padding:1.25rem 0;font-size:1.125rem;line-height:1;letter-spacing:-.05625rem}
   .testing-faq__answer p{font-size:1.125rem;line-height:1.2;letter-spacing:0}
 }
 @media(max-width:37.5rem){
-  .testing-faq{margin-top:2.5rem;padding:2.875rem 0 3.25rem}
+  .testing-faq{margin-top:2.5rem;margin-bottom:2.5rem;padding:2.875rem 0 3.25rem}
   .testing-faq__list{margin-top:1.5rem}
   .testing-faq__item summary{min-height:4.5rem;gap:.875rem;padding:.75rem 0;font-size:1.125rem;line-height:1;letter-spacing:-.05625rem}
   .testing-faq__item summary i{width:1.875rem;height:1.875rem}
