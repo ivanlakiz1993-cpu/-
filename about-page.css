@@ -22,7 +22,7 @@
 .about-cover__card-details>span{width:74%;max-width:17.25rem}
 .about-cover__card-arrow{display:block;flex:none}
 .about-cover__card:focus-visible{outline:.125rem solid #fff;outline-offset:.125rem}
-.about-description{width:min(120rem,100%);margin:9.375rem auto 0;display:flex;justify-content:center}
+.about-description{width:min(120rem,100%);margin:9.375rem auto 0;padding-inline:min(5.208333vw,6.25rem);display:flex;align-items:center;justify-content:center}
 .about-description p{width:min(55.25rem,100%);margin:0;color:#fff;font:400 1.5rem/1.1 var(--sans);letter-spacing:0;text-align:center;overflow-wrap:break-word}
 
 @media(max-width:64rem){
@@ -48,3 +48,11 @@
   .about-cover__card--documents{left:5.2083%}
   .about-cover__card--licenses{left:auto;right:5.2083%}
 }
+
+.about-gallery{width:min(120rem,100%);margin:9.375rem auto 0;padding-inline:min(5.208333vw,6.25rem)}
+.about-gallery__container{display:grid;grid-template-columns:860fr 431fr 429fr;grid-template-rows:267fr 233fr 50fr 239fr;aspect-ratio:1720/789}
+.about-gallery__item{min-width:0;min-height:0;margin:0;overflow:hidden;border-radius:.625rem}
+.about-gallery__item img{display:block;width:100%;height:100%;object-fit:cover}
+.about-gallery__item--laboratory{grid-column:1;grid-row:1/3}
+.about-gallery__item--equipment{grid-column:3;grid-row:2}
+.about-gallery__item--work{grid-column:2;grid-row:4}
