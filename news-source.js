@@ -51,7 +51,7 @@ async function requestJson(url) {
 }
 
 export async function listNews() {
-  if (!collectionRequest) collectionRequest = requestJson(newsApiBase || 'content/news.json?v=20261027-forum-text-1').then(data => {
+  if (!collectionRequest) collectionRequest = requestJson(newsApiBase || 'content/news.json?v=20261027-news-text-2').then(data => {
     if (!data || !Array.isArray(data.items)) throw new Error('Invalid news collection');
     return data.items.map(validateNews).sort((a, b) => b.date.localeCompare(a.date));
   });
