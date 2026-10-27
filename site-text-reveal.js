@@ -21,7 +21,7 @@
   const groups = new Map();
   const groupsByTarget = new WeakMap();
   const registeredTargets = new WeakSet();
-  const characterDelay = 22;
+  const headingSelector = 'h1, h2, h3, h4, h5, h6';
 
   const normalizedText = (element) => {
     const copy = element.cloneNode(true);
@@ -31,73 +31,34 @@
   };
 
   const unwrapRevealMarkup = (element) => {
+    element.querySelectorAll('.text-reveal__letter').forEach((letter) => {
+      letter.replaceWith(document.createTextNode(letter.textContent || ''));
+    });
     element.querySelectorAll('.text-reveal__word').forEach((word) => {
-      word.replaceWith(document.createTextNode(word.textContent));
+      word.replaceWith(...word.childNodes);
     });
     element.querySelectorAll('.text-reveal__content').forEach((content) => {
       content.replaceWith(...content.childNodes);
     });
+    element.querySelector(':scope > .text-reveal__accessible')?.remove();
   };
 
   const prepare = (element) => {
     if (!element || motionPreference.matches) return;
-    if (element.dataset.textRevealReady === 'true') {
-      const currentText = normalizedText(element);
-      if (currentText === element.dataset.textRevealContent) return;
-    }
-    const accessibleCopy = element.querySelector(':scope > .text-reveal__accessible');
     const sourceText = normalizedText(element);
     if (!sourceText) return;
-
-    accessibleCopy?.remove();
-    if (element.dataset.textRevealReady === 'true') unwrapRevealMarkup(element);
-
-    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-    const textNodes = [];
-    while (walker.nextNode()) textNodes.push(walker.currentNode);
-    textNodes.forEach((node) => {
-      if (!node.textContent.trim()) return;
-      const hasFlexLayout = getComputedStyle(node.parentElement).display.includes('flex');
-      const fragment = document.createDocumentFragment();
-      node.textContent.split(/(\s+)/u).forEach((part) => {
-        if (!part) return;
-        if (/^\s+$/u.test(part)) {
-          fragment.append(document.createTextNode(part));
-          return;
-        }
-        const word = document.createElement('span');
-        word.className = 'text-reveal__word';
-        word.textContent = part;
-        word.replaceChildren(...Array.from(part, (character) => {
-          const letter = document.createElement('span');
-          letter.className = 'text-reveal__letter';
-          letter.setAttribute('aria-hidden', 'true');
-          letter.textContent = character;
-          return letter;
-        }));
-        fragment.append(word);
-      });
-      if (hasFlexLayout) {
-        const content = document.createElement('span');
-        content.className = 'text-reveal__content';
-        content.append(fragment);
-        node.replaceWith(content);
-      } else {
-        node.replaceWith(fragment);
-      }
-    });
-
-    element.classList.add('text-reveal');
+    if (element.dataset.textRevealReady === 'true') {
+      if (sourceText === element.dataset.textRevealContent) return;
+    }
+    unwrapRevealMarkup(element);
+    element.classList.remove('text-reveal--active', 'text-reveal--heading', 'text-reveal--body');
+    element.classList.add('text-reveal', element.matches(headingSelector) ? 'text-reveal--heading' : 'text-reveal--body');
     element.dataset.textRevealReady = 'true';
     element.dataset.textRevealContent = sourceText;
-    const screenReaderCopy = document.createElement('span');
-    screenReaderCopy.className = 'visually-hidden text-reveal__accessible';
-    screenReaderCopy.textContent = sourceText;
-    element.prepend(screenReaderCopy);
   };
 
   const animate = (elements, { restart = false } = {}) => {
-    const targets = elements.filter((element) => element && element.querySelector('.text-reveal__letter'));
+    const targets = elements.filter((element) => element?.classList.contains('text-reveal'));
     if (!targets.length) return;
     if (motionPreference.matches) {
       targets.forEach((element) => element.classList.add('text-reveal--active'));
@@ -105,15 +66,6 @@
     }
 
     if (restart) targets.forEach((element) => element.classList.remove('text-reveal--active'));
-    let delay = 0;
-    targets.forEach((element) => {
-      const speed = element.matches('h1, h2, h3, h4, h5, h6') ? 1 : 1.2;
-      element.style.setProperty('--text-letter-duration', `${240 / speed}ms`);
-      element.querySelectorAll('.text-reveal__letter').forEach((letter) => {
-        letter.style.setProperty('--text-letter-delay', `${delay}ms`);
-        delay += characterDelay / speed;
-      });
-    });
     targets.forEach((element) => { void element.offsetWidth; });
     targets.forEach((element) => element.classList.add('text-reveal--active'));
   };

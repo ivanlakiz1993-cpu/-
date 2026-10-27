@@ -232,7 +232,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
         delete element.dataset.textRevealReady;
         delete element.dataset.textRevealContent;
       });
-      // The orange square marks the subtitle even when letter animation is off.
+      // Keep the orange marker visible while reveal motion is disabled for these states.
       benefitTitle.classList.add('text-reveal--active');
     }
     benefitCopy.classList.add('is-visible');
