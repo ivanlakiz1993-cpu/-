@@ -253,10 +253,9 @@
 
 /* One shared test unit stays centered while every section in the testing journey scrolls past it. */
 .testing-page{overflow-x:clip}
-.testing-journey{position:relative;isolation:isolate;overflow:clip;background:#000}
-/* A full-height track limits sticky travel at the end of the journey.
-   Negative margins on the sticky box would let it slide beneath the footer. */
-.testing-journey__visual-track{position:absolute;inset:0;z-index:1;pointer-events:none}
+.testing-journey{--testing-footer-clearance:5.625rem;position:relative;isolation:isolate;overflow:clip;background:#000}
+/* End the sticky track before the footer clearance so the scene cannot cover the footer. */
+.testing-journey__visual-track{position:absolute;inset:0 0 var(--testing-footer-clearance);z-index:1;pointer-events:none}
 .testing-journey__visual{position:sticky;z-index:1;top:0;display:grid;width:100%;height:100svh;place-items:center;pointer-events:none}
 .testing-journey__visual::before{content:"";position:absolute;z-index:0;left:50%;top:50%;width:min(96vw,110rem);aspect-ratio:1.55;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(255,126,42,.3) 0%,rgba(227,83,22,.17) 38%,rgba(130,43,15,0) 76%);filter:blur(clamp(1.5rem,4vw,5rem));opacity:var(--frost-melt-glow,0);transition:opacity .12s linear;pointer-events:none}
 .testing-journey__visual::after{content:"";position:absolute;z-index:0;inset:0;opacity:var(--frost-melt-glow,0);pointer-events:none;background:radial-gradient(circle at 8% 42%,rgba(255,170,62,.8) 0 .075rem,transparent .14rem),radial-gradient(circle at 13% 76%,rgba(255,146,44,.75) 0 .09rem,transparent .16rem),radial-gradient(circle at 22% 31%,rgba(255,177,66,.7) 0 .065rem,transparent .14rem),radial-gradient(circle at 31% 83%,rgba(255,137,34,.8) 0 .08rem,transparent .15rem),radial-gradient(circle at 39% 19%,rgba(255,175,58,.72) 0 .07rem,transparent .14rem),radial-gradient(circle at 57% 12%,rgba(255,151,44,.78) 0 .09rem,transparent .16rem),radial-gradient(circle at 69% 78%,rgba(255,178,68,.72) 0 .07rem,transparent .14rem),radial-gradient(circle at 78% 23%,rgba(255,143,37,.8) 0 .08rem,transparent .15rem),radial-gradient(circle at 88% 61%,rgba(255,172,56,.74) 0 .07rem,transparent .14rem),radial-gradient(circle at 94% 34%,rgba(255,147,39,.8) 0 .09rem,transparent .16rem)}
@@ -475,9 +474,9 @@
 @media(max-width:37.5rem){.testing-journey__visual .testing-stage__equipment{width:min(92.3077vw,22.5rem);max-width:calc(100% - 1.5rem)}}
 
 /* Let the sticky device continue through the existing gap before the footer. */
-.testing-journey{padding-bottom:5.625rem;margin-bottom:-5.625rem}
-@media(max-width:1000px){.testing-journey{padding-bottom:3rem;margin-bottom:-3rem}}
-@media(max-width:600px){.testing-journey{padding-bottom:2.5rem;margin-bottom:-2.5rem}}
+.testing-journey{padding-bottom:var(--testing-footer-clearance);margin-bottom:calc(-1 * var(--testing-footer-clearance))}
+@media(max-width:1000px){.testing-journey{--testing-footer-clearance:3rem}}
+@media(max-width:600px){.testing-journey{--testing-footer-clearance:2.5rem}}
 .testing-faq{position:relative;z-index:2;background:transparent}
 .testing-faq__item{background:rgba(0,0,0,.6)}
 

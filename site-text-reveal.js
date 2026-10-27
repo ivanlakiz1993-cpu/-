@@ -28,7 +28,7 @@
   const triggerPosition = 0.75;
   const headingDuration = 720;
   const bodyDuration = 680;
-  const sequenceGap = 80;
+  const sequenceGap = 40;
   const graphemes = typeof Intl.Segmenter === 'function'
     ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
     : null;
