@@ -6,8 +6,9 @@
   const targetSelector = [
     'main h1', 'main h2', 'main h3', 'main h4', 'main h5', 'main h6',
     'main p',
-    '.all-news',
-    '.testing-stage__breadcrumb > *'
+    '.hero-services', '.hero-description',
+    '.testing-stage__button',
+    '.all-news'
   ].join(',');
   const excludedSelector = [
     '.hero', '.metrics', '.work-card', '.news-card', '.news-page__card',
@@ -18,7 +19,7 @@
   ].join(',');
   const groupSelector = [
     '.benefits-stage', '.project-cta__copy', '.news',
-    '.contact-heading', '.testing-stage__copy', '.climate-tests__inner',
+    '.hero', '.contact-heading', '.testing-stage__content', '.testing-stage__copy', '.climate-tests__inner',
     '.mechanical-tests__inner', '.testing-faq__inner', '.news-page__content',
     '.news-article'
   ].join(',');
@@ -30,9 +31,9 @@
   const headingWidths = new WeakMap();
   const lineSeparators = new WeakMap();
   const triggerPosition = 0.75;
-  const headingDuration = 720;
+  const headingDuration = 800;
   const bodyDuration = 680;
-  const sequenceGap = 40;
+  const sequenceGap = 20;
   const graphemes = typeof Intl.Segmenter === 'function'
     ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
     : null;
@@ -213,6 +214,10 @@
 
   const advanceGroup = (group) => {
     if (group.playing) return;
+    if (window.sitePageEntryPending && group.elements.some((element) => {
+      const bounds = element.getBoundingClientRect();
+      return bounds.top < window.innerHeight && bounds.bottom > 0;
+    })) return;
     for (const element of orderedElements(group)) {
       if (group.revealed.has(element)) continue;
       if (!element.isConnected || !element.classList.contains('text-reveal')) {
@@ -270,8 +275,8 @@
       ...root.querySelectorAll(targetSelector)
     ];
     elements.forEach((element) => {
-      const isHomeCoverTitle = element.matches('.hero-title');
-      if ((!isHomeCoverTitle && (element.matches(excludedSelector)
+      const isHomeCoverCopy = element.matches('.hero-title, .hero-services, .hero-description');
+      if ((!isHomeCoverCopy && (element.matches(excludedSelector)
         || element.closest(excludedSelector)))
         || element.closest('[hidden], [aria-hidden="true"], [aria-busy="true"]')) return;
 
@@ -302,6 +307,9 @@
   let observer = createObserver();
 
   window.siteTextReveal = { prepare, animate, scan };
+  document.addEventListener('site:page-entry-revealed', () => {
+    groups.forEach(advanceGroup);
+  });
 
   let resizeFrame = 0;
   window.addEventListener('resize', () => {
@@ -329,7 +337,7 @@
       if (element.isConnected) prepare(element);
     });
     pendingPreparations.clear();
-    if (!observer) groups.forEach((group) => animate(orderedElements(group)));
+    if (!observer) groups.forEach(advanceGroup);
   };
   if (document.fonts?.ready) document.fonts.ready.then(() => requestAnimationFrame(startReveal));
   else startReveal();

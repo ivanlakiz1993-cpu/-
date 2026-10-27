@@ -216,14 +216,13 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   const reveal = (elements, stagger = 0) => elements.forEach((element, index) => {
     if (!element || element.hasAttribute('data-scroll-reveal')) return;
     // The shared page-entry mask already reveals the first screen.
-    if (window.siteMosaicIncoming && element.closest('.topbar, .menu-drawer, .testing-stage')) return;
+    if (window.sitePageEntryPending && element.closest('.topbar, .menu-drawer, .testing-stage')) return;
     element.setAttribute('data-scroll-reveal', '');
     element.style.setProperty('--reveal-delay', `${Math.min(index * stagger, 420)}ms`);
   });
   const revealGroup = (selector, stagger = 0) => reveal([...document.querySelectorAll(selector)], stagger);
   revealGroup('.topbar .brand-mark, .topbar .brand > span, .menu-toggle > span, .menu-toggle .menu-icon > i', 75);
   revealGroup('.nav .menu-nav-links a, .nav .menu-social__link', 55);
-  revealGroup('.testing-stage__button', 125);
   revealGroup('.climate-tests__visuals', 120);
   revealGroup('.climate-tests__pagination button', 100);
   revealGroup('.mechanical-tests__shaker img', 100);

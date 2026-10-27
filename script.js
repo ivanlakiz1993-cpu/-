@@ -1,5 +1,3 @@
-const hero = document.querySelector('.hero');
-const heroReveals = [...document.querySelectorAll('.hero-reveal')];
 const benefitsSection = document.querySelector('.benefits');
 const benefitsStage = document.querySelector('.benefits-stage');
 const benefitTitle = document.querySelector('[data-benefit-title]');
@@ -368,60 +366,6 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   });
   updateBenefitScale();
   updateBenefitFromScroll();
-}
-
-if (hero && heroReveals.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  if (window.siteMosaicIncoming || document.querySelector('.mosaic-transition')) {
-    // The incoming page mosaic reveals the cover itself; a second black grid
-    // here would stack over it and leave the destination looking blank.
-    heroReveals.forEach((reveal) => reveal.remove());
-  } else {
-    const columns = 16;
-    const rows = 9;
-    const centerRow = (rows - 1) / 2;
-    const centerColumn = (columns - 1) / 2;
-    const maxDistance = Math.hypot(centerRow, centerColumn);
-    const tileEntries = Array.from({ length: rows * columns }, (_, index) => ({
-      row: Math.floor(index / columns),
-      column: index % columns,
-      tiles: []
-    }));
-    heroReveals.forEach((reveal) => {
-      const tiles = document.createDocumentFragment();
-      tileEntries.forEach((entry) => {
-        const tile = document.createElement('span');
-        tile.className = 'hero-reveal__tile';
-        tiles.append(tile);
-        entry.tiles.push(tile);
-      });
-      reveal.append(tiles);
-    });
-
-    const startHeroReveal = () => {
-      window.setTimeout(() => {
-        requestAnimationFrame(() => {
-          tileEntries.forEach(({ tiles, row, column }) => {
-            const distance = Math.hypot(row - centerRow, column - centerColumn) / maxDistance;
-            const randomOffset = Math.random() * 0.35;
-            const delay = distance * 480 + randomOffset * 500;
-            tiles.forEach((tile) => {
-              tile.style.setProperty('--tile-delay', `${delay}ms`);
-              tile.classList.add('is-revealed');
-            });
-          });
-        });
-        window.setTimeout(() => heroReveals.forEach((reveal) => reveal.remove()), 1900);
-      }, 200);
-    };
-    const heroBackground = hero.querySelector('.hero-bg img');
-    if (!heroBackground || heroBackground.complete) {
-      Promise.resolve(heroBackground?.decode?.()).catch(() => {}).then(startHeroReveal);
-    } else {
-      const startAfterLoad = () => Promise.resolve(heroBackground.decode?.()).catch(() => {}).then(startHeroReveal);
-      heroBackground.addEventListener('load', startAfterLoad, { once: true });
-      heroBackground.addEventListener('error', startHeroReveal, { once: true });
-    }
-  }
 }
 
 const contactForm = document.querySelector('.contact-form');

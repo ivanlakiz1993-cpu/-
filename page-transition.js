@@ -1,14 +1,20 @@
 (() => {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const enterKey = 'site-mosaic-enter';
-  let entering = false;
-  try {
-    const timestamp = Number(sessionStorage.getItem(enterKey));
-    sessionStorage.removeItem(enterKey);
-    entering = timestamp && Date.now() - timestamp < 60000;
-  } catch {}
-  if (reducedMotion.matches) return;
-  window.siteMosaicIncoming = Boolean(entering);
+  const entryEvent = 'site:page-entry-revealed';
+  const finishEntry = () => {
+    document.querySelector('.page-entry-reveal')?.remove();
+    window.sitePageEntryPending = false;
+    window.sitePageEntryRevealed = true;
+    document.documentElement.classList.remove('page-entry-pending');
+    document.dispatchEvent(new Event(entryEvent));
+  };
+  window.sitePageEntryRevealed = reducedMotion.matches;
+  window.sitePageEntryPending = !reducedMotion.matches;
+  if (reducedMotion.matches) {
+    finishEntry();
+    return;
+  }
+  document.documentElement.classList.add('page-entry-pending');
 
   const root = document.createElement('div');
   root.className = 'mosaic-transition';
@@ -69,7 +75,7 @@
     animations.push(animation);
     return animation.finished.catch(() => {});
   }));
-  if (entering) {
+  {
     // Match the home-cover reveal: a 16×9 field of tiles clears radially.
     const entryRoot = document.createElement('div');
     entryRoot.className = 'page-entry-reveal';
@@ -96,7 +102,7 @@
       if (entryStarted) return;
       entryStarted = true;
       // Wait for the actual first screen, not merely its opening <main> tag.
-      const firstImage = document.querySelector('.hero .hero-bg img, .testing-stage__image');
+      const firstImage = document.querySelector('.hero .hero-bg img, .about-cover__image img, .testing-stage__image');
       await Promise.race([
         Promise.all([
           firstImage?.decode?.().catch(() => {}),
@@ -113,7 +119,7 @@
             tile.classList.add('is-revealed');
           });
         });
-        window.setTimeout(() => entryRoot.remove(), 1000);
+        window.setTimeout(finishEntry, 1000);
       });
     };
     if (document.readyState === 'loading') {
@@ -158,12 +164,11 @@
     await new Promise(resolve => requestAnimationFrame(resolve));
     if (!root.isConnected || !navigating) return;
     await animate(true);
-    try { sessionStorage.setItem(enterKey, String(Date.now())); } catch {}
     location.assign(destination.href);
   }, true);
   window.addEventListener('pageshow', event => {
     if (!event.persisted) return;
     reset();
-    document.querySelector('.page-entry-reveal')?.remove();
+    finishEntry();
   });
 })();

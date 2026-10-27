@@ -38,10 +38,6 @@
 .brand{gap:0.25rem}.brand>span{width:10.5rem;font-family:var(--display);font-size:1.125rem;line-height:.9;letter-spacing:0;font-weight:400}
 .menu-toggle{gap:2.375rem;font-size:2.25rem;line-height:1.2;letter-spacing:-0.1125rem}.menu-icon{display:block;width:2.75rem;height:2.75rem;max-width:none}
 .hero{border-bottom:0}.topbar{border-bottom:0;background:rgba(0,0,0,.6);backdrop-filter:blur(0.165625rem)}
-.hero-reveal{position:absolute;inset:0;z-index:10;display:grid;grid-template-columns:repeat(16,1fr);grid-template-rows:repeat(9,1fr);overflow:hidden;pointer-events:none}
-.hero-reveal__tile{min-width:0;min-height:0;background:#0a0a0a;opacity:1;transition:opacity .62s cubic-bezier(.4,0,.2,1);transition-delay:var(--tile-delay,0ms)}
-.hero-reveal__tile.is-revealed{opacity:0}
-@media(prefers-reduced-motion:reduce){.hero-reveal{display:none}}
 .hero-bg{inset:0;overflow:hidden;background:none;filter:none}.hero-bg img{position:absolute;left:0;top:-14.75%;width:107.08%;height:114.75%;max-width:none;object-fit:cover;object-position:right center}
 .hero-shade{display:none}
 .hero-title{left:7.6563%;right:7.6563%;top:10.875rem;z-index:4;margin:0;font-size:clamp(3.5rem,8.75vw,10.5rem);line-height:.9;letter-spacing:0.105rem;text-shadow:none}.hero-title span+span{margin-top:0.9375rem}
