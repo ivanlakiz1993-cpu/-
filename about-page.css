@@ -124,3 +124,26 @@
   .about-team__description{width:100%;margin-top:1.875rem;font-size:.875rem;line-height:1.2}
   .about-team__button{top:auto;left:.75rem;bottom:1.875rem;width:calc(100% - 1.5rem);height:3.5rem;margin:0;padding:.75rem;font-size:1.5rem;line-height:1.25;letter-spacing:-.075rem}
 }
+
+.about-history{display:none}
+
+@media(min-width:64.001rem) and (hover:hover) and (pointer:fine){
+  .about-history{display:block;position:relative;width:min(120rem,100%);aspect-ratio:1920/643;margin:clamp(3rem,7.8125vw,9.375rem) auto 0;overflow:hidden;background:#000;color:#fff}
+  .about-history__title{position:absolute;top:0;left:5.2083%;margin:0;font:400 clamp(2rem,3.3333vw,4rem)/1 var(--sans);letter-spacing:.01em;white-space:nowrap}
+  .about-history__years{position:absolute;top:19.7512%;left:5.2083%;display:flex;width:3.125%;flex-direction:column;gap:clamp(.5rem,.78125vw,.9375rem);margin:0;padding:0;list-style:none}
+  .about-history__year{display:flex;width:100%;align-items:center;justify-content:space-between;color:#525252;font:400 clamp(1rem,.9375vw,1.125rem)/1.2 var(--sans);letter-spacing:0}
+  .about-history__year[aria-current="step"]{color:#fff}
+  .about-history__year>span{width:75%}
+  .about-history__year>img{display:block;width:23.333%;height:auto;flex:none}
+  .about-history__timeline{position:absolute;top:21.4619%;left:8.3073%;width:30.9635%;height:33.437%;pointer-events:none}
+  .about-history__timeline>img{position:absolute;top:-.23%;left:-.17%;display:block;width:100.168%;height:189.77%;max-width:none}
+  .about-history__timeline-lines{position:absolute;top:53.1882%;left:8.28125%;width:30.4167%;height:0;pointer-events:none}
+  .about-history__timeline-line{position:absolute;top:-.026vw;left:0;display:block;max-width:none;transform:scaleY(-1)}
+  .about-history__timeline-line--short{width:100%;height:.9896vw}
+  .about-history__timeline-line--long{width:100%;height:2.9167vw}
+  .about-history__visual-image{position:absolute;top:19.1291%;left:50.026%;width:22.7604%;aspect-ratio:1;box-sizing:border-box;margin:0;transform:translateX(-50%);overflow:hidden;border:.0625rem solid var(--orange,#ff730d);border-radius:.625rem}
+  .about-history__visual-image>img{display:block;width:100%;height:100%;object-fit:cover}
+  .about-history__event{position:absolute;top:26.9051%;left:64.0104%;display:flex;width:21.875%;flex-direction:column;gap:4.6656%;margin:0}
+  .about-history__event-title{margin:0;font:400 clamp(1rem,1.25vw,1.5rem)/1 var(--sans);letter-spacing:-.05em}
+  .about-history__event-description{width:94.5238%;margin:0;font:400 clamp(.75rem,.8333vw,1rem)/1.2 var(--sans);letter-spacing:.01em}
+}
