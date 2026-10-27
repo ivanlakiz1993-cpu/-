@@ -1,4 +1,4 @@
-import { getNews, photoUrl, formatNewsDate, responsivePhotoSrcset } from './news-source.js?v=20261025-performance-1';
+import { getNews, photoUrl, formatNewsDate, responsivePhotoSrcset } from './news-source.js?v=20261027-forum-text-1';
 
 const article = document.querySelector('[data-news-article]');
 const status = document.querySelector('[data-news-status]');
@@ -32,8 +32,18 @@ try {
       photo.srcset = srcset;
     }
     photo.src = photoUrl(item.photo);
-    const paragraphs = item.text.replace(/\r\n?/g, '\n').split(/\n\s*\n/).filter(part => part.trim());
-    text.replaceChildren(...paragraphs.map(part => {
+    const contentBlocks = item.text.replace(/\r\n?/g, '\n').split(/\n\s*\n/).filter(part => part.trim());
+    text.replaceChildren(...contentBlocks.map(part => {
+      const lines = part.split('\n').map(line => line.trim()).filter(Boolean);
+      if (lines.length && lines.every(line => line.startsWith('- '))) {
+        const list = document.createElement('ul');
+        for (const line of lines) {
+          const item = document.createElement('li');
+          item.textContent = line.slice(2).trim();
+          list.append(item);
+        }
+        return list;
+      }
       const p = document.createElement('p');
       p.textContent = part;
       return p;

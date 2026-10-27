@@ -1,4 +1,4 @@
-import { listNews, newsUrl, photoUrl, formatNewsDate, responsivePhotoSrcset } from './news-source.js?v=20261025-performance-1';
+import { listNews, newsUrl, photoUrl, formatNewsDate, responsivePhotoSrcset } from './news-source.js?v=20261027-forum-text-1';
 
 const grid = document.querySelector('#news-stories');
 const legacyCategories = { 'victory-day': 'holidays', laboratory: 'laboratory', forum: 'forum', 'womens-day': 'holidays' };
