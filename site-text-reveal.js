@@ -23,7 +23,12 @@
   const registeredTargets = new WeakSet();
   const headingSelector = 'h1, h2, h3, h4, h5, h6';
   const headingTargets = new Set();
+  const headingWidths = new WeakMap();
   const lineSeparators = new WeakMap();
+  const triggerPosition = 0.75;
+  const headingDuration = 720;
+  const bodyDuration = 680;
+  const sequenceGap = 80;
   const graphemes = typeof Intl.Segmenter === 'function'
     ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
     : null;
@@ -57,6 +62,7 @@
       content.replaceWith(...content.childNodes);
     });
     element.querySelector(':scope > .text-reveal__accessible')?.remove();
+    element.normalize();
   };
 
   const wrapHeadingLines = (element) => {
@@ -123,6 +129,7 @@
       mask.append(content);
       element.append(mask);
     }
+    headingWidths.set(element, element.clientWidth);
   };
 
   const prepare = (element) => {
@@ -139,13 +146,28 @@
     element.classList.add('text-reveal', isHeading ? 'text-reveal--heading' : 'text-reveal--body');
     element.dataset.textRevealReady = 'true';
     element.dataset.textRevealContent = sourceText;
-    if (isHeading) headingTargets.add(element);
+    if (isHeading) {
+      headingTargets.add(element);
+      headingResizeObserver?.observe(element);
+    }
   };
+
+  const headingResizeObserver = 'ResizeObserver' in window
+    ? new ResizeObserver((entries) => {
+      entries.forEach(({ target }) => {
+        if (!target.classList.contains('text-reveal')
+          || headingWidths.get(target) === target.clientWidth) return;
+        unwrapRevealMarkup(target);
+        wrapHeadingLines(target);
+      });
+    })
+    : null;
 
   const refreshHeadingLines = () => {
     headingTargets.forEach((element) => {
       if (!element.isConnected) {
         headingTargets.delete(element);
+        headingResizeObserver?.unobserve(element);
         return;
       }
       if (element.dataset.textRevealReady !== 'true' || !element.classList.contains('text-reveal')) return;
@@ -156,20 +178,60 @@
 
   const animate = (elements, { restart = false } = {}) => {
     const targets = elements.filter((element) => element?.classList.contains('text-reveal'));
-    if (!targets.length) return;
+    if (!targets.length) return 0;
     if (motionPreference.matches) {
       targets.forEach((element) => element.classList.add('text-reveal--active'));
-      return;
+      return 0;
     }
 
     if (restart) targets.forEach((element) => element.classList.remove('text-reveal--active'));
+    let delay = 0;
+    targets.forEach((element) => {
+      element.style.setProperty('--text-reveal-delay', `${delay}ms`);
+      delay += (element.matches(headingSelector) ? headingDuration : bodyDuration) + sequenceGap;
+    });
     targets.forEach((element) => { void element.offsetWidth; });
     targets.forEach((element) => element.classList.add('text-reveal--active'));
+    return delay;
+  };
+
+  const orderedElements = (group) => {
+    const primaryHeading = group.elements.find((element) => element.matches('h1, h2'))
+      || group.elements.find((element) => element.matches(headingSelector));
+    return primaryHeading
+      ? [primaryHeading, ...group.elements.filter((element) => element !== primaryHeading)]
+      : group.elements;
+  };
+
+  const advanceGroup = (group) => {
+    if (group.playing) return;
+    for (const element of orderedElements(group)) {
+      if (group.revealed.has(element)) continue;
+      if (!element.isConnected || !element.classList.contains('text-reveal')) {
+        group.revealed.add(element);
+        continue;
+      }
+      const bounds = element.getBoundingClientRect();
+      if (bounds.top >= window.innerHeight * triggerPosition) return;
+      group.revealed.add(element);
+      observer?.unobserve(element);
+      // On a restored scroll position, finish content already above the viewport.
+      if (bounds.bottom <= 0) {
+        element.style.setProperty('--text-reveal-delay', '0ms');
+        element.classList.add('text-reveal--active');
+        continue;
+      }
+      group.playing = true;
+      const duration = animate([element]);
+      window.setTimeout(() => {
+        group.playing = false;
+        advanceGroup(group);
+      }, duration);
+      return;
+    }
   };
 
   const groupFor = (element) => {
-    const article = element.closest('.news-article');
-    if (article) return element.matches('.news-article__title') ? article : element;
     return element.closest(groupSelector)
       || element.closest('section, article')
       || element;
@@ -181,16 +243,12 @@
     const root = groupFor(element);
     let group = groups.get(root);
     if (!group) {
-      group = { elements: [], started: false };
+      group = { elements: [], revealed: new WeakSet(), playing: false };
       groups.set(root, group);
     }
     group.elements.push(element);
     groupsByTarget.set(element, group);
-    if (group.started) {
-      animate([element]);
-    } else if (observer) {
-      observer.observe(element);
-    }
+    observer?.observe(element);
   };
 
   const scan = (root = document) => {
@@ -216,18 +274,18 @@
     });
   };
 
-  const observer = 'IntersectionObserver' in window
+  const createObserver = () => 'IntersectionObserver' in window
     ? new IntersectionObserver((entries) => {
+      const affectedGroups = new Set();
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
         const group = groupsByTarget.get(entry.target);
-        if (!group || group.started) return;
-        group.started = true;
-        animate(group.elements);
-        group.elements.forEach((element) => observer.unobserve(element));
+        if (group) affectedGroups.add(group);
       });
-    }, { threshold: 0, rootMargin: '0px 0px -5% 0px' })
+      affectedGroups.forEach(advanceGroup);
+    }, { threshold: 0, rootMargin: `0px 0px -${Math.round(window.innerHeight * (1 - triggerPosition))}px 0px` })
     : null;
+
+  let observer = createObserver();
 
   window.siteTextReveal = { prepare, animate, scan };
   scan();
@@ -235,14 +293,23 @@
   let resizeFrame = 0;
   window.addEventListener('resize', () => {
     cancelAnimationFrame(resizeFrame);
-    resizeFrame = requestAnimationFrame(refreshHeadingLines);
+    resizeFrame = requestAnimationFrame(() => {
+      refreshHeadingLines();
+      observer?.disconnect();
+      observer = createObserver();
+      groups.forEach((group) => {
+        group.elements.forEach((element) => {
+          if (!group.revealed.has(element)) observer?.observe(element);
+        });
+        advanceGroup(group);
+      });
+    });
   }, { passive: true });
   document.fonts?.ready.then(() => requestAnimationFrame(refreshHeadingLines));
 
   if (!observer) {
     groups.forEach((group) => {
-      group.started = true;
-      animate(group.elements);
+      animate(orderedElements(group));
     });
   }
 })();

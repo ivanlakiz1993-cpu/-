@@ -1,10 +1,10 @@
 main .text-reveal.text-reveal--heading .text-reveal__line{display:block;overflow:hidden;line-height:inherit}
-main .text-reveal.text-reveal--heading .text-reveal__line-content{display:block;transform:translateY(105%);opacity:0;transition:transform .72s cubic-bezier(.22,1,.36,1),opacity .3s ease-out}
-main .text-reveal.text-reveal--heading.text-reveal--active .text-reveal__line-content{transform:translateY(0);opacity:1}
+main .text-reveal.text-reveal--heading .text-reveal__line-content{display:block;transform:translateY(105%);opacity:0;transition:none}
+main .text-reveal.text-reveal--heading.text-reveal--active .text-reveal__line-content{transform:translateY(0);opacity:1;transition:transform .72s cubic-bezier(.22,1,.36,1) var(--text-reveal-delay,0ms),opacity .3s ease-out var(--text-reveal-delay,0ms)}
 main .text-reveal.text-reveal--heading .text-reveal__source-break{display:none}
-main p.text-reveal.text-reveal--body{opacity:0;transition:opacity .68s ease-out}
-main p.text-reveal.text-reveal--body.text-reveal--active{opacity:1}
-main .text-reveal:not(p).text-reveal--body{opacity:0;transition:opacity .68s ease-out}
-main .text-reveal:not(p).text-reveal--body.text-reveal--active{opacity:1}
+main p.text-reveal.text-reveal--body{opacity:0;transition:none}
+main p.text-reveal.text-reveal--body.text-reveal--active{opacity:1;transition:opacity .68s ease-out var(--text-reveal-delay,0ms)}
+main .text-reveal:not(p).text-reveal--body{opacity:0;transition:none}
+main .text-reveal:not(p).text-reveal--body.text-reveal--active{opacity:1;transition:opacity .68s ease-out var(--text-reveal-delay,0ms)}
 .benefit-copy.is-switching h3.text-reveal.text-reveal--heading,.benefit-copy.is-switching p.text-reveal.text-reveal--body{opacity:0}
 @media(prefers-reduced-motion:reduce){main .text-reveal.text-reveal--heading .text-reveal__line-content,main .text-reveal.text-reveal--heading.text-reveal--active .text-reveal__line-content,main .text-reveal.text-reveal--body,main .text-reveal.text-reveal--body.text-reveal--active{transform:none;opacity:1;transition:none}}
