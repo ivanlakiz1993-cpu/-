@@ -42,6 +42,8 @@
   .about-cover__card-title{font-size:clamp(1rem,2.344vw,1.5rem);letter-spacing:-.075rem;white-space:normal}
   .about-cover__card-details{font-size:clamp(.75rem,1.367vw,.875rem);letter-spacing:0}
   .about-cover__card-details>span{width:calc(100% - 3rem);max-width:14.25rem}
+  .about-description{margin-top:6.25rem;padding-inline:3rem}
+  .about-description__text{font-size:1.125rem;line-height:1.2}
 }
 
 @media(max-width:40rem){
@@ -56,6 +58,8 @@
   .about-cover__card-title{font-size:clamp(1rem,6.15vw,1.5rem);letter-spacing:-.075rem}
   .about-cover__card-details{font-size:.875rem}
   .about-cover__card-details>span{width:calc(100% - 3rem);max-width:14.25rem}
+  .about-description{margin-top:3.75rem;padding-inline:.75rem}
+  .about-description__text{font-size:.875rem;line-height:1.2}
 }
 
 @media(min-width:64.001rem) and (prefers-reduced-motion:reduce){
@@ -86,6 +90,11 @@
 /* The final centered image occupies 55.125% of the cover height. */
 @media(min-width:64.001rem){
   .about-description{position:relative;margin-top:calc(9.375rem - min(22.4375vh,9.348958vw,11.21875rem));margin-top:calc(9.375rem - min(22.4375svh,9.348958vw,11.21875rem))}
+}
+
+@media(min-width:64.001rem) and (hover:none) and (pointer:coarse){
+  .about-description{margin-top:6.25rem;padding-inline:3rem}
+  .about-description__text{font-size:1.125rem;line-height:1.2}
 }
 
 @media(max-width:40rem){
