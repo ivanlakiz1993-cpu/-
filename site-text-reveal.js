@@ -10,7 +10,7 @@
     '.footer', '.testing-about__metric', '.climate-tests__list',
     '.mechanical-tests__list', '.mechanical-tests__equipment h3',
     '.mechanical-tests__group h4', '.testing-faq__item', '.news-page__filter-wrap',
-    '.news-article__status', '.form-feedback', '.visually-hidden'
+    '.news-page main p', '.news-article__status', '.form-feedback', '.visually-hidden'
   ].join(',');
   const groupSelector = [
     '.benefits-stage', '.project-cta__copy', '.news-intro__copy',
