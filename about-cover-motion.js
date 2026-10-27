@@ -1,4 +1,13 @@
 (() => {
+  document.querySelectorAll(".about-team__button").forEach((button) => {
+    button.addEventListener("pointermove", (event) => {
+      if (event.pointerType === "touch") return;
+      const bounds = button.getBoundingClientRect();
+      button.style.setProperty("--cursor-x", `${((event.clientX - bounds.left) / bounds.width) * 100}%`);
+      button.style.setProperty("--cursor-y", `${((event.clientY - bounds.top) / bounds.height) * 100}%`);
+    });
+  });
+
   const cover = document.querySelector(".about-cover");
   if (!cover || !window.gsap || !window.ScrollTrigger) return;
 

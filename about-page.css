@@ -117,10 +117,10 @@
 }
 
 @media(max-width:40rem){
-  .about-team{display:flex;min-height:clamp(30rem,100svh,40rem);aspect-ratio:auto;flex-direction:column;align-items:flex-start;padding:2rem 1.5rem}
-  .about-team__background img{top:0;height:100%;object-position:38% center}
-  .about-team__title,.about-team__description,.about-team__button{position:relative;top:auto;left:auto}
-  .about-team__title{font-size:clamp(2rem,8vw,3rem)}
-  .about-team__description{width:100%;margin-top:1.5rem;font-size:1rem;line-height:1.3}
-  .about-team__button{width:min(100%,27.8125rem);height:4.5rem;margin-top:2rem;font-size:1rem}
+  .about-team{height:clamp(26rem,129.4872vw,40rem);aspect-ratio:auto;margin-top:clamp(3rem,12.2917vw,14.75rem);padding:1.875rem .75rem}
+  .about-team__background img{top:0;left:-30.39%;width:232%;height:100%;object-position:initial}
+  .about-team__title,.about-team__description{position:relative;top:auto;left:auto}
+  .about-team__title{font-size:clamp(2rem,9.7436vw,2.375rem);line-height:.9}
+  .about-team__description{width:100%;margin-top:1.875rem;font-size:.875rem;line-height:1.2}
+  .about-team__button{top:auto;left:.75rem;bottom:1.875rem;width:calc(100% - 1.5rem);height:3.5rem;margin:0;padding:.75rem;font-size:1.5rem;line-height:1.25;letter-spacing:-.075rem}
 }
