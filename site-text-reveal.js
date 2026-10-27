@@ -33,7 +33,8 @@
   const triggerPosition = 0.75;
   const headingDuration = 800;
   const bodyDuration = 680;
-  const sequenceGap = 20;
+  const sequenceGap = 0;
+  const headingTextOverlap = 120;
   const graphemes = typeof Intl.Segmenter === 'function'
     ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
     : null;
@@ -195,9 +196,16 @@
 
     if (restart) targets.forEach((element) => element.classList.remove('text-reveal--active'));
     let delay = 0;
-    targets.forEach((element) => {
+    targets.forEach((element, index) => {
       element.style.setProperty('--text-reveal-delay', `${delay}ms`);
-      delay += (element.matches(headingSelector) ? headingDuration : bodyDuration) + sequenceGap;
+      const nextElement = targets[index + 1];
+      const headingToBodyOverlap = element.matches(headingSelector)
+        && nextElement
+        && !nextElement.matches(headingSelector)
+        ? headingTextOverlap
+        : 0;
+      delay += (element.matches(headingSelector) ? headingDuration : bodyDuration)
+        + sequenceGap - headingToBodyOverlap;
     });
     targets.forEach((element) => { void element.offsetWidth; });
     targets.forEach((element) => element.classList.add('text-reveal--active'));
@@ -236,10 +244,18 @@
       }
       group.playing = true;
       const duration = animate([element]);
+      const sequence = orderedElements(group);
+      const currentIndex = sequence.indexOf(element);
+      const nextElement = sequence.slice(currentIndex + 1).find((candidate) => !group.revealed.has(candidate));
+      const handoffDelay = element.matches(headingSelector)
+        && nextElement
+        && !nextElement.matches(headingSelector)
+        ? Math.max(0, duration - headingTextOverlap)
+        : duration;
       window.setTimeout(() => {
         group.playing = false;
         advanceGroup(group);
-      }, duration);
+      }, handoffDelay);
       return;
     }
   };

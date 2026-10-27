@@ -58,6 +58,13 @@ let sceneVisible = false;
 let webglAvailable = true;
 let animationLoopRunning = false;
 let staticRenderFrame = 0;
+let firstSceneFrameRendered = false;
+const renderScene = () => {
+  renderer.render(scene, camera);
+  if (firstSceneFrameRendered) return;
+  firstSceneFrameRendered = true;
+  equipment?.classList.add('testing-model-ready');
+};
 
 const vibrationChart = (() => {
   if (!vibrationSvg) return { setProgress: () => {}, update: () => {} };
@@ -592,7 +599,6 @@ try {
   ScrollTrigger.refresh();
   refreshSettledLayout();
   if (status) status.textContent = '';
-  equipment?.classList.add('testing-model-ready');
   modelReady = true;
 } catch (error) {
   console.error(error);
@@ -628,12 +634,12 @@ const renderFrame = () => {
     rainGeometry.attributes.position.needsUpdate = true;
     if (rainColorsChanged) rainGeometry.attributes.color.needsUpdate = true;
   }
-  renderer.render(scene, camera);
+  renderScene();
 };
 function syncAnimationLoop() {
   const shouldAnimate = webglAvailable && modelReady && sceneVisible && !document.hidden && !reducedMotion.matches;
   if (shouldAnimate === animationLoopRunning) {
-    if (!shouldAnimate && webglAvailable && modelReady && sceneVisible && !document.hidden) renderer.render(scene, camera);
+    if (!shouldAnimate && webglAvailable && modelReady && sceneVisible && !document.hidden) renderScene();
     return;
   }
   animationLoopRunning = shouldAnimate;
@@ -642,14 +648,14 @@ function syncAnimationLoop() {
     renderer.setAnimationLoop(renderFrame);
   } else {
     renderer.setAnimationLoop(null);
-    if (webglAvailable && modelReady && sceneVisible && !document.hidden) renderer.render(scene, camera);
+    if (webglAvailable && modelReady && sceneVisible && !document.hidden) renderScene();
   }
 }
 const renderStaticScene = () => {
   if (!webglAvailable || !reducedMotion.matches || !modelReady || !sceneVisible || document.hidden || staticRenderFrame) return;
   staticRenderFrame = requestAnimationFrame(() => {
     staticRenderFrame = 0;
-    renderer.render(scene, camera);
+    renderScene();
   });
 };
 if ('IntersectionObserver' in window) {
@@ -673,6 +679,7 @@ function showStaticTestingModel() {
   const canvas = document.querySelector('[data-testing-model], #device');
   if (!equipment || !canvas) return;
   canvas.hidden = true;
+  equipment.classList.remove('testing-model-ready');
   equipment.classList.add('testing-model-fallback');
   if (!equipment.querySelector('[data-testing-model-fallback]')) {
     const image = document.createElement('img');
