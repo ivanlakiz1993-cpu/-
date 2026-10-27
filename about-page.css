@@ -143,7 +143,8 @@
   .about-history__timeline-line--long{width:100%;height:2.9167vw}
   .about-history__visual-image{position:absolute;top:19.1291%;left:50.026%;width:22.7604%;aspect-ratio:1;box-sizing:border-box;margin:0;transform:translateX(-50%);overflow:hidden;border:.0625rem solid var(--orange,#ff730d);border-radius:.625rem}
   .about-history__visual-image>img{display:block;width:100%;height:100%;object-fit:cover}
-  .about-history__event{position:absolute;top:26.9051%;left:64.0104%;display:flex;width:21.875%;flex-direction:column;gap:4.6656%;margin:0}
+  .about-history__timeline-marker{position:absolute;z-index:2;top:51.4774%;left:38.125%;display:block;width:1.1458%;height:auto;max-width:none;pointer-events:none}
+  .about-history__event{position:absolute;top:26.9051%;left:64.0104%;display:flex;width:21.875%;flex-direction:column;gap:clamp(1rem,1.5625vw,1.875rem);margin:0}
   .about-history__event-title{margin:0;font:400 clamp(1rem,1.25vw,1.5rem)/1 var(--sans);letter-spacing:-.05em}
   .about-history__event-description{width:94.5238%;margin:0;font:400 clamp(.75rem,.8333vw,1rem)/1.2 var(--sans);letter-spacing:.01em}
 }
