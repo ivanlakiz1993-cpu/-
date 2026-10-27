@@ -6,6 +6,10 @@
   const work = gallery?.querySelector(".about-gallery__item--work");
 
   if (!gallery || !container || !laboratory || !equipment || !work || !window.gsap || !window.ScrollTrigger) return;
+  const desktopPointer = window.matchMedia("(min-width: 64.001rem) and (hover: hover) and (pointer: fine)");
+  const touchInputAvailable = Number(navigator.maxTouchPoints || 0) > 0
+    || window.matchMedia("(pointer: coarse)").matches;
+  if (!desktopPointer.matches || touchInputAvailable) return;
 
   gsap.registerPlugin(ScrollTrigger);
 
