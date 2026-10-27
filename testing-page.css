@@ -455,10 +455,9 @@
 
 /* The shared equipment is rendered and weathered on its actual GLB surfaces. */
 .testing-stage__model{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;opacity:1;pointer-events:none}
-.testing-stage__equipment>[data-testing-model-fallback]{position:absolute;inset:0;z-index:2;display:block;width:100%;height:100%;object-fit:contain;opacity:1;pointer-events:none;transition:opacity .28s ease}
-.testing-stage__equipment.testing-model-ready>[data-testing-model-fallback]{opacity:0}
+.testing-stage__equipment.testing-model-fallback>[data-testing-model-fallback]{position:absolute;inset:0;z-index:2;display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
 .testing-model-fallback .testing-stage__model{display:none}
-@media(prefers-reduced-motion:reduce){.testing-stage__model,.testing-stage__equipment>[data-testing-model-fallback]{transition:none}}
+@media(prefers-reduced-motion:reduce){.testing-stage__model{transition:none}}
 .testing-about{margin:clamp(3rem,4.167vw,5rem) auto 0}
 .climate-tests,.mechanical-tests{margin-top:var(--testing-section-gap)}
 

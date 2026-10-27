@@ -17,12 +17,6 @@
     '.mechanical-tests__group h4', '.testing-faq__item', '.news-page__filter-wrap',
     '.news-article__status', '.form-feedback', '.visually-hidden'
   ].join(',');
-  const groupSelector = [
-    '.benefits-stage', '.project-cta__copy', '.news',
-    '.hero', '.contact-heading', '.testing-stage__content', '.testing-stage__copy', '.climate-tests__inner',
-    '.mechanical-tests__inner', '.testing-faq__inner', '.news-page__content',
-    '.news-article'
-  ].join(',');
   const groups = new Map();
   const groupsByTarget = new WeakMap();
   const registeredTargets = new WeakSet();
@@ -31,10 +25,7 @@
   const headingWidths = new WeakMap();
   const lineSeparators = new WeakMap();
   const triggerPosition = 0.75;
-  const headingDuration = 800;
-  const bodyDuration = 680;
-  const sequenceGap = 0;
-  const headingTextOverlap = 120;
+  const sequenceGap = 8;
   const graphemes = typeof Intl.Segmenter === 'function'
     ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
     : null;
@@ -196,16 +187,9 @@
 
     if (restart) targets.forEach((element) => element.classList.remove('text-reveal--active'));
     let delay = 0;
-    targets.forEach((element, index) => {
+    targets.forEach((element) => {
       element.style.setProperty('--text-reveal-delay', `${delay}ms`);
-      const nextElement = targets[index + 1];
-      const headingToBodyOverlap = element.matches(headingSelector)
-        && nextElement
-        && !nextElement.matches(headingSelector)
-        ? headingTextOverlap
-        : 0;
-      delay += (element.matches(headingSelector) ? headingDuration : bodyDuration)
-        + sequenceGap - headingToBodyOverlap;
+      delay += sequenceGap;
     });
     targets.forEach((element) => { void element.offsetWidth; });
     targets.forEach((element) => element.classList.add('text-reveal--active'));
@@ -213,15 +197,17 @@
   };
 
   const orderedElements = (group) => {
-    const primaryHeading = group.elements.find((element) => element.matches('h1, h2'))
-      || group.elements.find((element) => element.matches(headingSelector));
-    return primaryHeading
-      ? [primaryHeading, ...group.elements.filter((element) => element !== primaryHeading)]
-      : group.elements;
+    return group.elements.slice().sort((first, second) => {
+      const firstBounds = first.getBoundingClientRect();
+      const secondBounds = second.getBoundingClientRect();
+      return Math.abs(firstBounds.top - secondBounds.top) > 1.5
+        ? firstBounds.top - secondBounds.top
+        : firstBounds.left - secondBounds.left;
+    });
   };
 
   const advanceGroup = (group) => {
-    if (group.playing) return;
+    if (group.timer) return;
     if (window.sitePageEntryPending && group.elements.some((element) => {
       const bounds = element.getBoundingClientRect();
       return bounds.top < window.innerHeight && bounds.bottom > 0;
@@ -234,36 +220,54 @@
       }
       const bounds = element.getBoundingClientRect();
       if (bounds.top >= window.innerHeight * triggerPosition) return;
-      group.revealed.add(element);
-      observer?.unobserve(element);
       // On a restored scroll position, finish content already above the viewport.
       if (bounds.bottom <= 0) {
+        group.revealed.add(element);
+        observer?.unobserve(element);
         element.style.setProperty('--text-reveal-delay', '0ms');
         element.classList.add('text-reveal--active');
         continue;
       }
-      group.playing = true;
-      const duration = animate([element]);
-      const sequence = orderedElements(group);
-      const currentIndex = sequence.indexOf(element);
-      const nextElement = sequence.slice(currentIndex + 1).find((candidate) => !group.revealed.has(candidate));
-      const handoffDelay = element.matches(headingSelector)
-        && nextElement
-        && !nextElement.matches(headingSelector)
-        ? Math.max(0, duration - headingTextOverlap)
-        : duration;
-      window.setTimeout(() => {
-        group.playing = false;
-        advanceGroup(group);
-      }, handoffDelay);
+      const wait = Math.max(0, group.nextStartAt - performance.now());
+      const startReveal = () => {
+        group.timer = 0;
+        const currentBounds = element.getBoundingClientRect();
+        if (!element.isConnected) {
+          group.revealed.add(element);
+          observer?.unobserve(element);
+          advanceGroup(group);
+          return;
+        }
+        if (currentBounds.top >= window.innerHeight * triggerPosition) {
+          advanceGroup(group);
+          return;
+        }
+        if (currentBounds.bottom <= 0) {
+          group.revealed.add(element);
+          observer?.unobserve(element);
+          element.style.setProperty('--text-reveal-delay', '0ms');
+          element.classList.add('text-reveal--active');
+          advanceGroup(group);
+          return;
+        }
+        group.revealed.add(element);
+        observer?.unobserve(element);
+        animate([element]);
+        group.nextStartAt = performance.now() + sequenceGap;
+        group.timer = window.setTimeout(() => {
+          group.timer = 0;
+          advanceGroup(group);
+        }, sequenceGap);
+      };
+
+      if (wait > 0) group.timer = window.setTimeout(startReveal, wait);
+      else startReveal();
       return;
     }
   };
 
   const groupFor = (element) => {
-    return element.closest(groupSelector)
-      || element.closest('section, article')
-      || element;
+    return element.closest('main') || element;
   };
 
   const register = (element) => {
@@ -272,7 +276,7 @@
     const root = groupFor(element);
     let group = groups.get(root);
     if (!group) {
-      group = { elements: [], revealed: new WeakSet(), playing: false };
+      group = { elements: [], revealed: new WeakSet(), nextStartAt: 0, timer: 0 };
       groups.set(root, group);
     }
     group.elements.push(element);

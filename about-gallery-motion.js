@@ -10,40 +10,31 @@
   gsap.registerPlugin(ScrollTrigger);
 
   const motion = gsap.matchMedia();
-  motion.add("(prefers-reduced-motion: no-preference)", () => {
+  motion.add("(min-width: 64.001rem) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)", () => {
     const alignToBottom = () => container.clientHeight * 289 / 789;
-    const sharedDrop = () => container.clientHeight * 40 / 789;
-    const desktopMotion = window.matchMedia("(min-width: 64.001rem)").matches;
-    gsap.set([laboratory, equipment, work], { y: 0 });
+    gsap.set([laboratory, equipment], { y: 0 });
 
     const timeline = gsap.timeline({
       scrollTrigger: {
         trigger: gallery,
-        start: () => desktopMotion ? "top top" : `top ${Math.max(0, window.innerHeight - container.clientHeight)}px`,
+        start: "top top",
         end: () => `+=${Math.round(Math.min(window.innerHeight * 0.55, container.clientHeight * 0.9))}`,
         pin: true,
-        scrub: true,
+        pinSpacing: true,
+        scrub: 0.45,
         anticipatePin: 1,
         invalidateOnRefresh: true
       }
     });
 
-    if (desktopMotion) {
-      timeline
-        .to({}, { duration: 0.22 })
-        .to(laboratory, { y: () => alignToBottom() + sharedDrop(), duration: 1, ease: "none" }, 0.22)
-        .to(equipment, { y: () => alignToBottom() + sharedDrop(), duration: 1, ease: "none" }, 0.22)
-        .to(work, { y: sharedDrop, duration: 1, ease: "none" }, 0.22);
-    } else {
-      timeline
-        .to(laboratory, { y: alignToBottom, duration: 1, ease: "none" }, 0)
-        .to(equipment, { y: alignToBottom, duration: 1, ease: "none" }, 0);
-    }
+    timeline
+      .to({}, { duration: 0.22 })
+      .to([laboratory, equipment], { y: alignToBottom, duration: 1, ease: "none" }, 0.22);
 
     return () => timeline.scrollTrigger?.kill();
   });
 
-  const refresh = () => requestAnimationFrame(() => ScrollTrigger.refresh());
+  const refresh = () => requestAnimationFrame(() => ScrollTrigger.refresh(true));
   window.addEventListener("load", refresh, { once: true });
   window.addEventListener("pageshow", refresh);
 })();

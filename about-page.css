@@ -79,6 +79,20 @@
 .about-gallery__item--equipment{grid-column:3;grid-row:2}
 .about-gallery__item--work{grid-column:2;grid-row:4}
 
+@media(max-width:64rem), (hover:none) and (pointer:coarse){
+  .about-gallery{padding-inline:clamp(1.5rem,4.6875vw,3rem)}
+  .about-gallery__container{grid-template-columns:464fr 230fr 234fr;grid-template-rows:144fr 126fr 20fr 127fr;aspect-ratio:928/421}
+}
+
+@media(max-width:40rem){
+  .about-gallery{padding-inline:.75rem}
+  .about-gallery__container{grid-template-columns:321fr 321fr 347fr;grid-template-rows:1fr;column-gap:clamp(.125rem,.5371vw,.34375rem);aspect-ratio:1000/187}
+  .about-gallery__item--laboratory,.about-gallery__item--equipment,.about-gallery__item--work{grid-row:1}
+  .about-gallery__item--laboratory{grid-column:1}
+  .about-gallery__item--work{grid-column:2}
+  .about-gallery__item--equipment{grid-column:3}
+}
+
 @media(min-width:64.001rem){
   .about-gallery{display:flex;min-height:100vh;min-height:100svh;align-items:center;justify-content:center}
   .about-gallery__container{width:min(100%,174svh)}

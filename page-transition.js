@@ -76,7 +76,7 @@
     return animation.finished.catch(() => {});
   }));
   {
-    // Keep the same radial 16×9 reveal for reloads and page transitions.
+    // Match the home-cover reveal: a 16×9 field of tiles clears radially.
     const entryRoot = document.createElement('div');
     entryRoot.className = 'page-entry-reveal';
     entryRoot.setAttribute('aria-hidden', 'true');
@@ -102,7 +102,7 @@
       if (entryStarted) return;
       entryStarted = true;
       // Wait for the actual first screen, not merely its opening <main> tag.
-      const firstImage = document.querySelector('.hero .hero-bg img, .about-cover__image img, .testing-stage__image, img[data-testing-model-fallback]');
+      const firstImage = document.querySelector('.hero .hero-bg img, .about-cover__image img, .testing-stage__image');
       await Promise.race([
         Promise.all([
           firstImage?.decode?.().catch(() => {}),
@@ -119,7 +119,7 @@
             tile.classList.add('is-revealed');
           });
         });
-        window.setTimeout(finishEntry, 850);
+        window.setTimeout(finishEntry, 1000);
       });
     };
     if (document.readyState === 'loading') {
