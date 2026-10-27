@@ -13,7 +13,7 @@
   gsap.registerPlugin(ScrollTrigger);
 
   const motion = gsap.matchMedia();
-  motion.add("(min-width: 64.001rem) and (prefers-reduced-motion: no-preference)", () => {
+  motion.add("(min-width: 64.001rem) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)", () => {
     gsap.set(documentsCard, { left: "-100%", autoAlpha: 0 });
     gsap.set(licensesCard, { right: "-100%", autoAlpha: 0 });
 
