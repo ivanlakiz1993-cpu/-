@@ -160,15 +160,6 @@
 .benefit-copy h3,.benefit-copy p{transition:opacity .24s ease-in-out}
 .benefit-copy.is-switching h3,.benefit-copy.is-switching p{opacity:0;transition-duration:.18s}
 @media(prefers-reduced-motion:reduce){.benefit-copy h3,.benefit-copy p,.benefit-copy.is-switching h3,.benefit-copy.is-switching p{transition:none}}
-main .text-reveal.text-reveal--heading{clip-path:inset(0 0 100% 0);transform:translateY(.55em);opacity:0;transition:clip-path .72s cubic-bezier(.22,1,.36,1),transform .72s cubic-bezier(.22,1,.36,1),opacity .28s ease-out}
-main .text-reveal.text-reveal--heading.text-reveal--active{clip-path:inset(0);transform:translateY(0);opacity:1}
-main p.text-reveal.text-reveal--body{opacity:0;transition:opacity .68s ease-out}
-main p.text-reveal.text-reveal--body.text-reveal--active{opacity:1}
-main .text-reveal:not(p).text-reveal--body{opacity:0;transition:opacity .68s ease-out}
-main .text-reveal:not(p).text-reveal--body.text-reveal--active{opacity:1}
-.benefit-copy.is-switching h3.text-reveal.text-reveal--heading,.benefit-copy.is-switching p.text-reveal.text-reveal--body{opacity:0}
-@media(prefers-reduced-motion:reduce){.text-reveal.text-reveal--heading,.text-reveal.text-reveal--heading.text-reveal--active,.text-reveal.text-reveal--body,.text-reveal.text-reveal--body.text-reveal--active{clip-path:none;transform:none;opacity:1;transition:none}}
-
 /* Footer: Figma 1756:6495 */
 .footer{background:#121212;border-radius:0.625rem 0.625rem 0 0;overflow-x:clip}
 .footer-main{min-height:0;padding-top:1.875rem;padding-bottom:0;display:grid;align-items:start;gap:0}
