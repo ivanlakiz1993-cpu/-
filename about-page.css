@@ -79,6 +79,11 @@
 .about-gallery__item--equipment{grid-column:3;grid-row:2}
 .about-gallery__item--work{grid-column:2;grid-row:4}
 
+@media(min-width:64.001rem){
+  .about-gallery{display:flex;min-height:100vh;min-height:100svh;align-items:center;justify-content:center}
+  .about-gallery__container{width:min(100%,174svh)}
+}
+
 .about-team{position:relative;width:min(120rem,100%);aspect-ratio:1920/900;margin:clamp(3rem,12.2917vw,14.75rem) auto 0;overflow:hidden;color:#fff}
 .about-team__background{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .about-team__background img{position:absolute;top:-3.98%;left:0;display:block;width:100%;height:119.07%;max-width:none;object-fit:cover}
