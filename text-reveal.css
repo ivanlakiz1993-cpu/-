@@ -1,5 +1,5 @@
 main .text-reveal.text-reveal--heading .text-reveal__line{display:block;overflow:hidden;line-height:inherit}
-main .text-reveal.text-reveal--heading .text-reveal__line-content{display:block;transform:translateY(105%);opacity:0;transition:none}
+main .text-reveal.text-reveal--heading .text-reveal__line-content{display:block;white-space:nowrap;transform:translateY(105%);opacity:0;transition:none}
 main .text-reveal.text-reveal--heading.text-reveal--active .text-reveal__line-content{transform:translateY(0);opacity:1;transition:transform .72s cubic-bezier(.22,1,.36,1) var(--text-reveal-delay,0ms),opacity .3s ease-out var(--text-reveal-delay,0ms)}
 main .text-reveal.text-reveal--heading .text-reveal__source-break{display:none}
 main p.text-reveal.text-reveal--body{opacity:0;transition:none}

@@ -9,7 +9,7 @@
 
   /* Height-based scene scaling must not move the left and right content edges. */
   .benefits-layout { width:calc(100% / var(--benefit-scale,1)); }
-  .benefits-stage h2 { width:34.2441860465%; }
+  .benefits-stage h2 { width:40.9302325581%; }
   .benefit-copy,.benefit-copy[data-state="0"] { left:25.1744186047%;width:20.1744186047%; }
   .benefit-more { left:25.1744186047%; }
   .benefit-art { left:50.8720930233%;width:49.1279069767%; }

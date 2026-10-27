@@ -10,7 +10,7 @@ const benefitMore = document.querySelector('[data-benefit-more]');
 const benefitImage = document.querySelector('[data-benefit-image]');
 const benefitButtons = [...document.querySelectorAll('[data-benefit-index]')];
 let restartBenefitTextReveal = () => {
-  if (!benefitTitle || !benefitDescription || benefitCopy?.dataset.state !== '0') return;
+  if (!benefitTitle || !benefitDescription) return;
   window.siteTextReveal?.animate([benefitTitle, benefitDescription], { restart: true });
 };
 const prepareTextLines = (element) => window.siteTextReveal?.prepare(element);
@@ -224,17 +224,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     benefitTitle.textContent = state.title;
     benefitDescription.textContent = state.description;
     benefitCopy.dataset.state = String(index);
-    if (index === 0) {
-      [benefitTitle, benefitDescription].forEach(prepareTextLines);
-    } else {
-      [benefitTitle, benefitDescription].forEach((element) => {
-        element.classList.remove('text-reveal');
-        delete element.dataset.textRevealReady;
-        delete element.dataset.textRevealContent;
-      });
-      // Keep the orange marker visible while reveal motion is disabled for these states.
-      benefitTitle.classList.add('text-reveal--active');
-    }
+    [benefitTitle, benefitDescription].forEach(prepareTextLines);
     benefitCopy.classList.add('is-visible');
     syncBenefitMore(index);
     benefitButtons.forEach((button, buttonIndex) => {
@@ -282,7 +272,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     setBenefitCard(index);
 
     const version = ++copySwapVersion;
-    const animateCopy = index === 0 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const animateCopy = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     benefitCopy.classList.toggle('is-switching', animateCopy);
     const swapText = () => {
       if (version !== copySwapVersion) return;
@@ -290,7 +280,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
       requestAnimationFrame(() => requestAnimationFrame(() => {
         if (version === copySwapVersion) {
           benefitCopy.classList.remove('is-switching');
-          if (index === 0) restartBenefitTextReveal();
+          restartBenefitTextReveal();
         }
       }));
     };

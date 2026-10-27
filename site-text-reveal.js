@@ -1,8 +1,12 @@
 (() => {
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+  let typographyReady = !document.fonts;
+  const pendingScanRoots = new Set();
+  const pendingPreparations = new Set();
   const targetSelector = [
     'main h1', 'main h2', 'main h3', 'main h4', 'main h5', 'main h6',
     'main p',
+    '.all-news',
     '.testing-stage__breadcrumb > *'
   ].join(',');
   const excludedSelector = [
@@ -13,7 +17,7 @@
     '.news-article__status', '.form-feedback', '.visually-hidden'
   ].join(',');
   const groupSelector = [
-    '.benefits-stage', '.project-cta__copy', '.news-intro__copy',
+    '.benefits-stage', '.project-cta__copy', '.news',
     '.contact-heading', '.testing-stage__copy', '.climate-tests__inner',
     '.mechanical-tests__inner', '.testing-faq__inner', '.news-page__content',
     '.news-article'
@@ -134,6 +138,10 @@
 
   const prepare = (element) => {
     if (!element || motionPreference.matches) return;
+    if (!typographyReady) {
+      pendingPreparations.add(element);
+      return;
+    }
     const sourceText = normalizedText(element);
     if (!sourceText) return;
     if (element.dataset.textRevealReady === 'true') {
@@ -253,13 +261,19 @@
 
   const scan = (root = document) => {
     if (motionPreference.matches) return;
+    if (!typographyReady) {
+      pendingScanRoots.add(root);
+      return;
+    }
     const elements = [
       ...(root.matches?.(targetSelector) ? [root] : []),
       ...root.querySelectorAll(targetSelector)
     ];
     elements.forEach((element) => {
-      if (element.matches(excludedSelector)
-        || element.closest(`${excludedSelector}, [hidden], [aria-hidden="true"], [aria-busy="true"]`)) return;
+      const isHomeCoverTitle = element.matches('.hero-title');
+      if ((!isHomeCoverTitle && (element.matches(excludedSelector)
+        || element.closest(excludedSelector)))
+        || element.closest('[hidden], [aria-hidden="true"], [aria-busy="true"]')) return;
 
       const previousText = element.dataset.textRevealContent;
       prepare(element);
@@ -288,7 +302,6 @@
   let observer = createObserver();
 
   window.siteTextReveal = { prepare, animate, scan };
-  scan();
 
   let resizeFrame = 0;
   window.addEventListener('resize', () => {
@@ -305,11 +318,19 @@
       });
     });
   }, { passive: true });
-  document.fonts?.ready.then(() => requestAnimationFrame(refreshHeadingLines));
-
-  if (!observer) {
-    groups.forEach((group) => {
-      animate(orderedElements(group));
+  const startReveal = () => {
+    typographyReady = true;
+    scan();
+    pendingScanRoots.forEach((root) => {
+      if (root !== document && root.isConnected) scan(root);
     });
-  }
+    pendingScanRoots.clear();
+    pendingPreparations.forEach((element) => {
+      if (element.isConnected) prepare(element);
+    });
+    pendingPreparations.clear();
+    if (!observer) groups.forEach((group) => animate(orderedElements(group)));
+  };
+  if (document.fonts?.ready) document.fonts.ready.then(() => requestAnimationFrame(startReveal));
+  else startReveal();
 })();
