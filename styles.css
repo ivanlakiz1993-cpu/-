@@ -161,7 +161,7 @@
 .benefit-copy.is-switching h3,.benefit-copy.is-switching p{opacity:0;transition-duration:.18s}
 @media(prefers-reduced-motion:reduce){.benefit-copy h3,.benefit-copy p,.benefit-copy.is-switching h3,.benefit-copy.is-switching p{transition:none}}
 /* Footer: Figma 1756:6495 */
-.footer{background:#121212;border-radius:0.625rem 0.625rem 0 0;overflow-x:clip}
+.footer{position:relative;z-index:1;background:#121212;border-radius:0.625rem 0.625rem 0 0;overflow-x:clip}
 .footer-main{min-height:0;padding-top:1.875rem;padding-bottom:0;display:grid;align-items:start;gap:0}
 .footer-main>div{display:block}
 .footer-main .footer-brand{align-self:start;gap:0.25rem;color:var(--orange)}
