@@ -27,7 +27,8 @@
         pinSpacing: true,
         scrub: 0.45,
         anticipatePin: 1,
-        invalidateOnRefresh: true
+        invalidateOnRefresh: true,
+        onLeaveBack: () => gsap.set([laboratory, equipment], { clearProps: "transform" })
       }
     });
 

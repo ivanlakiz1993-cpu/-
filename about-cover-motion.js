@@ -32,9 +32,13 @@
         start: () => `top ${parseFloat(getComputedStyle(cover.closest("main")).paddingTop)}px`,
         end: () => `+=${Math.round(window.innerHeight * 1.875)}`,
         pin: true,
+        pinSpacing: true,
         scrub: true,
         anticipatePin: 1,
-        invalidateOnRefresh: true
+        invalidateOnRefresh: true,
+        onLeaveBack: () => {
+          gsap.set([imageFrame, image, documentsCard, licensesCard], { clearProps: "all" });
+        }
       }
     });
 
@@ -128,7 +132,7 @@
     };
   });
 
-  const refresh = () => requestAnimationFrame(() => ScrollTrigger.refresh());
+  const refresh = () => requestAnimationFrame(() => ScrollTrigger.refresh(true));
   window.addEventListener("load", refresh, { once: true });
   window.addEventListener("pageshow", refresh);
 })();
