@@ -1,4 +1,4 @@
-import { getNews, photoUrl, formatNewsDate, responsivePhotoSrcset } from './news-source.js?v=20261027-news-text-2';
+import { getNews, photoUrl, formatNewsDate, responsivePhotoSrcset } from './news-source.js?v=20261027-news-text-3';
 
 const article = document.querySelector('[data-news-article]');
 const status = document.querySelector('[data-news-status]');
