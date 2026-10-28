@@ -161,6 +161,9 @@
   .about-history__current.is-active path{animation:about-history-current-flow 2.2s linear infinite}
   .about-history__visual-image{position:absolute;z-index:1;top:19.1291%;left:50.026%;width:22.7604%;aspect-ratio:1;box-sizing:border-box;margin:0;transform:translateX(-50%);overflow:hidden;border:.0625rem solid var(--orange,#ff730d);border-radius:.625rem;transition:border-color .28s ease}
   .about-history__visual-image>img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .16s ease}
+  .about-history__visual-image>img[data-history-crop="wide-2021"]{top:0;left:-32.43%;width:233.39%;height:100%;max-width:none;object-fit:fill}
+  .about-history__visual-image>img[data-history-crop="zoom-2023"]{top:-31.69%;left:-35.22%;width:152.37%;height:152.37%;max-width:none;object-fit:fill}
+  .about-history__visual-image>img[data-history-crop="zoom-2024"]{top:-12.64%;left:-2.14%;width:145.44%;height:145.44%;max-width:none;object-fit:fill}
   .about-history__visual-image>img.is-visible{opacity:1}
   .about-history__visual-image>img.is-flashing{animation:about-history-image-flash .48s linear both;transition:none}
   .about-history__timeline-marker{position:absolute;z-index:2;top:51.5552%;left:38.2031%;display:block;width:1.1458%;height:auto;max-width:none;pointer-events:none}
