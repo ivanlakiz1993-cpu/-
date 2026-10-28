@@ -138,20 +138,20 @@
   .about-history__year-button:focus-visible{outline:.0625rem solid var(--orange,#ff730d);outline-offset:.125rem}
   .about-history__year-button>span{width:75%}
   .about-history__year-button>img{display:block;width:23.333%;height:auto;flex:none}
-  .about-history__timeline{position:absolute;z-index:0;top:21.4619%;left:8.3073%;width:30.9635%;height:33.437%;overflow:visible;pointer-events:none}
+  .about-history__timeline{position:absolute;z-index:0;top:21.4619%;left:8.3333%;width:30.9375%;height:63.7636%;overflow:visible;pointer-events:none}
   .about-history__timeline-line{position:absolute;top:var(--line-y);left:var(--line-x);display:block;width:var(--line-width);height:auto;max-width:none;overflow:visible}
-  .about-history__timeline-line--2013{--line-x:-.1682%;--line-y:0%;--line-width:98.234%}
-  .about-history__timeline-line--2014{--line-x:-.1275%;--line-y:17.2093%;--line-width:98.402%}
-  .about-history__timeline-line--2015{--line-x:-.0841%;--line-y:34.4186%;--line-width:98.234%}
-  .about-history__timeline-line--2016{--line-x:-.0841%;--line-y:51.1628%;--line-width:98.234%}
-  .about-history__timeline-line--2017{--line-x:-.0841%;--line-y:68.8372%;--line-width:98.15%}
-  .about-history__timeline-line--2018{--line-x:-.0841%;--line-y:86.0465%;--line-width:98.234%}
-  .about-history__timeline-line--2019{--line-x:-.0841%;--line-y:103.2558%;--line-width:98.234%;transform:scaleY(-1);transform-origin:top left}
-  .about-history__timeline-line--2020{--line-x:-.0841%;--line-y:120.4651%;--line-width:98.234%;transform:scaleY(-1);transform-origin:top left}
-  .about-history__timeline-line--2021{--line-x:-.0841%;--line-y:137.6744%;--line-width:98.234%;transform:scaleY(-1);transform-origin:top left}
-  .about-history__timeline-line--2022{--line-x:-.0841%;--line-y:154.8837%;--line-width:98.234%;transform:scaleY(-1);transform-origin:top left}
-  .about-history__timeline-line--2023{--line-x:-.0841%;--line-y:172.093%;--line-width:98.234%;transform:scaleY(-1);transform-origin:top left}
-  .about-history__timeline-line--2024{--line-x:-.0841%;--line-y:189.3023%;--line-width:98.234%;transform:scaleY(-1);transform-origin:top left}
+  .about-history__timeline-line--2013{--line-x:-.2525%;--line-y:0%;--line-width:98.3165%}
+  .about-history__timeline-line--2014{--line-x:-.2118%;--line-y:9.0244%;--line-width:98.3599%}
+  .about-history__timeline-line--2015{--line-x:-.1684%;--line-y:18.0488%;--line-width:98.3165%}
+  .about-history__timeline-line--2016{--line-x:-.1684%;--line-y:26.8293%;--line-width:98.3165%}
+  .about-history__timeline-line--2017{--line-x:-.1684%;--line-y:36.0976%;--line-width:98.2323%}
+  .about-history__timeline-line--2018{--line-x:-.1684%;--line-y:45.122%;--line-width:98.3165%}
+  .about-history__timeline-line--2019{--line-x:-.1684%;--line-y:54.1463%;--line-width:98.3165%;transform:scaleY(-1);transform-origin:top left}
+  .about-history__timeline-line--2020{--line-x:-.1684%;--line-y:63.1707%;--line-width:98.3165%;transform:scaleY(-1);transform-origin:top left}
+  .about-history__timeline-line--2021{--line-x:-.1684%;--line-y:72.1951%;--line-width:98.3165%;transform:scaleY(-1);transform-origin:top left}
+  .about-history__timeline-line--2022{--line-x:-.1684%;--line-y:81.2195%;--line-width:98.3165%;transform:scaleY(-1);transform-origin:top left}
+  .about-history__timeline-line--2023{--line-x:-.1684%;--line-y:90.2439%;--line-width:98.3165%;transform:scaleY(-1);transform-origin:top left}
+  .about-history__timeline-line--2024{--line-x:-.1684%;--line-y:99.2683%;--line-width:98.3165%;transform:scaleY(-1);transform-origin:top left}
   .about-history__route{z-index:1;clip-path:inset(0 100% 0 0);opacity:0;transition:opacity .16s ease}
   .about-history__route.is-active{clip-path:inset(0);opacity:1}
   .about-history__route.is-animating{clip-path:inset(0 100% 0 0);opacity:1;animation:about-history-signal .76s cubic-bezier(.22,.7,.24,1) forwards;filter:drop-shadow(0 0 .18rem rgba(255,115,13,.7))}
