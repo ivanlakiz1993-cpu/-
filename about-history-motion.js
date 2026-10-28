@@ -4,8 +4,10 @@
 
   const title = section.querySelector('.about-history__event-title');
   const description = section.querySelector('.about-history__event-description');
-  let visibleVisual = section.querySelector('.about-history__visual-image > img.is-visible');
+  let visibleVisual = section.querySelector('.about-history__visual-image img.is-visible');
   let imageBuffer = section.querySelector('.about-history__visual-image-buffer');
+  const responsiveSource = section.querySelector('.about-history__responsive-source');
+  const useAdaptiveHistoryImage = matchMedia('(max-width:64rem), (hover:none) and (pointer:coarse)');
   const buttons = [...section.querySelectorAll('[data-history-year]')];
   const routes = new Map(
     [...section.querySelectorAll('[data-history-route]')]
@@ -18,6 +20,8 @@
   const content = {
     2013: {
       image: 'assets/about-history-image.webp',
+      adaptiveImage: 'assets/about-history-adaptive.png',
+      adaptiveImageAlt: 'Логотип компании среди документов и сертификатов',
       imageAlt: 'Логотип компании на чёрной папке для документов',
       title: 'Основана компания «СпецЭлектроника»',
       description: 'Получена государственная лицензия на проектирование, производство и сервисное обслуживание электронных систем специального назначения. Оснащение производственных площадей современным технологическим и измерительным оборудованием. Завершена модернизация рабочих помещений.'
@@ -95,9 +99,10 @@
   const inactiveControl = 'assets/about-history-year.svg';
   const activeControl = 'assets/about-history-year-active.svg';
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const timing = reducedMotion
-    ? { fade: 0, route: 0, frame: 0, image: 0 }
-    : { fade: 150, route: 790, frame: 280, image: 500 };
+  const timelineMotion = !reducedMotion && !useAdaptiveHistoryImage.matches;
+  const timing = timelineMotion
+    ? { fade: 150, route: 790, frame: 280, image: 500 }
+    : { fade: 0, route: 0, frame: 0, image: reducedMotion ? 0 : 500 };
   let activeYear = '2013';
   let switching = false;
 
@@ -110,6 +115,13 @@
     image.src = src;
     if (image.complete) resolve();
   });
+
+  const getHistoryImage = (entry) => (
+    useAdaptiveHistoryImage.matches && entry.adaptiveImage ? entry.adaptiveImage : entry.image
+  );
+  const getHistoryAlt = (entry) => (
+    useAdaptiveHistoryImage.matches && entry.adaptiveImageAlt ? entry.adaptiveImageAlt : entry.imageAlt
+  );
 
   const setSelectedYear = (year) => {
     buttons.forEach((button) => {
@@ -137,7 +149,8 @@
     section.classList.add('is-switching');
     section.setAttribute('aria-busy', 'true');
     setSelectedYear(year);
-    const imageReady = preloadImage(nextContent.image);
+    const nextImage = getHistoryImage(nextContent);
+    const imageReady = preloadImage(nextImage);
     const previousRoute = routes.get(activeYear);
     const previousFlow = currentFlows.get(activeYear);
     const nextFlow = currentFlows.get(year);
@@ -156,10 +169,11 @@
     await wait(timing.frame);
     await imageReady;
 
+    if (responsiveSource) responsiveSource.srcset = nextImage;
     if (nextContent.imageCrop) imageBuffer.dataset.historyCrop = nextContent.imageCrop;
     else imageBuffer.removeAttribute('data-history-crop');
-    imageBuffer.src = nextContent.image;
-    imageBuffer.alt = nextContent.imageAlt;
+    imageBuffer.src = nextImage;
+    imageBuffer.alt = getHistoryAlt(nextContent);
     if (typeof imageBuffer.decode === 'function') {
       try {
         await imageBuffer.decode();

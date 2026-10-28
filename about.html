@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=20261028-about-footer-1">
   <link rel="stylesheet" href="hero-grid.css?v=20261026-shared-chrome-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
-  <link rel="stylesheet" href="about-page.css?v=20261028-about-history-footer-spacing-1">
+  <link rel="stylesheet" href="about-page.css?v=20261028-about-history-adaptive-1">
   <link rel="stylesheet" href="text-reveal.css?v=20261027-unified-entry-reveal-1">
   <script src="site-header.js?v=20261025-common-header-component-1"></script>
   <script src="page-transition.js?v=20261027-unified-entry-reveal-1"></script>
@@ -128,7 +128,10 @@
         <svg class="about-history__timeline-line about-history__timeline-line--2024 about-history__current" data-history-current="2024" viewBox="0 0 584 204" aria-hidden="true" focusable="false"><path d="M0 203.5L366.5 203.5C369.261 203.5 371.5 201.261 371.5 198.5V5.5C371.5 2.73858 373.739 0.5 376.5 0.5H584" pathLength="1"/></svg>
       </div>
       <figure class="about-history__visual-image">
-        <img class="is-visible" src="assets/about-history-image.webp" width="1254" height="1254" alt="Логотип компании на чёрной папке для документов" loading="lazy" decoding="async">
+        <picture class="about-history__visual-picture">
+          <source class="about-history__responsive-source" media="(max-width:64rem), (hover:none) and (pointer:coarse)" srcset="assets/about-history-adaptive.png">
+          <img class="is-visible" src="assets/about-history-image.webp" width="1254" height="1254" alt="Исторический визуал с логотипом компании" loading="lazy" decoding="async">
+        </picture>
         <img class="about-history__visual-image-buffer" width="1244" height="1244" alt="" aria-hidden="true" decoding="async">
       </figure>
       <img class="about-history__timeline-marker" src="assets/about-history-timeline-marker.svg" alt="" aria-hidden="true">
@@ -183,6 +186,6 @@
   <script src="about-cover-motion.js?v=20261028-about-cover-card-sync-1"></script>
   <script src="about-gallery-motion.js?v=20261028-about-gallery-scrub-align-1"></script>
   <script src="site-text-reveal.js?v=20261027-8ms-viewport-sequence-1"></script>
-  <script src="about-history-motion.js?v=20261028-about-history-years-2015-2024-1"></script>
+  <script src="about-history-motion.js?v=20261028-about-history-adaptive-1"></script>
 </body>
 </html>
