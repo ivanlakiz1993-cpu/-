@@ -138,7 +138,7 @@
   .about-history__year-button:focus-visible{outline:.0625rem solid var(--orange,#ff730d);outline-offset:.125rem}
   .about-history__year-button>span{width:75%}
   .about-history__year-button>img{display:block;width:23.333%;height:auto;flex:none}
-  .about-history__timeline{position:absolute;top:21.4619%;left:8.3073%;width:30.9635%;height:33.437%;overflow:visible;pointer-events:none}
+  .about-history__timeline{position:absolute;z-index:0;top:21.4619%;left:8.3073%;width:30.9635%;height:33.437%;overflow:visible;pointer-events:none}
   .about-history__timeline-line{position:absolute;top:var(--line-y);left:var(--line-x);display:block;width:var(--line-width);height:auto;max-width:none;overflow:visible}
   .about-history__timeline-line--2013{--line-x:-.1682%;--line-y:0%;--line-width:98.234%}
   .about-history__timeline-line--2014{--line-x:-.1275%;--line-y:17.2093%;--line-width:98.402%}
@@ -155,12 +155,17 @@
   .about-history__route{z-index:1;clip-path:inset(0 100% 0 0);opacity:0;transition:opacity .16s ease}
   .about-history__route.is-active{clip-path:inset(0);opacity:1}
   .about-history__route.is-animating{clip-path:inset(0 100% 0 0);opacity:1;animation:about-history-signal .76s cubic-bezier(.22,.7,.24,1) forwards;filter:drop-shadow(0 0 .18rem rgba(255,115,13,.7))}
-  .about-history__visual-image{position:absolute;top:19.1291%;left:50.026%;width:22.7604%;aspect-ratio:1;box-sizing:border-box;margin:0;transform:translateX(-50%);overflow:hidden;border:.0625rem solid var(--orange,#ff730d);border-radius:.625rem;transition:border-color .28s ease}
-  .about-history__visual-image>img{display:block;width:100%;height:100%;object-fit:cover;opacity:1;transition:opacity .16s ease}
+  .about-history__current{z-index:2;overflow:visible;opacity:0}
+  .about-history__current path{fill:none;stroke:#ffd39c;stroke-width:1.5;stroke-linecap:round;stroke-dasharray:.08 .92;stroke-dashoffset:1;filter:drop-shadow(0 0 .14rem rgba(255,115,13,.95))}
+  .about-history__current.is-active{opacity:1}
+  .about-history__current.is-active path{animation:about-history-current-flow 2.2s linear infinite}
+  .about-history__visual-image{position:absolute;z-index:1;top:19.1291%;left:50.026%;width:22.7604%;aspect-ratio:1;box-sizing:border-box;margin:0;transform:translateX(-50%);overflow:hidden;border:.0625rem solid var(--orange,#ff730d);border-radius:.625rem;transition:border-color .28s ease}
+  .about-history__visual-image>img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .16s ease}
+  .about-history__visual-image>img.is-visible{opacity:1}
+  .about-history__visual-image>img.is-flashing{animation:about-history-image-flash .48s linear both;transition:none}
   .about-history__timeline-marker{position:absolute;z-index:2;top:51.4774%;left:38.125%;display:block;width:1.1458%;height:auto;max-width:none;pointer-events:none}
   .about-history.is-switching .about-history__visual-image{border-color:#333}
-  .about-history.is-switching .about-history__visual-image>img,.about-history.is-switching .about-history__event{opacity:0}
-  .about-history.is-revealing .about-history__visual-image>img{animation:about-history-image-flash .48s linear both}
+  .about-history.is-switching .about-history__visual-image>img.is-visible,.about-history.is-switching .about-history__event{opacity:0}
   .about-history__event{position:absolute;top:26.9051%;left:64.0104%;display:flex;width:21.875%;flex-direction:column;gap:clamp(1rem,1.5625vw,1.875rem);margin:0;transition:opacity .14s ease}
   .about-history__event-title{margin:0;font:400 clamp(1rem,1.25vw,1.5rem)/1 var(--sans);letter-spacing:-.05em}
   .about-history__event-description{width:94.5238%;margin:0;font:400 clamp(.75rem,.8333vw,1rem)/1.2 var(--sans);letter-spacing:.01em}
@@ -168,6 +173,10 @@
 
 @keyframes about-history-signal{
   to{clip-path:inset(0);filter:drop-shadow(0 0 .08rem rgba(255,115,13,.36))}
+}
+
+@keyframes about-history-current-flow{
+  to{stroke-dashoffset:0}
 }
 
 @keyframes about-history-image-flash{
@@ -178,5 +187,6 @@
 
 @media(prefers-reduced-motion:reduce){
   .about-history__route.is-animating{animation-duration:.01ms;filter:none}
-  .about-history.is-revealing .about-history__visual-image>img{animation:none;opacity:1}
+  .about-history__current{display:none}
+  .about-history__visual-image>img.is-flashing{animation:none;opacity:1}
 }

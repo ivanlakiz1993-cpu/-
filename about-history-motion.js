@@ -4,11 +4,16 @@
 
   const title = section.querySelector('.about-history__event-title');
   const description = section.querySelector('.about-history__event-description');
-  const visual = section.querySelector('.about-history__visual-image > img');
+  let visibleVisual = section.querySelector('.about-history__visual-image > img.is-visible');
+  let imageBuffer = section.querySelector('.about-history__visual-image-buffer');
   const buttons = [...section.querySelectorAll('[data-history-year]')];
   const routes = new Map(
     [...section.querySelectorAll('[data-history-route]')]
       .map((route) => [route.dataset.historyRoute, route])
+  );
+  const currentFlows = new Map(
+    [...section.querySelectorAll('[data-history-current]')]
+      .map((flow) => [flow.dataset.historyCurrent, flow])
   );
   const content = {
     2013: {
@@ -71,8 +76,12 @@
     setSelectedYear(year);
     const imageReady = preloadImage(nextContent.image);
     const previousRoute = routes.get(activeYear);
+    const previousFlow = currentFlows.get(activeYear);
+    const nextFlow = currentFlows.get(year);
     previousRoute?.classList.remove('is-active', 'is-animating');
+    previousFlow?.classList.remove('is-active');
     nextRoute.classList.remove('is-active', 'is-animating');
+    nextFlow?.classList.remove('is-active');
 
     await wait(timing.fade);
     nextRoute.classList.add('is-animating');
@@ -80,20 +89,32 @@
 
     nextRoute.classList.remove('is-animating');
     nextRoute.classList.add('is-active');
-    section.classList.remove('is-switching');
+    nextFlow?.classList.add('is-active');
     await wait(timing.frame);
     await imageReady;
 
-    visual.src = nextContent.image;
-    visual.alt = nextContent.imageAlt;
+    imageBuffer.src = nextContent.image;
+    imageBuffer.alt = nextContent.imageAlt;
+    if (typeof imageBuffer.decode === 'function') {
+      try {
+        await imageBuffer.decode();
+      } catch {}
+    }
     title.textContent = nextContent.title;
     description.textContent = nextContent.description;
-    section.classList.add('is-revealing');
+    visibleVisual.classList.remove('is-visible');
+    imageBuffer.classList.add('is-visible', 'is-flashing');
     revealCopy();
     activeYear = year;
+    section.classList.remove('is-switching');
 
     await wait(timing.image);
-    section.classList.remove('is-revealing');
+    imageBuffer.classList.remove('is-flashing');
+    const previousVisual = visibleVisual;
+    visibleVisual = imageBuffer;
+    imageBuffer = previousVisual;
+    imageBuffer.removeAttribute('src');
+    imageBuffer.alt = '';
     section.removeAttribute('aria-busy');
     switching = false;
   };

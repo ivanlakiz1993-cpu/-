@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=20261027-about-team-button-hover-1">
   <link rel="stylesheet" href="hero-grid.css?v=20261026-shared-chrome-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
-  <link rel="stylesheet" href="about-page.css?v=20261028-about-history-lines-radius-5-1">
+  <link rel="stylesheet" href="about-page.css?v=20261028-about-history-flow-photo-swap-1">
   <link rel="stylesheet" href="text-reveal.css?v=20261027-unified-entry-reveal-1">
   <script src="site-header.js?v=20261025-common-header-component-1"></script>
   <script src="page-transition.js?v=20261027-unified-entry-reveal-1"></script>
@@ -104,9 +104,12 @@
         <img class="about-history__timeline-line about-history__timeline-line--2024" src="assets/about-history-line-2024.svg" alt="">
         <img class="about-history__timeline-line about-history__timeline-line--2013 about-history__route is-active" data-history-route="2013" src="assets/about-history-line-2013.svg" alt="">
         <img class="about-history__timeline-line about-history__timeline-line--2014 about-history__route" data-history-route="2014" src="assets/about-history-line-2014-active.svg" alt="">
+        <svg class="about-history__timeline-line about-history__timeline-line--2013 about-history__current is-active" data-history-current="2013" viewBox="0 0 584 205" aria-hidden="true" focusable="false"><path d="M0 0.5L324 0.5C326.762 0.5 329 2.73858 329 5.5V199C329 201.761 331.239 204 334 204H584" pathLength="1"/></svg>
+        <svg class="about-history__timeline-line about-history__timeline-line--2014 about-history__current" data-history-current="2014" viewBox="0 0 585 168" aria-hidden="true" focusable="false"><path d="M0 0.5L284.758 0.5C287.519 0.5 289.758 2.73858 289.758 5.5V103C289.758 105.761 291.996 108 294.758 108H451.758C454.519 108 456.758 110.239 456.758 113V162.5C456.758 165.261 458.996 167.5 461.758 167.5H584.258" pathLength="1"/></svg>
       </div>
       <figure class="about-history__visual-image">
-        <img src="assets/about-history-image.png" width="1244" height="1244" alt="Логотип компании на чёрной папке для документов" loading="lazy" decoding="async">
+        <img class="is-visible" src="assets/about-history-image.png" width="1244" height="1244" alt="Логотип компании на чёрной папке для документов" loading="lazy" decoding="async">
+        <img class="about-history__visual-image-buffer" width="1244" height="1244" alt="" aria-hidden="true" decoding="async">
       </figure>
       <img class="about-history__timeline-marker" src="assets/about-history-timeline-marker.svg" alt="" aria-hidden="true">
       <article class="about-history__event" aria-live="polite">
@@ -120,6 +123,6 @@
   <script src="about-cover-motion.js?v=20261027-about-cover-reverse-reset-1"></script>
   <script src="about-gallery-motion.js?v=20261027-about-gallery-reverse-reset-1"></script>
   <script src="site-text-reveal.js?v=20261027-8ms-viewport-sequence-1"></script>
-  <script src="about-history-motion.js?v=20261028-about-history-interaction-1"></script>
+  <script src="about-history-motion.js?v=20261028-about-history-flow-photo-swap-1"></script>
 </body>
 </html>
