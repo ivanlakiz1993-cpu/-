@@ -40,13 +40,11 @@
 .contacts-page__download-card:focus-visible{outline:.125rem solid #fff;outline-offset:.1875rem}
 .contacts-page__download-label{font-size:clamp(1.125rem,1.25vw,1.5rem);font-weight:300;line-height:1.1}
 .contacts-page__download-icon{display:block;width:2.5625rem;height:2.5625rem;flex:none}
-.contacts-page__column-divider{position:absolute;top:0;bottom:0;left:50%;width:.0625rem;transform:translateX(-50%);background:var(--line)}
 
 @media(max-width:74.9375rem){
   .contacts-page__main{padding-top:6.5rem;padding-bottom:5rem}
   .contacts-page__content{margin-top:3rem}
   .contacts-page__columns{grid-template-columns:minmax(0,1fr);gap:4rem;margin-top:2.75rem}
-  .contacts-page__column-divider{display:none}
   .contacts-page__contact-column,.contacts-page__company-column{max-width:52rem}
   .contacts-page__company-column{padding-top:3.5rem;border-top:.0625rem solid var(--line)}
   .contacts-page__section-title{font-size:clamp(1.75rem,3.2vw,2.25rem)}
