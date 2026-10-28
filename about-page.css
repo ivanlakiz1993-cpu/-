@@ -128,7 +128,7 @@
 .about-history{display:none}
 
 @media(min-width:64.001rem) and (hover:hover) and (pointer:fine){
-  .about-history{display:block;position:relative;width:min(120rem,100%);aspect-ratio:1920/643;margin:clamp(3rem,7.8125vw,9.375rem) auto 0;overflow:hidden;background:#000;color:#fff}
+  .about-history{display:block;position:relative;width:min(120rem,100%);aspect-ratio:1920/643;margin:clamp(3rem,7.8125vw,9.375rem) auto clamp(3.125rem,5.208333vw,6.25rem);overflow:hidden;background:#000;color:#fff}
   .about-history__title{position:absolute;top:0;left:5.2083%;margin:0;font:400 clamp(2rem,3.3333vw,4rem)/1 var(--sans);letter-spacing:.01em;white-space:nowrap}
   .about-history__years{position:absolute;top:19.7512%;left:5.2083%;display:flex;width:3.125%;flex-direction:column;gap:clamp(.5rem,.78125vw,.9375rem);margin:0;padding:0;list-style:none}
   .about-history__year{width:100%;color:#525252;font:400 clamp(1rem,.9375vw,1.125rem)/1.2 var(--sans);letter-spacing:0}
