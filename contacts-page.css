@@ -19,8 +19,9 @@
 .contacts-page__field-value a:hover,.contacts-page__field-value a:focus-visible{color:var(--orange)}
 .contacts-page__contact-row--legal .contacts-page__field-value{max-width:34.7%}
 .contacts-page__contact-row--postal .contacts-page__field-value{max-width:41.1%}
-.contacts-page__divider{width:100%;height:.0625rem;flex:none;background:var(--line)}
-.contacts-page__social-row{display:flex;align-items:center;justify-content:space-between;gap:1.875rem;margin-top:1.875rem}
+.contacts-page__divider{position:relative;width:100%;height:0;flex:none}
+.contacts-page__divider::before{position:absolute;top:-.03125rem;left:0;width:100%;height:.0625rem;background:var(--line);content:""}
+.contacts-page__social-row{display:flex;align-items:center;justify-content:space-between;gap:1.875rem}
 .contacts-page__social-label{margin:0;color:#979797;font-size:.875rem;line-height:1.2;white-space:nowrap}
 .contacts-page__social-links{display:flex;align-items:center;gap:clamp(.625rem,1.5625vw,1.875rem)}
 .contacts-page__social-link{display:grid;place-items:center;flex:none;width:clamp(2.5rem,2.6042vw,3.125rem);height:clamp(2.5rem,2.6042vw,3.125rem);overflow:hidden;border:.0625rem solid #6e6e6e;border-radius:.3125rem}
@@ -64,7 +65,7 @@
   .contacts-page__contact-row,.contacts-page__company-detail-row{flex-direction:column;align-items:flex-start;gap:.375rem;font-size:1rem}
   .contacts-page__field-label{white-space:normal}
   .contacts-page__field-value,.contacts-page__contact-row--legal .contacts-page__field-value,.contacts-page__contact-row--postal .contacts-page__field-value,.contacts-page__company-detail-row--organization .contacts-page__field-value,.contacts-page__company-detail-row--legal-address .contacts-page__field-value{max-width:100%;text-align:left}
-  .contacts-page__social-row{align-items:flex-start;flex-direction:column;gap:.875rem;margin-top:1.5rem}
+  .contacts-page__social-row{align-items:flex-start;flex-direction:column;gap:.875rem}
   .contacts-page__social-links{gap:.625rem}
   .contacts-page__company-column{padding-top:2.5rem}
   .contacts-page__company-card-content{gap:1.5rem;margin-top:1.875rem}
