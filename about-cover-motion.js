@@ -29,16 +29,13 @@
     const timeline = gsap.timeline({
       scrollTrigger: {
         trigger: cover,
-        start: () => `top ${parseFloat(getComputedStyle(cover.closest("main")).paddingTop)}px`,
+        start: "top top",
         end: () => `+=${Math.round(window.innerHeight * 1.875)}`,
         pin: true,
         pinSpacing: true,
         scrub: true,
         anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onLeaveBack: () => {
-          gsap.set([imageFrame, image, documentsCard, licensesCard], { clearProps: "all" });
-        }
+        invalidateOnRefresh: true
       }
     });
 
@@ -71,13 +68,13 @@
       .to(documentsCard, {
         left: "-11.6667%",
         autoAlpha: 1,
-        duration: 0.32,
+        duration: 0.5,
         ease: "none"
       }, 0)
       .to(licensesCard, {
         right: "-11.6667%",
         autoAlpha: 1,
-        duration: 0.32,
+        duration: 0.5,
         ease: "none"
       }, 0)
       .to(imageFrame, {
