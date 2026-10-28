@@ -9,6 +9,7 @@
       const currentPage = page === 'news-article' ? 'news' : page;
       const homeAnchor = (section) => `${isHome ? '' : 'index.html'}#${section}`;
       const current = (route) => currentPage === route ? ' aria-current="page"' : '';
+      const contactsHref = currentPage === 'contacts' ? '#top' : 'contacts.html';
 
       this.innerHTML = `
         <header class="topbar">
@@ -29,7 +30,7 @@
               <a href="testing.html"${current('testing')}>Испытания</a>
               <a href="about.html"${current('about')}>О нас</a>
               <a href="news.html"${current('news')}>Новости</a>
-              <a href="${homeAnchor('contact')}">Контакты</a>
+              <a href="${contactsHref}"${current('contacts')}>Контакты</a>
             </div>
             <div class="menu-social" role="group" aria-label="Мы в социальных сетях">
               <a class="menu-social__link menu-social__link--vk" href="${homeAnchor('contact')}" aria-label="ВКонтакте"><img src="assets/social/vk.svg" alt=""></a>

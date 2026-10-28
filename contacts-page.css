@@ -1,0 +1,79 @@
+.contacts-page{background:var(--bg)}
+.contacts-page__main{padding-top:6.9375rem;padding-bottom:9.375rem}
+.contacts-page__breadcrumbs{display:flex;align-items:center;gap:.1875rem;color:#979797;font:400 .75rem/1.3 var(--sans);white-space:nowrap}
+.contacts-page__breadcrumb-link{color:inherit;transition:color .18s ease}
+.contacts-page__breadcrumb-link:hover,.contacts-page__breadcrumb-link:focus-visible{color:var(--text)}
+.contacts-page__breadcrumb-current{color:var(--orange)}
+.contacts-page__content{margin-top:3.8125rem}
+.contacts-page__title{margin:0;color:var(--text);font-size:clamp(3rem,3.3333vw,4rem);font-weight:400;line-height:1;letter-spacing:.01em}
+.contacts-page__columns{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(3rem,5.2083vw,6.25rem);margin-top:3.125rem}
+.contacts-page__contact-column,.contacts-page__company-column{min-width:0}
+.contacts-page__section-title{margin:0;color:var(--text);font-size:clamp(1.625rem,1.875vw,2.25rem);font-weight:400;line-height:1.1}
+.contacts-page__contact-list{display:flex;flex-direction:column;gap:1.875rem;margin-top:3rem}
+.contacts-page__contact-row,.contacts-page__company-detail-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;min-width:0;color:var(--text);font-size:clamp(1rem,.9375vw,1.125rem);font-weight:400;line-height:1.2}
+.contacts-page__field-label,.contacts-page__field-value{margin:0}
+.contacts-page__field-label{flex:0 1 auto;color:#979797;white-space:nowrap}
+.contacts-page__field-label--small{font-size:clamp(.875rem,.7292vw,.875rem)}
+.contacts-page__field-value{flex:0 1 auto;max-width:52%;color:#fff;text-align:right;overflow-wrap:anywhere}
+.contacts-page__field-value a{color:inherit;transition:color .18s ease}
+.contacts-page__field-value a:hover,.contacts-page__field-value a:focus-visible{color:var(--orange)}
+.contacts-page__contact-row--legal .contacts-page__field-value{max-width:34.7%}
+.contacts-page__contact-row--postal .contacts-page__field-value{max-width:41.1%}
+.contacts-page__divider{width:100%;height:.0625rem;flex:none;background:var(--line)}
+.contacts-page__social-row{display:flex;align-items:center;justify-content:space-between;gap:1.875rem;margin-top:1.875rem}
+.contacts-page__social-label{margin:0;color:#979797;font-size:.875rem;line-height:1.2;white-space:nowrap}
+.contacts-page__social-links{display:flex;align-items:center;gap:clamp(.625rem,1.5625vw,1.875rem)}
+.contacts-page__social-link{display:grid;place-items:center;flex:none;width:clamp(2.5rem,2.6042vw,3.125rem);height:clamp(2.5rem,2.6042vw,3.125rem);overflow:hidden;border:.0625rem solid #6e6e6e;border-radius:.3125rem}
+.contacts-page__social-link img{display:block;width:50%;height:50%;object-fit:contain}
+.contacts-page__social-link--vk img{width:68%;height:auto}
+.contacts-page__social-link--rutube img{height:42%}
+.contacts-page__social-link--telegram img{width:54%;height:auto}
+.contacts-page__company-column{display:flex;flex-direction:column}
+.contacts-page__company-card-content{display:flex;flex-direction:column;gap:1.875rem;margin-top:3.125rem}
+.contacts-page__company-details-list{display:flex;flex-direction:column;gap:1.875rem}
+.contacts-page__company-detail-row{min-height:1.375rem}
+.contacts-page__company-detail-row--organization .contacts-page__field-value{max-width:51.1%}
+.contacts-page__company-detail-row--legal-address .contacts-page__field-value{max-width:39.8%}
+.contacts-page__company-detail-row .contacts-page__field-label--small{font-size:.875rem}
+.contacts-page__download-card{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;width:100%;min-height:6.4375rem;padding:1.875rem 1.25rem;border:.0625rem solid var(--orange);border-radius:1.25rem;background:transparent;color:#fff;text-align:left;cursor:pointer}
+.contacts-page__download-card:focus-visible{outline:.125rem solid #fff;outline-offset:.1875rem}
+.contacts-page__download-label{font-size:clamp(1.125rem,1.25vw,1.5rem);font-weight:300;line-height:1.1}
+.contacts-page__download-icon{display:block;width:2.5625rem;height:2.5625rem;flex:none}
+.contacts-page__column-divider{position:absolute;top:0;bottom:0;left:50%;width:.0625rem;transform:translateX(-50%);background:var(--line)}
+
+@media(max-width:74.9375rem){
+  .contacts-page__main{padding-top:6.5rem;padding-bottom:5rem}
+  .contacts-page__content{margin-top:3rem}
+  .contacts-page__columns{grid-template-columns:minmax(0,1fr);gap:4rem;margin-top:2.75rem}
+  .contacts-page__column-divider{display:none}
+  .contacts-page__contact-column,.contacts-page__company-column{max-width:52rem}
+  .contacts-page__company-column{padding-top:3.5rem;border-top:.0625rem solid var(--line)}
+  .contacts-page__section-title{font-size:clamp(1.75rem,3.2vw,2.25rem)}
+  .contacts-page__contact-row,.contacts-page__company-detail-row{font-size:clamp(1rem,1.6vw,1.125rem)}
+  .contacts-page__field-label--small,.contacts-page__company-detail-row .contacts-page__field-label--small{font-size:.875rem}
+}
+
+@media(max-width:37.5rem){
+  .contacts-page__main{padding-top:5.125rem;padding-bottom:3.75rem}
+  .contacts-page__breadcrumbs{font-size:.75rem}
+  .contacts-page__content{margin-top:2.5rem}
+  .contacts-page__title{font-size:clamp(2.375rem,10vw,3rem)}
+  .contacts-page__columns{gap:3rem;margin-top:2.25rem}
+  .contacts-page__section-title{font-size:1.5rem}
+  .contacts-page__contact-list{gap:1.25rem;margin-top:1.875rem}
+  .contacts-page__contact-row,.contacts-page__company-detail-row{flex-direction:column;align-items:flex-start;gap:.375rem;font-size:1rem}
+  .contacts-page__field-label{white-space:normal}
+  .contacts-page__field-value,.contacts-page__contact-row--legal .contacts-page__field-value,.contacts-page__contact-row--postal .contacts-page__field-value,.contacts-page__company-detail-row--organization .contacts-page__field-value,.contacts-page__company-detail-row--legal-address .contacts-page__field-value{max-width:100%;text-align:left}
+  .contacts-page__social-row{align-items:flex-start;flex-direction:column;gap:.875rem;margin-top:1.5rem}
+  .contacts-page__social-links{gap:.625rem}
+  .contacts-page__company-column{padding-top:2.5rem}
+  .contacts-page__company-card-content{gap:1.5rem;margin-top:1.875rem}
+  .contacts-page__company-details-list{gap:1.25rem}
+  .contacts-page__download-card{min-height:5rem;padding:1.25rem .9375rem;border-radius:1rem}
+  .contacts-page__download-label{font-size:1rem}
+  .contacts-page__download-icon{width:2rem;height:2rem}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .contacts-page__breadcrumb-link,.contacts-page__field-value a{transition:none}
+}
