@@ -25,16 +25,14 @@
         end: () => `+=${Math.round(Math.min(window.innerHeight * 0.55, container.clientHeight * 0.9))}`,
         pin: true,
         pinSpacing: true,
-        scrub: 0.45,
+        scrub: true,
         anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onLeaveBack: () => gsap.set([laboratory, equipment], { clearProps: "transform" })
+        invalidateOnRefresh: true
       }
     });
 
     timeline
-      .to({}, { duration: 0.22 })
-      .to([laboratory, equipment], { y: alignToBottom, duration: 1, ease: "none" }, 0.22);
+      .to([laboratory, equipment], { y: alignToBottom, duration: 1, ease: "none" });
 
     return () => timeline.scrollTrigger?.kill();
   });

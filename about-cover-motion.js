@@ -23,8 +23,8 @@
 
   const motion = gsap.matchMedia();
   motion.add("(min-width: 64.001rem) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)", () => {
-    gsap.set(documentsCard, { left: "-100%", autoAlpha: 0 });
-    gsap.set(licensesCard, { right: "-100%", autoAlpha: 0 });
+    gsap.set(documentsCard, { left: "-100%", autoAlpha: 1 });
+    gsap.set(licensesCard, { right: "-100%", autoAlpha: 1 });
 
     const timeline = gsap.timeline({
       scrollTrigger: {
@@ -67,13 +67,11 @@
       }, 0)
       .to(documentsCard, {
         left: "-11.6667%",
-        autoAlpha: 1,
         duration: 0.5,
         ease: "none"
       }, 0)
       .to(licensesCard, {
         right: "-11.6667%",
-        autoAlpha: 1,
         duration: 0.5,
         ease: "none"
       }, 0)
