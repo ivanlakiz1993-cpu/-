@@ -41,6 +41,11 @@
 .contacts-page__download-label{font-size:clamp(1.125rem,1.25vw,1.5rem);font-weight:300;line-height:1.1}
 .contacts-page__download-icon{display:block;width:2.5625rem;height:2.5625rem;flex:none}
 
+@media(min-width:75rem){
+  .contacts-page__social-label{font-size:1.125rem}
+  .contacts-page__field-label--small,.contacts-page__company-detail-row .contacts-page__field-label--small{font-size:inherit}
+}
+
 @media(max-width:74.9375rem){
   .contacts-page__main{padding-top:6.5rem;padding-bottom:5rem}
   .contacts-page__content{margin-top:3rem}
