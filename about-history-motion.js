@@ -4,8 +4,7 @@
 
   const title = section.querySelector('.about-history__event-title');
   const description = section.querySelector('.about-history__event-description');
-  let visibleVisual = section.querySelector('.about-history__visual-image img.is-visible');
-  let imageBuffer = section.querySelector('.about-history__visual-image-buffer');
+  const visibleVisual = section.querySelector('.about-history__visual-picture img');
   const responsiveSource = section.querySelector('.about-history__responsive-source');
   const useAdaptiveHistoryImage = matchMedia('(max-width:64rem), (hover:none) and (pointer:coarse)');
   const buttons = [...section.querySelectorAll('[data-history-year]')];
@@ -101,20 +100,26 @@
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const timelineMotion = !reducedMotion && !useAdaptiveHistoryImage.matches;
   const timing = timelineMotion
-    ? { fade: 150, route: 790, frame: 280, image: 500 }
-    : { fade: 0, route: 0, frame: 0, image: reducedMotion ? 0 : 500 };
+    ? { fade: 150, route: 790 }
+    : { fade: 0, route: 0 };
   let activeYear = '2013';
   let switching = false;
 
   const wait = (duration) => new Promise((resolve) => window.setTimeout(resolve, duration));
 
-  const preloadImage = (src) => new Promise((resolve) => {
+  const preloadImage = async (src) => {
     const image = new Image();
-    image.onload = resolve;
-    image.onerror = resolve;
-    image.src = src;
-    if (image.complete) resolve();
-  });
+    await new Promise((resolve) => {
+      image.onload = resolve;
+      image.onerror = resolve;
+      image.src = src;
+      if (image.complete) resolve();
+    });
+    if (typeof image.decode === 'function') {
+      try { await image.decode(); } catch {}
+    }
+    return image.naturalWidth > 0;
+  };
 
   const getHistoryImage = (entry) => (
     useAdaptiveHistoryImage.matches && entry.adaptiveImage ? entry.adaptiveImage : entry.image
@@ -150,7 +155,14 @@
     section.setAttribute('aria-busy', 'true');
     setSelectedYear(year);
     const nextImage = getHistoryImage(nextContent);
-    const imageReady = preloadImage(nextImage);
+    const imageReady = preloadImage(nextImage).then((loaded) => {
+      if (!loaded) return;
+      if (nextContent.imageCrop) visibleVisual.dataset.historyCrop = nextContent.imageCrop;
+      else visibleVisual.removeAttribute('data-history-crop');
+      if (responsiveSource) responsiveSource.srcset = nextImage;
+      visibleVisual.src = nextImage;
+      visibleVisual.alt = getHistoryAlt(nextContent);
+    });
     const previousRoute = routes.get(activeYear);
     const previousFlow = currentFlows.get(activeYear);
     const nextFlow = currentFlows.get(year);
@@ -166,35 +178,14 @@
     nextRoute.classList.remove('is-animating');
     nextRoute.classList.add('is-active');
     nextFlow?.classList.add('is-active');
-    await wait(timing.frame);
     await imageReady;
 
-    if (responsiveSource) responsiveSource.srcset = nextImage;
-    if (nextContent.imageCrop) imageBuffer.dataset.historyCrop = nextContent.imageCrop;
-    else imageBuffer.removeAttribute('data-history-crop');
-    imageBuffer.src = nextImage;
-    imageBuffer.alt = getHistoryAlt(nextContent);
-    if (typeof imageBuffer.decode === 'function') {
-      try {
-        await imageBuffer.decode();
-      } catch {}
-    }
     title.textContent = nextContent.title;
     description.textContent = nextContent.description;
-    visibleVisual.classList.remove('is-visible');
-    imageBuffer.classList.add('is-visible', 'is-flashing');
     revealCopy();
     activeYear = year;
     section.classList.remove('is-switching');
 
-    await wait(timing.image);
-    imageBuffer.classList.remove('is-flashing');
-    const previousVisual = visibleVisual;
-    visibleVisual = imageBuffer;
-    imageBuffer = previousVisual;
-    imageBuffer.removeAttribute('src');
-    imageBuffer.removeAttribute('data-history-crop');
-    imageBuffer.alt = '';
     section.removeAttribute('aria-busy');
     switching = false;
   };
