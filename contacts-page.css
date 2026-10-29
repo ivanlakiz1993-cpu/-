@@ -49,34 +49,61 @@
 
 @media(max-width:74.9375rem){
   .contacts-page__main{padding-top:6.5rem;padding-bottom:5rem}
-  .contacts-page__content{margin-top:3rem}
-  .contacts-page__columns{grid-template-columns:minmax(0,1fr);gap:4rem;margin-top:2.75rem}
-  .contacts-page__contact-column,.contacts-page__company-column{max-width:52rem}
-  .contacts-page__company-column{padding-top:3.5rem;border-top:.0625rem solid var(--line)}
-  .contacts-page__section-title{font-size:clamp(1.75rem,3.2vw,2.25rem)}
-  .contacts-page__contact-row,.contacts-page__company-detail-row{font-size:clamp(1rem,1.6vw,1.125rem)}
-  .contacts-page__field-label--small,.contacts-page__company-detail-row .contacts-page__field-label--small{font-size:.875rem}
+  .contacts-page__breadcrumbs.wrap{width:calc(100% - 12.5rem)}
+  .contacts-page__content.wrap{width:calc(100% - 6rem)}
+  .contacts-page__content{margin-top:3.125rem}
+  .contacts-page__title{font-size:2.375rem;line-height:.9}
+  .contacts-page__columns{grid-template-columns:minmax(0,1fr);gap:1.875rem;margin-top:3.125rem}
+  .contacts-page__contact-column,.contacts-page__company-column{max-width:none}
+  .contacts-page__company-column{padding-top:0;border-top:0}
+  .contacts-page__section-title{font-size:clamp(1.75rem,3.515625vw,2.25rem)}
+  .contacts-page__contact-list{gap:.9375rem;margin-top:1.875rem}
+  .contacts-page__contact-row,.contacts-page__company-detail-row{font-size:clamp(1rem,1.5625vw,1.125rem);letter-spacing:.01em}
+  .contacts-page__field-label--small,.contacts-page__company-detail-row .contacts-page__field-label--small{font-size:inherit}
+  .contacts-page__social-label{font-size:1rem;letter-spacing:.01em}
+  .contacts-page__social-links{gap:.625rem}
+  .contacts-page__social-link{width:3.125rem;height:3.125rem}
+  .contacts-page .menu-toggle{font-size:clamp(1.75rem,3.515625vw,2.25rem)}
+  .contacts-page__company-card-content{gap:1.875rem;margin-top:1.875rem}
+  .contacts-page__company-details-list{gap:.9375rem}
+  .contacts-page__download-card{min-height:0;padding:.9375rem;border-radius:1.25rem}
+  .contacts-page__download-label{font-size:1rem;font-weight:400;line-height:1.25;letter-spacing:-.05em;text-transform:uppercase}
+  .contacts-page__download-icon{width:1.9375rem;height:1.9375rem}
 }
 
 @media(max-width:37.5rem){
-  .contacts-page__main{padding-top:5.125rem;padding-bottom:3.75rem}
+  .contacts-page__main{padding-top:3.5rem;padding-bottom:3.75rem}
+  .contacts-page__breadcrumbs.wrap,.contacts-page__content.wrap{width:calc(100% - 1.5rem)}
   .contacts-page__breadcrumbs{font-size:.75rem}
-  .contacts-page__content{margin-top:2.5rem}
-  .contacts-page__title{font-size:clamp(2.375rem,10vw,3rem)}
-  .contacts-page__columns{gap:3rem;margin-top:2.25rem}
-  .contacts-page__section-title{font-size:1.5rem}
-  .contacts-page__contact-list{gap:1.25rem;margin-top:1.875rem}
-  .contacts-page__contact-row,.contacts-page__company-detail-row{flex-direction:column;align-items:flex-start;gap:.375rem;font-size:1rem}
+  .contacts-page__content{margin-top:1.875rem}
+  .contacts-page__title{font-size:2.375rem;line-height:.9}
+  .contacts-page__columns{gap:3.125rem;margin-top:3.125rem}
+  .contacts-page__section-title{font-size:2.25rem}
+  .contacts-page__contact-list{gap:.9375rem;margin-top:1.875rem}
+  .contacts-page__contact-row,.contacts-page__company-detail-row{flex-direction:column;align-items:flex-start;gap:.9375rem;font-size:.875rem;letter-spacing:0}
+  .contacts-page__contact-row--postal{padding-block:.9375rem}
+  .contacts-page__contact-row:not(.contacts-page__contact-row--legal):not(.contacts-page__contact-row--postal){min-height:4.25rem;padding-block:.9375rem}
   .contacts-page__field-label{white-space:normal}
   .contacts-page__field-value,.contacts-page__contact-row--legal .contacts-page__field-value,.contacts-page__contact-row--postal .contacts-page__field-value,.contacts-page__company-detail-row--organization .contacts-page__field-value,.contacts-page__company-detail-row--legal-address .contacts-page__field-value{max-width:100%;text-align:left}
-  .contacts-page__social-row{align-items:flex-start;flex-direction:column;gap:.875rem}
+  .contacts-page__social-row{align-items:flex-start;flex-direction:column;gap:.9375rem;padding-block:.9375rem}
+  .contacts-page__social-label{font-size:.875rem;letter-spacing:0}
   .contacts-page__social-links{gap:.625rem}
-  .contacts-page__company-column{padding-top:2.5rem}
-  .contacts-page__company-card-content{gap:1.5rem;margin-top:1.875rem}
-  .contacts-page__company-details-list{gap:1.25rem}
-  .contacts-page__download-card{min-height:5rem;padding:1.25rem .9375rem;border-radius:1rem}
-  .contacts-page__download-label{font-size:1rem}
-  .contacts-page__download-icon{width:2rem;height:2rem}
+  .contacts-page__company-column{padding-top:0;border-top:0}
+  .contacts-page__company-card-content{gap:1.875rem;margin-top:1.875rem}
+  .contacts-page__company-details-list{gap:.9375rem}
+  .contacts-page__download-card{padding:.9375rem .625rem}
+  .contacts-page__download-icon{width:1.1875rem;height:1.1875rem}
+  .contacts-page .topbar{height:3rem;padding:.5rem .75rem}
+  .contacts-page .topbar .brand{gap:.117rem;font-size:.525rem;letter-spacing:0}
+  .contacts-page .topbar .brand-mark{width:1.544rem;height:1.894rem}
+  .contacts-page .topbar .brand>span{width:auto;font-size:.525rem;line-height:.9;letter-spacing:0}
+  .contacts-page .menu-toggle{top:1.5rem;right:.75rem;gap:.14rem;transform:translateY(-50%);font-size:1.125rem;line-height:1;letter-spacing:0}
+  .contacts-page .menu-icon{width:1.143rem;height:.75rem}
+  .contacts-page .menu-icon i{height:.0625rem}
+  .contacts-page .menu-icon i:nth-child(1){top:.0625rem}
+  .contacts-page .menu-icon i:nth-child(2){top:.34375rem}
+  .contacts-page .menu-icon i:nth-child(3){top:.625rem}
+  .contacts-page .menu-drawer.is-open .menu-icon i:nth-child(1),.contacts-page .menu-drawer.is-open .menu-icon i:nth-child(3){top:.34375rem}
 }
 
 @media(prefers-reduced-motion:reduce){
