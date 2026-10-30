@@ -210,10 +210,11 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
 
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  const syncBenefitMore = (index) => {
+  const syncBenefitMore = (index, { deferReveal = false } = {}) => {
     const isVisible = index === 2;
     benefitMore.hidden = !isVisible;
-    benefitMore.classList.toggle('is-visible', isVisible);
+    benefitMore.classList.toggle('is-visible', isVisible && !deferReveal
+      && !benefitCopy.classList.contains('is-switching'));
   };
 
   const updateBenefitText = (index) => {
@@ -224,7 +225,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     benefitCopy.dataset.state = String(index);
     [benefitTitle, benefitDescription].forEach(prepareTextLines);
     benefitCopy.classList.add('is-visible');
-    syncBenefitMore(index);
+    syncBenefitMore(index, { deferReveal: true });
     benefitButtons.forEach((button, buttonIndex) => {
       const isActive = buttonIndex === index;
       button.classList.toggle('is-active', isActive);
@@ -279,6 +280,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
         if (version === copySwapVersion) {
           benefitCopy.classList.remove('is-switching');
           restartBenefitTextReveal();
+          syncBenefitMore(index);
         }
       }));
     };
