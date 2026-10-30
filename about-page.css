@@ -174,7 +174,7 @@
   .about-history__title{position:absolute;top:0;left:4.6875%;margin:0;font:400 clamp(2rem,3.71094vw,2.375rem)/.9 var(--sans);letter-spacing:.01em;white-space:nowrap}
   .about-history__years{position:absolute;top:14.382%;left:4.6875%;display:flex;width:90.625%;flex-direction:row;justify-content:space-between;gap:0;margin:0;padding:0;list-style:none}
   .about-history__year{width:auto;flex:none;color:#525252;font:400 clamp(1rem,1.75781vw,1.125rem)/1.2 var(--sans);letter-spacing:0}
-  .about-history__year-button{display:flex;width:auto;align-items:center;justify-content:flex-start;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;white-space:nowrap;cursor:pointer}
+  .about-history__year-button{display:flex;width:max-content;align-items:center;justify-content:flex-start;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;white-space:nowrap;cursor:pointer}
   .about-history__year-button[aria-pressed="true"]{color:var(--orange,#ff730d)}
   .about-history__year-button:focus-visible{outline:.0625rem solid var(--orange,#ff730d);outline-offset:.125rem}
   .about-history__year-button>span{width:auto}
@@ -193,7 +193,7 @@
   .about-history__years{position:relative;top:auto;left:auto;display:flex;width:calc(100% - 1.5rem);flex-direction:row;justify-content:flex-start;gap:0;margin:1.875rem .75rem 0;padding:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;list-style:none}
   .about-history__years::-webkit-scrollbar{display:none}
   .about-history__year{width:5rem;flex:0 0 5rem;color:#525252;font:400 1.125rem/1.2 var(--sans);letter-spacing:0}
-  .about-history__year-button{display:flex;width:100%;align-items:center;justify-content:flex-start;padding:0;border:0;background:transparent;color:inherit;font:inherit;white-space:nowrap;cursor:pointer}
+  .about-history__year-button{display:flex;width:max-content;align-items:center;justify-content:flex-start;padding:0;border:0;background:transparent;color:inherit;font:inherit;white-space:nowrap;cursor:pointer}
   .about-history__year-button[aria-pressed="true"]{color:var(--orange,#ff730d)}
   .about-history__year-button:focus-visible{outline:.0625rem solid var(--orange,#ff730d);outline-offset:.125rem}
   .about-history__year-button>span{width:auto}
