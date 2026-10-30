@@ -496,6 +496,10 @@ html.home-page{font-size:clamp(.9375rem,1vw,1rem)}
 .benefit-more.home-action-link:hover,.benefit-more.home-action-link:focus-visible,.benefit-more.home-action-link:active{color:#979797}
 
 /* Run the benefit copy in sequence: heading, description, then the final link. */
+<<<<<<< HEAD
+=======
+.benefit-copy p.text-reveal.text-reveal--body.text-reveal--active{--text-reveal-delay:16ms!important}
+>>>>>>> 5301312f21e233c59dd12b193638baf6b24adc0d
 .benefit-more.is-visible{transition-delay:0s,32ms}
 @media(prefers-reduced-motion:reduce){
   .benefit-copy p.text-reveal.text-reveal--body.text-reveal--active{--text-reveal-delay:0ms!important}
