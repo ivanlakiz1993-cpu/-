@@ -25,7 +25,7 @@
   const headingWidths = new WeakMap();
   const lineSeparators = new WeakMap();
   const triggerPosition = 0.75;
-  const sequenceGap = 2;
+  const sequenceGap = 16;
   const graphemes = typeof Intl.Segmenter === 'function'
     ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
     : null;

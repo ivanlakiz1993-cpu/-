@@ -141,7 +141,7 @@
     if (!window.siteTextReveal) return;
     window.siteTextReveal.prepare(title);
     window.siteTextReveal.prepare(description);
-    // The text reveal controller offsets each following element by 2 ms.
+    // The text reveal controller offsets each following element by 16 ms.
     window.siteTextReveal.animate([title, description], { restart: true });
   };
 
