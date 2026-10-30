@@ -494,3 +494,11 @@ html.home-page{font-size:clamp(.9375rem,1vw,1rem)}
 }
 .all-news.home-action-link:hover,.all-news.home-action-link:focus-visible,.all-news.home-action-link:active,
 .benefit-more.home-action-link:hover,.benefit-more.home-action-link:focus-visible,.benefit-more.home-action-link:active{color:#979797}
+
+/* Run the benefit copy in sequence: heading, description, then the final link. */
+.benefit-copy p.text-reveal.text-reveal--body.text-reveal--active{--text-reveal-delay:728ms!important}
+.benefit-more.is-visible{transition-delay:0s,1.45s}
+@media(prefers-reduced-motion:reduce){
+  .benefit-copy p.text-reveal.text-reveal--body.text-reveal--active{--text-reveal-delay:0ms!important}
+  .benefit-more.is-visible{transition-delay:0s,0s}
+}

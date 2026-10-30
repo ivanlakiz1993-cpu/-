@@ -211,7 +211,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const syncBenefitMore = (index) => {
-    const isVisible = index === 2 || window.innerWidth <= 600;
+    const isVisible = index === 2;
     benefitMore.hidden = !isVisible;
     benefitMore.classList.toggle('is-visible', isVisible);
   };
