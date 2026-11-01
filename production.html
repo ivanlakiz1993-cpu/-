@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="Демонстрация перехода от заявки к техническому заданию: изображения собираются из частиц.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self'; connect-src 'self'; prefetch-src 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Производство — СпецЭлектроника</title>
+  <link rel="stylesheet" href="styles.css?v=20261101-production-particles-1">
+  <link rel="stylesheet" href="hero-grid.css?v=20261101-production-particles-1">
+  <link rel="stylesheet" href="layout-gutters.css?v=20261101-production-particles-1">
+  <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
+  <link rel="stylesheet" href="production-particle.css?v=20261101-1">
+  <script src="site-header.js?v=20261101-production-route-1"></script>
+  <script src="page-transition.js?v=20261027-unified-entry-reveal-1"></script>
+</head>
+<body class="production-demo">
+  <site-header page="production"></site-header>
+  <main id="top" data-production-demo>
+    <section class="production-demo__hero" aria-labelledby="production-title">
+      <div class="production-demo__layout">
+        <div class="production-demo__copy">
+          <p class="production-demo__eyebrow"><span></span> ПРОИЗВОДСТВЕННЫЙ ПРОЦЕСС</p>
+          <h1 id="production-title">Производство</h1>
+          <p class="production-demo__intro">От заявки к техническому заданию — два этапа, собранные из одного потока частиц.</p>
+
+          <ol class="production-demo__steps" aria-label="Этапы процесса">
+            <li class="production-demo__step is-active" data-particle-step="0" aria-current="step">
+              <span class="production-demo__step-number">01</span>
+              <span>Заявка</span>
+            </li>
+            <li class="production-demo__step" data-particle-step="1">
+              <span class="production-demo__step-number">02</span>
+              <span>Техническое задание</span>
+            </li>
+          </ol>
+
+          <button class="production-demo__replay" type="button" data-particle-replay disabled>
+            <span class="production-demo__replay-icon" aria-hidden="true">↻</span>
+            <span data-particle-button-label>Подготовка анимации</span>
+          </button>
+        </div>
+
+        <div class="production-demo__visual">
+          <div class="production-demo__frame" data-particle-frame>
+            <canvas
+              class="production-demo__canvas"
+              data-particle-canvas
+              role="img"
+              aria-label="Частицы собирают изображение телефона, рассеиваются и складываются в чертёж на планшете">
+              Анимация частиц недоступна в этом браузере.
+            </canvas>
+            <span class="production-demo__frame-index" aria-hidden="true">S / E&nbsp;&nbsp;—&nbsp;&nbsp; 01—02</span>
+            <div class="production-demo__caption" aria-live="polite" aria-atomic="true">
+              <span class="production-demo__caption-step" data-particle-caption>01 — Заявка</span>
+              <span class="production-demo__caption-status" data-particle-status>Собираем образ из частиц</span>
+            </div>
+          </div>
+          <div class="production-demo__progress" aria-hidden="true">
+            <span data-particle-progress></span>
+          </div>
+        </div>
+      </div>
+      <a class="production-demo__back" href="index.html#top"><span aria-hidden="true">↖</span> На главную</a>
+    </section>
+  </main>
+  <script src="production-particle.js?v=20261101-1"></script>
+</body>
+</html>
