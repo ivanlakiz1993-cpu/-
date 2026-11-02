@@ -145,17 +145,6 @@ if ('IntersectionObserver' in window) {
   newsCards.forEach(setNewsCardBackground);
 }
 
-document.querySelectorAll('.project-cta__button, .submit').forEach((button) => {
-  button.addEventListener('pointermove', (event) => {
-    if (event.pointerType === 'touch') return;
-    const bounds = button.getBoundingClientRect();
-    const x = ((event.clientX - bounds.left) / bounds.width) * 100;
-    const y = ((event.clientY - bounds.top) / bounds.height) * 100;
-    button.style.setProperty('--cursor-x', `${x}%`);
-    button.style.setProperty('--cursor-y', `${y}%`);
-  });
-});
-
 const benefitStates = [
   {
     title: 'Гарантийные обязательства',

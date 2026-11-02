@@ -8,22 +8,25 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self'; connect-src 'self'; prefetch-src 'self'; form-action 'self'; upgrade-insecure-requests">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Производство — СпецЭлектроника</title>
-  <link rel="stylesheet" href="styles.css?v=20261101-production-particles-1">
+  <link rel="stylesheet" href="styles.css?v=20261102-production-webm-hover-1">
   <link rel="stylesheet" href="hero-grid.css?v=20261101-production-particles-1">
   <link rel="stylesheet" href="layout-gutters.css?v=20261101-production-particles-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
-  <link rel="stylesheet" href="production-hero.css?v=20261102-2">
+  <link rel="stylesheet" href="production-hero.css?v=20261102-production-webm-hover-1">
   <script src="site-header.js?v=20261101-production-route-1"></script>
   <script src="page-transition.js?v=20261027-unified-entry-reveal-1"></script>
-  <script src="production-hero.js?v=20261102-1" defer></script>
+  <script src="button-glow.js?v=20261102-shared-button-glow-1" defer></script>
+  <script src="production-hero.js?v=20261102-video-playback-1" defer></script>
 </head>
 <body class="production-page">
   <site-header page="production"></site-header>
   <main id="top">
     <section class="production-hero" aria-labelledby="production-title">
-      <picture class="production-hero__media" aria-hidden="true">
-        <img src="assets/production-hero-background.png" alt="" fetchpriority="high" decoding="async">
-      </picture>
+      <div class="production-hero__media" aria-hidden="true">
+        <video class="production-hero__video" muted loop playsinline preload="metadata" poster="assets/production-hero-background.png">
+          <source src="assets/production-hero-background.webm" type="video/webm">
+        </video>
+      </div>
       <div class="production-hero__content">
         <h1 id="production-title">Контрактное производство электроники</h1>
         <div class="production-hero__support">

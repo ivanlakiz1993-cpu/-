@@ -1,15 +1,21 @@
-const productionHeroButton = document.querySelector('.production-hero__button');
+const productionHeroVideo = document.querySelector('.production-hero__video');
+const productionHeroMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-if (productionHeroButton) {
-  productionHeroButton.addEventListener('pointermove', (event) => {
-    if (event.pointerType === 'touch') return;
+if (productionHeroVideo) {
+  const syncProductionHeroPlayback = () => {
+    if (productionHeroMotion.matches) {
+      productionHeroVideo.pause();
+      return;
+    }
 
-    const bounds = productionHeroButton.getBoundingClientRect();
-    if (!bounds.width || !bounds.height) return;
+    productionHeroVideo.play().catch(() => {});
+  };
 
-    const x = ((event.clientX - bounds.left) / bounds.width) * 100;
-    const y = ((event.clientY - bounds.top) / bounds.height) * 100;
-    productionHeroButton.style.setProperty('--cursor-x', `${x}%`);
-    productionHeroButton.style.setProperty('--cursor-y', `${y}%`);
-  });
+  syncProductionHeroPlayback();
+
+  if (productionHeroMotion.addEventListener) {
+    productionHeroMotion.addEventListener('change', syncProductionHeroPlayback);
+  } else {
+    productionHeroMotion.addListener(syncProductionHeroPlayback);
+  }
 }
