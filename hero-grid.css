@@ -60,6 +60,14 @@
 @media(max-width:56.25rem){.brand>span{font-size:0.875rem;width:auto}.menu-toggle{gap:0.75rem;font-size:1.375rem}.menu-icon{width:2.125rem;height:2.125rem}.hero-title{left:7%;top:22%;font-size:clamp(3.25rem,8.75vw,5rem)}.hero-services{top:auto;bottom:19%;font-size:0.875rem}.hero-description{top:auto;bottom:4%;left:7%;right:7%;width:auto;height:auto;min-height:6.25rem;font-size:0.875rem}.grid-top{top:9.5%}.grid-section-bottom{top:calc(100% - 0.0625rem)}.grid-bottom{top:94.6%}.grid-mid{top:52.8%}.grid-orange-left{top:68.5%}.grid-orange-right{top:82.1%}.grid-left,.grid-right{width:48.625rem}.grid-inner-right{width:14.375rem}.grid-description-left{width:6.125rem}.grid-orange-center{width:20.5625rem}}
 @media(max-width:37.5rem){.grid-left,.grid-right{width:43.09375rem}.grid-inner-right{width:12.75rem}.grid-description-left{width:5.4375rem}.grid-orange-center{width:18.25rem}}
 
+/* Desktop homepage hero aligned to Figma frame 1958:7025 (1920 × 900). */
+@media (min-width:75rem){
+  .home-page .hero{height:56.25rem}
+  .home-page .hero-bg img{inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+  .home-page .hero-services-anchor{top:calc(50% + 6.375rem)}
+  .home-page .hero-description-anchor{bottom:3.125rem}
+}
+
 /* Responsive hero layouts based on Figma frames 1960:6327 (tablet) and 2221:10430 (mobile). */
 .hero-copy-group{display:contents}
 @media (min-width:37.5625rem) and (max-width:74.9375rem){
