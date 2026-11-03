@@ -1,0 +1,244 @@
+.development-page {
+  overflow-x: hidden;
+  background: #000;
+  color: #f4f4f4;
+}
+
+.development-hero {
+  min-height: clamp(45rem, 47.6vw, 57.125rem);
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+  background: #000;
+}
+
+.development-hero__content {
+  width: min(63rem, calc(100% - 10.4vw));
+  margin-inline: 5.2vw;
+  padding-top: 18rem;
+  padding-bottom: clamp(5rem, 5.2vw, 6.25rem);
+}
+
+.development-hero h1 {
+  max-width: 49.25rem;
+  margin: 0 0 3rem;
+  font-family: var(--sans);
+  font-size: clamp(2.75rem, 3.34vw, 4rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: .01em;
+}
+
+.development-hero p {
+  max-width: 43.625rem;
+  margin: 0 0 2.75rem;
+  font-size: clamp(1rem, 1.25vw, 1.5rem);
+  line-height: 1.1;
+  color: #f0f0f0;
+}
+
+.development-button {
+  width: clamp(14rem, 23.2vw, 28rem);
+  min-height: clamp(3.5rem, 4.7vw, 5.625rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--orange);
+  border-radius: .25rem;
+  color: #fff;
+  font-size: clamp(.875rem, 1.25vw, 1.5rem);
+  line-height: 1.25;
+  text-align: center;
+  text-transform: uppercase;
+  transition: background-color .2s ease, border-color .2s ease;
+}
+
+.development-button:hover {
+  background: var(--orange);
+  border-color: var(--orange);
+}
+
+.development-button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.development-pattern,
+.development-panel {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: #050403;
+}
+
+.development-pattern--intro {
+  height: clamp(25rem, 44.27vw, 53.125rem);
+}
+
+.development-pattern--intro img {
+  position: absolute;
+  inset: -8.26% 0 auto;
+  width: 100%;
+  height: 108.28%;
+  object-fit: fill;
+}
+
+.development-panel {
+  height: clamp(30rem, 35.26vw, 42.3125rem);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.development-panel__texture {
+  position: absolute;
+  z-index: -1;
+  inset: -35.92% 0 auto;
+  width: 100%;
+  height: 135.95%;
+  object-fit: fill;
+}
+
+.development-panel h2,
+.development-panel__contact-copy {
+  position: relative;
+  margin: 0;
+  padding-top: clamp(7rem, 8.4vw, 10.125rem);
+  text-align: center;
+}
+
+.development-panel h2 {
+  width: min(calc(100% - 3rem), 76rem);
+  font-size: clamp(2rem, 3.34vw, 4rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: .01em;
+}
+
+.development-panel__contact-copy {
+  display: flex;
+  width: min(calc(100% - 3rem), 56rem);
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.development-panel__contact-copy p {
+  max-width: 58rem;
+  margin: 0;
+  font-size: clamp(1rem, 1.25vw, 1.5rem);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.development-endcap {
+  height: clamp(12rem, 17.2vw, 20.625rem);
+  background: #000;
+}
+
+@media (max-width: 56.25rem) {
+  .development-hero {
+    min-height: clamp(40rem, 100svh, 56rem);
+  }
+
+  .development-hero__content {
+    width: calc(100% - 3rem);
+    margin-inline: 1.5rem;
+    padding-top: 15rem;
+    padding-bottom: 7rem;
+  }
+
+  .development-hero h1 {
+    max-width: 38rem;
+    font-size: clamp(2.5rem, 7.2vw, 4rem);
+  }
+
+  .development-hero p {
+    max-width: 31rem;
+    font-size: 1rem;
+  }
+
+  .development-pattern--intro {
+    height: 45rem;
+  }
+
+  .development-panel {
+    height: 38rem;
+  }
+
+  .development-panel h2,
+  .development-panel__contact-copy {
+    padding-top: 8rem;
+  }
+
+  .development-endcap {
+    height: 12rem;
+  }
+}
+
+@media (max-width: 37.5rem) {
+  .development-hero {
+    min-height: 43.75rem;
+  }
+
+  .development-hero__content {
+    width: calc(100% - 2.25rem);
+    margin-inline: 1.125rem;
+    padding-top: 12rem;
+    padding-bottom: 5.5rem;
+  }
+
+  .development-hero h1 {
+    font-size: clamp(2.25rem, 10vw, 3rem);
+  }
+
+  .development-hero p {
+    font-size: .875rem;
+    line-height: 1.4;
+  }
+
+  .development-button {
+    width: min(100%, 22rem);
+    min-height: 3.5rem;
+  }
+
+  .development-pattern--intro {
+    height: 28rem;
+  }
+
+  .development-pattern--intro img,
+  .development-panel__texture {
+    width: 160%;
+    left: -30%;
+  }
+
+  .development-panel {
+    height: 30rem;
+  }
+
+  .development-panel h2 {
+    width: calc(100% - 2.25rem);
+    padding-top: 6.5rem;
+    font-size: 2rem;
+  }
+
+  .development-panel__contact-copy {
+    width: calc(100% - 2.25rem);
+    padding-top: 6.5rem;
+    gap: 1.5rem;
+  }
+
+  .development-panel__contact-copy p {
+    font-size: 1rem;
+  }
+
+  .development-endcap {
+    height: 8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .development-button {
+    transition: none;
+  }
+}

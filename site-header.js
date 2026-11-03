@@ -9,6 +9,7 @@
       const currentPage = page === 'news-article' ? 'news' : page;
       const homeAnchor = (section) => `${isHome ? '' : 'index.html'}#${section}`;
       const productionHref = currentPage === 'production' ? '#top' : 'production.html';
+      const developmentHref = currentPage === 'development' ? '#top' : 'development.html';
       const current = (route) => currentPage === route ? ' aria-current="page"' : '';
       const contactsHref = currentPage === 'contacts' ? '#top' : 'contacts.html';
 
@@ -27,7 +28,7 @@
           <nav id="site-nav" class="nav" aria-label="Основная навигация" aria-hidden="true">
             <div class="menu-nav-links">
               <a href="${productionHref}"${current('production')}>Производство</a>
-              <a href="${homeAnchor('work')}">Разработка</a>
+              <a href="${developmentHref}"${current('development')}>Разработка</a>
               <a href="testing.html"${current('testing')}>Испытания</a>
               <a href="about.html"${current('about')}>О нас</a>
               <a href="news.html"${current('news')}>Новости</a>
