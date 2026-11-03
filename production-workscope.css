@@ -129,6 +129,7 @@
 
 @media(min-width:109rem){
   .production-workscope{
+    height:100svh;
     flex-direction:row;
     align-items:flex-start;
     gap:4.0625rem;
@@ -138,10 +139,21 @@
   .production-workscope__intro{gap:3.125rem}
   .production-workscope__stages{
     flex:1 1 0;
+    height:calc(100svh - 3.125rem);
+    min-height:0;
     min-width:43.75rem;
     gap:6.25rem;
     padding:0 0 3.125rem 3.125rem;
+    overflow-x:hidden;
+    overflow-y:auto;
+    overscroll-behavior-y:contain;
+    scrollbar-color:#6e6e6e transparent;
+    scrollbar-width:thin;
   }
+
+  .production-workscope__stages::-webkit-scrollbar{width:.375rem}
+  .production-workscope__stages::-webkit-scrollbar-thumb{border-radius:999px;background:#6e6e6e}
+  .production-workscope__stages::-webkit-scrollbar-track{background:transparent}
 
   .production-workscope__stage{gap:6.25rem}
 
