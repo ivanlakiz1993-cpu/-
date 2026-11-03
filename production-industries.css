@@ -28,7 +28,7 @@
 .production-industries__option.is-active{color:#fff}
 
 .production-industries.is-enhanced{height:300svh;margin-top:0;overflow:visible}
-.production-industries.is-enhanced .production-industries__stage{position:sticky;top:0;height:100svh;opacity:var(--industries-entry-opacity,0);transform:scale(var(--industries-entry-scale,.96));transform-origin:center top;will-change:opacity,transform}
+.production-industries.is-enhanced .production-industries__stage{position:sticky;top:0;height:var(--production-industries-scene-height);opacity:var(--industries-entry-opacity,0);transform:scale(var(--industries-entry-scale,.96));transform-origin:center top;will-change:opacity,transform}
 .production-industries.is-enhanced .production-industries__image-stack{transform:translate3d(-50%,var(--industry-offset,0px),0);will-change:transform}
 .production-industries.is-enhanced .production-industries__image--aerospace,.production-industries.is-enhanced .production-industries__image--automation{display:block}
 
@@ -43,7 +43,7 @@
   .production-industries__selector{top:calc(50% + .03125rem);left:.75rem;width:calc(100% - 1.5rem);gap:1.875rem;transform:translateY(-50%);font-size:1.5rem;line-height:1;letter-spacing:-.05em}
 
   .production-industries.is-enhanced{height:300svh;margin-top:0}
-  .production-industries.is-enhanced .production-industries__stage{height:100svh}
+  .production-industries.is-enhanced .production-industries__stage{height:min(33.8125rem,calc(138.59vw + .03125rem))}
   .production-industries.is-enhanced .production-industries__image-stack{top:0;left:50%;display:flex;width:min(100%,24.375rem);height:auto;flex-direction:column;gap:1.25rem;transform:translate3d(-50%,var(--industry-offset,0px),0)}
   .production-industries.is-enhanced .production-industries__image{height:min(33.7814375rem,138.59vw);border-radius:7.197px}
   .production-industries.is-enhanced .production-industries__selector{top:calc(50% + .03125rem)}

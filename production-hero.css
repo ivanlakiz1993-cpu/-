@@ -38,9 +38,9 @@
 }
 
 @media(max-width:37.5rem){
-  .production-page site-header{height:4.125rem}
-  .production-page .topbar{height:4.125rem}
-  .production-hero{height:min(41.75rem,calc(100svh - 4.125rem));padding:3.125rem var(--production-gutter)}
+  .production-page site-header{height:4.375rem}
+  .production-page .topbar{height:4.375rem}
+  .production-hero{height:min(41.75rem,calc(100svh - 4.375rem));padding:3.125rem var(--production-gutter)}
   .production-hero__video{object-position:56% center}
   .production-hero__heading{font-size:2.375rem;line-height:.9;letter-spacing:.02375rem}
   .production-hero__supporting-content{width:100%}
