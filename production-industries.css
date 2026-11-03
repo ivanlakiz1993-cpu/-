@@ -34,6 +34,10 @@
 
 .production-page.production-scroll-motion .production-industries__option{transition:color .28s ease}
 
+@media (min-width:40.0625rem) and (max-width:74.9375rem){
+  .production-industries__selector{gap:.9375rem;font-size:1.5rem;line-height:1;letter-spacing:-.075rem}
+}
+
 @media(max-width:40rem){
   .production-industries{height:min(33.8125rem,calc(138.59vw + .03125rem));margin-top:3.75rem}
   .production-industries__stage{height:100%}
