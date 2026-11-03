@@ -282,8 +282,12 @@
     const runHeight=splitPreTravel+splitHold+entryDistance+sequenceDistance+viewport*1.5;
     end=splitEnabled?introTop+runHeight:sequenceStart+runHeight;
     if(splitEnabled){
+      // Keep the split reveal independent from the decorative grid line: the
+      // line is intentionally absent from the homepage cover.
       const line=hero.querySelector('.grid-mid');
-      const seam=line.getBoundingClientRect().top-hero.getBoundingClientRect().top;
+      const seam=line
+        ? line.getBoundingClientRect().top-hero.getBoundingClientRect().top
+        : heroHeight*(mobileMedia.matches ? 0.58 : 0.528);
       splitSeam=Math.max(0,Math.min(viewport-1,seam));
       splitTopTravel=Math.max(0,splitSeam-splitPreTravel);
       splitBottomTravel=viewport-splitSeam+splitPreTravel;
