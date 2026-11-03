@@ -238,3 +238,30 @@ site-header{--menu-gutter:max(5.2083333333vw,calc((100vw - 107.5rem)/2));display
   .hero-description{background:transparent;backdrop-filter:none;isolation:isolate}
   .hero-description::before{content:"";position:absolute;inset:0.0625rem 0 0;z-index:-1;background:rgba(0,0,0,.4);backdrop-filter:blur(0.125rem);clip-path:inset(0);pointer-events:none}
 }
+
+/* Final size and placement checks against the Figma header and hero frames. */
+.topbar{background:rgba(0,0,0,.6);backdrop-filter:blur(0.165625rem)}
+@media(min-width:75rem){
+  .home-page .hero-services-anchor{top:53.2222%}
+  .hero-description{overflow:clip;border-radius:0.625rem}
+}
+@media(min-width:56.3125rem) and (max-width:74.9375rem){
+  .home-page .intro-sequence{padding-top:5.9375rem}
+  .menu-toggle{font-size:2.25rem}
+  .hero{min-height:clamp(41.6875rem,65.13671875vw,50rem)}
+  .hero-bg img{left:-10.28%;width:120.55%}
+}
+@media(max-width:37.5rem){
+  .home-page .intro-sequence{padding-top:3rem}
+  .topbar{height:3rem;padding:0.5rem 0.75rem}
+  .topbar .brand{height:1.89375rem;gap:0.125rem}
+  .topbar .brand-mark{width:1.5441rem;height:1.89375rem}
+  .topbar .brand>span{width:auto;font-size:0.524375rem;line-height:0.9;letter-spacing:0}
+  .menu-toggle{top:1.5rem;right:0.75rem;transform:translateY(-50%);align-items:center;gap:0.13944rem;font-size:1.125rem;line-height:1.2;letter-spacing:0}
+  .menu-toggle>span:first-child{top:0}
+  .menu-icon{width:1.14325rem;height:1.35rem}
+  .menu-icon i{height:0.0625rem}
+  .menu-icon i:nth-child(1){top:0.25rem}
+  .menu-icon i:nth-child(2){top:0.675rem}
+  .menu-icon i:nth-child(3){top:1.1rem}
+}
