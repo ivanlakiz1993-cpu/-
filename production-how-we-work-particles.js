@@ -23,11 +23,12 @@
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
   const ease = value => value * value * (3 - 2 * value);
-  const guideSize = 512;
-  const maxParticles = 6200;
-  const binOpacity = [.3, .45, .64, .82];
+  const guideSize = 768;
+  const maxParticles = 18000;
+  const binOpacity = [.24, .4, .62, .84];
 
   let targets = [];
+  let artworks = [];
   let cloud = null;
   let particleSize = null;
   let particleDepth = null;
@@ -88,6 +89,7 @@
         candidates.push({
           x: (x + 1) / guideSize,
           y: (y + 1) / guideSize,
+          light,
           key: -Math.log(Math.max(random(), 1e-8)) / weight
         });
       }
@@ -98,9 +100,10 @@
     return candidates;
   };
 
-  const initializeParticles = samples => {
+  const initializeParticles = (samples, images) => {
     const count = Math.min(maxParticles, ...samples.map(sample => sample.length));
     const random = randomGenerator(10921);
+    artworks = images;
     targets = samples.map(sample => {
       const points = new Float32Array(count * 2);
       for (let index = 0; index < count; index++) {
@@ -122,9 +125,9 @@
       cloud[index * 2] = .5 + Math.cos(angle) * radius;
       cloud[index * 2 + 1] = .5 + Math.sin(angle) * radius;
       particleDepth[index] = random();
-      particleSize[index] = .65 + particleDepth[index] * 1.05;
+      particleSize[index] = .55 + particleDepth[index] * .65;
       particleSeed[index] = random() * Math.PI * 2;
-      particleBins[Math.min(3, Math.floor(random() * 4))].push(index);
+      particleBins[Math.min(3, Math.floor(samples[0][index].light * 4))].push(index);
     }
   };
 
@@ -153,6 +156,8 @@
       canvas.height = height;
     }
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = 'high';
     canvasWidth = bounds.width;
     canvasHeight = bounds.height;
     paint(performance.now());
@@ -177,10 +182,22 @@
     const left = (canvasWidth - size) / 2;
     const top = (canvasHeight - size) / 2;
 
+    // The supplied artwork is itself made of fine dots. Reveal its full resolution
+    // as particles settle so the contours and small details stay faithful.
+    const settled = ease(clamp((intro - .62) / .38));
+    const fromImageOpacity = (toIndex === fromIndex ? 1 : 1 - ease(clamp(fraction * 4))) * settled;
+    const toImageOpacity = toIndex === fromIndex ? 0 : ease(clamp((fraction - .75) * 4)) * settled;
+    context.globalAlpha = fromImageOpacity;
+    context.drawImage(artworks[fromIndex], left, top, size, size);
+    if (toImageOpacity) {
+      context.globalAlpha = toImageOpacity;
+      context.drawImage(artworks[toIndex], left, top, size, size);
+    }
+
     context.fillStyle = '#e5e8eb';
     context.globalCompositeOperation = 'lighter';
     for (let bin = 0; bin < particleBins.length; bin++) {
-      context.globalAlpha = binOpacity[bin] * opacity;
+      context.globalAlpha = binOpacity[bin] * opacity * (1 - Math.max(fromImageOpacity, toImageOpacity) * .9);
       const indices = particleBins[bin];
       for (let item = 0; item < indices.length; item++) {
         const index = indices[item];
@@ -272,7 +289,7 @@
     try {
       const images = await Promise.all(sources.map(loadImage));
       const samples = images.map(sampleImage);
-      initializeParticles(samples);
+      initializeParticles(samples, images);
       canvasReady = true;
       resizeCanvas();
       canvas.hidden = false;

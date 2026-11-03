@@ -57,7 +57,7 @@
   height:100%;
   max-width:none;
   border-radius:1rem;
-  object-fit:fill;
+  object-fit:contain;
   transition:opacity .3s ease;
 }
 
