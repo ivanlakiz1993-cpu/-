@@ -7,12 +7,15 @@
 .production-hero__media{position:absolute;z-index:0;inset:0;display:block;overflow:hidden}
 .production-hero__media::after{position:absolute;inset:0;content:"";background:rgba(0,0,0,.4)}
 .production-hero__video{display:block;width:100%;height:100%;object-fit:cover;object-position:center 52%}
+.production-page.production-scroll-motion .production-hero__media{opacity:var(--production-hero-media-opacity,1);transform:scale(var(--production-hero-media-scale,1));transform-origin:center;will-change:opacity,transform}
 .production-hero__breadcrumbs{position:absolute;z-index:2;top:.5rem;left:var(--production-gutter);display:flex;align-items:center;gap:.1875rem;color:#979797;font-size:.75rem;line-height:1.3;white-space:nowrap}
+.production-page.production-scroll-motion .production-hero__breadcrumbs{opacity:var(--production-hero-content-opacity,1);transform:translateY(var(--production-hero-content-y,0px));will-change:opacity,transform}
 .production-hero__breadcrumb-link{color:inherit;transition:color .2s ease}
 .production-hero__breadcrumb-link:hover,.production-hero__breadcrumb-link:focus-visible{color:#fff}
 .production-hero__breadcrumb-link:focus-visible{outline:.0625rem solid currentColor;outline-offset:.125rem}
 .production-hero__breadcrumb-current{color:var(--orange)}
 .production-hero__content{position:relative;z-index:1;display:flex;flex:1;flex-direction:column;justify-content:space-between;gap:3rem;width:min(100%,108rem);min-height:0;margin-inline:auto}
+.production-page.production-scroll-motion .production-hero__content{opacity:var(--production-hero-content-opacity,1);transform:translateY(var(--production-hero-content-y,0px));will-change:opacity,transform}
 .production-hero__heading{width:100%;max-width:clamp(22.875rem,calc(40.5134vw + 6.19625rem),54.8125rem);margin:0;color:#fff;font-family:var(--sans);font-size:clamp(2.375rem,3.333333vw,4rem);font-weight:400;line-height:1;letter-spacing:.04rem}
 .production-hero__supporting-content{display:flex;flex-direction:column;align-items:flex-start;gap:1.875rem}
 .production-hero__description{width:100%;max-width:clamp(22.875rem,calc(16.40625vw + 15.375rem),35.0625rem);margin:0;color:#fff;font-size:clamp(.875rem,calc(.6696vw + .69625rem),1.5rem);font-weight:400;line-height:1.2}

@@ -1,0 +1,200 @@
+.production-workscope{
+  --production-workscope-gutter:clamp(.75rem,calc(5.803571vw - .71625rem),6.25rem);
+  --production-workscope-title-size:clamp(2.375rem,calc(2.9018vw + .5179rem),4rem);
+  --production-workscope-title-line:clamp(.9,calc(.011161vw + .78571),1);
+  --production-workscope-copy-size:clamp(.875rem,calc(.66964vw + .69625rem),1.5rem);
+  display:flex;
+  flex-direction:column;
+  gap:1.875rem;
+  width:min(120rem,100%);
+  margin-inline:auto;
+  padding:3.125rem var(--production-workscope-gutter) 3.125rem;
+  overflow:hidden;
+  background:#121212;
+  color:#fff;
+}
+
+.production-workscope__intro{
+  display:flex;
+  flex:0 0 auto;
+  flex-direction:column;
+  gap:1.875rem;
+  width:min(49.75rem,100%);
+}
+
+.production-workscope__heading{
+  width:100%;
+  margin:0;
+  color:#fff;
+  font-family:var(--sans);
+  font-size:var(--production-workscope-title-size);
+  font-weight:400;
+  line-height:var(--production-workscope-title-line);
+  letter-spacing:.01em;
+}
+
+.production-workscope__description{
+  width:min(44.6875rem,100%);
+  margin:0;
+  color:#fff;
+  font-size:var(--production-workscope-copy-size);
+  font-weight:400;
+  line-height:1.2;
+}
+
+.production-workscope__stages{
+  position:relative;
+  display:flex;
+  flex:0 0 auto;
+  flex-direction:column;
+  gap:3.75rem;
+  width:100%;
+  margin:0;
+  padding:0 1.875rem 1.875rem;
+  border-left:1px solid #6e6e6e;
+  list-style:none;
+}
+
+.production-workscope__stage{
+  display:flex;
+  flex:0 0 auto;
+  align-items:flex-start;
+  gap:1.875rem;
+  width:min(40.5625rem,100%);
+  height:7.375rem;
+  padding:0;
+  font-family:var(--sans);
+}
+.production-workscope__stage:nth-child(7){height:6rem}
+
+.production-workscope__number{
+  flex:0 0 1.6875rem;
+  width:1.6875rem;
+  color:#fff;
+  font-size:1.5rem;
+  font-weight:400;
+  line-height:1.1;
+}
+
+.production-workscope__content{
+  display:flex;
+  flex:0 0 32.625rem;
+  flex-direction:column;
+  gap:3.125rem;
+  width:32.625rem;
+  min-width:0;
+}
+
+.production-workscope__stage-heading{
+  width:100%;
+  margin:0;
+  color:#fff;
+  font-size:1.5rem;
+  font-weight:400;
+  line-height:1;
+  letter-spacing:-.075rem;
+}
+
+.production-workscope__stage-description{
+  width:100%;
+  margin:0;
+  color:#979797;
+  font-size:1.125rem;
+  font-weight:400;
+  line-height:1.2;
+}
+
+.production-workscope__divider{
+  position:absolute;
+  left:-1px;
+  display:block;
+  width:calc(100% + 1px);
+  line-height:0;
+}
+
+.production-workscope__divider img{
+  display:block;
+  width:100%;
+  height:auto;
+  max-width:none;
+}
+
+.production-workscope__stage:nth-child(1) .production-workscope__divider{top:10.5rem}
+.production-workscope__stage:nth-child(2) .production-workscope__divider{top:24.125rem}
+.production-workscope__stage:nth-child(3) .production-workscope__divider{top:37.75rem}
+.production-workscope__stage:nth-child(4) .production-workscope__divider{top:51.375rem}
+.production-workscope__stage:nth-child(5) .production-workscope__divider{top:65rem}
+.production-workscope__stage:nth-child(6) .production-workscope__divider{top:78.625rem}
+.production-workscope__stage:nth-child(7) .production-workscope__divider{top:90.875rem}
+
+@media(min-width:109rem){
+  .production-workscope{
+    flex-direction:row;
+    align-items:flex-start;
+    gap:4.0625rem;
+    padding-bottom:0;
+  }
+
+  .production-workscope__intro{gap:3.125rem}
+  .production-workscope__stages{
+    flex:1 1 0;
+    min-width:43.75rem;
+    gap:6.25rem;
+    padding:0 0 3.125rem 3.125rem;
+  }
+
+  .production-workscope__stage{gap:6.25rem}
+
+  .production-workscope__stage:nth-child(1) .production-workscope__divider{top:10.5rem}
+  .production-workscope__stage:nth-child(2) .production-workscope__divider{top:24.125rem}
+  .production-workscope__stage:nth-child(3) .production-workscope__divider{top:37.75rem}
+  .production-workscope__stage:nth-child(4) .production-workscope__divider{top:51.375rem}
+  .production-workscope__stage:nth-child(5) .production-workscope__divider{top:65rem}
+  .production-workscope__stage:nth-child(6) .production-workscope__divider{top:78.625rem}
+  .production-workscope__stage:nth-child(7) .production-workscope__divider{top:90.875rem}
+}
+
+@media(max-width:108.9375rem){
+  .production-workscope__intro{height:9.5rem}
+  .production-workscope__stages{padding-bottom:1.875rem}
+  .production-workscope__divider{width:100%}
+  .production-workscope__stage:nth-child(1) .production-workscope__divider{top:9.25rem}
+  .production-workscope__stage:nth-child(2) .production-workscope__divider{top:20.375rem}
+  .production-workscope__stage:nth-child(3) .production-workscope__divider{top:31.5rem}
+  .production-workscope__stage:nth-child(4) .production-workscope__divider{top:42.625rem}
+  .production-workscope__stage:nth-child(5) .production-workscope__divider{top:53.75rem}
+  .production-workscope__stage:nth-child(6) .production-workscope__divider{top:64.875rem}
+  .production-workscope__stage:nth-child(7) .production-workscope__divider{top:74.625rem;width:calc(100% + 1px)}
+}
+
+@media(min-width:48rem) and (max-width:108.9375rem){
+  .production-workscope__stages{padding-right:1.875rem;padding-left:1.875rem}
+}
+
+@media(max-width:47.9375rem){
+  .production-workscope{padding-bottom:1.875rem}
+  .production-workscope__intro{height:12.5rem}
+  .production-workscope__description{width:100%}
+  .production-workscope__stages{padding:0 0 1.875rem}
+  .production-workscope__divider{width:calc(100% + 1px)}
+  .production-workscope__stage{
+    gap:1.875rem;
+    width:100%;
+    height:auto;
+    min-height:5.25rem;
+    padding-left:.875rem;
+  }
+  .production-workscope__stage:nth-child(7){height:auto}
+  .production-workscope__stage:nth-child(n+6){min-height:4.1875rem}
+  .production-workscope__number{flex-basis:2.5rem;width:2.5rem}
+  .production-workscope__content{flex:1 1 auto;gap:.9375rem;width:auto}
+  .production-workscope__stage-heading{font-size:1.125rem;letter-spacing:-.05625rem}
+  .production-workscope__stage-description{font-size:clamp(.875rem,calc(.6309vw + .7213rem),1.125rem)}
+  .production-workscope__stage:nth-child(1) .production-workscope__divider{top:7.125rem}
+  .production-workscope__stage:nth-child(2) .production-workscope__divider{top:16.125rem}
+  .production-workscope__stage:nth-child(3) .production-workscope__divider{top:25.125rem}
+  .production-workscope__stage:nth-child(4) .production-workscope__divider{top:34.125rem}
+  .production-workscope__stage:nth-child(5) .production-workscope__divider{top:43.125rem}
+  .production-workscope__stage:nth-child(6) .production-workscope__divider{top:51.0625rem}
+  .production-workscope__stage:nth-child(7) .production-workscope__divider{top:59rem}
+}

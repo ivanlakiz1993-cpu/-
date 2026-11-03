@@ -12,12 +12,14 @@
   <link rel="stylesheet" href="hero-grid.css?v=20261103-menu-icon-align-1">
   <link rel="stylesheet" href="layout-gutters.css?v=20261101-production-particles-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
-  <link rel="stylesheet" href="production-hero.css?v=20261103-production-hero-figma-1">
-  <link rel="stylesheet" href="production-industries.css?v=20261103-production-industries-1">
+  <link rel="stylesheet" href="production-hero.css?v=20261103-production-hero-scroll-exit-1">
+  <link rel="stylesheet" href="production-industries.css?v=20261103-production-industries-scroll-1">
+  <link rel="stylesheet" href="production-workscope.css?v=20261103-production-workscope-1">
   <script src="site-header.js?v=20261101-production-route-1"></script>
   <script src="page-transition.js?v=20261027-unified-entry-reveal-1"></script>
   <script src="button-glow.js?v=20261102-shared-button-glow-1" defer></script>
   <script src="production-hero.js?v=20261102-video-playback-1" defer></script>
+  <script src="production-industries.js?v=20261103-scroll-cards-1" defer></script>
 </head>
 <body class="production-page">
   <site-header page="production"></site-header>
@@ -61,6 +63,100 @@
           <li class="production-industries__option" data-industry-option="automation"><span>Промышленность</span><span>и автоматизация</span></li>
         </ol>
       </div>
+    </section>
+
+    <section class="production-workscope" aria-labelledby="production-workscope-heading" data-name="Work scope section" data-node-id="3438:4438">
+      <div class="production-workscope__intro" data-name="Section introduction" data-node-id="3438:4439">
+        <h2 class="production-workscope__heading" id="production-workscope-heading" data-name="Section heading" data-node-id="3438:4440">Что входит в состав работ</h2>
+        <p class="production-workscope__description" data-name="Section description" data-node-id="3438:4441">Контрактное производство включает изготовление печатных плат, монтаж компонентов и сборку электронных модулей. Комплектующие проходят входной контроль, собранные платы проверяют на работоспособность, а готовая аппаратура проходит приёмосдаточные испытания</p>
+      </div>
+
+      <ol class="production-workscope__stages" aria-label="Этапы производства" data-name="Production stages" data-node-id="3438:4442">
+        <li class="production-workscope__stage" data-name="Production stage 01" data-node-id="3438:4443">
+          <span class="production-workscope__number" data-name="Stage number" data-node-id="3438:4444">01</span>
+          <div class="production-workscope__content" data-name="Stage content" data-node-id="3438:4445">
+            <h3 class="production-workscope__stage-heading" data-name="Stage heading" data-node-id="3438:4446">Подготовка производства</h3>
+            <p class="production-workscope__stage-description" data-name="Stage description" data-node-id="3438:4447">Проверка конструкторской документации, адаптация изделия и технологическая подготовка.</p>
+          </div>
+          <picture class="production-workscope__divider" aria-hidden="true" data-name="Stage divider" data-node-id="3438:4448">
+            <source media="(min-width: 109rem)" srcset="assets/production-workscope-divider-desktop.svg">
+            <source media="(min-width: 24.4375rem)" srcset="assets/production-workscope-divider-tablet.svg">
+            <img src="assets/production-workscope-divider-mobile.svg" alt="">
+          </picture>
+        </li>
+        <li class="production-workscope__stage" data-name="Production stage 02" data-node-id="3438:4449">
+          <span class="production-workscope__number" data-name="Stage number" data-node-id="3438:4450">02</span>
+          <div class="production-workscope__content" data-name="Stage content" data-node-id="3438:4451">
+            <h3 class="production-workscope__stage-heading" data-name="Stage heading" data-node-id="3438:4452">Закупка компонентов и материалов</h3>
+            <p class="production-workscope__stage-description" data-name="Stage description" data-node-id="3438:4453">Подбор и поставка электронных компонентов, печатных плат и комплектующих</p>
+          </div>
+          <picture class="production-workscope__divider" aria-hidden="true" data-name="Stage divider" data-node-id="3438:4454">
+            <source media="(min-width: 109rem)" srcset="assets/production-workscope-divider-desktop.svg">
+            <source media="(min-width: 24.4375rem)" srcset="assets/production-workscope-divider-tablet.svg">
+            <img src="assets/production-workscope-divider-mobile.svg" alt="">
+          </picture>
+        </li>
+        <li class="production-workscope__stage" data-name="Production stage 03" data-node-id="3438:4455">
+          <span class="production-workscope__number" data-name="Stage number" data-node-id="3438:4456">03</span>
+          <div class="production-workscope__content" data-name="Stage content" data-node-id="3438:4457">
+            <h3 class="production-workscope__stage-heading" data-name="Stage heading" data-node-id="3438:4458">Изготовление и монтаж</h3>
+            <p class="production-workscope__stage-description" data-name="Stage description" data-node-id="3438:4459">Производство печатных плат, SMT- и THT-монтаж компонентов, сборка электронных блоков</p>
+          </div>
+          <picture class="production-workscope__divider" aria-hidden="true" data-name="Stage divider" data-node-id="3438:4460">
+            <source media="(min-width: 109rem)" srcset="assets/production-workscope-divider-desktop.svg">
+            <source media="(min-width: 24.4375rem)" srcset="assets/production-workscope-divider-tablet.svg">
+            <img src="assets/production-workscope-divider-mobile.svg" alt="">
+          </picture>
+        </li>
+        <li class="production-workscope__stage" data-name="Production stage 04" data-node-id="3438:4461">
+          <span class="production-workscope__number" data-name="Stage number" data-node-id="3438:4462">04</span>
+          <div class="production-workscope__content" data-name="Stage content" data-node-id="3438:4463">
+            <h3 class="production-workscope__stage-heading" data-name="Stage heading" data-node-id="3438:4464">Программирование и настройка</h3>
+            <p class="production-workscope__stage-description" data-name="Stage description" data-node-id="3438:4465">Разработка и загрузка ПО, настройка изделия, если это предусмотрено проектом</p>
+          </div>
+          <picture class="production-workscope__divider" aria-hidden="true" data-name="Stage divider" data-node-id="3438:4466">
+            <source media="(min-width: 109rem)" srcset="assets/production-workscope-divider-desktop.svg">
+            <source media="(min-width: 24.4375rem)" srcset="assets/production-workscope-divider-tablet.svg">
+            <img src="assets/production-workscope-divider-mobile.svg" alt="">
+          </picture>
+        </li>
+        <li class="production-workscope__stage" data-name="Production stage 05" data-node-id="3438:4467">
+          <span class="production-workscope__number" data-name="Stage number" data-node-id="3438:4468">05</span>
+          <div class="production-workscope__content" data-name="Stage content" data-node-id="3438:4469">
+            <h3 class="production-workscope__stage-heading" data-name="Stage heading" data-node-id="3438:4470">Контроль и испытания</h3>
+            <p class="production-workscope__stage-description" data-name="Stage description" data-node-id="3438:4471">Проверка качества монтажа, функциональное тестирование и выявление дефектов</p>
+          </div>
+          <picture class="production-workscope__divider" aria-hidden="true" data-name="Stage divider" data-node-id="3438:4472">
+            <source media="(min-width: 109rem)" srcset="assets/production-workscope-divider-desktop.svg">
+            <source media="(min-width: 24.4375rem)" srcset="assets/production-workscope-divider-tablet.svg">
+            <img src="assets/production-workscope-divider-mobile.svg" alt="">
+          </picture>
+        </li>
+        <li class="production-workscope__stage" data-name="Production stage 06" data-node-id="3438:4473">
+          <span class="production-workscope__number" data-name="Stage number" data-node-id="3438:4474">06</span>
+          <div class="production-workscope__content" data-name="Stage content" data-node-id="3438:4475">
+            <h3 class="production-workscope__stage-heading" data-name="Stage heading" data-node-id="3438:4476">Финальная сборка</h3>
+            <p class="production-workscope__stage-description" data-name="Stage description" data-node-id="3438:4477">Установка плат в корпуса, подключение кабелей и комплектация изделия</p>
+          </div>
+          <picture class="production-workscope__divider" aria-hidden="true" data-name="Stage divider" data-node-id="3438:4478">
+            <source media="(min-width: 109rem)" srcset="assets/production-workscope-divider-desktop.svg">
+            <source media="(min-width: 24.4375rem)" srcset="assets/production-workscope-divider-tablet.svg">
+            <img src="assets/production-workscope-divider-mobile.svg" alt="">
+          </picture>
+        </li>
+        <li class="production-workscope__stage" data-name="Production stage 07" data-node-id="3438:4479">
+          <span class="production-workscope__number" data-name="Stage number" data-node-id="3438:4480">07</span>
+          <div class="production-workscope__content" data-name="Stage content" data-node-id="3438:4481">
+            <h3 class="production-workscope__stage-heading" data-name="Stage heading" data-node-id="3438:4482">Упаковка и поставка</h3>
+            <p class="production-workscope__stage-description" data-name="Stage description" data-node-id="3438:4483">Маркировка, упаковка и доставка готовой продукции</p>
+          </div>
+          <picture class="production-workscope__divider production-workscope__divider--tablet-edge" aria-hidden="true" data-name="Stage divider" data-node-id="3438:4484">
+            <source media="(min-width: 109rem)" srcset="assets/production-workscope-divider-desktop.svg">
+            <source media="(min-width: 24.4375rem)" srcset="assets/production-workscope-divider-tablet-edge.svg">
+            <img src="assets/production-workscope-divider-mobile.svg" alt="">
+          </picture>
+        </li>
+      </ol>
     </section>
   </main>
 </body>
