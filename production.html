@@ -12,7 +12,8 @@
   <link rel="stylesheet" href="hero-grid.css?v=20261103-menu-icon-align-1">
   <link rel="stylesheet" href="layout-gutters.css?v=20261101-production-particles-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
-  <link rel="stylesheet" href="production-hero.css?v=20261102-home-button-glow-1">
+  <link rel="stylesheet" href="production-hero.css?v=20261103-production-hero-figma-1">
+  <link rel="stylesheet" href="production-industries.css?v=20261103-production-industries-1">
   <script src="site-header.js?v=20261101-production-route-1"></script>
   <script src="page-transition.js?v=20261027-unified-entry-reveal-1"></script>
   <script src="button-glow.js?v=20261102-shared-button-glow-1" defer></script>
@@ -27,12 +28,38 @@
           <source src="assets/production-hero-background.webm" type="video/webm">
         </video>
       </div>
+      <nav class="production-hero__breadcrumbs" aria-label="Хлебные крошки">
+        <a class="production-hero__breadcrumb-link" href="index.html">Главная</a>
+        <span class="production-hero__breadcrumb-separator" aria-hidden="true">/</span>
+        <span class="production-hero__breadcrumb-current" aria-current="page">Производство</span>
+      </nav>
       <div class="production-hero__content">
-        <h1 id="production-title">Контрактное производство электроники</h1>
-        <div class="production-hero__support">
-          <p>Печатные платы и электронные блоки — от разработки до готового изделия. Оперативно, точно, под ваши задачи</p>
+        <h1 class="production-hero__heading" id="production-title">Контрактное производство электроники</h1>
+        <div class="production-hero__supporting-content">
+          <p class="production-hero__description">Печатные платы и электронные блоки — от разработки до готового изделия. Оперативно, точно, под ваши задачи</p>
           <a class="production-hero__button" href="index.html#contact"><span>Обсудить проект</span></a>
         </div>
+      </div>
+    </section>
+
+    <section class="production-industries" aria-label="Отрасли производства" data-production-industries>
+      <div class="production-industries__stage" data-industries-stage>
+        <div class="production-industries__image-stack" aria-hidden="true" data-name="Industry image stack" data-industries-stack>
+          <figure class="production-industries__image production-industries__image--energy" data-name="Energy image" data-industry-image="energy">
+            <img src="assets/production-industry-energy.png" alt="" width="1696" height="2528" fetchpriority="high" decoding="async">
+          </figure>
+          <figure class="production-industries__image production-industries__image--aerospace" data-name="Aerospace and defense image" data-industry-image="aerospace">
+            <img src="assets/production-industry-aerospace.png" alt="" width="1600" height="2400" loading="lazy" decoding="async">
+          </figure>
+          <figure class="production-industries__image production-industries__image--automation" data-name="Industry and automation image" data-industry-image="automation">
+            <img src="assets/production-industry-automation.png" alt="" width="2752" height="1536" loading="lazy" decoding="async">
+          </figure>
+        </div>
+        <ol class="production-industries__selector" aria-label="Отрасли" data-name="Industry selector" data-industries-selector>
+          <li class="production-industries__option is-active" aria-current="true" data-industry-option="energy">Энергетика</li>
+          <li class="production-industries__option" data-industry-option="aerospace"><span>Аэрокосмическая</span><span>и оборонная отрасли</span></li>
+          <li class="production-industries__option" data-industry-option="automation"><span>Промышленность</span><span>и автоматизация</span></li>
+        </ol>
       </div>
     </section>
   </main>
