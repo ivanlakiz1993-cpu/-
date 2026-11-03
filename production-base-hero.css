@@ -18,8 +18,8 @@
 }
 
 .production-base-hero.is-enhanced{
-  height:400svh;
-  min-height:133.75rem;
+  height:500svh;
+  min-height:167.1875rem;
 }
 
 .production-base-hero__stage{
@@ -139,7 +139,7 @@
   }
 
   .production-base-hero.is-enhanced{
-    min-height:147rem;
+    min-height:183.75rem;
   }
 
   .production-base-hero.is-enhanced.is-reduced-motion{
@@ -172,6 +172,7 @@
 
 @media(min-width:109rem){
   .production-base-hero__content{
+    top:6.25rem;
     height:auto;
   }
 }

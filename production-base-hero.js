@@ -7,8 +7,9 @@
   const states = [
     { imageIndex: 0, visibleAreas: 1 },
     { imageIndex: 1, visibleAreas: 2 },
-    { imageIndex: 2, visibleAreas: 4 },
-    { imageIndex: 3, visibleAreas: 5 },
+    { imageIndex: 2, visibleAreas: 3 },
+    { imageIndex: 3, visibleAreas: 4 },
+    { imageIndex: 4, visibleAreas: 5 },
   ];
 
   if (!section || !stage || images.length !== states.length || areas.length !== 5) return;
