@@ -242,6 +242,9 @@ site-header{--menu-gutter:max(5.2083333333vw,calc((100vw - 107.5rem)/2));display
 /* Final size and placement checks against the Figma header and hero frames. */
 .topbar{background:rgba(0,0,0,.6);backdrop-filter:blur(0.165625rem)}
 @media(min-width:75rem){
+  .home-page .hero{height:50rem;min-height:50rem}
+  .home-page .hero-title{top:19.333333%;font-size:clamp(3.5rem,7.7777778vw,9.333333rem);letter-spacing:0.093333rem}
+  .home-page .hero-title span+span{margin-top:0.833333rem}
   .home-page .hero-services-anchor{top:53.2222%}
   .hero-description{overflow:clip;border-radius:0.625rem}
 }
