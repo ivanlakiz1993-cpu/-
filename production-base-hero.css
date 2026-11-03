@@ -9,13 +9,34 @@
   --production-base-hero-area-tracking:clamp(-.075rem,calc(.1343785vw - .16125rem),0rem);
   position:relative;
   isolation:isolate;
-  overflow:hidden;
   width:min(120rem,100%);
   height:100svh;
   min-height:33.4375rem;
   margin-inline:auto;
   background:#121212;
   color:#fff;
+}
+
+.production-base-hero.is-enhanced{
+  height:400svh;
+  min-height:133.75rem;
+}
+
+.production-base-hero__stage{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  width:100%;
+  height:100%;
+  min-height:33.4375rem;
+  background:#121212;
+}
+
+.production-base-hero.is-enhanced .production-base-hero__stage{
+  position:sticky;
+  top:0;
+  height:100svh;
+  min-height:33.4375rem;
 }
 
 .production-base-hero__image{
@@ -28,6 +49,13 @@
   max-width:none;
   object-fit:cover;
   object-position:center;
+  opacity:0;
+  transition:opacity .55s ease;
+  pointer-events:none;
+}
+
+.production-base-hero__image.is-active{
+  opacity:1;
 }
 
 .production-base-hero__shade{
@@ -89,16 +117,40 @@
 .production-base-hero__area{
   flex:none;
   margin:0;
-  color:transparent;
+  color:#fff;
+  opacity:0;
+  transition:opacity .32s ease;
 }
 
-.production-base-hero__area.is-active{
-  color:#fff;
+.production-base-hero__area.is-visible{
+  opacity:1;
+}
+
+.production-base-hero.is-reduced-motion .production-base-hero__image,
+.production-base-hero.is-reduced-motion .production-base-hero__area{
+  transition:none;
 }
 
 @media(max-width:40rem){
-  .production-base-hero{
+  .production-base-hero,
+  .production-base-hero__stage,
+  .production-base-hero.is-enhanced .production-base-hero__stage{
     min-height:36.75rem;
+  }
+
+  .production-base-hero.is-enhanced{
+    min-height:147rem;
+  }
+
+  .production-base-hero.is-enhanced.is-reduced-motion{
+    height:100svh;
+    min-height:36.75rem;
+  }
+
+  .production-base-hero.is-enhanced.is-reduced-motion .production-base-hero__stage{
+    position:relative;
+    top:auto;
+    height:100%;
   }
 
   .production-base-hero__content{
@@ -121,5 +173,24 @@
 @media(min-width:109rem){
   .production-base-hero__content{
     height:auto;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .production-base-hero.is-enhanced{
+    height:100svh;
+    min-height:33.4375rem;
+  }
+
+  .production-base-hero.is-enhanced .production-base-hero__stage{
+    position:relative;
+    top:auto;
+    height:100%;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) and (max-width:40rem){
+  .production-base-hero.is-enhanced{
+    min-height:36.75rem;
   }
 }
