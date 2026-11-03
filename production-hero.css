@@ -1,6 +1,6 @@
 .production-page{overflow-x:clip;background:#000}
 .production-page site-header{display:block;height:5.9375rem}
-.production-page .topbar{position:absolute}
+.production-page .topbar{position:fixed;inset:0 0 auto}
 .production-page .nav a[aria-current=page]{color:var(--orange)}
 
 .production-hero{--production-gutter:clamp(.75rem,calc(5.803571vw - .71625rem),6.25rem);position:relative;isolation:isolate;display:flex;flex-direction:column;width:min(120rem,100%);height:min(55.9375rem,calc(100svh - 5.9375rem));min-height:41.75rem;margin-inline:auto;overflow:hidden;padding:9.375rem var(--production-gutter) 6.25rem;background:#000}

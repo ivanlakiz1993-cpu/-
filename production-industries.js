@@ -25,6 +25,7 @@
     transitionImage.setAttribute('aria-hidden', 'true');
     transitionImage.decoding = 'async';
     transitionImage.src = energyImage.currentSrc || energyImage.src;
+    transitionImage.decode?.().catch(() => {});
     heroMedia.append(transitionImage);
   }
 
