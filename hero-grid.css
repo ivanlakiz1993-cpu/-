@@ -259,7 +259,7 @@ site-header{--menu-gutter:max(5.2083333333vw,calc((100vw - 107.5rem)/2));display
   .topbar .brand>span{width:auto;font-size:0.524375rem;line-height:0.9;letter-spacing:0}
   .menu-toggle{top:1.5rem;right:0.75rem;transform:translateY(-50%);align-items:center;gap:0.13944rem;font-size:1.125rem;line-height:1.2;letter-spacing:0}
   .menu-toggle>span:first-child{top:0}
-  .menu-icon{width:1.14325rem;height:1.35rem}
+  .menu-drawer .menu-icon{width:1.14325rem;height:1.35rem}
   .menu-icon i{height:0.0625rem}
   .menu-icon i:nth-child(1){top:0.25rem}
   .menu-icon i:nth-child(2){top:0.675rem}
