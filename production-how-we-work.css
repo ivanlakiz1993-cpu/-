@@ -132,7 +132,7 @@
 
 @media(min-width:48rem) and (max-width:108.9375rem){
   .production-how-we-work__heading{
-    left:calc(50% - 29.09375rem);
+    left:2.90625rem;
   }
 
   .production-how-we-work__list{
@@ -142,8 +142,8 @@
 
   .production-how-we-work__step{
     min-height:3.525rem;
-    padding:.9375rem 6.25rem .9375rem 0;
-    gap:6.25rem;
+    padding:.9375rem clamp(3rem,calc(20.3125vw - 6.75rem),6.25rem) .9375rem 0;
+    gap:clamp(3rem,calc(20.3125vw - 6.75rem),6.25rem);
     overflow:visible;
   }
 
@@ -154,7 +154,7 @@
   .production-how-we-work__description{
     flex:0 0 auto;
     min-width:0;
-    font-size:1.125rem;
+    font-size:clamp(.875rem,calc(1.5625vw + .125rem),1.125rem);
     line-height:1.2;
     white-space:nowrap;
   }
