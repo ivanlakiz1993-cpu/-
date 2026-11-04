@@ -26,6 +26,8 @@
   const maxParticles = 64000;
   const holdViewports = 1;
   const transitionViewports = .75;
+  const stepActivationThreshold = .75;
+  const stepDeactivationThreshold = .25;
   const sequenceViewports = sources.length * holdViewports + (sources.length - 1) * transitionViewports;
 
   let targets = [];
@@ -279,14 +281,11 @@
     displayedTravel += (requestedTravel - displayedTravel) * (1 - Math.exp(-elapsed / 260));
     if (Math.abs(requestedTravel - displayedTravel) < .0001) displayedTravel = requestedTravel;
     const direction = Math.sign(requestedTravel - displayedTravel);
-    const settledStep = Math.round(displayedTravel);
     let nextStep = activeStep;
-    if (Math.abs(displayedTravel - settledStep) < .0001) {
-      nextStep = settledStep;
-    } else if (direction > 0) {
-      while (nextStep < targets.length - 1 && displayedTravel >= nextStep + 1) nextStep++;
+    if (direction > 0) {
+      while (nextStep < targets.length - 1 && displayedTravel >= nextStep + stepActivationThreshold) nextStep++;
     } else if (direction < 0) {
-      while (nextStep > 0 && displayedTravel <= nextStep - 1) nextStep--;
+      while (nextStep > 0 && displayedTravel <= nextStep - 1 + stepDeactivationThreshold) nextStep--;
     }
     setActiveStep(clamp(nextStep, 0, targets.length - 1));
     if (now - lastPaint > 28) {
