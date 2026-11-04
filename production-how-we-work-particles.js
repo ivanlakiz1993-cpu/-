@@ -280,14 +280,15 @@
     if (Math.abs(requestedTravel - displayedTravel) < .0001) displayedTravel = requestedTravel;
     const direction = Math.sign(requestedTravel - displayedTravel);
     const settledStep = Math.round(displayedTravel);
+    let nextStep = activeStep;
     if (Math.abs(displayedTravel - settledStep) < .0001) {
-      activeStep = settledStep;
+      nextStep = settledStep;
     } else if (direction > 0) {
-      while (activeStep < targets.length - 1 && displayedTravel >= activeStep + 1) activeStep++;
+      while (nextStep < targets.length - 1 && displayedTravel >= nextStep + 1) nextStep++;
     } else if (direction < 0) {
-      while (activeStep > 0 && displayedTravel <= activeStep - 1) activeStep--;
+      while (nextStep > 0 && displayedTravel <= nextStep - 1) nextStep--;
     }
-    setActiveStep(clamp(activeStep, 0, targets.length - 1));
+    setActiveStep(clamp(nextStep, 0, targets.length - 1));
     if (now - lastPaint > 28) {
       paint(now);
       lastPaint = now;
