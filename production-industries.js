@@ -9,6 +9,7 @@
   const heroVideo = heroMedia?.querySelector('.production-hero__video');
   const energyImage = cards[0]?.querySelector('img');
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const compactViewport = window.matchMedia('(max-width: 74.9375rem)');
 
   if (!hero || !industries || !stage || !stack || cards.length < 2 || options.length !== cards.length) return;
 
@@ -17,6 +18,7 @@
   const smoothstep = (progress) => progress * progress * (3 - 2 * progress);
   let transitionImage = null;
   let morphActive = false;
+  let motionEnabled = false;
 
   if (heroMedia && heroVideo && energyImage) {
     transitionImage = document.createElement('img');
@@ -95,7 +97,7 @@
 
   const updateMotion = () => {
     animationFrame = 0;
-    if (motionPreference.matches) return;
+    if (!motionEnabled) return;
 
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
     const heroRect = hero.getBoundingClientRect();
@@ -131,11 +133,12 @@
   };
 
   const scheduleUpdate = () => {
-    if (!animationFrame) animationFrame = window.requestAnimationFrame(updateMotion);
+    if (motionEnabled && !animationFrame) animationFrame = window.requestAnimationFrame(updateMotion);
   };
 
   const syncMotionPreference = () => {
-    const enabled = !motionPreference.matches;
+    const enabled = !motionPreference.matches && !compactViewport.matches;
+    motionEnabled = enabled;
     document.body.classList.toggle('production-scroll-motion', enabled);
     industries.classList.toggle('is-enhanced', enabled);
     if (enabled) scheduleUpdate();
@@ -146,6 +149,8 @@
   window.addEventListener('resize', scheduleUpdate);
   if (motionPreference.addEventListener) motionPreference.addEventListener('change', syncMotionPreference);
   else motionPreference.addListener(syncMotionPreference);
+  if (compactViewport.addEventListener) compactViewport.addEventListener('change', syncMotionPreference);
+  else compactViewport.addListener(syncMotionPreference);
 
   syncMotionPreference();
 })();

@@ -137,13 +137,15 @@
   }
 
   .production-workscope__intro{gap:3.125rem}
+  .production-workscope__description{line-height:1.1}
   .production-workscope__stages{
     flex:1 1 0;
-    height:calc(100svh - 3.125rem);
+    height:calc(100svh - 10.25rem);
+    margin-top:7.125rem;
     min-height:0;
     min-width:43.75rem;
     gap:6.25rem;
-    padding:0 0 3.125rem 3.125rem;
+    padding:3.125rem 0 0 3.125rem;
     overflow-x:hidden;
     overflow-y:auto;
     overscroll-behavior-y:contain;
