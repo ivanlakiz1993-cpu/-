@@ -23,24 +23,25 @@
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
   const ease = value => value * value * (3 - 2 * value);
   const guideSize = 1024;
-  const maxParticles = 48000;
-  const binOpacity = [.24, .4, .62, .84];
+  const maxParticles = 64000;
+  const holdViewports = 1;
+  const transitionViewports = .75;
+  const sequenceViewports = sources.length * holdViewports + (sources.length - 1) * transitionViewports;
 
   let targets = [];
+  let targetLights = [];
   let cloud = null;
-  let particleSize = null;
   let particleDepth = null;
   let particleRingMask = null;
   let particleRingRadius = null;
-  let particleBins = null;
   let canvasReady = false;
   let preparing = false;
   let inView = false;
   let animationFrame = 0;
   let introStart = null;
-  let displayedProgress = 0;
-  let requestedProgress = 0;
-  let activeStep = -1;
+  let displayedTravel = 0;
+  let requestedTravel = 0;
+  let activeStep = 0;
   let lastTick = 0;
   let lastPaint = 0;
   let canvasWidth = 0;
@@ -53,6 +54,20 @@
     let value = Math.imul(seed ^ seed >>> 15, 1 | seed);
     value ^= value + Math.imul(value ^ value >>> 7, 61 | value);
     return ((value ^ value >>> 14) >>> 0) / 4294967296;
+  };
+
+  const resolveSequence = progress => {
+    let remaining = clamp(progress) * sequenceViewports;
+    for (let index = 0; index < sources.length - 1; index++) {
+      if (remaining < holdViewports) return { travel: index, activeStep: index };
+      remaining -= holdViewports;
+      if (remaining < transitionViewports) {
+        return { travel: index + remaining / transitionViewports, activeStep: index };
+      }
+      remaining -= transitionViewports;
+    }
+    const lastStep = sources.length - 1;
+    return { travel: lastStep, activeStep: lastStep };
   };
 
   const loadImage = source => new Promise((resolve, reject) => {
@@ -85,19 +100,19 @@
         const alpha = pixels[offset + 3] / 255;
         const light = (pixels[offset] * .2126 + pixels[offset + 1] * .7152 + pixels[offset + 2] * .0722) / 255;
         const weight = alpha * light;
-        if (weight < .035) continue;
+        if (weight < .022) continue;
         candidates.push({
           x: (x + 1) / guideSize,
           y: (y + 1) / guideSize,
-          light,
-          key: random()
+          brightness: weight,
+          key: -Math.log(Math.max(random(), 1e-8)) / weight
         });
       }
     }
 
     candidates.sort((first, second) => first.key - second.key);
     if (candidates.length < 700) throw new Error('A particle image needs a lighter, detailed subject.');
-    return candidates;
+    return candidates.length > maxParticles ? candidates.slice(0, maxParticles) : candidates;
   };
 
   const initializeParticles = samples => {
@@ -111,13 +126,16 @@
       }
       return points;
     });
+    targetLights = samples.map(sample => {
+      const lights = new Float32Array(count);
+      for (let index = 0; index < count; index++) lights[index] = sample[index].brightness;
+      return lights;
+    });
 
     cloud = new Float32Array(count * 2);
-    particleSize = new Float32Array(count);
     particleDepth = new Float32Array(count);
     particleRingMask = new Uint8Array(count);
     particleRingRadius = new Float32Array(count);
-    particleBins = [[], [], [], []];
 
     for (let index = 0; index < count; index++) {
       const angle = random() * Math.PI * 2;
@@ -125,12 +143,10 @@
       cloud[index * 2] = .5 + Math.cos(angle) * radius;
       cloud[index * 2 + 1] = .5 + Math.sin(angle) * radius;
       particleDepth[index] = random();
-      particleSize[index] = .45 + samples[0][index].light * .85;
       const initialX = samples[0][index].x - .5;
       const initialY = samples[0][index].y - .5;
       particleRingRadius[index] = Math.hypot(initialX, initialY);
       particleRingMask[index] = particleRingRadius[index] > .31 ? 1 : 0;
-      particleBins[Math.min(3, Math.floor(samples[0][index].light * 4))].push(index);
     }
   };
 
@@ -171,13 +187,15 @@
     if (!canvasReady || !canvasWidth || !canvasHeight || !targets.length) return;
     context.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    const count = particleSize.length;
-    const travel = displayedProgress * (targets.length - 1);
+    const count = targets[0].length / 2;
+    const travel = clamp(displayedTravel, 0, targets.length - 1);
     const firstStepInfluence = clamp(1 - travel);
     const fromIndex = Math.min(targets.length - 1, Math.floor(travel));
     const toIndex = Math.min(targets.length - 1, fromIndex + 1);
     const from = targets[fromIndex];
     const to = targets[toIndex];
+    const fromLights = targetLights[fromIndex];
+    const toLights = targetLights[toIndex];
     const fraction = travel - fromIndex;
     const toCloud = fraction < .5;
     const phase = toCloud ? ease(fraction * 2) : ease((fraction - .5) * 2);
@@ -189,69 +207,65 @@
 
     context.fillStyle = '#e5e8eb';
     context.globalCompositeOperation = 'lighter';
-    for (let bin = 0; bin < particleBins.length; bin++) {
-      const baseAlpha = binOpacity[bin] * opacity;
-      context.globalAlpha = baseAlpha;
-      const indices = particleBins[bin];
-      for (let item = 0; item < indices.length; item++) {
-        const index = indices[item];
-        const offset = index * 2;
-        let x = from[offset];
-        let y = from[offset + 1];
+    for (let index = 0; index < count; index++) {
+      const offset = index * 2;
+      let x = from[offset];
+      let y = from[offset + 1];
+      let light = fromLights[index];
 
-        if (toIndex !== fromIndex && fraction > 0) {
-          if (toCloud) {
-            x += (cloud[offset] - x) * phase;
-            y += (cloud[offset + 1] - y) * phase;
-          } else {
-            x = cloud[offset] + (to[offset] - cloud[offset]) * phase;
-            y = cloud[offset + 1] + (to[offset + 1] - cloud[offset + 1]) * phase;
-          }
+      if (toIndex !== fromIndex && fraction > 0) {
+        if (toCloud) {
+          x += (cloud[offset] - x) * phase;
+          y += (cloud[offset + 1] - y) * phase;
+          light *= 1 - phase;
+        } else {
+          x = cloud[offset] + (to[offset] - cloud[offset]) * phase;
+          y = cloud[offset + 1] + (to[offset + 1] - cloud[offset + 1]) * phase;
+          light = toLights[index] * phase;
         }
-
-        x = cloud[offset] + (x - cloud[offset]) * intro;
-        y = cloud[offset + 1] + (y - cloud[offset + 1]) * intro;
-        let screenX = left + x * size;
-        let screenY = top + y * size;
-        let ringPulse = 0;
-        const depth = particleDepth[index];
-
-        if (particleRingMask[index] && firstStepInfluence > 0 && !reducedMotion.matches) {
-          const centerX = left + size / 2;
-          const centerY = top + size / 2;
-          const relativeX = screenX - centerX;
-          const relativeY = screenY - centerY;
-          const radius = Math.max(1, Math.hypot(relativeX, relativeY));
-          ringPulse = Math.sin(now * .0018) * firstStepInfluence;
-          const pulseOffset = ringPulse * (2 + particleRingRadius[index] * 5);
-          screenX += relativeX / radius * pulseOffset;
-          screenY += relativeY / radius * pulseOffset;
-        }
-
-        if (!reducedMotion.matches && pointerX !== null && pointerY !== null) {
-          const distanceX = screenX - pointerX;
-          const distanceY = screenY - pointerY;
-          const distance = Math.hypot(distanceX, distanceY);
-          const influenceRadius = 150;
-          if (distance > 0 && distance < influenceRadius) {
-            const influence = Math.pow(1 - distance / influenceRadius, 2);
-            const ripple = Math.sin(distance * .055 - now * .004);
-            const ringBoost = particleRingMask[index] ? 1 + .25 * firstStepInfluence : 1;
-            const push = influence * (27 + ripple * 11 + depth * 8) * ringBoost;
-            const swirl = influence * Math.sin(distance * .035 - now * .0025) * 15 * ringBoost;
-            screenX += distanceX / distance * push - distanceY / distance * swirl;
-            screenY += distanceY / distance * push + distanceX / distance * swirl;
-          }
-        }
-
-        const dot = particleSize[index] * (particleRingMask[index] ? 1 + ringPulse * .2 : 1);
-        if (particleRingMask[index]) {
-          const pulseAlpha = binOpacity[bin] * opacity * (.1 + (ringPulse + 1) * .075) * firstStepInfluence;
-          context.globalAlpha = Math.min(1, baseAlpha + pulseAlpha);
-        }
-        context.fillRect(screenX, screenY, dot, dot);
-        if (particleRingMask[index]) context.globalAlpha = baseAlpha;
       }
+
+      x = cloud[offset] + (x - cloud[offset]) * intro;
+      y = cloud[offset + 1] + (y - cloud[offset + 1]) * intro;
+      let screenX = left + x * size;
+      let screenY = top + y * size;
+      let ringPulse = 0;
+      const depth = particleDepth[index];
+
+      if (particleRingMask[index] && firstStepInfluence > 0 && !reducedMotion.matches) {
+        const centerX = left + size / 2;
+        const centerY = top + size / 2;
+        const relativeX = screenX - centerX;
+        const relativeY = screenY - centerY;
+        const radius = Math.max(1, Math.hypot(relativeX, relativeY));
+        ringPulse = Math.sin(now * .0018) * firstStepInfluence;
+        const pulseOffset = ringPulse * (2 + particleRingRadius[index] * 5);
+        screenX += relativeX / radius * pulseOffset;
+        screenY += relativeY / radius * pulseOffset;
+      }
+
+      if (!reducedMotion.matches && pointerX !== null && pointerY !== null) {
+        const distanceX = screenX - pointerX;
+        const distanceY = screenY - pointerY;
+        const distance = Math.hypot(distanceX, distanceY);
+        const influenceRadius = 150;
+        if (distance > 0 && distance < influenceRadius) {
+          const influence = Math.pow(1 - distance / influenceRadius, 2);
+          const ripple = Math.sin(distance * .055 - now * .004);
+          const ringBoost = particleRingMask[index] ? 1 + .25 * firstStepInfluence : 1;
+          const push = influence * (27 + ripple * 11 + depth * 8) * ringBoost;
+          const swirl = influence * Math.sin(distance * .035 - now * .0025) * 15 * ringBoost;
+          screenX += distanceX / distance * push - distanceY / distance * swirl;
+          screenY += distanceY / distance * push + distanceX / distance * swirl;
+        }
+      }
+
+      const baseAlpha = opacity * (.12 + light * .72);
+      const dot = (.45 + light * .85) * (particleRingMask[index] ? 1 + ringPulse * .2 : 1);
+      context.globalAlpha = particleRingMask[index]
+        ? Math.min(1, baseAlpha + opacity * (.08 + (ringPulse + 1) * .06) * firstStepInfluence)
+        : baseAlpha;
+      context.fillRect(screenX, screenY, dot, dot);
     }
     context.globalAlpha = 1;
     context.globalCompositeOperation = 'source-over';
@@ -262,8 +276,18 @@
     if (!canvasReady || !desktop.matches || !inView || document.hidden) return;
     const elapsed = Math.min(64, now - (lastTick || now));
     lastTick = now;
-    displayedProgress += (requestedProgress - displayedProgress) * (1 - Math.exp(-elapsed / 115));
-    if (Math.abs(requestedProgress - displayedProgress) < .0001) displayedProgress = requestedProgress;
+    displayedTravel += (requestedTravel - displayedTravel) * (1 - Math.exp(-elapsed / 260));
+    if (Math.abs(requestedTravel - displayedTravel) < .0001) displayedTravel = requestedTravel;
+    const direction = Math.sign(requestedTravel - displayedTravel);
+    const settledStep = Math.round(displayedTravel);
+    if (Math.abs(displayedTravel - settledStep) < .0001) {
+      activeStep = settledStep;
+    } else if (direction > 0) {
+      while (activeStep < targets.length - 1 && displayedTravel >= activeStep + 1) activeStep++;
+    } else if (direction < 0) {
+      while (activeStep > 0 && displayedTravel <= activeStep - 1) activeStep--;
+    }
+    setActiveStep(clamp(activeStep, 0, targets.length - 1));
     if (now - lastPaint > 28) {
       paint(now);
       lastPaint = now;
@@ -274,7 +298,7 @@
   const schedulePaint = () => {
     if (!canvasReady || !desktop.matches || !inView || document.hidden) return;
     if (reducedMotion.matches) {
-      displayedProgress = sources.length > 1 ? Math.round(requestedProgress * (sources.length - 1)) / (sources.length - 1) : 0;
+      displayedTravel = Math.max(0, activeStep);
       paint(performance.now());
     } else if (!animationFrame) {
       animationFrame = requestAnimationFrame(tick);
@@ -283,16 +307,20 @@
 
   const updateRunway = () => {
     if (sources.length < 2) return;
-    section.style.setProperty('--particle-runway', `${sources.length * 100}svh`);
-    section.style.setProperty('--particle-runway-min', `${sources.length * (mobile.matches ? 36.75 : 33.4375)}rem`);
+    const runwayViewports = sequenceViewports + 1;
+    const minimumStageHeight = mobile.matches ? 36.75 : 33.4375;
+    section.style.setProperty('--particle-runway', `${runwayViewports * 100}svh`);
+    section.style.setProperty('--particle-runway-min', `${runwayViewports * minimumStageHeight}rem`);
   };
 
   const updateScroll = () => {
     if (sources.length < 2) return;
     const sectionTop = section.getBoundingClientRect().top + window.scrollY;
     const scrollRange = Math.max(1, section.offsetHeight - stage.offsetHeight);
-    requestedProgress = clamp((window.scrollY - sectionTop) / scrollRange);
-    setActiveStep(Math.round(requestedProgress * (sources.length - 1)));
+    const scrollProgress = clamp((window.scrollY - sectionTop) / scrollRange);
+    const sequence = resolveSequence(scrollProgress);
+    requestedTravel = sequence.travel;
+    if (reducedMotion.matches) setActiveStep(sequence.activeStep);
     schedulePaint();
   };
 
