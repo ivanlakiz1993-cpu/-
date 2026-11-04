@@ -145,7 +145,7 @@
     min-height:0;
     min-width:43.75rem;
     gap:6.25rem;
-    padding:3.125rem 0 1.875rem 3.125rem;
+    padding:0 0 0 3.0625rem;
     overflow-x:hidden;
     overflow-y:auto;
     overscroll-behavior-y:contain;
