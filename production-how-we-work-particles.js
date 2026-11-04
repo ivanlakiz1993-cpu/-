@@ -2,12 +2,11 @@
   const section = document.querySelector('.production-how-we-work');
   const stage = section?.querySelector('[data-particle-stage]');
   const frame = section?.querySelector('[data-particle-frame]');
-  const fallback = frame?.querySelector('[data-particle-fallback]');
   const canvas = frame?.querySelector('[data-particle-canvas]');
   const steps = section ? [...section.querySelectorAll('.production-how-we-work__step')] : [];
   const context = canvas?.getContext('2d', { alpha: true });
 
-  if (!section || !stage || !frame || !fallback || !canvas || !context || !steps.length) return;
+  if (!section || !stage || !frame || !canvas || !context || !steps.length) return;
 
   // Add each later image to its matching list item with data-particle-src.
   // Only consecutive illustrated steps take part in the scroll sequence.
@@ -23,16 +22,14 @@
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
   const ease = value => value * value * (3 - 2 * value);
-  const guideSize = 768;
-  const maxParticles = 18000;
+  const guideSize = 1024;
+  const maxParticles = 48000;
   const binOpacity = [.24, .4, .62, .84];
 
   let targets = [];
-  let artworks = [];
   let cloud = null;
   let particleSize = null;
   let particleDepth = null;
-  let particleSeed = null;
   let particleRingMask = null;
   let particleRingRadius = null;
   let particleBins = null;
@@ -76,6 +73,7 @@
     const scale = Math.min(guideSize / image.naturalWidth, guideSize / image.naturalHeight);
     const width = image.naturalWidth * scale;
     const height = image.naturalHeight * scale;
+    // This offscreen guide is only used to read the source pixels; the visible frame is particles only.
     guideContext.drawImage(image, (guideSize - width) / 2, (guideSize - height) / 2, width, height);
     const pixels = guideContext.getImageData(0, 0, guideSize, guideSize).data;
     const random = randomGenerator(73013 + imageIndex * 1009);
@@ -92,7 +90,7 @@
           x: (x + 1) / guideSize,
           y: (y + 1) / guideSize,
           light,
-          key: -Math.log(Math.max(random(), 1e-8)) / weight
+          key: random()
         });
       }
     }
@@ -102,10 +100,9 @@
     return candidates;
   };
 
-  const initializeParticles = (samples, images) => {
+  const initializeParticles = samples => {
     const count = Math.min(maxParticles, ...samples.map(sample => sample.length));
     const random = randomGenerator(10921);
-    artworks = images;
     targets = samples.map(sample => {
       const points = new Float32Array(count * 2);
       for (let index = 0; index < count; index++) {
@@ -118,7 +115,6 @@
     cloud = new Float32Array(count * 2);
     particleSize = new Float32Array(count);
     particleDepth = new Float32Array(count);
-    particleSeed = new Float32Array(count);
     particleRingMask = new Uint8Array(count);
     particleRingRadius = new Float32Array(count);
     particleBins = [[], [], [], []];
@@ -129,8 +125,7 @@
       cloud[index * 2] = .5 + Math.cos(angle) * radius;
       cloud[index * 2 + 1] = .5 + Math.sin(angle) * radius;
       particleDepth[index] = random();
-      particleSize[index] = .55 + particleDepth[index] * .65;
-      particleSeed[index] = random() * Math.PI * 2;
+      particleSize[index] = .45 + samples[0][index].light * .85;
       const initialX = samples[0][index].x - .5;
       const initialY = samples[0][index].y - .5;
       particleRingRadius[index] = Math.hypot(initialX, initialY);
@@ -190,22 +185,10 @@
     const left = (canvasWidth - size) / 2;
     const top = (canvasHeight - size) / 2;
 
-    // The supplied artwork is itself made of fine dots. Reveal its full resolution
-    // as particles settle so the contours and small details stay faithful.
-    const settled = ease(clamp((intro - .62) / .38));
-    const fromImageOpacity = (toIndex === fromIndex ? 1 : 1 - ease(clamp(fraction * 4))) * settled;
-    const toImageOpacity = toIndex === fromIndex ? 0 : ease(clamp((fraction - .75) * 4)) * settled;
-    context.globalAlpha = fromImageOpacity;
-    context.drawImage(artworks[fromIndex], left, top, size, size);
-    if (toImageOpacity) {
-      context.globalAlpha = toImageOpacity;
-      context.drawImage(artworks[toIndex], left, top, size, size);
-    }
-
     context.fillStyle = '#e5e8eb';
     context.globalCompositeOperation = 'lighter';
     for (let bin = 0; bin < particleBins.length; bin++) {
-      const baseAlpha = binOpacity[bin] * opacity * (1 - Math.max(fromImageOpacity, toImageOpacity) * .9);
+      const baseAlpha = binOpacity[bin] * opacity;
       context.globalAlpha = baseAlpha;
       const indices = particleBins[bin];
       for (let item = 0; item < indices.length; item++) {
@@ -237,15 +220,10 @@
           const relativeX = screenX - centerX;
           const relativeY = screenY - centerY;
           const radius = Math.max(1, Math.hypot(relativeX, relativeY));
-          ringPulse = Math.sin(now * .0022 - particleRingRadius[index] * 42);
-          const pulseOffset = ringPulse * 5.5;
+          ringPulse = Math.sin(now * .0018);
+          const pulseOffset = ringPulse * (2 + particleRingRadius[index] * 5);
           screenX += relativeX / radius * pulseOffset;
           screenY += relativeY / radius * pulseOffset;
-        }
-
-        if (!reducedMotion.matches) {
-          screenX += Math.sin(now * .00052 + particleSeed[index]) * depth * 1.1;
-          screenY += Math.cos(now * .00043 + particleSeed[index]) * depth * 1.1;
         }
 
         if (!reducedMotion.matches && pointerX !== null && pointerY !== null) {
@@ -322,11 +300,10 @@
     try {
       const images = await Promise.all(sources.map(loadImage));
       const samples = images.map(sampleImage);
-      initializeParticles(samples, images);
+      initializeParticles(samples);
       canvasReady = true;
       resizeCanvas();
       canvas.hidden = false;
-      fallback.setAttribute('aria-hidden', 'true');
       frame.classList.add('is-particle-ready');
       if (inView) introStart = performance.now();
       schedulePaint();

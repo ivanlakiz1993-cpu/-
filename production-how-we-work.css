@@ -53,16 +53,6 @@
   display:none;
 }
 
-.production-how-we-work__illustration img{
-  display:block;
-  width:100%;
-  height:100%;
-  max-width:none;
-  border-radius:1rem;
-  object-fit:contain;
-  transition:opacity .3s ease;
-}
-
 .production-how-we-work__canvas{
   position:absolute;
   z-index:1;
@@ -77,10 +67,6 @@
 
 .production-how-we-work__canvas[hidden]{
   display:none;
-}
-
-.production-how-we-work__illustration.is-particle-ready img{
-  opacity:0;
 }
 
 .production-how-we-work__illustration.is-particle-ready .production-how-we-work__canvas{
@@ -285,7 +271,6 @@
 }
 
 @media(prefers-reduced-motion:reduce){
-  .production-how-we-work__illustration img,
   .production-how-we-work__canvas{
     transition:none;
   }
