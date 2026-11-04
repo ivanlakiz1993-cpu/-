@@ -125,6 +125,10 @@
   color:#fff;
 }
 
+.production-how-we-work__step.is-complete{
+  color:#fff;
+}
+
 .production-how-we-work__number{
   flex:0 0 auto;
   margin:0;

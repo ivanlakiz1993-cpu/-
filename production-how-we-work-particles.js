@@ -139,6 +139,7 @@
     activeStep = index;
     steps.forEach((step, stepIndex) => {
       const active = stepIndex === index;
+      step.classList.toggle('is-complete', stepIndex < index);
       step.classList.toggle('is-active', active);
       if (active) step.setAttribute('aria-current', 'step');
       else step.removeAttribute('aria-current');
@@ -172,6 +173,7 @@
 
     const count = particleSize.length;
     const travel = displayedProgress * (targets.length - 1);
+    const firstStepInfluence = clamp(1 - travel);
     const fromIndex = Math.min(targets.length - 1, Math.floor(travel));
     const toIndex = Math.min(targets.length - 1, fromIndex + 1);
     const from = targets[fromIndex];
@@ -214,13 +216,13 @@
         let ringPulse = 0;
         const depth = particleDepth[index];
 
-        if (particleRingMask[index] && !reducedMotion.matches) {
+        if (particleRingMask[index] && firstStepInfluence > 0 && !reducedMotion.matches) {
           const centerX = left + size / 2;
           const centerY = top + size / 2;
           const relativeX = screenX - centerX;
           const relativeY = screenY - centerY;
           const radius = Math.max(1, Math.hypot(relativeX, relativeY));
-          ringPulse = Math.sin(now * .0018);
+          ringPulse = Math.sin(now * .0018) * firstStepInfluence;
           const pulseOffset = ringPulse * (2 + particleRingRadius[index] * 5);
           screenX += relativeX / radius * pulseOffset;
           screenY += relativeY / radius * pulseOffset;
@@ -234,7 +236,7 @@
           if (distance > 0 && distance < influenceRadius) {
             const influence = Math.pow(1 - distance / influenceRadius, 2);
             const ripple = Math.sin(distance * .055 - now * .004);
-            const ringBoost = particleRingMask[index] ? 1.25 : 1;
+            const ringBoost = particleRingMask[index] ? 1 + .25 * firstStepInfluence : 1;
             const push = influence * (27 + ripple * 11 + depth * 8) * ringBoost;
             const swirl = influence * Math.sin(distance * .035 - now * .0025) * 15 * ringBoost;
             screenX += distanceX / distance * push - distanceY / distance * swirl;
@@ -244,7 +246,7 @@
 
         const dot = particleSize[index] * (particleRingMask[index] ? 1 + ringPulse * .2 : 1);
         if (particleRingMask[index]) {
-          const pulseAlpha = binOpacity[bin] * opacity * (.1 + (ringPulse + 1) * .075);
+          const pulseAlpha = binOpacity[bin] * opacity * (.1 + (ringPulse + 1) * .075) * firstStepInfluence;
           context.globalAlpha = Math.min(1, baseAlpha + pulseAlpha);
         }
         context.fillRect(screenX, screenY, dot, dot);
