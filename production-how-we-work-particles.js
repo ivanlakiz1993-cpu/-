@@ -33,6 +33,8 @@
   let particleSize = null;
   let particleDepth = null;
   let particleSeed = null;
+  let particleRingMask = null;
+  let particleRingRadius = null;
   let particleBins = null;
   let canvasReady = false;
   let preparing = false;
@@ -117,6 +119,8 @@
     particleSize = new Float32Array(count);
     particleDepth = new Float32Array(count);
     particleSeed = new Float32Array(count);
+    particleRingMask = new Uint8Array(count);
+    particleRingRadius = new Float32Array(count);
     particleBins = [[], [], [], []];
 
     for (let index = 0; index < count; index++) {
@@ -127,6 +131,10 @@
       particleDepth[index] = random();
       particleSize[index] = .55 + particleDepth[index] * .65;
       particleSeed[index] = random() * Math.PI * 2;
+      const initialX = samples[0][index].x - .5;
+      const initialY = samples[0][index].y - .5;
+      particleRingRadius[index] = Math.hypot(initialX, initialY);
+      particleRingMask[index] = particleRingRadius[index] > .31 ? 1 : 0;
       particleBins[Math.min(3, Math.floor(samples[0][index].light * 4))].push(index);
     }
   };
@@ -197,7 +205,8 @@
     context.fillStyle = '#e5e8eb';
     context.globalCompositeOperation = 'lighter';
     for (let bin = 0; bin < particleBins.length; bin++) {
-      context.globalAlpha = binOpacity[bin] * opacity * (1 - Math.max(fromImageOpacity, toImageOpacity) * .9);
+      const baseAlpha = binOpacity[bin] * opacity * (1 - Math.max(fromImageOpacity, toImageOpacity) * .9);
+      context.globalAlpha = baseAlpha;
       const indices = particleBins[bin];
       for (let item = 0; item < indices.length; item++) {
         const index = indices[item];
@@ -219,25 +228,49 @@
         y = cloud[offset + 1] + (y - cloud[offset + 1]) * intro;
         let screenX = left + x * size;
         let screenY = top + y * size;
+        let ringPulse = 0;
+        const depth = particleDepth[index];
+
+        if (particleRingMask[index] && !reducedMotion.matches) {
+          const centerX = left + size / 2;
+          const centerY = top + size / 2;
+          const relativeX = screenX - centerX;
+          const relativeY = screenY - centerY;
+          const radius = Math.max(1, Math.hypot(relativeX, relativeY));
+          ringPulse = Math.sin(now * .0022 - particleRingRadius[index] * 42);
+          const pulseOffset = ringPulse * 5.5;
+          screenX += relativeX / radius * pulseOffset;
+          screenY += relativeY / radius * pulseOffset;
+        }
 
         if (!reducedMotion.matches) {
-          const depth = particleDepth[index];
           screenX += Math.sin(now * .00052 + particleSeed[index]) * depth * 1.1;
           screenY += Math.cos(now * .00043 + particleSeed[index]) * depth * 1.1;
-          if (pointerX !== null && pointerY !== null) {
-            const distanceX = screenX - pointerX;
-            const distanceY = screenY - pointerY;
-            const distance = Math.hypot(distanceX, distanceY);
-            if (distance > 0 && distance < 110) {
-              const force = Math.pow(1 - distance / 110, 2) * (18 + depth * 18);
-              screenX += distanceX / distance * force;
-              screenY += distanceY / distance * force;
-            }
+        }
+
+        if (!reducedMotion.matches && pointerX !== null && pointerY !== null) {
+          const distanceX = screenX - pointerX;
+          const distanceY = screenY - pointerY;
+          const distance = Math.hypot(distanceX, distanceY);
+          const influenceRadius = 150;
+          if (distance > 0 && distance < influenceRadius) {
+            const influence = Math.pow(1 - distance / influenceRadius, 2);
+            const ripple = Math.sin(distance * .055 - now * .004);
+            const ringBoost = particleRingMask[index] ? 1.25 : 1;
+            const push = influence * (27 + ripple * 11 + depth * 8) * ringBoost;
+            const swirl = influence * Math.sin(distance * .035 - now * .0025) * 15 * ringBoost;
+            screenX += distanceX / distance * push - distanceY / distance * swirl;
+            screenY += distanceY / distance * push + distanceX / distance * swirl;
           }
         }
 
-        const dot = particleSize[index];
+        const dot = particleSize[index] * (particleRingMask[index] ? 1 + ringPulse * .2 : 1);
+        if (particleRingMask[index]) {
+          const pulseAlpha = binOpacity[bin] * opacity * (.1 + (ringPulse + 1) * .075);
+          context.globalAlpha = Math.min(1, baseAlpha + pulseAlpha);
+        }
         context.fillRect(screenX, screenY, dot, dot);
+        if (particleRingMask[index]) context.globalAlpha = baseAlpha;
       }
     }
     context.globalAlpha = 1;

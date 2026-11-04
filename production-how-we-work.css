@@ -6,8 +6,8 @@
   position:relative;
   isolation:isolate;
   width:min(120rem,100%);
-  height:58rem;
-  margin:9.375rem auto 15.625rem;
+  height:50.625rem;
+  margin:9.375rem auto 23rem;
   overflow:visible;
   background:#000;
   color:#fff;
@@ -184,7 +184,7 @@
   }
 
   .production-how-we-work__heading{
-    left:2.90625rem;
+    left:3rem;
   }
 
   .production-how-we-work__list{
@@ -222,7 +222,7 @@
 
   .production-how-we-work__illustration{
     position:absolute;
-    top:10.875rem;
+    top:9.8125rem;
     left:8.8541667%;
     display:block;
     width:35.15625%;
@@ -233,13 +233,13 @@
   }
 
   .production-how-we-work__list{
-    top:0;
+    top:7.125rem;
     left:50%;
     width:50%;
   }
 
   .production-how-we-work__step{
-    height:7.25rem;
+    height:5.4375rem;
     padding:0 6.25rem 0 1.875rem;
     gap:0;
     justify-content:space-between;
