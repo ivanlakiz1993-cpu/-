@@ -147,13 +147,10 @@
     overflow-x:hidden;
     overflow-y:auto;
     overscroll-behavior-y:contain;
-    scrollbar-color:#6e6e6e transparent;
-    scrollbar-width:thin;
+    scrollbar-width:none;
   }
 
-  .production-workscope__stages::-webkit-scrollbar{width:.375rem}
-  .production-workscope__stages::-webkit-scrollbar-thumb{border-radius:999px;background:#6e6e6e}
-  .production-workscope__stages::-webkit-scrollbar-track{background:transparent}
+  .production-workscope__stages::-webkit-scrollbar{display:none}
 
   .production-workscope__stage{gap:6.25rem}
 
