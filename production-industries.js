@@ -19,6 +19,7 @@
   let transitionImage = null;
   let morphActive = false;
   let motionEnabled = false;
+  let heroMotionEnabled = false;
 
   if (heroMedia && heroVideo && energyImage) {
     transitionImage = document.createElement('img');
@@ -40,6 +41,14 @@
       heroMedia.style.removeProperty(property);
     });
     cards[0]?.style.removeProperty('opacity');
+  };
+
+  const clearHeroScrollStyles = () => {
+    clearHeroMorph();
+    hero.style.removeProperty('--production-hero-media-opacity');
+    hero.style.removeProperty('--production-hero-media-scale');
+    hero.style.removeProperty('--production-hero-content-opacity');
+    hero.style.removeProperty('--production-hero-content-y');
   };
 
   const updateHeroMorph = (progress, viewportHeight, heroRect, heroPageBottom) => {
@@ -80,11 +89,7 @@
   let animationFrame = 0;
 
   const clearMotionStyles = () => {
-    clearHeroMorph();
-    hero.style.removeProperty('--production-hero-media-opacity');
-    hero.style.removeProperty('--production-hero-media-scale');
-    hero.style.removeProperty('--production-hero-content-opacity');
-    hero.style.removeProperty('--production-hero-content-y');
+    clearHeroScrollStyles();
     industries.style.removeProperty('--industries-entry-opacity');
     industries.style.removeProperty('--industries-entry-scale');
     stack.style.removeProperty('--industry-offset');
@@ -100,20 +105,21 @@
     if (!motionEnabled) return;
 
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-    const heroRect = hero.getBoundingClientRect();
-    const heroPageBottom = heroRect.bottom + window.scrollY;
-    const heroTransitionStart = Math.max(0, heroPageBottom - viewportHeight);
-    const heroTransitionProgress = clamp((window.scrollY - heroTransitionStart) / Math.max(1, heroPageBottom - heroTransitionStart));
-    const heroExit = clamp((viewportHeight - heroRect.bottom) / viewportHeight);
+    if (heroMotionEnabled) {
+      const heroRect = hero.getBoundingClientRect();
+      const heroPageBottom = heroRect.bottom + window.scrollY;
+      const heroTransitionStart = Math.max(0, heroPageBottom - viewportHeight);
+      const heroTransitionProgress = clamp((window.scrollY - heroTransitionStart) / Math.max(1, heroPageBottom - heroTransitionStart));
+      const heroExit = clamp((viewportHeight - heroRect.bottom) / viewportHeight);
+      updateHeroMorph(heroTransitionProgress, viewportHeight, heroRect, heroPageBottom);
+      hero.style.setProperty('--production-hero-media-opacity', (1 - heroExit * 0.48).toFixed(3));
+      hero.style.setProperty('--production-hero-media-scale', (1 - heroExit * 0.1).toFixed(3));
+      hero.style.setProperty('--production-hero-content-opacity', (1 - heroExit).toFixed(3));
+      hero.style.setProperty('--production-hero-content-y', `${(-2.5 * heroExit).toFixed(2)}rem`);
+    }
+
     const industryRect = industries.getBoundingClientRect();
     const industryEntry = clamp((viewportHeight - industryRect.top) / viewportHeight);
-
-    updateHeroMorph(heroTransitionProgress, viewportHeight, heroRect, heroPageBottom);
-
-    hero.style.setProperty('--production-hero-media-opacity', (1 - heroExit * 0.48).toFixed(3));
-    hero.style.setProperty('--production-hero-media-scale', (1 - heroExit * 0.1).toFixed(3));
-    hero.style.setProperty('--production-hero-content-opacity', (1 - heroExit).toFixed(3));
-    hero.style.setProperty('--production-hero-content-y', `${(-2.5 * heroExit).toFixed(2)}rem`);
     industries.style.setProperty('--industries-entry-opacity', industryEntry.toFixed(3));
     industries.style.setProperty('--industries-entry-scale', (0.96 + industryEntry * 0.04).toFixed(3));
 
@@ -137,10 +143,14 @@
   };
 
   const syncMotionPreference = () => {
-    const enabled = !motionPreference.matches && !compactViewport.matches;
+    const enabled = !motionPreference.matches;
+    const heroEnabled = enabled && !compactViewport.matches;
+    const heroWasEnabled = heroMotionEnabled;
     motionEnabled = enabled;
-    document.body.classList.toggle('production-scroll-motion', enabled);
+    heroMotionEnabled = heroEnabled;
+    document.body.classList.toggle('production-scroll-motion', heroEnabled);
     industries.classList.toggle('is-enhanced', enabled);
+    if (heroWasEnabled && !heroEnabled) clearHeroScrollStyles();
     if (enabled) scheduleUpdate();
     else clearMotionStyles();
   };

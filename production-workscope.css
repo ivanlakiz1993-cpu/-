@@ -10,7 +10,7 @@
   margin-inline:auto;
   padding:3.125rem var(--production-workscope-gutter) 3.125rem;
   overflow:hidden;
-  background:#121212;
+  background:#000;
   color:#fff;
 }
 
@@ -145,7 +145,7 @@
     min-height:0;
     min-width:43.75rem;
     gap:6.25rem;
-    padding:3.125rem 0 0 3.125rem;
+    padding:3.125rem 0 1.875rem 3.125rem;
     overflow-x:hidden;
     overflow-y:auto;
     overscroll-behavior-y:contain;
@@ -184,28 +184,22 @@
 
 @media(max-width:47.9375rem){
   .production-workscope{padding-bottom:1.875rem}
-  .production-workscope__intro{height:12.5rem}
+  .production-workscope__intro{height:auto}
   .production-workscope__description{width:100%}
-  .production-workscope__stages{padding:0 0 1.875rem}
+  .production-workscope__stages{gap:1.875rem;padding:0}
   .production-workscope__divider{width:calc(100% + 1px)}
   .production-workscope__stage{
+    position:relative;
     gap:1.875rem;
     width:100%;
     height:auto;
-    min-height:5.25rem;
-    padding-left:.875rem;
+    min-height:0;
+    padding:0 0 1.875rem .9375rem;
   }
   .production-workscope__stage:nth-child(7){height:auto}
-  .production-workscope__stage:nth-child(n+6){min-height:4.1875rem}
   .production-workscope__number{flex-basis:2.5rem;width:2.5rem}
   .production-workscope__content{flex:1 1 auto;gap:.9375rem;width:auto}
   .production-workscope__stage-heading{font-size:1.125rem;letter-spacing:-.05625rem}
   .production-workscope__stage-description{font-size:clamp(.875rem,calc(.6309vw + .7213rem),1.125rem)}
-  .production-workscope__stage:nth-child(1) .production-workscope__divider{top:7.125rem}
-  .production-workscope__stage:nth-child(2) .production-workscope__divider{top:16.125rem}
-  .production-workscope__stage:nth-child(3) .production-workscope__divider{top:25.125rem}
-  .production-workscope__stage:nth-child(4) .production-workscope__divider{top:34.125rem}
-  .production-workscope__stage:nth-child(5) .production-workscope__divider{top:43.125rem}
-  .production-workscope__stage:nth-child(6) .production-workscope__divider{top:51.0625rem}
-  .production-workscope__stage:nth-child(7) .production-workscope__divider{top:59rem}
+  .production-workscope__stage:nth-child(n) .production-workscope__divider{top:auto;bottom:0}
 }
