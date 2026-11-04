@@ -1,10 +1,13 @@
+.production-page main{
+  display:flow-root;
+}
+
 .production-how-we-work{
   position:relative;
   isolation:isolate;
   width:min(120rem,100%);
-  height:100svh;
-  min-height:33.4375rem;
-  margin-inline:auto;
+  height:58rem;
+  margin:9.375rem auto 15.625rem;
   overflow:visible;
   background:#000;
   color:#fff;
@@ -16,7 +19,6 @@
   isolation:isolate;
   width:100%;
   height:100%;
-  min-height:33.4375rem;
   overflow:hidden;
 }
 
@@ -176,6 +178,11 @@
 }
 
 @media(min-width:48rem) and (max-width:108.9375rem){
+  .production-how-we-work{
+    height:32rem;
+    margin-block:6.25rem;
+  }
+
   .production-how-we-work__heading{
     left:2.90625rem;
   }
@@ -186,8 +193,8 @@
   }
 
   .production-how-we-work__step{
-    min-height:3.525rem;
-    padding:.9375rem clamp(3rem,calc(20.3125vw - 6.75rem),6.25rem) .9375rem 0;
+    height:3.5rem;
+    padding:0 clamp(3rem,calc(20.3125vw - 6.75rem),6.25rem) 0 0;
     gap:clamp(3rem,calc(20.3125vw - 6.75rem),6.25rem);
     overflow:visible;
   }
@@ -261,9 +268,19 @@
 }
 
 @media(max-width:47.9375rem){
-  .production-how-we-work,
-  .production-how-we-work__stage{
-    min-height:36.75rem;
+  .production-how-we-work{
+    height:35rem;
+    margin-block:3.75rem;
+  }
+
+  .production-how-we-work__step{
+    min-height:4rem;
+    padding:.925rem 0;
+  }
+
+  .production-how-we-work__step:nth-child(5),
+  .production-how-we-work__step:nth-child(6){
+    min-height:3.5rem;
   }
 }
 
