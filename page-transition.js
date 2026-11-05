@@ -75,8 +75,10 @@
     animations.push(animation);
     return animation.finished.catch(() => {});
   }));
-  {
-    // Match the home-cover reveal: a 16×9 field of tiles clears radially.
+  if (document.documentElement.classList.contains('home-page')) {
+    finishEntry();
+  } else {
+    // Other pages reveal their first screen with a 16×9 field of tiles.
     const entryRoot = document.createElement('div');
     entryRoot.className = 'page-entry-reveal';
     entryRoot.setAttribute('aria-hidden', 'true');
