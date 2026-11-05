@@ -18,14 +18,14 @@
   const root=document.documentElement,{sample,poses,transitions,matrix,lerp,smooth}=storyboard;
   const mobileHelicopterTop=progress=>{
     const positions=[25.12,38.62,52.9,64.62];
-    const entrances=[[.375,.47],[.645,.74],[.895,.97]];
+    const entrances=[[.30,.47],[.57,.74],[.84,.97]];
     return positions[0]+entrances.reduce((offset,[start,end],i)=>
       offset+(positions[i+1]-positions[i])*smooth((progress-start)/(end-start)),0);
   };
   const mobileHelicopterFlight=progress=>{
-    const flight=smooth((progress-.645)/(.74-.645));
+    const flight=smooth((progress-.57)/(.74-.57));
     const arc=Math.sin(Math.PI*flight)**2;
-    const returnFlight=smooth((progress-.84)/(.895-.84));
+    const returnFlight=smooth((progress-.84)/(.97-.84));
     const travel=flight*(1-returnFlight);
     return {top:mobileHelicopterTop(progress)-arc*7.5,left:-travel*6.5,depth:travel*1.2};
   };
@@ -200,7 +200,7 @@
     // Short scrub smoothing removes wheel-event steps. It settles to the exact
     // scroll pose; there is no autonomous rotation or breathing of the airframe.
     if(progress!==target||sparksProgress!==sparksTarget){
-      progress=lerp(progress,target,1-Math.exp(-dt/95));
+      progress=lerp(progress,target,1-Math.exp(-dt/(mobileMedia.matches?125:95)));
       if(Math.abs(progress-target)<.000015)progress=target;
       sparksProgress=lerp(sparksProgress,sparksTarget,1-Math.exp(-dt/120));
       if(Math.abs(sparksProgress-sparksTarget)<.000015)sparksProgress=sparksTarget;
@@ -238,7 +238,7 @@
     viewport=innerHeight;
     resizeSparks(root.clientWidth||innerWidth,viewport);
     const heroHeight=hero.offsetHeight,introTop=intro.getBoundingClientRect().top+scrollY;
-    sequenceDistance=viewport*(mobileMedia.matches?1.575:tabletMedia.matches?1.8:2.52);
+    sequenceDistance=viewport*(mobileMedia.matches?2.5:tabletMedia.matches?1.8:2.52);
     entryStart=introTop+heroHeight-viewport;
     sequenceStart=introTop+heroHeight;
     const runHeight=sequenceDistance+viewport*1.5;
