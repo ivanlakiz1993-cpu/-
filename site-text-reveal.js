@@ -295,9 +295,7 @@
       ...root.querySelectorAll(targetSelector)
     ];
     elements.forEach((element) => {
-      const isHomeCoverCopy = element.matches('.hero-title, .hero-services, .hero-description');
-      if ((!isHomeCoverCopy && (element.matches(excludedSelector)
-        || element.closest(excludedSelector)))
+      if ((element.matches(excludedSelector) || element.closest(excludedSelector))
         || element.closest('[hidden], [aria-hidden="true"], [aria-busy="true"]')) return;
 
       const previousText = element.dataset.textRevealContent;

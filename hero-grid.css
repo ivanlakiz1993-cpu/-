@@ -63,7 +63,7 @@
 /* Desktop homepage hero aligned to Figma frame 1958:7025 (1920 × 900). */
 @media (min-width:75rem){
   .home-page .hero-bg img{inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
-  .home-page .hero-services-anchor{top:calc(50% + 6.375rem)}
+  .home-page .hero-services-anchor{left:7.6563%;top:calc(50% + 4.4375rem)}
   .home-page .hero-description-anchor{bottom:3.125rem}
 }
 
