@@ -36,7 +36,7 @@
   padding-top:1px;
   background:#000;
   color:#fff;
-  transition:background-color .34s ease,color .34s ease;
+  transition:background-color .34s ease,color .34s ease,border-color .34s ease;
 }
 
 .production-faq__item[open]{
@@ -137,11 +137,6 @@
   font-size:clamp(.875rem,calc(.6309vw + .7213rem),1.125rem);
   font-weight:400;
   line-height:1.2;
-}
-
-.production-faq__item[data-closing]>.production-faq__answer{
-  display:block;
-  min-height:0;
 }
 
 @media(min-width:109rem){
