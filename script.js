@@ -160,6 +160,7 @@ const benefitStates = [
   },
 ];
 let benefitScrollStep = 0;
+let advanceBenefitCardByScroll = null;
 
 if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && benefitCopy && benefitArt && benefitImage) {
   let activeBenefit = 0;
@@ -289,6 +290,46 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     showBenefit(stateIndex);
   };
 
+  let benefitScrollActivationLocked = false;
+  let benefitScrollActivationTimer = 0;
+  let benefitTargetIndex = null;
+  advanceBenefitCardByScroll = (scrollDirection, originScrollY = window.scrollY, inputType = 'touch', wheelBurst = false) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !benefitScrollStep) return false;
+    const direction = Math.sign(scrollDirection);
+    if (!direction) return false;
+    const sectionTop = benefitsSection.getBoundingClientRect().top + window.scrollY;
+    const mobile = window.matchMedia('(max-width:37.5rem)').matches;
+    const stickyTop = mobile ? (parseFloat(getComputedStyle(benefitsStage).top) || 0) : 0;
+    const availableScroll = Math.max(1, benefitsSection.offsetHeight - benefitsStage.offsetHeight - stickyTop);
+    if (window.scrollY < sectionTop || window.scrollY > sectionTop + availableScroll) return false;
+
+    const sourceScrollY = originScrollY >= sectionTop && originScrollY <= sectionTop + availableScroll
+      ? originScrollY
+      : window.scrollY;
+    const visibleIndex = Math.max(0, Math.min(benefitStates.length - 1,
+      Math.floor((sourceScrollY - sectionTop) / benefitScrollStep)));
+    if (benefitTargetIndex === null) benefitTargetIndex = visibleIndex;
+    const nextIndex = benefitTargetIndex + direction;
+    if (nextIndex < 0 || nextIndex >= benefitStates.length) return false;
+    if (inputType === 'wheel' && wheelBurst && benefitScrollActivationLocked) {
+      window.clearTimeout(benefitScrollActivationTimer);
+      benefitScrollActivationTimer = window.setTimeout(() => { benefitScrollActivationLocked = false; }, 160);
+      return true;
+    }
+
+    benefitTargetIndex = nextIndex;
+    if (inputType === 'wheel' && wheelBurst) {
+      benefitScrollActivationLocked = true;
+      window.clearTimeout(benefitScrollActivationTimer);
+      benefitScrollActivationTimer = window.setTimeout(() => { benefitScrollActivationLocked = false; }, 160);
+    }
+    window.scrollTo({
+      top: sectionTop + benefitScrollStep * nextIndex,
+      behavior: 'smooth',
+    });
+    return true;
+  };
+
   const requestBenefitUpdate = () => {
     if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateBenefitFromScroll);
   };
@@ -309,6 +350,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
   benefitButtons.forEach((button) => {
     button.addEventListener('click', () => {
       const index = Number(button.dataset.benefitIndex);
+      benefitTargetIndex = index;
       const sectionTop = benefitsSection.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({ top: sectionTop + (benefitScrollStep || benefitsStage.offsetHeight) * index, behavior: 'smooth' });
     });
@@ -378,4 +420,60 @@ contactForm.addEventListener('submit', async (event) => {
   }
 });
 
+// Smooth and slow wheel input across the page. Reduced-motion preferences keep
+// the browser's native wheel scrolling behaviour.
+{
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const hasTouchInput = navigator.maxTouchPoints > 0 || window.matchMedia('(any-pointer: coarse)').matches;
+  const wheelDistanceScale = .5;
+  const settlingTime = 280;
+  let frame = 0;
+  let position = window.scrollY;
+  let destination = position;
+  let previousTime = 0;
+  let activeSettlingTime = settlingTime;
+
+  const stop = () => {
+    cancelAnimationFrame(frame);
+    frame = 0;
+    previousTime = 0;
+  };
+  const advance = (time) => {
+    const elapsed = previousTime ? Math.min(50, time - previousTime) : 16.67;
+    previousTime = time;
+    position += (destination - position) * (1 - Math.exp(-elapsed / activeSettlingTime));
+    if (Math.abs(destination - position) < .5) position = destination;
+    window.scrollTo({ top: position, behavior: 'instant' });
+    frame = position === destination ? 0 : requestAnimationFrame(advance);
+    if (!frame) previousTime = 0;
+  };
+
+  window.addEventListener('wheel', (event) => {
+    if (reducedMotion.matches || !finePointer.matches || hasTouchInput || event.ctrlKey || event.metaKey || !event.deltaY ||
+        Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
+        event.target.closest('textarea, .menu-drawer') ||
+        document.documentElement.classList.contains('menu-open')) return;
+    if (advanceBenefitCardByScroll?.(event.deltaY, window.scrollY, 'wheel', Math.abs(event.deltaY) < 35)) {
+      if (event.cancelable) event.preventDefault();
+      stop();
+      return;
+    }
+    const distance = event.deltaY * (event.deltaMode === 1 ? 40 : event.deltaMode === 2 ? innerHeight : 1) * wheelDistanceScale;
+    const limit = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+    if (!event.cancelable || !limit) return;
+    event.preventDefault();
+    if (!frame) position = destination = window.scrollY;
+    activeSettlingTime = event.deltaMode === 0 && Math.abs(event.deltaY) < 35 ? 90 : settlingTime;
+    const maxLead = innerHeight * .9;
+    destination = Math.max(0, Math.min(limit, position + Math.max(-maxLead, Math.min(maxLead, destination + distance - position))));
+    if (!frame) frame = requestAnimationFrame(advance);
+  }, { passive: false });
+
+  ['pointerdown', 'touchstart', 'keydown', 'hashchange', 'popstate'].forEach((type) => {
+    window.addEventListener(type, stop, { passive: true });
+  });
+  reducedMotion.addEventListener('change', stop);
+  window.addEventListener('resize', stop, { passive: true });
+}
 

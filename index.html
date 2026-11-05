@@ -10,13 +10,13 @@
   <title>СпецЭлектроника — промышленная электроника</title>
   <link rel="stylesheet" href="styles.css?v=20261103-home-hero-figma-900-1">
   <link rel="stylesheet" href="hero-grid.css?v=20261103-menu-icon-align-1">
-  <link rel="stylesheet" href="metrics-desktop.css?v=20261105-static-home-metrics-1">
+  <link rel="stylesheet" href="metrics-desktop.css?v=20261024-helicopter-fall-glyphs-3">
   <link rel="stylesheet" href="layout-gutters.css?v=20261027-benefit-heading-width-1">
   <link rel="stylesheet" href="news-responsive.css?v=20261018-fluid-home-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
   <link rel="stylesheet" href="text-reveal.css?v=20261027-unified-entry-reveal-1">
   <script src="site-header.js?v=20261101-production-route-1"></script>
-  <script src="page-transition.js?v=20261105-home-no-cover-entry-1"></script>
+  <script src="page-transition.js?v=20261027-unified-entry-reveal-1"></script>
 </head>
 <body>
     <site-header page="home"></site-header>
@@ -36,9 +36,13 @@
     </section>
 
     <section id="about" class="metrics wrap" aria-labelledby="metrics-heading">
-      <h2 id="metrics-heading" class="metrics__heading">Компания в цифрах</h2>
+      <h2 id="metrics-heading" class="visually-hidden">Компания в цифрах</h2>
       <div class="metrics-desktop" data-scene="1">
-        <div class="metrics-desktop__frame">
+        <div class="metrics-desktop__frame" aria-hidden="true">
+          <div class="metrics-desktop__background">
+            <canvas class="metrics-desktop__particles"></canvas>
+          </div>
+          <canvas class="metrics-desktop__sparks" aria-hidden="true"></canvas>
           <div class="metrics-desktop__copy metrics-desktop__copy--area" data-achievement="area" data-node-id="2325:2321">
             <p class="metrics-desktop__value"><span class="metrics-desktop__value-wide">88 160</span><span class="metrics-desktop__value-compact">1600</span></p>
             <p class="metrics-desktop__label">кв. м общая площадь производства</p>
@@ -225,9 +229,13 @@
     </div>
     <div class="footer-bottom wrap">© 2026 ООО «СпецЭлектроники»</div>
   </footer>
-  <script src="site-text-reveal.js?v=20261105-home-cover-static-1"></script>
+  <script src="helicopter-model.js?v=20261010-ascii-3"></script>
+  <script src="helicopter-renderer.js?v=20261024-helicopter-fall-glyphs-2"></script>
+  <script src="helicopter-storyboard.js?v=20261023-mobile-flight-3"></script>
+  <script src="helicopter-motion.js?v=20261103-hero-split-transition-1"></script>
+  <script src="site-text-reveal.js?v=20261030-30ms-viewport-sequence-1"></script>
   <script src="button-glow.js?v=20261102-shared-button-glow-1"></script>
-  <script src="script.js?v=20261105-native-wheel-scroll-1"></script>
+  <script src="script.js?v=20261027-unified-entry-reveal-1"></script>
 </body>
 </html>
 

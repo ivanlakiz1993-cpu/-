@@ -296,7 +296,6 @@
     ];
     elements.forEach((element) => {
       const isHomeCoverCopy = element.matches('.hero-title, .hero-services, .hero-description');
-      if (document.documentElement.classList.contains('home-page') && isHomeCoverCopy) return;
       if ((!isHomeCoverCopy && (element.matches(excludedSelector)
         || element.closest(excludedSelector)))
         || element.closest('[hidden], [aria-hidden="true"], [aria-busy="true"]')) return;
