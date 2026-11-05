@@ -28,34 +28,6 @@ html.metrics-sequence .metrics {
   color: #fff;
   pointer-events: none;
 }
-html.hero-split-active .intro-sequence > .hero { opacity: 0; pointer-events: none; }
-html.hero-split-active .metrics { margin-top: calc(-1 * var(--intro-hero-height)); }
-.hero-split { display: none; }
-html.hero-split-active .hero-split {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  display: block;
-  overflow: hidden;
-  pointer-events: none;
-}
-.hero-split__half {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--hero-split-hero-height);
-  will-change: transform;
-}
-.hero-split__half > .hero { height: var(--hero-split-hero-height); }
-.hero-split__half--top {
-  clip-path: inset(0 0 calc(100% - var(--hero-split-y)) 0);
-  transform: translateY(var(--hero-split-top-offset, 0));
-}
-.hero-split__half--bottom {
-  clip-path: inset(var(--hero-split-y) 0 0 0);
-  transform: translateY(var(--hero-split-bottom-offset, 0));
-}
 html.metrics-sequence .metrics-desktop {
   position: sticky;
   top: 0;
@@ -144,10 +116,6 @@ html.metrics-sequence .metrics-desktop {
 }
 
 @media (max-width: 37.5rem) {
-  html.hero-split-active .intro-sequence > .hero { position: relative; z-index: 3; opacity: 1; }
-  html.hero-split-active.hero-split-opening .intro-sequence > .hero { opacity: 0; }
-  html.hero-split-active .hero-split { display: none; }
-  html.hero-split-active.hero-split-opening .hero-split { display: block; }
   html.metrics-sequence .metrics-desktop { height: 157.4359vw; }
   .metrics-desktop__frame { height: 157.4359vw; }
   .metrics-desktop__background {

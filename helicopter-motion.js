@@ -13,7 +13,6 @@
   if(!renderer)return;
   if(sparksCanvas&&benefitsStage)benefitsStage.prepend(sparksCanvas);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const splitMedia=matchMedia('(min-width: 37.5625rem), (max-width: 37.5rem)');
   const mobileMedia=matchMedia('(max-width: 37.5rem)');
   const tabletMedia=matchMedia('(min-width: 37.5625rem) and (max-width: 56.25rem)');
   const root=document.documentElement,{sample,poses,transitions,matrix,lerp,smooth}=storyboard;
@@ -30,10 +29,9 @@
     const travel=flight*(1-returnFlight);
     return {top:mobileHelicopterTop(progress)-arc*7.5,left:-travel*6.5,depth:travel*1.2};
   };
-  let enabled=false,splitEnabled=false,splitOverlay=null,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
+  let enabled=false,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
   let restoreSyncPending=false,restoreSyncTimer=0;
-  let sceneWidth=0,sceneHeight=0,entryStart=0,entryDistance=0,sequenceStart=0,sequenceDistance=0,end=0;
-  let splitIntroTop=0,splitPreTravel=0,splitSeam=0,splitTopTravel=0,splitBottomTravel=0;
+  let sceneWidth=0,sceneHeight=0,entryStart=0,sequenceStart=0,sequenceDistance=0,end=0;
   let layoutWidth=0,layoutHeight=0,lastTime=0,rotorTime=0,lastScroll=NaN,target=0,progress=0;
   let sparksTarget=0,sparksProgress=0,sparkParticles=null,sparkRatio=1,sparkWidth=0,sparkHeight=0;
   let state=sample(0);
@@ -150,23 +148,6 @@
     return {fit:lerp(a.fit,b.fit,t)*.97,centerX:lerp(a.centerX,b.centerX,t),centerY:lerp(a.centerY,b.centerY,t)};
   }
   function stop(){cancelAnimationFrame(raf);raf=0;lastTime=0;}
-  function ensureSplitOverlay(){
-    if(splitOverlay)return;
-    splitOverlay=document.createElement('div');
-    splitOverlay.className='hero-split';
-    splitOverlay.setAttribute('aria-hidden','true');
-    for(const side of ['top','bottom']){
-      const half=document.createElement('div'),copy=hero.cloneNode(true);
-      half.className=`hero-split__half hero-split__half--${side}`;
-      copy.removeAttribute('aria-label');
-      copy.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
-      // Desktop hides the original cover and shows these split copies from the
-      // first frame, so keep the reveal layer on them as well.
-      copy.inert=true;
-      half.append(copy);splitOverlay.append(half);
-    }
-    document.body.append(splitOverlay);
-  }
   function sizeFrame(){
     const width=Math.min(stage.clientWidth,viewport*1920/state.height),height=width*state.height/1920;
     if(Math.abs(width-sceneWidth)<.01&&Math.abs(height-sceneHeight)<.01)return;
@@ -194,21 +175,6 @@
   }
   function updateScroll(){
     const scroll=window.scrollY;
-    if(splitEnabled){
-      const coverScroll=Math.max(0,Math.min(splitPreTravel,scroll-splitIntroTop));
-      const opening=smooth((scroll-entryStart)/entryDistance);
-      if(mobileMedia.matches){
-        const hasEntered=scroll>entryStart;
-        root.classList.toggle('hero-split-opening',hasEntered);
-      }
-      if(splitOverlay){
-        splitOverlay.style.setProperty('--hero-split-y',`${splitSeam}px`);
-        splitOverlay.style.setProperty('--hero-split-hero-height',`${hero.offsetHeight}px`);
-        splitOverlay.style.setProperty('--hero-split-top-offset',`${-coverScroll-opening*splitTopTravel}px`);
-        splitOverlay.style.setProperty('--hero-split-bottom-offset',`${-coverScroll+opening*splitBottomTravel}px`);
-        splitOverlay.style.visibility=opening>=1?'hidden':'visible';
-      }
-    }
     target=Math.max(0,Math.min(1,(scroll-sequenceStart)/sequenceDistance));
     sparksTarget=sparksContext?Math.max(0,Math.min(1,(scroll-(sequenceStart+sequenceDistance))/Math.max(1,end-(sequenceStart+sequenceDistance)))):0;
     const fallStart=sequenceStart+sequenceDistance;
@@ -273,45 +239,21 @@
     resizeSparks(root.clientWidth||innerWidth,viewport);
     const heroHeight=hero.offsetHeight,introTop=intro.getBoundingClientRect().top+scrollY;
     sequenceDistance=viewport*(mobileMedia.matches?1.575:tabletMedia.matches?1.8:2.52);
-    entryDistance=splitEnabled?viewport*.85:0;
-    splitIntroTop=introTop;
-    splitPreTravel=splitEnabled?Math.max(0,heroHeight-viewport):0;
-    const splitHold=splitEnabled&&!mobileMedia.matches?viewport*.18:0;
-    entryStart=splitEnabled?introTop+splitPreTravel+splitHold:introTop+heroHeight-viewport;
-    sequenceStart=splitEnabled?entryStart+entryDistance:introTop+heroHeight;
-    const runHeight=splitPreTravel+splitHold+entryDistance+sequenceDistance+viewport*1.5;
-    end=splitEnabled?introTop+runHeight:sequenceStart+runHeight;
-    if(splitEnabled){
-      // Keep the split reveal independent from the decorative grid line: the
-      // line is intentionally absent from the homepage cover.
-      const line=hero.querySelector('.grid-mid');
-      const seam=line
-        ? line.getBoundingClientRect().top-hero.getBoundingClientRect().top
-        : heroHeight*(mobileMedia.matches ? 0.58 : 0.528);
-      splitSeam=Math.max(0,Math.min(viewport-1,seam));
-      splitTopTravel=Math.max(0,splitSeam-splitPreTravel);
-      splitBottomTravel=viewport-splitSeam+splitPreTravel;
-      intro.style.setProperty('--intro-hero-height',`${heroHeight}px`);
-      if(splitOverlay){
-        splitOverlay.style.setProperty('--hero-split-y',`${splitSeam}px`);
-        splitOverlay.style.setProperty('--hero-split-hero-height',`${heroHeight}px`);
-      }
-    }
+    entryStart=introTop+heroHeight-viewport;
+    sequenceStart=introTop+heroHeight;
+    const runHeight=sequenceDistance+viewport*1.5;
+    end=sequenceStart+runHeight;
     intro.style.setProperty('--metrics-run-height',`${runHeight}px`);
     updateScroll();progress=target;sparksProgress=sparksTarget;compose();wake();
   }
   function requestMeasure(){if(!resizeFrame)resizeFrame=requestAnimationFrame(measure);}
   function configure(){
     stop();enabled=!reduced.matches&&!contextLost;
-    splitEnabled=enabled&&splitMedia.matches;
-    if(splitEnabled)ensureSplitOverlay();
     root.classList.toggle('metrics-sequence',enabled);
-    root.classList.toggle('hero-split-active',splitEnabled);
-    root.classList.toggle('hero-split-opening',splitEnabled&&!mobileMedia.matches);
+    root.classList.remove('hero-split-active','hero-split-opening');
     hero.inert=false;
-    if(!splitEnabled)intro.style.removeProperty('--intro-hero-height');
     if(enabled)measure();
-    else {intro.style.removeProperty('--metrics-run-height');intro.style.removeProperty('--intro-hero-height');stage.classList.remove('is-rendered');}
+    else {intro.style.removeProperty('--metrics-run-height');stage.classList.remove('is-rendered');}
   }
   window.addEventListener('scroll',()=>{if(enabled){updateScroll();if(restoreSyncPending)syncRestoredScroll();wake();}},{passive:true});
   window.addEventListener('resize',requestMeasure,{passive:true});
@@ -322,7 +264,7 @@
     restoreSyncTimer=setTimeout(finishRestoreSync,900);
   },{passive:true});
   ['wheel','touchstart','pointerdown','keydown'].forEach(type=>addEventListener(type,finishRestoreSync,{passive:true,capture:true}));
-  reduced.addEventListener('change',configure);splitMedia.addEventListener('change',configure);
+  reduced.addEventListener('change',configure);
   document.addEventListener('visibilitychange',()=>{stop();wake();});
   canvas.addEventListener('webglcontextlost',()=>{contextLost=true;configure();});
   new MutationObserver(()=>{if(root.classList.contains('menu-open'))stop();else wake();}).observe(root,{attributes:true,attributeFilter:['class']});
