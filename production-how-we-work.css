@@ -281,6 +281,10 @@
   }
 }
 
+@media(max-width:108.9375rem){
+  .production-how-we-work__step{color:#fff}
+}
+
 @media(prefers-reduced-motion:reduce){
   .production-how-we-work__canvas{
     transition:none;
