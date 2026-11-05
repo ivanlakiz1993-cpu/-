@@ -238,7 +238,7 @@
     viewport=innerHeight;
     resizeSparks(root.clientWidth||innerWidth,viewport);
     const heroHeight=hero.offsetHeight,introTop=intro.getBoundingClientRect().top+scrollY;
-    sequenceDistance=viewport*(mobileMedia.matches?2.5:tabletMedia.matches?1.8:2.52);
+    sequenceDistance=viewport*(mobileMedia.matches?2.5:tabletMedia.matches?1.8:2);
     entryStart=introTop+heroHeight-viewport;
     sequenceStart=introTop+heroHeight;
     const runHeight=sequenceDistance+viewport*1.5;
