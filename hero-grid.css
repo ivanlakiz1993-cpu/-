@@ -146,7 +146,6 @@ site-header{--menu-gutter:max(5.2083333333vw,calc((100vw - 107.5rem)/2));display
 .menu-social__link--vk img{width:3.335rem;height:2.081rem}
 .menu-social__link--rutube img{height:2.1rem}
 .menu-social__link--telegram img{width:2.7rem;height:2.4rem}
-.menu-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){.menu-drawer::before,.menu-drawer .nav,.menu-icon i,.menu-nav-links a,.menu-letter{transition-duration:.01ms!important;transition-delay:0ms!important}}
 
 @media (min-width:56.3125rem) and (max-width:74.9375rem){

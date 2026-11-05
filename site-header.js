@@ -99,7 +99,6 @@
       this.drawer.classList.toggle('is-open', open);
       this.navigation.setAttribute('aria-hidden', String(!open));
       document.documentElement.classList.toggle('menu-open', open);
-      document.body.classList.toggle('menu-open', open);
     }
   }
 

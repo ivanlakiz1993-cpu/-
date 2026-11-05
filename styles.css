@@ -509,3 +509,5 @@ html.home-page{font-size:clamp(.9375rem,1vw,1rem)}
   .benefit-copy p.text-reveal.text-reveal--body.text-reveal--active{--text-reveal-delay:0ms!important}
   .benefit-more.is-visible{transition-delay:0s,0s}
 }
+
+html.menu-open{overflow:hidden;scrollbar-gutter:stable}
