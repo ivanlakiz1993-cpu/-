@@ -186,7 +186,9 @@
     sequenceDistance=viewport*(mobileMedia.matches?2.5:tabletMedia.matches?1.8:2);
     entryStart=introTop+heroHeight-viewport;
     sequenceStart=introTop+heroHeight;
-    const runHeight=sequenceDistance;
+    // Keep the metrics scene pinned briefly after its scroll timeline ends so
+    // the smoothed helicopter and achievement state can settle before the next section.
+    const runHeight=sequenceDistance+viewport*.3;
     end=sequenceStart+runHeight;
     intro.style.setProperty('--metrics-run-height',`${runHeight}px`);
     updateScroll();progress=target;compose();wake();
