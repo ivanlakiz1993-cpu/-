@@ -3,49 +3,62 @@
   const stage = section?.querySelector('[data-production-base-stage]');
   const images = section ? [...section.querySelectorAll('[data-base-image]')] : [];
   const areas = section ? [...section.querySelectorAll('[data-base-area]')] : [];
+  const title = section?.querySelector('.production-base-hero__title');
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const states = [
-    { imageIndex: 0, visibleAreas: 1 },
-    { imageIndex: 1, visibleAreas: 2 },
-    { imageIndex: 2, visibleAreas: 3 },
-    { imageIndex: 3, visibleAreas: 4 },
-    { imageIndex: 4, visibleAreas: 5 },
-  ];
 
-  if (!section || !stage || images.length !== states.length || areas.length !== 5) return;
+  if (!section || !stage || !title || images.length !== 5 || areas.length !== images.length) return;
 
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+  const stepSize = 1 / images.length;
+  const imageRevealDuration = stepSize * 0.4;
+  const titleRevealStart = imageRevealDuration;
+  const titleRevealDuration = stepSize * 0.2;
+  const areaRevealOffset = stepSize * 0.6;
+  const areaRevealDuration = stepSize * 0.3;
   let animationFrame = 0;
 
-  const applyState = (stateIndex) => {
-    const state = states[stateIndex];
+  const revealProgress = (progress, start, duration) =>
+    clamp((progress - start) / duration);
+
+  const applyProgress = (progress) => {
+    const currentState = Math.min(images.length - 1, Math.floor(progress / stepSize));
 
     images.forEach((image, index) => {
-      image.classList.toggle('is-active', index === state.imageIndex);
+      const start = index * stepSize;
+      const reveal = revealProgress(progress, start, imageRevealDuration);
+      image.classList.toggle('is-active', index <= currentState);
+      image.classList.toggle('is-current', index === currentState);
+      image.style.setProperty('--production-base-image-reveal', String(reveal));
     });
 
+    const titleReveal = revealProgress(progress, titleRevealStart, titleRevealDuration);
+    title.style.setProperty('--production-base-title-reveal', `${titleReveal * 100}%`);
+
+    let visibleAreas = 0;
     areas.forEach((area, index) => {
-      area.classList.toggle('is-visible', index < state.visibleAreas);
+      const start = index * stepSize + areaRevealOffset;
+      const reveal = revealProgress(progress, start, areaRevealDuration);
+      area.classList.toggle('is-visible', reveal > 0);
+      area.style.setProperty('--production-base-area-reveal', `${reveal * 100}%`);
+      if (reveal > 0) visibleAreas += 1;
     });
 
-    section.dataset.stateIndex = String(stateIndex);
-    section.dataset.visibleAreas = String(state.visibleAreas);
+    section.dataset.stateIndex = String(currentState);
+    section.dataset.visibleAreas = String(visibleAreas);
   };
 
   const updateFromScroll = () => {
     animationFrame = 0;
 
     if (motionPreference.matches) {
-      applyState(states.length - 1);
+      applyProgress(1);
       return;
     }
 
     const sectionTop = section.getBoundingClientRect().top + window.scrollY;
     const scrollRange = Math.max(1, section.offsetHeight - stage.offsetHeight);
     const progress = clamp((window.scrollY - sectionTop) / scrollRange);
-    const stateIndex = Math.round(progress * (states.length - 1));
-
-    applyState(stateIndex);
+    applyProgress(progress);
   };
 
   const scheduleUpdate = () => {
@@ -59,7 +72,7 @@
     if (reducedMotion) {
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
       animationFrame = 0;
-      applyState(states.length - 1);
+      applyProgress(1);
       return;
     }
 
