@@ -8,7 +8,3 @@ main .text-reveal:not(p).text-reveal--body{opacity:0;transition:none}
 main .text-reveal:not(p).text-reveal--body.text-reveal--active{opacity:1;transition:opacity .68s ease-out var(--text-reveal-delay,0ms)}
 .benefit-copy.is-switching h3.text-reveal.text-reveal--heading,.benefit-copy.is-switching p.text-reveal.text-reveal--body{opacity:0}
 @media(prefers-reduced-motion:reduce){main .text-reveal.text-reveal--heading .text-reveal__line-content,main .text-reveal.text-reveal--heading.text-reveal--active .text-reveal__line-content,main .text-reveal.text-reveal--body,main .text-reveal.text-reveal--body.text-reveal--active{transform:none;opacity:1;transition:none}}
-@media(prefers-reduced-motion:no-preference){
-  .home-page main h1.hero-title.text-reveal.text-reveal--heading.text-reveal--active>span:first-child .text-reveal__line-content{transition-delay:var(--text-reveal-delay,0ms)}
-  .home-page main h1.hero-title.text-reveal.text-reveal--heading.text-reveal--active>span:nth-child(2) .text-reveal__line-content{transition-delay:calc(var(--text-reveal-delay,0ms) + 120ms)}
-}

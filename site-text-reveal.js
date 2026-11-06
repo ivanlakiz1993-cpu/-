@@ -21,8 +21,9 @@
   const groupsByTarget = new WeakMap();
   const registeredTargets = new WeakSet();
   const headingSelector = 'h1, h2, h3, h4, h5, h6';
-  // Includes the 720 ms line motion plus the 120 ms stagger on the second line.
-  const homepageHeroTitleSequenceDuration = 840;
+  // Includes the 720 ms title motion plus the 40 ms pause before the first panel.
+  const homepageHeroTitleSequenceDuration = 760;
+  const homepageHeroPanelGap = 40;
   const isHomepageHeroTarget = (element) => element.matches(
     '.home-page .hero-title, .home-page .hero-services, .home-page .hero-description'
   );
@@ -262,7 +263,9 @@
         animate([element]);
         const nextRevealDelay = element.matches('.home-page .hero-title')
           ? homepageHeroTitleSequenceDuration
-          : sequenceGap;
+          : element.matches('.home-page .hero-services')
+            ? homepageHeroPanelGap
+            : sequenceGap;
         group.nextStartAt = performance.now() + nextRevealDelay;
         group.timer = window.setTimeout(() => {
           group.timer = 0;
