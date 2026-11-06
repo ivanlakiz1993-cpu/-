@@ -232,7 +232,7 @@
   .production-how-we-work__list{
     top:7.125rem;
     left:50%;
-    width:50%;
+    width:calc(50% - 6.25rem);
   }
 
   .production-how-we-work__step{
@@ -255,8 +255,8 @@
   .production-how-we-work__description{
     flex:0 0 32.125rem;
     width:32.125rem;
-    font-size:1.5rem;
-    line-height:1.1;
+    font-size:1.125rem;
+    line-height:1.2;
   }
 
   .production-how-we-work__description-line{
