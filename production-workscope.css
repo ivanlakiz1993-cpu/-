@@ -139,6 +139,7 @@
   .production-workscope__heading{line-height:1}
   .production-workscope__description{line-height:1.1}
   .production-workscope__stages{
+    --production-workscope-fade-size:clamp(7rem,13vh,9rem);
     flex:1 1 0;
     height:calc(100svh - 10.25rem);
     margin-top:7.125rem;
@@ -150,6 +151,8 @@
     overflow-y:auto;
     overscroll-behavior-y:contain;
     scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - var(--production-workscope-fade-size)),transparent 100%);
+    mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - var(--production-workscope-fade-size)),transparent 100%);
   }
 
   .production-workscope__stages::-webkit-scrollbar{display:none}
