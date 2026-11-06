@@ -285,7 +285,7 @@ if (benefitsSection && benefitsStage && benefitTitle && benefitDescription && be
     const mobile = window.matchMedia('(max-width:37.5rem)').matches;
     const stickyTop = mobile ? (parseFloat(getComputedStyle(benefitsStage).top) || 0) : 0;
     const availableScroll = Math.max(1, benefitsSection.offsetHeight - stageHeight - stickyTop);
-    benefitScrollStep = mobile ? availableScroll / benefitStates.length : stageHeight;
+    benefitScrollStep = mobile ? availableScroll / benefitStates.length : stageHeight * 0.7;
     const stateIndex = clamp(Math.floor((window.scrollY - sectionTop) / benefitScrollStep), 0, benefitStates.length - 1);
     showBenefit(stateIndex);
   };
