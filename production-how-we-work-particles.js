@@ -8,8 +8,7 @@
 
   if (!section || !stage || !frame || !canvas || !context || !steps.length) return;
 
-  // Add each later image to its matching list item with data-particle-src.
-  // Only consecutive illustrated steps take part in the scroll sequence.
+  // Each illustrated step maps to its particle image and can be previewed on hover or focus.
   const sources = [];
   for (const step of steps) {
     if (!step.dataset.particleSrc) break;
@@ -18,17 +17,11 @@
   if (!sources.length) return;
 
   const desktop = window.matchMedia('(min-width: 109rem)');
-  const mobile = window.matchMedia('(max-width: 47.9375rem)');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
   const ease = value => value * value * (3 - 2 * value);
   const guideSize = 1024;
   const maxParticles = 64000;
-  const holdViewports = 1;
-  const transitionViewports = .75;
-  const stepActivationThreshold = .75;
-  const stepDeactivationThreshold = .25;
-  const sequenceViewports = sources.length * holdViewports + (sources.length - 1) * transitionViewports;
 
   let targets = [];
   let targetLights = [];
@@ -43,7 +36,9 @@
   let introStart = null;
   let displayedTravel = 0;
   let requestedTravel = 0;
-  let activeStep = 0;
+  let activeStep = -1;
+  let hoveredStep = -1;
+  let focusedStep = -1;
   let lastTick = 0;
   let lastPaint = 0;
   let canvasWidth = 0;
@@ -56,20 +51,6 @@
     let value = Math.imul(seed ^ seed >>> 15, 1 | seed);
     value ^= value + Math.imul(value ^ value >>> 7, 61 | value);
     return ((value ^ value >>> 14) >>> 0) / 4294967296;
-  };
-
-  const resolveSequence = progress => {
-    let remaining = clamp(progress) * sequenceViewports;
-    for (let index = 0; index < sources.length - 1; index++) {
-      if (remaining < holdViewports) return { travel: index, activeStep: index };
-      remaining -= holdViewports;
-      if (remaining < transitionViewports) {
-        return { travel: index + remaining / transitionViewports, activeStep: index };
-      }
-      remaining -= transitionViewports;
-    }
-    const lastStep = sources.length - 1;
-    return { travel: lastStep, activeStep: lastStep };
   };
 
   const loadImage = source => new Promise((resolve, reject) => {
@@ -157,14 +138,45 @@
     activeStep = index;
     steps.forEach((step, stepIndex) => {
       const active = stepIndex === index;
-      step.classList.toggle('is-complete', stepIndex < index);
       step.classList.toggle('is-active', active);
       if (active) step.setAttribute('aria-current', 'step');
       else step.removeAttribute('aria-current');
     });
-    const description = steps[index]?.querySelector('.production-how-we-work__description')?.textContent?.trim();
-    if (description) canvas.setAttribute('aria-label', `Частицы образуют иллюстрацию этапа ${index + 1}: ${description}`);
+    const labelIndex = Math.max(0, index);
+    const description = steps[labelIndex]?.querySelector('.production-how-we-work__description')?.textContent?.trim();
+    if (description) canvas.setAttribute('aria-label', `Частицы образуют иллюстрацию этапа ${labelIndex + 1}: ${description}`);
   };
+
+  const updateSelectedStep = () => {
+    const index = hoveredStep >= 0 ? hoveredStep : focusedStep;
+    setActiveStep(index);
+    requestedTravel = index >= 0 ? index : 0;
+    schedulePaint();
+  };
+
+  const list = section.querySelector('.production-how-we-work__steps');
+  list?.addEventListener('pointerover', event => {
+    if (event.pointerType === 'touch') return;
+    const step = event.target.closest?.('.production-how-we-work__step');
+    if (!step || !list.contains(step)) return;
+    hoveredStep = steps.indexOf(step);
+    updateSelectedStep();
+  });
+  list?.addEventListener('pointerleave', () => {
+    hoveredStep = -1;
+    updateSelectedStep();
+  });
+  list?.addEventListener('focusin', event => {
+    const step = event.target.closest?.('.production-how-we-work__step');
+    if (!step || !list.contains(step)) return;
+    focusedStep = steps.indexOf(step);
+    updateSelectedStep();
+  });
+  list?.addEventListener('focusout', event => {
+    if (list.contains(event.relatedTarget)) return;
+    focusedStep = -1;
+    updateSelectedStep();
+  });
 
   const resizeCanvas = () => {
     if (!canvasReady || !desktop.matches) return;
@@ -280,14 +292,6 @@
     lastTick = now;
     displayedTravel += (requestedTravel - displayedTravel) * (1 - Math.exp(-elapsed / 260));
     if (Math.abs(requestedTravel - displayedTravel) < .0001) displayedTravel = requestedTravel;
-    const direction = Math.sign(requestedTravel - displayedTravel);
-    let nextStep = activeStep;
-    if (direction > 0) {
-      while (nextStep < targets.length - 1 && displayedTravel >= nextStep + stepActivationThreshold) nextStep++;
-    } else if (direction < 0) {
-      while (nextStep > 0 && displayedTravel <= nextStep - 1 + stepDeactivationThreshold) nextStep--;
-    }
-    setActiveStep(clamp(nextStep, 0, targets.length - 1));
     if (now - lastPaint > 28) {
       paint(now);
       lastPaint = now;
@@ -298,30 +302,11 @@
   const schedulePaint = () => {
     if (!canvasReady || !desktop.matches || !inView || document.hidden) return;
     if (reducedMotion.matches) {
-      displayedTravel = Math.max(0, activeStep);
+      displayedTravel = clamp(requestedTravel, 0, targets.length - 1);
       paint(performance.now());
     } else if (!animationFrame) {
       animationFrame = requestAnimationFrame(tick);
     }
-  };
-
-  const updateRunway = () => {
-    if (sources.length < 2) return;
-    const runwayViewports = sequenceViewports + 1;
-    const minimumStageHeight = mobile.matches ? 36.75 : 33.4375;
-    section.style.setProperty('--particle-runway', `${runwayViewports * 100}svh`);
-    section.style.setProperty('--particle-runway-min', `${runwayViewports * minimumStageHeight}rem`);
-  };
-
-  const updateScroll = () => {
-    if (sources.length < 2) return;
-    const sectionTop = section.getBoundingClientRect().top + window.scrollY;
-    const scrollRange = Math.max(1, section.offsetHeight - stage.offsetHeight);
-    const scrollProgress = clamp((window.scrollY - sectionTop) / scrollRange);
-    const sequence = resolveSequence(scrollProgress);
-    requestedTravel = sequence.travel;
-    if (reducedMotion.matches) setActiveStep(sequence.activeStep);
-    schedulePaint();
   };
 
   const ensureCanvas = async () => {
@@ -384,10 +369,6 @@
   };
 
   desktop.addEventListener?.('change', onDesktopChange);
-  mobile.addEventListener?.('change', () => {
-    updateRunway();
-    updateScroll();
-  });
   reducedMotion.addEventListener?.('change', () => {
     if (reducedMotion.matches && animationFrame) {
       cancelAnimationFrame(animationFrame);
@@ -399,16 +380,6 @@
 
   if (typeof ResizeObserver !== 'undefined') new ResizeObserver(resizeCanvas).observe(frame);
   else window.addEventListener('resize', resizeCanvas);
-
-  if (sources.length > 1) {
-    updateRunway();
-    section.classList.add('is-particle-sequence');
-    window.addEventListener('scroll', updateScroll, { passive: true });
-    window.addEventListener('resize', updateScroll);
-    updateScroll();
-  } else {
-    setActiveStep(0);
-  }
 
   ensureCanvas();
 })();

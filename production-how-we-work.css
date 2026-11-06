@@ -23,17 +23,6 @@
   overflow:hidden;
 }
 
-.production-how-we-work.is-particle-sequence{
-  height:var(--particle-runway,100svh);
-  min-height:var(--particle-runway-min,33.4375rem);
-}
-
-.production-how-we-work.is-particle-sequence .production-how-we-work__stage{
-  position:sticky;
-  top:0;
-  height:100svh;
-}
-
 .production-how-we-work__heading{
   position:absolute;
   z-index:2;
@@ -119,15 +108,17 @@
   background:#000;
   color:#525252;
   font-family:inherit;
+  cursor:pointer;
+  transition:color .22s ease;
 }
 
 .production-how-we-work__step.is-active{
-  align-items:flex-start;
   color:#fff;
 }
 
-.production-how-we-work__step.is-complete{
-  color:#fff;
+.production-how-we-work__step:focus-visible{
+  outline:1px solid #fff;
+  outline-offset:-1px;
 }
 
 .production-how-we-work__number{
@@ -190,10 +181,6 @@
     overflow:visible;
   }
 
-  .production-how-we-work__step.is-active{
-    align-items:center;
-  }
-
   .production-how-we-work__description{
     flex:0 0 auto;
     min-width:0;
@@ -243,10 +230,6 @@
     overflow:clip;
   }
 
-  .production-how-we-work__step.is-active{
-    align-items:center;
-  }
-
   .production-how-we-work__number{
     font-size:3.25rem;
     line-height:1.1;
@@ -281,12 +264,11 @@
   }
 }
 
-@media(max-width:108.9375rem){
-  .production-how-we-work__step{color:#fff}
-}
-
 @media(prefers-reduced-motion:reduce){
   .production-how-we-work__canvas{
+    transition:none;
+  }
+  .production-how-we-work__step{
     transition:none;
   }
 }
