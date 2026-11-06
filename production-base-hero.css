@@ -13,6 +13,7 @@
   height:100svh;
   min-height:33.4375rem;
   margin-inline:auto;
+  margin-block-start:9.375rem;
   background:#121212;
   color:#fff;
 }
@@ -168,6 +169,14 @@
   .production-base-hero__content{
     left:calc(50% + .03125rem);
   }
+}
+
+@media(max-width:108.9375rem){
+  .production-base-hero{margin-block-start:6.25rem}
+}
+
+@media(max-width:47.9375rem){
+  .production-base-hero{margin-block-start:3.75rem}
 }
 
 @media(min-width:109rem){
