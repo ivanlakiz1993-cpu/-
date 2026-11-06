@@ -91,14 +91,14 @@
   transition:filter .24s ease,opacity .24s ease,transform .38s cubic-bezier(.22,1,.36,1);
 }
 
-.production-faq__icon--open{opacity:0;transform:rotate(-90deg) scale(.8)}
+.production-faq__icon--open{opacity:0;transform:rotate(0deg)}
 
 .production-faq__item[open] .production-faq__icon--open{
   opacity:1;
-  transform:rotate(0) scale(1);
+  transform:rotate(180deg);
 }
 
-.production-faq__item[open] .production-faq__icon--closed{opacity:0;transform:rotate(90deg) scale(.8)}
+.production-faq__item[open] .production-faq__icon--closed{opacity:0;transform:rotate(180deg)}
 
 .production-faq__item:not([open]) .production-faq__question:hover .production-faq__icon--closed,
 .production-faq__item:not([open]) .production-faq__question:focus-visible .production-faq__icon--closed{
