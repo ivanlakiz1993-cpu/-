@@ -4,14 +4,11 @@
   const hero=intro?.querySelector('.hero'),section=intro?.querySelector('.metrics');
   const stage=section?.querySelector('.metrics-desktop');
   const sceneFrame=stage?.querySelector('.metrics-desktop__frame'),canvas=stage?.querySelector('.metrics-desktop__particles');
-  const background=stage?.querySelector('.metrics-desktop__background'),benefitsStage=document.querySelector('.benefits-stage');
-  const sparksCanvas=stage?.querySelector('.metrics-desktop__sparks'),sparksContext=sparksCanvas?.getContext('2d');
   const copies=[...(stage?.querySelectorAll('[data-achievement]')||[])];
   const model=window.HelicopterModel,storyboard=window.HelicopterStoryboard;
   if(!intro||!hero||!sceneFrame||!canvas||!model||!storyboard||!window.HelicopterRenderer)return;
   const renderer=window.HelicopterRenderer.create(canvas,model);
   if(!renderer)return;
-  if(sparksCanvas&&benefitsStage)benefitsStage.prepend(sparksCanvas);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const mobileMedia=matchMedia('(max-width: 37.5rem)');
   const tabletMedia=matchMedia('(min-width: 37.5625rem) and (max-width: 56.25rem)');
@@ -33,42 +30,7 @@
   let restoreSyncPending=false,restoreSyncTimer=0;
   let sceneWidth=0,sceneHeight=0,entryStart=0,sequenceStart=0,sequenceDistance=0,end=0;
   let layoutWidth=0,layoutHeight=0,lastTime=0,rotorTime=0,lastScroll=NaN,target=0,progress=0;
-  let sparksTarget=0,sparksProgress=0,sparkParticles=null,sparkRatio=1,sparkWidth=0,sparkHeight=0;
   let state=sample(0);
-  function resizeSparks(width,height){
-    if(!sparksContext)return;
-    sparkWidth=width;sparkHeight=height;
-    sparkRatio=Math.min(devicePixelRatio||1,1.5);
-    const pixelWidth=Math.max(1,Math.round(width*sparkRatio)),pixelHeight=Math.max(1,Math.round(height*sparkRatio));
-    if(sparksCanvas.width!==pixelWidth||sparksCanvas.height!==pixelHeight){
-      sparksCanvas.width=pixelWidth;sparksCanvas.height=pixelHeight;sparkParticles=null;
-    }
-    sparksContext.setTransform(sparkRatio,0,0,sparkRatio,0,0);
-  }
-  function drawSparks(amount){
-    if(!sparksContext)return;
-    sparksContext.clearRect(0,0,sparkWidth,sparkHeight);
-    if(!sparkParticles||amount<=0)return;
-    const amountClamped=Math.max(0,Math.min(1,amount));
-    sparksContext.globalCompositeOperation='source-over';
-    sparksContext.textAlign='center';sparksContext.textBaseline='middle';
-    sparksContext.font=`${Math.max(4.2,sceneWidth/320)}px monospace`;
-    sparksContext.fillStyle='#e8e3d7';
-    for(const particle of sparkParticles){
-      const fall=Math.max(0,Math.min(1,(amountClamped-particle.seed*.22)/(1-particle.seed*.22)));
-      if(fall<=0)continue;
-      const travel=Math.pow(fall,1.25+particle.curve*.95)*(.5+particle.velocity*1.05);
-      const fadeStart=.28+particle.fade*.42,fade=1-smooth((fall-fadeStart)/(1-fadeStart));
-      const x=particle.x+(particle.drift-.5)*sceneWidth*.04*travel+
-        Math.sin(fall*(4+particle.sway*5)+particle.sway*6.28)*sceneWidth*.006*travel;
-      const y=particle.y+viewport*.78*travel;
-      const alpha=particle.strength*fade*Math.min(1,fall*6);
-      if(alpha<.015)continue;
-      sparksContext.globalAlpha=alpha;
-      sparksContext.fillText(particle.symbol,x,y);
-    }
-    sparksContext.globalAlpha=1;
-  }
   const rotorAngles=Array.from({length:12},(_,i)=>{
     const angle=i/12*Math.PI*2;
     return [Math.cos(angle),Math.sin(angle)];
@@ -176,18 +138,12 @@
   function updateScroll(){
     const scroll=window.scrollY;
     target=Math.max(0,Math.min(1,(scroll-sequenceStart)/sequenceDistance));
-    sparksTarget=sparksContext?Math.max(0,Math.min(1,(scroll-(sequenceStart+sequenceDistance))/Math.max(1,end-(sequenceStart+sequenceDistance)))):0;
-    const fallStart=sequenceStart+sequenceDistance;
-    if(scroll<=entryStart||scroll>=end){progress=target;sparksProgress=sparksTarget;compose();}
-    else if(scroll>=fallStart){progress=target;compose();}
-    if(scroll<fallStart&&(sparkParticles!==null||sparksProgress>0)){
-      sparkParticles=null;sparksProgress=0;drawSparks(0);
-    }
+    if(scroll<=entryStart||scroll>=end){progress=target;compose();}
     lastScroll=scroll;
   }
   function syncRestoredScroll(){
     if(!restoreSyncPending||!enabled)return;
-    updateScroll();progress=target;sparksProgress=sparksTarget;compose();wake();
+    updateScroll();progress=target;compose();wake();
   }
   function finishRestoreSync(){
     restoreSyncPending=false;clearTimeout(restoreSyncTimer);
@@ -195,15 +151,13 @@
   function draw(time){
     raf=0;if(!enabled||document.hidden)return;
     if(window.scrollY!==lastScroll)updateScroll();
-    if(window.scrollY<entryStart||window.scrollY>=end||root.classList.contains('menu-open')){drawSparks(sparksProgress);lastTime=0;return;}
+    if(window.scrollY<entryStart||window.scrollY>=end||root.classList.contains('menu-open')){lastTime=0;return;}
     const dt=lastTime?Math.min(50,time-lastTime):16.67;lastTime=time;rotorTime+=dt;
     // Short scrub smoothing removes wheel-event steps. It settles to the exact
     // scroll pose; there is no autonomous rotation or breathing of the airframe.
-    if(progress!==target||sparksProgress!==sparksTarget){
+    if(progress!==target){
       progress=lerp(progress,target,1-Math.exp(-dt/(mobileMedia.matches?125:95)));
       if(Math.abs(progress-target)<.000015)progress=target;
-      sparksProgress=lerp(sparksProgress,sparksTarget,1-Math.exp(-dt/120));
-      if(Math.abs(sparksProgress-sparksTarget)<.000015)sparksProgress=sparksTarget;
       compose();
     }
     const a=calibrations[state.from],b=calibrations[state.to],unit=sceneWidth/1920;
@@ -220,15 +174,7 @@
       centerX,centerY,
       depth:mobileFlight?.depth||0,
       angle:rotorTime*.0032};
-    if(sparksProgress>0&&sparkParticles===null){
-      renderer.render({...helicopterFrame,disintegration:0});
-      const source=background.getBoundingClientRect(),scaleX=source.width/sceneWidth,scaleY=source.height/sceneHeight;
-      sparkParticles=renderer.captureParticles().map(particle=>({...particle,
-        x:source.left+(mobile?source.width-particle.x*scaleX:particle.x*scaleX),
-        y:source.top+particle.y*scaleY}));
-    }
-    renderer.render({...helicopterFrame,disintegration:sparksProgress});
-    drawSparks(sparksProgress);
+    renderer.render(helicopterFrame);
     stage.classList.add('is-rendered');
     raf=requestAnimationFrame(draw);
   }
@@ -236,15 +182,14 @@
   function measure(){
     resizeFrame=0;if(!enabled)return;
     viewport=innerHeight;
-    resizeSparks(root.clientWidth||innerWidth,viewport);
     const heroHeight=hero.offsetHeight,introTop=intro.getBoundingClientRect().top+scrollY;
     sequenceDistance=viewport*(mobileMedia.matches?2.5:tabletMedia.matches?1.8:2);
     entryStart=introTop+heroHeight-viewport;
     sequenceStart=introTop+heroHeight;
-    const runHeight=sequenceDistance+viewport*1.5;
+    const runHeight=sequenceDistance;
     end=sequenceStart+runHeight;
     intro.style.setProperty('--metrics-run-height',`${runHeight}px`);
-    updateScroll();progress=target;sparksProgress=sparksTarget;compose();wake();
+    updateScroll();progress=target;compose();wake();
   }
   function requestMeasure(){if(!resizeFrame)resizeFrame=requestAnimationFrame(measure);}
   function configure(){
