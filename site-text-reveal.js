@@ -21,6 +21,11 @@
   const groupsByTarget = new WeakMap();
   const registeredTargets = new WeakSet();
   const headingSelector = 'h1, h2, h3, h4, h5, h6';
+  // Includes the 720 ms line motion plus the 120 ms stagger on the second line.
+  const homepageHeroTitleSequenceDuration = 840;
+  const isHomepageHeroTarget = (element) => element.matches(
+    '.home-page .hero-title, .home-page .hero-services, .home-page .hero-description'
+  );
   const headingTargets = new Set();
   const headingWidths = new WeakMap();
   const lineSeparators = new WeakMap();
@@ -206,6 +211,8 @@
     });
   };
 
+  const revealThreshold = (element) => window.innerHeight * (isHomepageHeroTarget(element) ? 1 : triggerPosition);
+
   const advanceGroup = (group) => {
     if (group.timer) return;
     if (window.sitePageEntryPending && group.elements.some((element) => {
@@ -219,7 +226,7 @@
         continue;
       }
       const bounds = element.getBoundingClientRect();
-      if (bounds.top >= window.innerHeight * triggerPosition) return;
+      if (bounds.top >= revealThreshold(element)) return;
       // On a restored scroll position, finish content already above the viewport.
       if (bounds.bottom <= 0) {
         group.revealed.add(element);
@@ -238,7 +245,7 @@
           advanceGroup(group);
           return;
         }
-        if (currentBounds.top >= window.innerHeight * triggerPosition) {
+        if (currentBounds.top >= revealThreshold(element)) {
           advanceGroup(group);
           return;
         }
@@ -253,11 +260,14 @@
         group.revealed.add(element);
         observer?.unobserve(element);
         animate([element]);
-        group.nextStartAt = performance.now() + sequenceGap;
+        const nextRevealDelay = element.matches('.home-page .hero-title')
+          ? homepageHeroTitleSequenceDuration
+          : sequenceGap;
+        group.nextStartAt = performance.now() + nextRevealDelay;
         group.timer = window.setTimeout(() => {
           group.timer = 0;
           advanceGroup(group);
-        }, sequenceGap);
+        }, nextRevealDelay);
       };
 
       if (wait > 0) group.timer = window.setTimeout(startReveal, wait);
@@ -295,7 +305,8 @@
       ...root.querySelectorAll(targetSelector)
     ];
     elements.forEach((element) => {
-      if ((element.matches(excludedSelector) || element.closest(excludedSelector))
+      const isExcluded = element.matches(excludedSelector) || element.closest(excludedSelector);
+      if ((isExcluded && !isHomepageHeroTarget(element))
         || element.closest('[hidden], [aria-hidden="true"], [aria-busy="true"]')) return;
 
       const previousText = element.dataset.textRevealContent;
