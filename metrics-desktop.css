@@ -115,8 +115,8 @@ html.metrics-sequence .metrics-desktop {
 }
 
 @media (max-width: 37.5rem) {
-  html.metrics-sequence .metrics-desktop { height: 157.4359vw; }
-  .metrics-desktop__frame { height: 157.4359vw; }
+  html.metrics-sequence .metrics-desktop { height: 100svh; }
+  .metrics-desktop__frame { height: 100svh; }
   .metrics-desktop__background {
     inset: auto;
     left: var(--mobile-helicopter-left, 0%);

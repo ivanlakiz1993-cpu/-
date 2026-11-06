@@ -20,7 +20,7 @@
       offset+(positions[i+1]-positions[i])*smooth((progress-start)/(end-start)),0);
   };
   const mobileHelicopterFlight=progress=>{
-    const flight=smooth((progress-.57)/(.74-.57));
+    const flight=smooth(progress/.17);
     const arc=Math.sin(Math.PI*flight)**2;
     const returnFlight=smooth((progress-.84)/(.97-.84));
     const travel=flight*(1-returnFlight);
@@ -28,7 +28,7 @@
   };
   let enabled=false,contextLost=false,raf=0,resizeFrame=0,viewport=innerHeight;
   let restoreSyncPending=false,restoreSyncTimer=0;
-  let sceneWidth=0,sceneHeight=0,entryStart=0,sequenceStart=0,sequenceDistance=0,end=0;
+  let sceneWidth=0,sceneHeight=0,entryStart=0,sequenceStart=0,sequenceDistance=0,settleDistance=0,end=0;
   let layoutWidth=0,layoutHeight=0,lastTime=0,rotorTime=0,lastScroll=NaN,target=0,progress=0;
   let state=sample(0);
   const rotorAngles=Array.from({length:12},(_,i)=>{
@@ -186,10 +186,12 @@
     sequenceDistance=viewport*(mobileMedia.matches?2.5:tabletMedia.matches?1.8:2);
     entryStart=introTop+heroHeight-viewport;
     sequenceStart=introTop+heroHeight;
-    // Keep the metrics scene pinned briefly after its scroll timeline ends so
-    // the smoothed helicopter and achievement state can settle before the next section.
-    const runHeight=sequenceDistance+viewport*.3;
-    end=sequenceStart+runHeight;
+    // Sticky positioning releases when the parent's bottom reaches the stage's
+    // bottom, so reserve the stage height plus the full scroll timeline and a
+    // short final reading hold. The timeline distance itself stays unchanged.
+    settleDistance=viewport*.3;
+    const runHeight=stage.offsetHeight+sequenceDistance+settleDistance;
+    end=sequenceStart+sequenceDistance+settleDistance;
     intro.style.setProperty('--metrics-run-height',`${runHeight}px`);
     updateScroll();progress=target;compose();wake();
   }
