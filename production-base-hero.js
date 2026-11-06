@@ -11,41 +11,55 @@
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
   const stepSize = 1 / imageLayers.length;
   const imageRevealDuration = stepSize * 0.4;
-  const titleRevealStart = imageRevealDuration;
-  const titleRevealDuration = stepSize * 0.2;
-  const areaRevealOffset = stepSize * 0.6;
-  const areaRevealDuration = stepSize * 0.3;
+  const initialAreaDelay = 120;
   let animationFrame = 0;
+  let initialAreaTimer = 0;
+  let initialAreaReady = false;
+  let currentProgress = 0;
 
   const revealProgress = (progress, start, duration) =>
     clamp((progress - start) / duration);
 
   const applyProgress = (progress) => {
+    currentProgress = progress;
     const currentState = Math.min(imageLayers.length - 1, Math.floor(progress / stepSize));
+    const firstImageRevealed = progress >= imageRevealDuration;
 
     imageLayers.forEach((imageLayer, index) => {
-      const start = index * stepSize;
-      const reveal = revealProgress(progress, start, imageRevealDuration);
       imageLayer.classList.toggle('is-active', index <= currentState);
       imageLayer.classList.toggle('is-current', index === currentState);
-      imageLayer.style.setProperty('--production-base-image-reveal', `${reveal * 100}%`);
+      if (index === 0) {
+        const reveal = revealProgress(progress, 0, imageRevealDuration);
+        imageLayer.style.setProperty('--production-base-image-reveal', `${reveal * 100}%`);
+      }
     });
 
-    const titleReveal = revealProgress(progress, titleRevealStart, titleRevealDuration);
-    title.style.setProperty('--production-base-title-reveal', `${titleReveal * 100}%`);
+    title.classList.toggle('is-visible', firstImageRevealed);
+    if (!firstImageRevealed) {
+      window.clearTimeout(initialAreaTimer);
+      initialAreaTimer = 0;
+      initialAreaReady = false;
+    }
 
     let visibleAreas = 0;
     areas.forEach((area, index) => {
-      const start = index * stepSize + areaRevealOffset;
-      const reveal = revealProgress(progress, start, areaRevealDuration);
-      area.classList.toggle('is-visible', reveal > 0);
-      area.style.setProperty('--production-base-area-reveal', `${reveal * 100}%`);
-      if (reveal > 0) visibleAreas += 1;
+      const visible = firstImageRevealed && (index === 0 ? initialAreaReady : currentState >= index);
+      area.classList.toggle('is-visible', visible);
+      if (visible) visibleAreas += 1;
     });
 
     section.dataset.stateIndex = String(currentState);
     section.dataset.visibleAreas = String(visibleAreas);
   };
+
+  title.addEventListener('transitionend', (event) => {
+    if (event.propertyName !== 'clip-path' || !title.classList.contains('is-visible')) return;
+    window.clearTimeout(initialAreaTimer);
+    initialAreaTimer = window.setTimeout(() => {
+      initialAreaReady = true;
+      applyProgress(currentProgress);
+    }, initialAreaDelay);
+  });
 
   const updateFromScroll = () => {
     animationFrame = 0;
@@ -73,6 +87,9 @@
     if (reducedMotion) {
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
       animationFrame = 0;
+      window.clearTimeout(initialAreaTimer);
+      initialAreaTimer = 0;
+      initialAreaReady = true;
       applyProgress(1);
       return;
     }
