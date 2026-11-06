@@ -169,6 +169,11 @@
   .about-history__event-description{width:94.5238%;margin:0;font:400 clamp(.75rem,.8333vw,1rem)/1.2 var(--sans);letter-spacing:.01em}
 }
 
+@media(min-width:64.001rem) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  .about-history__visual-picture img.is-flashing{animation:about-history-image-flash .48s linear both;transition:none}
+  .about-history.is-switching .about-history__visual-picture img.is-visible{opacity:0}
+}
+
 @media (min-width:48.001rem) and (max-width:64rem), (min-width:48.001rem) and (hover:none) and (pointer:coarse){
   .about-history{display:block;position:relative;width:min(120rem,100%);aspect-ratio:1024/445;margin:clamp(3.125rem,9.765625vw,6.25rem) auto;overflow:hidden;background:#000;color:#fff}
   .about-history__title{position:absolute;top:0;left:4.6875%;margin:0;font:400 clamp(2rem,3.71094vw,2.375rem)/.9 var(--sans);letter-spacing:.01em;white-space:nowrap}
@@ -219,6 +224,12 @@
 
 @keyframes about-history-current-flow{
   to{stroke-dashoffset:0}
+}
+
+@keyframes about-history-image-flash{
+  0%,18%,36%,54%{opacity:0}
+  8%,26%,44%,100%{opacity:1}
+  62%{opacity:.35}
 }
 
 @media(prefers-reduced-motion:reduce){

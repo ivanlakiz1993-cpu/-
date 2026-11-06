@@ -100,8 +100,8 @@
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const timelineMotion = !reducedMotion && !useAdaptiveHistoryImage.matches;
   const timing = timelineMotion
-    ? { fade: 150, route: 790 }
-    : { fade: 0, route: 0 };
+    ? { fade: 150, route: 790, image: 500 }
+    : { fade: 0, route: 0, image: 0 };
   let activeYear = '2013';
   let switching = false;
 
@@ -183,9 +183,12 @@
     title.textContent = nextContent.title;
     description.textContent = nextContent.description;
     revealCopy();
+    if (timelineMotion) visibleVisual.classList.add('is-flashing');
     activeYear = year;
     section.classList.remove('is-switching');
 
+    if (timing.image) await wait(timing.image);
+    visibleVisual.classList.remove('is-flashing');
     section.removeAttribute('aria-busy');
     switching = false;
   };
