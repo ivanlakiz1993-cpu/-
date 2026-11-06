@@ -1,4 +1,14 @@
 (() => {
+  document.querySelectorAll(".about-cover__card").forEach((card) => {
+    card.addEventListener("pointermove", (event) => {
+      if (event.pointerType === "touch") return;
+      const bounds = card.getBoundingClientRect();
+      if (!bounds.width || !bounds.height) return;
+      card.style.setProperty("--cursor-x", `${((event.clientX - bounds.left) / bounds.width) * 100}%`);
+      card.style.setProperty("--cursor-y", `${((event.clientY - bounds.top) / bounds.height) * 100}%`);
+    });
+  });
+
   document.querySelectorAll(".about-team__button").forEach((button) => {
     button.addEventListener("pointermove", (event) => {
       if (event.pointerType === "touch") return;

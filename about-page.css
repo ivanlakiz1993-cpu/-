@@ -22,6 +22,11 @@
 .about-cover__card-details>span{width:74%;max-width:17.25rem}
 .about-cover__card-arrow{display:block;flex:none}
 .about-cover__card:focus-visible{outline:.125rem solid #fff;outline-offset:.125rem}
+@media(min-width:64.001rem) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  .about-cover__card::before{position:absolute;z-index:2;inset:0;pointer-events:none;background:radial-gradient(circle 11.25rem at var(--cursor-x,50%) var(--cursor-y,50%),rgba(255,115,13,.52) 0,rgba(255,115,13,.28) 36%,rgba(255,115,13,0) 100%);content:"";opacity:0;transition:opacity .18s ease}
+  .about-cover__card:hover::before,.about-cover__card:focus-visible::before{opacity:1}
+  .about-cover__card-title,.about-cover__card-details{z-index:3}
+}
 .about-description{width:min(120rem,100%);margin:9.375rem auto 0;padding-inline:min(5.208333vw,6.25rem);display:flex;align-items:center;justify-content:center}
 .about-description__text{width:min(55.25rem,100%);margin:0;color:#fff;font:400 1.5rem/1.1 var(--sans);letter-spacing:0;text-align:center;overflow-wrap:break-word}
 
