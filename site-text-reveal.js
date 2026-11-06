@@ -8,10 +8,11 @@
     'main p',
     '.hero-services', '.hero-description',
     '.testing-stage__button',
+    '.production-hero__button',
     '.all-news'
   ].join(',');
   const excludedSelector = [
-    '.hero', '.metrics', '.work-card', '.news-card', '.news-page__card',
+    '.hero', '.production-page', '.metrics', '.work-card', '.news-card', '.news-page__card',
     '.footer', '.testing-about__metric', '.climate-tests__list',
     '.mechanical-tests__list', '.mechanical-tests__equipment h3',
     '.mechanical-tests__group h4', '.testing-faq__item', '.news-page__filter-wrap',
@@ -21,11 +22,15 @@
   const groupsByTarget = new WeakMap();
   const registeredTargets = new WeakSet();
   const headingSelector = 'h1, h2, h3, h4, h5, h6';
-  // Includes the 720 ms title motion plus the 40 ms pause before the first panel.
-  const homepageHeroTitleSequenceDuration = 760;
+  // Includes the 720 ms title motion plus the 40 ms pause before supporting content.
+  const heroTitleSequenceDuration = 760;
   const homepageHeroPanelGap = 40;
+  const productionHeroElementGap = 40;
   const isHomepageHeroTarget = (element) => element.matches(
     '.home-page .hero-title, .home-page .hero-services, .home-page .hero-description'
+  );
+  const isProductionHeroTarget = (element) => element.matches(
+    '.production-page .production-hero__heading, .production-page .production-hero__description, .production-page .production-hero__button'
   );
   const headingTargets = new Set();
   const headingWidths = new WeakMap();
@@ -212,7 +217,9 @@
     });
   };
 
-  const revealThreshold = (element) => window.innerHeight * (isHomepageHeroTarget(element) ? 1 : triggerPosition);
+  const revealThreshold = (element) => window.innerHeight * (
+    isHomepageHeroTarget(element) || isProductionHeroTarget(element) ? 1 : triggerPosition
+  );
 
   const advanceGroup = (group) => {
     if (group.timer) return;
@@ -261,11 +268,14 @@
         group.revealed.add(element);
         observer?.unobserve(element);
         animate([element]);
-        const nextRevealDelay = element.matches('.home-page .hero-title')
-          ? homepageHeroTitleSequenceDuration
-          : element.matches('.home-page .hero-services')
-            ? homepageHeroPanelGap
-            : sequenceGap;
+        let nextRevealDelay = sequenceGap;
+        if (element.matches('.home-page .hero-title')) nextRevealDelay = heroTitleSequenceDuration;
+        else if (element.matches('.home-page .hero-services')) nextRevealDelay = homepageHeroPanelGap;
+        else if (element.matches('.production-page .production-hero__heading')) {
+          nextRevealDelay = heroTitleSequenceDuration;
+        } else if (element.matches('.production-page .production-hero__description')) {
+          nextRevealDelay = productionHeroElementGap;
+        }
         group.nextStartAt = performance.now() + nextRevealDelay;
         group.timer = window.setTimeout(() => {
           group.timer = 0;
@@ -309,7 +319,7 @@
     ];
     elements.forEach((element) => {
       const isExcluded = element.matches(excludedSelector) || element.closest(excludedSelector);
-      if ((isExcluded && !isHomepageHeroTarget(element))
+      if ((isExcluded && !isHomepageHeroTarget(element) && !isProductionHeroTarget(element))
         || element.closest('[hidden], [aria-hidden="true"], [aria-busy="true"]')) return;
 
       const previousText = element.dataset.textRevealContent;
