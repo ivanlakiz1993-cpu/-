@@ -1,15 +1,15 @@
 (() => {
   const section = document.querySelector('[data-production-base-hero]');
   const stage = section?.querySelector('[data-production-base-stage]');
-  const images = section ? [...section.querySelectorAll('[data-base-image]')] : [];
+  const imageLayers = section ? [...section.querySelectorAll('[data-base-image]')] : [];
   const areas = section ? [...section.querySelectorAll('[data-base-area]')] : [];
   const title = section?.querySelector('.production-base-hero__title');
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  if (!section || !stage || !title || images.length !== 5 || areas.length !== images.length) return;
+  if (!section || !stage || !title || imageLayers.length !== 5 || areas.length !== imageLayers.length) return;
 
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
-  const stepSize = 1 / images.length;
+  const stepSize = 1 / imageLayers.length;
   const imageRevealDuration = stepSize * 0.4;
   const titleRevealStart = imageRevealDuration;
   const titleRevealDuration = stepSize * 0.2;
@@ -21,14 +21,14 @@
     clamp((progress - start) / duration);
 
   const applyProgress = (progress) => {
-    const currentState = Math.min(images.length - 1, Math.floor(progress / stepSize));
+    const currentState = Math.min(imageLayers.length - 1, Math.floor(progress / stepSize));
 
-    images.forEach((image, index) => {
+    imageLayers.forEach((imageLayer, index) => {
       const start = index * stepSize;
       const reveal = revealProgress(progress, start, imageRevealDuration);
-      image.classList.toggle('is-active', index <= currentState);
-      image.classList.toggle('is-current', index === currentState);
-      image.style.setProperty('--production-base-image-reveal', String(reveal));
+      imageLayer.classList.toggle('is-active', index <= currentState);
+      imageLayer.classList.toggle('is-current', index === currentState);
+      imageLayer.style.setProperty('--production-base-image-reveal', `${reveal * 100}%`);
     });
 
     const titleReveal = revealProgress(progress, titleRevealStart, titleRevealDuration);
@@ -57,7 +57,8 @@
 
     const sectionTop = section.getBoundingClientRect().top + window.scrollY;
     const scrollRange = Math.max(1, section.offsetHeight - stage.offsetHeight);
-    const progress = clamp((window.scrollY - sectionTop) / scrollRange);
+    const animationStart = sectionTop - Math.min(stage.offsetHeight, window.innerHeight);
+    const progress = clamp((window.scrollY - animationStart) / scrollRange);
     applyProgress(progress);
   };
 

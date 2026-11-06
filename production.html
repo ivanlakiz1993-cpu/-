@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="production-hero.css?v=20261104-production-header-aligned-1">
   <link rel="stylesheet" href="production-industries.css?v=20261104-industries-scroll-compact-1">
   <link rel="stylesheet" href="production-workscope.css?v=20261106-workscope-scroll-reveal-1">
-  <link rel="stylesheet" href="production-base-hero.css?v=20261106-production-base-reveal-sequence-1">
+  <link rel="stylesheet" href="production-base-hero.css?v=20261106-production-base-mask-drop-1">
   <link rel="stylesheet" href="production-how-we-work.css?v=20261105-how-we-work-responsive-white-1">
   <link rel="stylesheet" href="production-faq.css?v=20261106-faq-arrow-rotation-1">
   <script src="site-header.js?v=20261105-menu-scroll-lock-1"></script>
@@ -26,7 +26,7 @@
   <script src="production-workscope-motion.js?v=20261106-workscope-scroll-reveal-1" defer></script>
   <script src="production-hero.js?v=20261102-video-playback-1" defer></script>
   <script src="production-industries.js?v=20261104-enable-compact-scroll-motion-1" defer></script>
-  <script src="production-base-hero.js?v=20261106-production-base-reveal-sequence-1" defer></script>
+  <script src="production-base-hero.js?v=20261106-production-base-mask-drop-1" defer></script>
   <script src="production-how-we-work-particles.js?v=20261104-particle-step-sync-1" defer></script>
 </head>
 <body class="production-page">
@@ -168,11 +168,26 @@
     </section>
     <section class="production-base-hero" aria-labelledby="production-base-hero__title" data-production-base-hero data-name="Production base hero" data-node-id="3438:4533">
       <div class="production-base-hero__stage" data-production-base-stage>
-        <img class="production-base-hero__image is-active" src="assets/production-base-hero.webp" width="2752" height="1536" alt="" aria-hidden="true" loading="lazy" decoding="async" data-base-image data-name="SMT line background" data-design-state="3438:4533">
-        <img class="production-base-hero__image" src="assets/production-base-hero-smt.webp" width="4096" height="2286" alt="" aria-hidden="true" loading="lazy" decoding="async" data-base-image data-name="SMT inspection background" data-design-state="3513:4395">
-        <img class="production-base-hero__image" src="assets/production-base-hero-assembly-workshop.webp" width="2608" height="1456" alt="" aria-hidden="true" loading="lazy" decoding="async" data-base-image data-name="Electronic assembly workshop background" data-design-state="3513:4404">
-        <img class="production-base-hero__image" src="assets/production-base-hero-assembly.webp" width="2752" height="1536" alt="" aria-hidden="true" loading="lazy" decoding="async" data-base-image data-name="Assembly background" data-design-state="3513:4413">
-        <img class="production-base-hero__image" src="assets/production-base-hero-testing.webp" width="2752" height="1536" alt="" aria-hidden="true" loading="lazy" decoding="async" data-base-image data-name="Testing background" data-design-state="3513:4422">
+        <div class="production-base-hero__image-layer is-active" data-base-image data-name="SMT line background" data-design-state="3438:4533" aria-hidden="true">
+          <img class="production-base-hero__image" src="assets/production-base-hero.webp" width="2752" height="1536" alt="" loading="lazy" decoding="async">
+          <div class="production-base-hero__image-mask"></div>
+        </div>
+        <div class="production-base-hero__image-layer" data-base-image data-name="SMT inspection background" data-design-state="3513:4395" aria-hidden="true">
+          <img class="production-base-hero__image" src="assets/production-base-hero-smt.webp" width="4096" height="2286" alt="" loading="lazy" decoding="async">
+          <div class="production-base-hero__image-mask"></div>
+        </div>
+        <div class="production-base-hero__image-layer" data-base-image data-name="Electronic assembly workshop background" data-design-state="3513:4404" aria-hidden="true">
+          <img class="production-base-hero__image" src="assets/production-base-hero-assembly-workshop.webp" width="2608" height="1456" alt="" loading="lazy" decoding="async">
+          <div class="production-base-hero__image-mask"></div>
+        </div>
+        <div class="production-base-hero__image-layer" data-base-image data-name="Assembly background" data-design-state="3513:4413" aria-hidden="true">
+          <img class="production-base-hero__image" src="assets/production-base-hero-assembly.webp" width="2752" height="1536" alt="" loading="lazy" decoding="async">
+          <div class="production-base-hero__image-mask"></div>
+        </div>
+        <div class="production-base-hero__image-layer" data-base-image data-name="Testing background" data-design-state="3513:4422" aria-hidden="true">
+          <img class="production-base-hero__image" src="assets/production-base-hero-testing.webp" width="2752" height="1536" alt="" loading="lazy" decoding="async">
+          <div class="production-base-hero__image-mask"></div>
+        </div>
         <div class="production-base-hero__shade" aria-hidden="true"></div>
         <div class="production-base-hero__content" data-name="Hero content" data-node-id="3438:4534">
           <h2 class="production-base-hero__title" id="production-base-hero__title" data-name="Title" data-node-id="3438:4535">Производственная база</h2>
