@@ -25,7 +25,7 @@
         end: () => `+=${Math.round(Math.min(window.innerHeight * 0.55, container.clientHeight * 0.9))}`,
         pin: true,
         pinSpacing: true,
-        scrub: true,
+        scrub: 0.25,
         anticipatePin: 1,
         invalidateOnRefresh: true
       }
@@ -37,7 +37,4 @@
     return () => timeline.scrollTrigger?.kill();
   });
 
-  const refresh = () => requestAnimationFrame(() => ScrollTrigger.refresh(true));
-  window.addEventListener("load", refresh, { once: true });
-  window.addEventListener("pageshow", refresh);
 })();

@@ -128,6 +128,5 @@
   });
 
   const refresh = () => requestAnimationFrame(() => ScrollTrigger.refresh(true));
-  window.addEventListener("load", refresh, { once: true });
   window.addEventListener("pageshow", refresh);
 })();
