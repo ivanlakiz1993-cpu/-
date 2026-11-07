@@ -197,7 +197,8 @@
   color: #fff;
 }
 
-.development-software__background {
+.development-software__canvas,
+.development-software__fallback {
   position: absolute;
   z-index: 0;
   inset: 0;
@@ -293,6 +294,20 @@
   }
 }
 
+@media (min-width: 37.5625rem) and (max-width: 74.9375rem) {
+  .development-software {
+    height: 17rem;
+    padding: 6.25rem 1.125rem;
+  }
+
+  .development-software__description {
+    width: min(43.0625rem, 100%);
+    font-size: clamp(1.125rem, 2.34375vw, 1.5rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+}
+
 @media (max-width: 47.9375rem) {
   .development-software {
     margin-block: 3.75rem;
@@ -306,11 +321,16 @@
   }
 
   .development-software {
-    height: 16rem;
+    height: auto;
+    min-height: 17.25rem;
+    padding: 3.125rem 0.75rem;
   }
 
   .development-software__description {
-    width: calc(100% - 2.25rem);
+    width: min(12.5rem, 100%);
+    font-size: 1.125rem;
+    line-height: 1.2;
+    letter-spacing: 0;
   }
 
   .development-intro__inner {
