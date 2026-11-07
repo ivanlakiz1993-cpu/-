@@ -27,20 +27,24 @@
   let height = 0;
   let pixelRatio = 1;
   let animationFrame = 0;
-  let animationStartedAt = 0;
-  let elapsedBeforePause = 0;
   let isAnimating = false;
   let isInView = false;
   let imageReady = false;
+  let pointerInside = false;
+  let cursorX = 0;
+  let cursorY = 0;
+  let cursorTargetX = 0;
+  let cursorTargetY = 0;
+  let cursorStrength = 0;
+  let lastFrameAt = 0;
 
-  function makePalette(red, green, blue, alpha, isOrange) {
+  function makePalette(gray, alpha) {
     return Array.from({ length: 16 }, (_, index) => {
       const level = index / 15;
-      const orangeMix = isOrange ? 0.06 + level * 0.55 : level * 0.96;
-      const r = Math.round(red + (accent[0] - red) * orangeMix);
-      const g = Math.round(green + (accent[1] - green) * orangeMix);
-      const b = Math.round(blue + (accent[2] - blue) * orangeMix);
-      const a = Math.min(0.92, alpha * (0.48 + level * 1.15));
+      const r = Math.round(gray + (accent[0] - gray) * level);
+      const g = Math.round(gray + (accent[1] - gray) * level);
+      const b = Math.round(gray + (accent[2] - gray) * level);
+      const a = Math.min(0.9, alpha * (0.82 + level * 0.32));
       return `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})`;
     });
   }
@@ -81,10 +85,6 @@
       let minY = sourceHeight;
       let maxX = 0;
       let maxY = 0;
-      let brightest = -1;
-      let red = 0;
-      let green = 0;
-      let blue = 0;
 
       visited[start] = 1;
       queue[tail++] = start;
@@ -104,12 +104,6 @@
         minY = Math.min(minY, y);
         maxX = Math.max(maxX, x);
         maxY = Math.max(maxY, y);
-        if (luminance > brightest) {
-          brightest = luminance;
-          red = data[color];
-          green = data[color + 1];
-          blue = data[color + 2];
-        }
 
         const firstX = Math.max(0, x - 1);
         const lastX = Math.min(sourceWidth - 1, x + 1);
@@ -132,15 +126,14 @@
       if (area < 3 || area > 420 || particleWidth > 32 || particleHeight > 32) continue;
 
       const averageLuminance = sumLuminance / area;
-      const baseAlpha = Math.min(0.58, 0.17 + Math.max(0, averageLuminance - 24) / 190);
-      const isOrange = red > green * 1.12 && red > blue * 1.3;
+      const baseGray = Math.max(74, Math.min(128, Math.round(72 + averageLuminance * 0.55)));
+      const baseAlpha = Math.max(0.4, Math.min(0.68, 0.38 + averageLuminance / 500));
       result.push({
         x: sumX / area,
         y: sumY / area,
         width: particleWidth,
         height: particleHeight,
-        phase: ((minX * 17 + minY * 71) % 628) / 100,
-        palette: makePalette(red, green, blue, baseAlpha, isOrange)
+        palette: makePalette(baseGray, baseAlpha)
       });
     }
 
@@ -167,49 +160,39 @@
     };
   }
 
-  function drawImageFallback() {
-    if (!imageReady || !imageTransform) return;
-    context.clearRect(0, 0, width, height);
-    context.drawImage(
-      source,
-      imageTransform.offsetX,
-      imageTransform.offsetY,
-      source.naturalWidth * imageTransform.scaleX,
-      source.naturalHeight * imageTransform.scaleY
-    );
+  function drawRoundedSquare(x, y, squareWidth, squareHeight) {
+    const radius = Math.min(squareWidth, squareHeight) * 0.18;
+    context.beginPath();
+    if (typeof context.roundRect === 'function') {
+      context.roundRect(x, y, squareWidth, squareHeight, radius);
+    } else {
+      context.moveTo(x + radius, y);
+      context.arcTo(x + squareWidth, y, x + squareWidth, y + squareHeight, radius);
+      context.arcTo(x + squareWidth, y + squareHeight, x, y + squareHeight, radius);
+      context.arcTo(x, y + squareHeight, x, y, radius);
+      context.arcTo(x, y, x + squareWidth, y, radius);
+      context.closePath();
+    }
+    context.fill();
   }
 
-  function drawFrame(elapsed) {
+  function drawFrame() {
     if (!imageReady || !imageTransform || !width || !height) return;
     context.clearRect(0, 0, width, height);
-    if (particles.length < 100) {
-      drawImageFallback();
-      return;
-    }
-
-    const phase = elapsed * 0.42;
-    const centerX = width * (0.5 + 0.42 * Math.sin(phase));
-    const centerY = height * (0.5 + 0.3 * Math.sin(phase * 0.72 + 0.8));
-    const radiusX = width * 0.44;
-    const radiusY = height * 0.78;
+    const glowRadius = Math.max(88, Math.min(width * 0.27, 430));
 
     for (const particle of particles) {
       const x = imageTransform.offsetX + particle.x * imageTransform.scaleX;
       const y = imageTransform.offsetY + particle.y * imageTransform.scaleY;
-      const dx = (x - centerX) / radiusX;
-      const dy = (y - centerY) / radiusY;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const cloud = 1 - smoothstep(0.2, 1.15, distance);
-      const ripple = 0.5 + 0.5 * Math.sin(distance * 18 - elapsed * 1.65 + particle.phase);
-      const shimmer = 0.5 + 0.5 * Math.sin(elapsed * 0.9 + particle.phase);
-      const glow = clamp(cloud * (0.62 + ripple * 0.38) + shimmer * 0.04);
+      const distance = Math.hypot(x - cursorX, y - cursorY);
+      const glow = pointerStrength * (1 - smoothstep(glowRadius * 0.08, glowRadius, distance));
       const paletteIndex = Math.round(glow * (particle.palette.length - 1));
-      const sizePulse = 0.86 + glow * 0.34;
+      const sizePulse = 0.88 + glow * 0.22;
       const drawWidth = Math.max(1, particle.width * imageTransform.scaleX * sizePulse * 0.82);
       const drawHeight = Math.max(1, particle.height * imageTransform.scaleY * sizePulse * 0.82);
 
       context.fillStyle = particle.palette[paletteIndex];
-      context.fillRect(x - drawWidth / 2, y - drawHeight / 2, drawWidth, drawHeight);
+      drawRoundedSquare(x - drawWidth / 2, y - drawHeight / 2, drawWidth, drawHeight);
     }
   }
 
@@ -223,37 +206,76 @@
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     if (imageReady) {
       updateImageTransform();
-      const elapsed = elapsedBeforePause + (isAnimating ? (performance.now() - animationStartedAt) / 1000 : 0);
-      drawFrame(elapsed);
+      drawFrame();
     }
   }
 
   function animate(timestamp) {
     if (!isAnimating) return;
-    const elapsed = elapsedBeforePause + (timestamp - animationStartedAt) / 1000;
-    drawFrame(elapsed);
+    const delta = lastFrameAt ? Math.min((timestamp - lastFrameAt) / 1000, 0.05) : 1 / 60;
+    lastFrameAt = timestamp;
+    const easing = 1 - Math.exp(-delta * 18);
+    cursorX += (cursorTargetX - cursorX) * easing;
+    cursorY += (cursorTargetY - cursorY) * easing;
+    const targetStrength = pointerInside ? 1 : 0;
+    cursorStrength += (targetStrength - cursorStrength) * (1 - Math.exp(-delta * (pointerInside ? 12 : 9)));
+    drawFrame();
+
+    const cursorDistance = Math.hypot(cursorTargetX - cursorX, cursorTargetY - cursorY);
+    const settled = cursorDistance < 0.35 && Math.abs(targetStrength - cursorStrength) < 0.01;
+    if (settled && pointerInside) {
+      cursorX = cursorTargetX;
+      cursorY = cursorTargetY;
+      cursorStrength = 1;
+      drawFrame();
+      isAnimating = false;
+      lastFrameAt = 0;
+      return;
+    }
+    if (settled && !pointerInside) {
+      cursorStrength = 0;
+      pauseAnimation();
+      return;
+    }
     animationFrame = window.requestAnimationFrame(animate);
   }
 
   function pauseAnimation() {
-    if (!isAnimating) return;
-    elapsedBeforePause += (performance.now() - animationStartedAt) / 1000;
+    if (isAnimating) window.cancelAnimationFrame(animationFrame);
     isAnimating = false;
-    window.cancelAnimationFrame(animationFrame);
-    drawFrame(elapsedBeforePause);
+    lastFrameAt = 0;
+    if (!pointerInside || reducedMotion.matches || document.hidden || !isInView) cursorStrength = 0;
+    drawFrame();
   }
 
   function syncAnimation() {
-    const shouldAnimate = imageReady && isInView && !document.hidden && !reducedMotion.matches;
+    const shouldAnimate = imageReady && isInView && !document.hidden && !reducedMotion.matches && (pointerInside || cursorStrength > 0.01);
     if (shouldAnimate && !isAnimating) {
       isAnimating = true;
-      animationStartedAt = performance.now();
+      lastFrameAt = 0;
       animationFrame = window.requestAnimationFrame(animate);
     } else if (!shouldAnimate) {
       pauseAnimation();
-      if (imageReady && reducedMotion.matches) drawFrame(0);
     }
   }
+
+  section.addEventListener('pointermove', event => {
+    if (event.pointerType === 'touch') return;
+    const bounds = section.getBoundingClientRect();
+    cursorTargetX = Math.min(width, Math.max(0, event.clientX - bounds.left));
+    cursorTargetY = Math.min(height, Math.max(0, event.clientY - bounds.top));
+    if (!pointerInside) {
+      cursorX = cursorTargetX;
+      cursorY = cursorTargetY;
+    }
+    pointerInside = true;
+    syncAnimation();
+  }, { passive: true });
+
+  section.addEventListener('pointerleave', () => {
+    pointerInside = false;
+    syncAnimation();
+  });
 
   source.addEventListener('load', () => {
     if (imageReady) return;

@@ -196,12 +196,11 @@
   width: min(100%, 120rem);
   height: clamp(16rem, 27.5521vw, 33.0625rem);
   margin: 9.375rem auto;
-  background: #090706;
+  background: #000;
   color: #fff;
 }
 
-.development-software__canvas,
-.development-software__fallback {
+.development-software__canvas {
   position: absolute;
   z-index: 0;
   inset: 0;
@@ -214,9 +213,18 @@
   pointer-events: none;
 }
 
+.development-software::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(to bottom, #000 0%, transparent 11%, transparent 89%, #000 100%);
+  content: '';
+  pointer-events: none;
+}
+
 .development-software__description {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   width: min(62.9375rem, calc(100% - 2.25rem));
   margin: 0;
   font-family: var(--sans);
