@@ -187,6 +187,54 @@
   height: auto;
 }
 
+@media (max-width: 89.9375rem) {
+  .development-services__canvas {
+    display: flex;
+    height: 48.1875rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.875rem;
+    padding: 3.125rem 3rem 0;
+  }
+
+  .development-services__heading {
+    position: static;
+    width: auto;
+    font-size: 2.375rem;
+    line-height: .9;
+  }
+
+  .development-services__image-stack {
+    display: none;
+  }
+
+  .development-services__list {
+    position: static;
+    width: 28.8125rem;
+  }
+
+  .development-services__list p {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 47.9375rem) {
+  .development-services__canvas {
+    height: 29.1875rem;
+    padding: 1.875rem .75rem 0;
+  }
+
+  .development-services__list {
+    width: 100%;
+  }
+
+  .development-services__list p {
+    font-size: 1.125rem;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+}
+
 .development-software {
   position: relative;
   isolation: isolate;
@@ -265,38 +313,6 @@
     line-height: 1.4;
   }
 
-  .development-services__canvas {
-    display: flex;
-    height: auto;
-    flex-direction: column;
-    align-items: stretch;
-    padding: 3.5rem 1.125rem 3rem;
-  }
-
-  .development-services__heading {
-    position: static;
-    width: 100%;
-    font-size: clamp(2rem, 6vw, 2.75rem);
-  }
-
-  .development-services__image-stack {
-    position: relative;
-    top: auto;
-    left: auto;
-    width: min(100%, 48rem);
-    margin: 2rem auto 0;
-  }
-
-  .development-services__list {
-    position: static;
-    width: min(100%, 28.75rem);
-    margin-top: 2rem;
-  }
-
-  .development-services__list p {
-    font-size: clamp(1.125rem, 3vw, 1.25rem);
-    line-height: 1.2;
-  }
 }
 
 @media (min-width: 48rem) and (max-width: 108.9375rem) {
@@ -326,8 +342,7 @@
 }
 
 @media (max-width: 37.5rem) {
-  .development-intro__inner,
-  .development-services__canvas {
+  .development-intro__inner {
     padding-inline: 1.125rem;
   }
 
@@ -353,14 +368,6 @@
     font-size: clamp(2rem, 8vw, 2.5rem);
   }
 
-  .development-services__canvas {
-    padding-top: 3rem;
-    padding-bottom: 2.5rem;
-  }
-
-  .development-services__heading {
-    font-size: 2rem;
-  }
 }
 
 .development-process {

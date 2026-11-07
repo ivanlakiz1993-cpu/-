@@ -17,7 +17,7 @@
     '.mechanical-tests__list', '.mechanical-tests__equipment h3',
     '.mechanical-tests__group h4', '.testing-faq__item', '.news-page__filter-wrap',
     '.news-article__status', '.form-feedback', '.visually-hidden',
-    '.development-process__step'
+    '.development-process__step', '.development-services__list'
   ].join(',');
   const groups = new Map();
   const groupsByTarget = new WeakMap();
