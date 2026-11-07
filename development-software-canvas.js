@@ -173,7 +173,7 @@
   function updateDefaultOrangeSpot() {
     if (!particles.length || !imageTransform) return;
 
-    const targetX = width * 0.86;
+    const targetX = width * 0.5;
     const targetY = height * 0.5;
     let nearestDistance = Infinity;
 
@@ -211,7 +211,7 @@
     if (!imageReady || !imageTransform || !width || !height) return;
     context.clearRect(0, 0, width, height);
     const glowRadius = Math.max(88, Math.min(width * 0.27, 430));
-    const idleGlowRadius = Math.max(22, Math.min(width * 0.045, 62));
+    const idleGlowRadius = Math.max(28, Math.min(width * 0.055, 80));
     const horizontalFade = width * 0.16;
     const verticalFade = height * 0.3;
 
@@ -265,11 +265,11 @@
     if (!isAnimating) return;
     const delta = lastFrameAt ? Math.min((timestamp - lastFrameAt) / 1000, 0.05) : 1 / 60;
     lastFrameAt = timestamp;
-    const easing = 1 - Math.exp(-delta * 18);
+    const easing = 1 - Math.exp(-delta * 7.5);
     cursorX += (cursorTargetX - cursorX) * easing;
     cursorY += (cursorTargetY - cursorY) * easing;
     const targetStrength = pointerInside ? 1 : 0;
-    cursorStrength += (targetStrength - cursorStrength) * (1 - Math.exp(-delta * (pointerInside ? 12 : 9)));
+    cursorStrength += (targetStrength - cursorStrength) * (1 - Math.exp(-delta * (pointerInside ? 7 : 4.5)));
     drawFrame();
 
     const cursorDistance = Math.hypot(cursorTargetX - cursorX, cursorTargetY - cursorY);
