@@ -185,7 +185,7 @@
       const x = imageTransform.offsetX + particle.x * imageTransform.scaleX;
       const y = imageTransform.offsetY + particle.y * imageTransform.scaleY;
       const distance = Math.hypot(x - cursorX, y - cursorY);
-      const glow = pointerStrength * (1 - smoothstep(glowRadius * 0.08, glowRadius, distance));
+      const glow = cursorStrength * (1 - smoothstep(glowRadius * 0.08, glowRadius, distance));
       const paletteIndex = Math.round(glow * (particle.palette.length - 1));
       const sizePulse = 0.88 + glow * 0.22;
       const drawWidth = Math.max(1, particle.width * imageTransform.scaleX * sizePulse * 0.82);
