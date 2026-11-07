@@ -20,9 +20,16 @@
     const amount = clamp((value - min) / (max - min));
     return amount * amount * (3 - 2 * amount);
   };
+  const densityAtY = y => {
+    const verticalProgress = clamp(y / height);
+    const centerStrength = 1 - Math.abs(verticalProgress * 2 - 1);
+    return 0.2 + smoothstep(0, 1, centerStrength) * 0.62;
+  };
 
   let particles = [];
   let imageTransform = null;
+  let defaultOrangeX = 0;
+  let defaultOrangeY = 0;
   let width = 0;
   let height = 0;
   let pixelRatio = 1;
@@ -68,7 +75,7 @@
     for (let pixel = 0; pixel < pixelCount; pixel += 1) {
       const color = pixel * 4;
       const luminance = data[color] * 0.2126 + data[color + 1] * 0.7152 + data[color + 2] * 0.0722;
-      if (data[color + 3] > 180 && luminance > 27) eligible[pixel] = 1;
+      if (data[color + 3] > 180 && luminance > 22) eligible[pixel] = 1;
     }
 
     const result = [];
@@ -125,14 +132,17 @@
       const particleHeight = maxY - minY + 1;
       if (area < 3 || area > 420 || particleWidth > 32 || particleHeight > 32) continue;
 
+      const densityRoll = Math.abs(Math.sin(sumX * 12.9898 + sumY * 78.233) * 43758.5453) % 1;
+
       const averageLuminance = sumLuminance / area;
-      const baseGray = Math.max(74, Math.min(128, Math.round(72 + averageLuminance * 0.55)));
-      const baseAlpha = Math.max(0.4, Math.min(0.68, 0.38 + averageLuminance / 500));
+      const baseGray = Math.max(66, Math.min(112, Math.round(64 + averageLuminance * 0.42)));
+      const baseAlpha = Math.max(0.28, Math.min(0.5, 0.27 + averageLuminance / 900));
       result.push({
         x: sumX / area,
         y: sumY / area,
         width: particleWidth,
         height: particleHeight,
+        densityRoll,
         palette: makePalette(baseGray, baseAlpha)
       });
     }
@@ -160,6 +170,27 @@
     };
   }
 
+  function updateDefaultOrangeSpot() {
+    if (!particles.length || !imageTransform) return;
+
+    const targetX = width * 0.86;
+    const targetY = height * 0.5;
+    let nearestDistance = Infinity;
+
+    for (const particle of particles) {
+      const x = imageTransform.offsetX + particle.x * imageTransform.scaleX;
+      const y = imageTransform.offsetY + particle.y * imageTransform.scaleY;
+      const keepProbability = densityAtY(y);
+      if (particle.densityRoll > keepProbability) continue;
+      const distance = (x - targetX) ** 2 + (y - targetY) ** 2;
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        defaultOrangeX = x;
+        defaultOrangeY = y;
+      }
+    }
+  }
+
   function drawRoundedSquare(x, y, squareWidth, squareHeight) {
     const radius = Math.min(squareWidth, squareHeight) * 0.18;
     context.beginPath();
@@ -180,20 +211,39 @@
     if (!imageReady || !imageTransform || !width || !height) return;
     context.clearRect(0, 0, width, height);
     const glowRadius = Math.max(88, Math.min(width * 0.27, 430));
+    const idleGlowRadius = Math.max(22, Math.min(width * 0.045, 62));
+    const horizontalFade = width * 0.16;
+    const verticalFade = height * 0.3;
 
     for (const particle of particles) {
       const x = imageTransform.offsetX + particle.x * imageTransform.scaleX;
       const y = imageTransform.offsetY + particle.y * imageTransform.scaleY;
+      const keepProbability = densityAtY(y);
+      if (particle.densityRoll > keepProbability) continue;
       const distance = Math.hypot(x - cursorX, y - cursorY);
-      const glow = cursorStrength * (1 - smoothstep(glowRadius * 0.08, glowRadius, distance));
+      const cursorGlow = cursorStrength * (1 - smoothstep(glowRadius * 0.08, glowRadius, distance));
+      const idleDistance = Math.hypot(x - defaultOrangeX, y - defaultOrangeY);
+      const idleGlow = 0.86 * (1 - smoothstep(idleGlowRadius * 0.12, idleGlowRadius, idleDistance));
+      const glow = Math.max(cursorGlow, idleGlow);
       const paletteIndex = Math.round(glow * (particle.palette.length - 1));
-      const sizePulse = 0.88 + glow * 0.22;
-      const drawWidth = Math.max(1, particle.width * imageTransform.scaleX * sizePulse * 0.82);
-      const drawHeight = Math.max(1, particle.height * imageTransform.scaleY * sizePulse * 0.82);
+      const sizePulse = 0.86 + glow * 0.16;
+      const drawWidth = Math.max(1, particle.width * imageTransform.scaleX * sizePulse * 0.72);
+      const drawHeight = Math.max(1, particle.height * imageTransform.scaleY * sizePulse * 0.72);
+      const edgeFade =
+        smoothstep(0, horizontalFade, x) *
+        smoothstep(0, horizontalFade, width - x) *
+        smoothstep(0, verticalFade, y) *
+        smoothstep(0, verticalFade, height - y);
 
-      context.fillStyle = particle.palette[paletteIndex];
+      context.globalAlpha = edgeFade;
+      if (idleGlow > cursorGlow && idleGlow > 0.1) {
+        context.fillStyle = `rgba(${accent.join(', ')}, ${(0.2 + idleGlow * 0.58).toFixed(3)})`;
+      } else {
+        context.fillStyle = particle.palette[paletteIndex];
+      }
       drawRoundedSquare(x - drawWidth / 2, y - drawHeight / 2, drawWidth, drawHeight);
     }
+    context.globalAlpha = 1;
   }
 
   function resizeCanvas() {
@@ -206,6 +256,7 @@
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     if (imageReady) {
       updateImageTransform();
+      updateDefaultOrangeSpot();
       drawFrame();
     }
   }
