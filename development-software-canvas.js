@@ -36,11 +36,11 @@
   function makePalette(red, green, blue, alpha, isOrange) {
     return Array.from({ length: 16 }, (_, index) => {
       const level = index / 15;
-      const orangeMix = isOrange ? 0.04 + level * 0.38 : level * 0.88;
+      const orangeMix = isOrange ? 0.06 + level * 0.55 : level * 0.96;
       const r = Math.round(red + (accent[0] - red) * orangeMix);
       const g = Math.round(green + (accent[1] - green) * orangeMix);
       const b = Math.round(blue + (accent[2] - blue) * orangeMix);
-      const a = Math.min(0.86, alpha * (0.74 + level * 0.52));
+      const a = Math.min(0.92, alpha * (0.48 + level * 1.15));
       return `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})`;
     });
   }
@@ -187,11 +187,11 @@
       return;
     }
 
-    const phase = elapsed * 0.28;
+    const phase = elapsed * 0.42;
     const centerX = width * (0.5 + 0.42 * Math.sin(phase));
-    const centerY = height * (0.5 + 0.24 * Math.sin(phase * 1.45 + 0.8));
-    const radiusX = width * 0.56;
-    const radiusY = height * 0.92;
+    const centerY = height * (0.5 + 0.3 * Math.sin(phase * 0.72 + 0.8));
+    const radiusX = width * 0.44;
+    const radiusY = height * 0.78;
 
     for (const particle of particles) {
       const x = imageTransform.offsetX + particle.x * imageTransform.scaleX;
@@ -199,12 +199,12 @@
       const dx = (x - centerX) / radiusX;
       const dy = (y - centerY) / radiusY;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      const cloud = 1 - smoothstep(0.18, 1.22, distance);
-      const ripple = 0.5 + 0.5 * Math.sin(distance * 13 - elapsed * 1.25 + particle.phase);
+      const cloud = 1 - smoothstep(0.2, 1.15, distance);
+      const ripple = 0.5 + 0.5 * Math.sin(distance * 18 - elapsed * 1.65 + particle.phase);
       const shimmer = 0.5 + 0.5 * Math.sin(elapsed * 0.9 + particle.phase);
-      const glow = clamp(cloud * (0.72 + ripple * 0.28) + shimmer * 0.08);
+      const glow = clamp(cloud * (0.62 + ripple * 0.38) + shimmer * 0.04);
       const paletteIndex = Math.round(glow * (particle.palette.length - 1));
-      const sizePulse = 0.92 + glow * 0.2;
+      const sizePulse = 0.86 + glow * 0.34;
       const drawWidth = Math.max(1, particle.width * imageTransform.scaleX * sizePulse * 0.82);
       const drawHeight = Math.max(1, particle.height * imageTransform.scaleY * sizePulse * 0.82);
 
