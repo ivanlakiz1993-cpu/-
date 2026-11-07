@@ -395,7 +395,7 @@
   top: 7.125rem;
   left: 1px;
   display: flex;
-  width: min(41.162791%, 44.25rem);
+  width: min(39.709302%, 42.6875rem);
   flex-direction: column;
   gap: 1.875rem;
   margin: 0;
@@ -421,7 +421,7 @@
 .development-process__number {
   position: relative;
   left: 0;
-  flex: 0 0 2rem;
+  flex: 0 0 1.625rem;
   text-align: center;
   font: inherit;
   transition: left .55s ease-in-out;
@@ -433,7 +433,7 @@
   flex: 1 1 auto;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1.875rem;
+  gap: .625rem;
   transition: transform .55s ease-in-out;
 }
 
@@ -490,7 +490,11 @@
 }
 
 .development-process__number-group .development-process__number {
-  flex: 0 0 2rem;
+  flex: 0 0 1.625rem;
+}
+
+.development-process__step--active .development-process__number-group {
+  width: 2rem;
 }
 
 .development-process__marker {
@@ -512,7 +516,7 @@
 }
 
 .development-process__step--active .development-process__content {
-  transform: translateX(2.875rem);
+  transform: translateX(2.5rem);
 }
 
 .development-process__step--active .development-process__marker {
