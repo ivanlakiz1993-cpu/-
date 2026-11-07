@@ -1,9 +1,3 @@
-.production-footer .footer-bottom::before{
-  left:0;
-  width:100%;
-  transform:none;
-}
-
 @media(max-width:37.5rem){
   .production-footer .footer-main{
     padding-top:0;
