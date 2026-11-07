@@ -145,8 +145,11 @@
 }
 
 .development-services__divider:focus-visible {
-  outline: .125rem solid #fff;
-  outline-offset: .125rem;
+  outline: none;
+}
+
+.development-services__divider:focus-visible img {
+  filter: drop-shadow(0 0 .25rem #ff730d);
 }
 
 .development-services__list {
