@@ -12,12 +12,13 @@
   <link rel="stylesheet" href="hero-grid.css?v=20261105-home-services-radius-1">
   <link rel="stylesheet" href="page-transition.css?v=20261023-faster-mosaic-1">
   <link rel="stylesheet" href="text-reveal.css?v=20261106-home-hero-text-sequence-2">
-  <link rel="stylesheet" href="development-page.css?v=20261107-development-process-1">
+  <link rel="stylesheet" href="development-page.css?v=20261107-development-process-hover-1">
   <script src="site-header.js?v=20261105-menu-scroll-lock-1"></script>
   <script src="page-transition.js?v=20261027-unified-entry-reveal-1"></script>
   <script src="site-text-reveal.js?v=20261106-home-hero-text-sequence-2" defer></script>
   <script src="development-image-reveal.js?v=20261107-development-scroll-reveal-1" defer></script>
   <script src="development-software-canvas.js?v=20261107-particle-reference-1" defer></script>
+  <script src="development-process.js?v=20261107-development-process-hover-1" defer></script>
 </head>
 <body class="development-page">
   <site-header page="development"></site-header>
@@ -61,14 +62,18 @@
     <section class="development-process" aria-labelledby="development-process-title" data-node-ids="3601:5189 3648:4050 3676:5108" data-name="Development Process Section">
       <h2 class="development-process__title" id="development-process-title" data-node-id="3601:5190">Процесс разработки</h2>
       <ol class="development-process__steps" aria-label="Этапы разработки" data-node-id="3601:5191">
-        <li class="development-process__step" data-node-id="3601:5192">
-          <span class="development-process__number" data-node-id="3601:5193">01</span>
+        <li class="development-process__step development-process__step--active" aria-current="step" data-node-id="3601:5192">
+          <span class="development-process__number-group">
+            <span class="development-process__marker" aria-hidden="true"></span>
+            <span class="development-process__number" data-node-id="3601:5193">01</span>
+          </span>
           <div class="development-process__content" data-node-id="3601:5194">
             <h3 class="development-process__step-title" data-node-id="3601:5195">Определяем требования</h3>
             <p class="development-process__description" data-node-id="3601:5196">Уточняем цели, задачи и условия проекта.</p>
           </div>
+          <button class="development-process__hit-area" type="button" aria-label="Показать этап 01: Определяем требования" aria-pressed="true"></button>
         </li>
-        <li class="development-process__step development-process__step--active" aria-current="step" data-node-id="3601:5197">
+        <li class="development-process__step" data-node-id="3601:5197">
           <span class="development-process__number-group" data-node-id="3601:5198">
             <span class="development-process__marker" aria-hidden="true" data-node-id="3601:5199"></span>
             <span class="development-process__number" data-node-id="3601:5200">02</span>
@@ -77,31 +82,39 @@
             <h3 class="development-process__step-title" data-node-id="3601:5202">Проектируем решение</h3>
             <p class="development-process__description" data-node-id="3601:5203">Продумываем архитектуру, устройство и необходимую документацию.</p>
           </div>
+          <button class="development-process__hit-area" type="button" aria-label="Показать этап 02: Проектируем решение" aria-pressed="false"></button>
         </li>
         <li class="development-process__step" data-node-id="3601:5204">
-          <span class="development-process__number" data-node-id="3601:5205">03</span>
+          <span class="development-process__number-group"><span class="development-process__marker" aria-hidden="true"></span><span class="development-process__number" data-node-id="3601:5205">03</span></span>
           <div class="development-process__content" data-node-id="3601:5206">
             <h3 class="development-process__step-title" data-node-id="3601:5207">Разрабатываем</h3>
             <p class="development-process__description" data-node-id="3601:5208">Создаём ПО, собираем электронную часть и готовим технические материалы.</p>
           </div>
+          <button class="development-process__hit-area" type="button" aria-label="Показать этап 03: Разрабатываем" aria-pressed="false"></button>
         </li>
         <li class="development-process__step" data-node-id="3601:5209">
-          <span class="development-process__number" data-node-id="3601:5210">04</span>
+          <span class="development-process__number-group"><span class="development-process__marker" aria-hidden="true"></span><span class="development-process__number" data-node-id="3601:5210">04</span></span>
           <div class="development-process__content" data-node-id="3601:5211">
             <h3 class="development-process__step-title" data-node-id="3601:5212">Проверяем и дорабатываем</h3>
             <p class="development-process__description" data-node-id="3601:5213">Тестируем компоненты и их совместную работу, исправляем недочёты.</p>
           </div>
+          <button class="development-process__hit-area" type="button" aria-label="Показать этап 04: Проверяем и дорабатываем" aria-pressed="false"></button>
         </li>
         <li class="development-process__step" data-node-id="3601:5214">
-          <span class="development-process__number" data-node-id="3601:5215">05</span>
+          <span class="development-process__number-group"><span class="development-process__marker" aria-hidden="true"></span><span class="development-process__number" data-node-id="3601:5215">05</span></span>
           <div class="development-process__content" data-node-id="3601:5216">
             <h3 class="development-process__step-title" data-node-id="3601:5217">Подготовка к выпуску</h3>
             <p class="development-process__description" data-node-id="3601:5218">Оформляем документацию, выпускаем прототип или готовый продукт.</p>
           </div>
+          <button class="development-process__hit-area" type="button" aria-label="Показать этап 05: Подготовка к выпуску" aria-pressed="false"></button>
         </li>
       </ol>
-      <figure class="development-process__image" aria-hidden="true" data-node-id="3540:4368">
-        <img src="assets/development-process-photo.webp" width="1920" height="2560" alt="" loading="lazy" decoding="async">
+      <figure class="development-process__image" aria-hidden="true" data-node-id="3601:5219">
+        <img class="development-process__photo development-process__photo--active development-process__photo--review" src="assets/development-process-photo-01.webp" width="1920" height="2560" alt="" decoding="async" data-node-id="3601:5244">
+        <img class="development-process__photo" src="assets/development-process-photo.webp" width="1920" height="2560" alt="" decoding="async" data-node-id="3601:5219">
+        <img class="development-process__photo" src="assets/development-process-photo-03.webp" width="896" height="1200" alt="" decoding="async" data-node-id="3601:5245">
+        <img class="development-process__photo" src="assets/development-process-photo-04.webp" width="1920" height="2560" alt="" decoding="async" data-node-id="3601:5246">
+        <img class="development-process__photo" src="assets/development-process-photo-05.webp" width="1920" height="2560" alt="" decoding="async" data-node-id="3601:5247">
       </figure>
     </section>
   </main>
