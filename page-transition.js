@@ -129,7 +129,7 @@
     }
   }
   const destinationFor = link => {
-    if (!link || link.hasAttribute('download') || (link.target && link.target.toLowerCase() !== '_self')) return null;
+    if (!link || link.hasAttribute('download') || link.hasAttribute('data-consultation-modal-trigger') || (link.target && link.target.toLowerCase() !== '_self')) return null;
     const destination = new URL(link.href, location.href);
     if (destination.origin !== location.origin || !/^https?:$/.test(destination.protocol)) return null;
     if (destination.pathname === location.pathname && destination.search === location.search) return null;
