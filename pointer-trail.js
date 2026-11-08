@@ -47,6 +47,13 @@
 
   const draw = (now) => {
     frame = 0;
+    const dx = target.x - position.x;
+    const dy = target.y - position.y;
+    const distance = Math.hypot(dx, dy);
+    if (distance > 0) {
+      directionX = dx / distance;
+      directionY = dy / distance;
+    }
     // Keep the head on the pointer; only its short history forms the trail.
     position.x = target.x;
     position.y = target.y;
@@ -55,21 +62,29 @@
     clearTrail();
 
     const last = points[points.length - 1];
-    if (!last || Math.hypot(position.x - last.x, position.y - last.y) >= 1.5) {
+    if (!last || position.x !== last.x || position.y !== last.y) {
       points.push({ x: position.x, y: position.y, time: now });
     }
     while (points.length && now - points[0].time > lifetime) points.shift();
-    if (points.length >= 3) {
+    // Drop the old branch at a turn instead of clipping it into a sideways shard.
+    for (let i = points.length - 2; i >= 0; i--) {
+      const behind = (position.x - points[i].x) * directionX + (position.y - points[i].y) * directionY;
+      if (behind > 0) continue;
+      points.splice(0, i + 1);
+      break;
+    }
+    if (points.length >= 2) {
       const left = [];
       const right = [];
       for (let i = 0; i < points.length; i++) {
         const point = points[i];
         const previous = points[Math.max(0, i - 1)];
         const next = points[Math.min(points.length - 1, i + 1)];
-        const dx = next.x - previous.x;
-        const dy = next.y - previous.y;
+        const dx = i === points.length - 1 ? directionX : next.x - previous.x;
+        const dy = i === points.length - 1 ? directionY : next.y - previous.y;
         const distance = Math.hypot(dx, dy) || 1;
-        const width = (1.5 + 7.5 * Math.max(0, 1 - (now - point.time) / lifetime)) / 2;
+        // Keep the joint inside the 4px head radius, including on diagonal turns.
+        const width = 3.5 * Math.max(0, 1 - (now - point.time) / lifetime);
         left.push({ x: point.x - dy / distance * width, y: point.y + dx / distance * width });
         right.push({ x: point.x + dy / distance * width, y: point.y - dx / distance * width });
       }
@@ -128,13 +143,6 @@
       return;
     }
     document.documentElement.classList.add('has-pointer-trail');
-    const dx = event.clientX - target.x;
-    const dy = event.clientY - target.y;
-    const distance = Math.hypot(dx, dy);
-    if (distance) {
-      directionX = dx / distance;
-      directionY = dy / distance;
-    }
     target.x = event.clientX;
     target.y = event.clientY;
     if (!active) {
