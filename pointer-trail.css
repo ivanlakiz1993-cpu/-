@@ -14,8 +14,15 @@
 
 .pointer-trail.is-visible { visibility: visible; }
 
+.pointer-trail__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 .pointer-trail__dot,
-.pointer-trail__trace,
 .pointer-trail__wave {
   position: absolute;
   left: 0;
@@ -28,7 +35,6 @@
 }
 
 .pointer-trail__dot { border: 1px solid #8f8f8f; background: #fff; overflow: hidden; }
-.pointer-trail__trace { border: 1px solid #8f8f8f; background: #fff; opacity: 0; }
 
 .pointer-trail__inner {
   position: absolute;

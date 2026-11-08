@@ -5,12 +5,11 @@
   const overlay = document.createElement('div');
   overlay.className = 'pointer-trail';
   overlay.setAttribute('aria-hidden', 'true');
-  const traces = Array.from({ length: 6 }, () => {
-    const trace = document.createElement('span');
-    trace.className = 'pointer-trail__trace';
-    overlay.append(trace);
-    return trace;
-  });
+  const canvas = document.createElement('canvas');
+  canvas.className = 'pointer-trail__canvas';
+  const context = canvas.getContext('2d');
+  if (!context) return;
+  overlay.append(canvas);
   const dot = document.createElement('span');
   dot.className = 'pointer-trail__dot';
   const inner = document.createElement('span');
@@ -34,6 +33,15 @@
   let innerTargetY = 0;
   let hoveredControl = null;
   const points = [];
+  const resize = () => {
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(window.innerWidth * ratio);
+    canvas.height = Math.round(window.innerHeight * ratio);
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    points.length = 0;
+  };
+  resize();
+  window.addEventListener('resize', resize);
   const clickable = 'a[href], button, input, textarea, select, label, summary, [role="button"], [role="link"], [contenteditable="true"]';
 
   const controlAt = (target) => {
@@ -70,14 +78,33 @@
       innerY = innerY / radius * 5;
     }
     inner.style.transform = `translate(calc(-50% + ${innerX}px), calc(-50% + ${innerY}px))`;
-    for (let i = 0; i < traces.length; i++) {
-      const point = points[i];
-      const age = point ? (now - point.time) / 220 : 1;
-      const opacity = point ? Math.max(0, (1 - age) * (.36 - i * .045)) : 0;
-      traces[i].style.opacity = String(opacity);
-      if (point) traces[i].style.transform = `translate(${point.x - 10}px, ${point.y - 10}px)`;
+    context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    while (points.length && now - points[0].time > 220) points.shift();
+    if (points.length > 1) {
+      const tail = points[0];
+      const head = points[points.length - 1];
+      const fade = Math.max(0, 1 - (now - lastMove) / 220);
+      const stroke = (width, color) => {
+        const gradient = context.createLinearGradient(tail.x, tail.y, head.x, head.y);
+        gradient.addColorStop(0, `rgba(${color}, 0)`);
+        gradient.addColorStop(1, `rgba(${color}, ${fade * .42})`);
+        context.beginPath();
+        context.moveTo(tail.x, tail.y);
+        for (let i = 1; i < points.length - 1; i++) {
+          const midpointX = (points[i].x + points[i + 1].x) / 2;
+          const midpointY = (points[i].y + points[i + 1].y) / 2;
+          context.quadraticCurveTo(points[i].x, points[i].y, midpointX, midpointY);
+        }
+        context.lineTo(head.x, head.y);
+        context.lineWidth = width;
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        context.strokeStyle = gradient;
+        context.stroke();
+      };
+      stroke(20, '143, 143, 143');
+      stroke(18, '255, 255, 255');
     }
-    while (points.length && now - points[points.length - 1].time > 220) points.pop();
     if (points.length || Math.abs(innerX) + Math.abs(innerY) + Math.abs(innerVelocityX) + Math.abs(innerVelocityY) + Math.abs(innerTargetX) + Math.abs(innerTargetY) > .03) {
       frame = requestAnimationFrame(draw);
     } else {
@@ -99,10 +126,18 @@
       const deltaX = nextX - x;
       const deltaY = nextY - y;
       const distance = Math.hypot(deltaX, deltaY);
-      if (distance > 35) points.length = 0;
-      else if (distance >= 4) {
-        points.unshift({ x, y, time: now });
-        points.length = Math.min(points.length, traces.length);
+      if (distance > 50) points.length = 0;
+      else if (distance >= 1) {
+        if (!points.length) points.push({ x, y, time: now });
+        points.push({ x: nextX, y: nextY, time: now });
+        let trailLength = 0;
+        for (let i = points.length - 1; i > 0; i--) {
+          trailLength += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+          if (trailLength > 70) {
+            points.splice(0, i + 1);
+            break;
+          }
+        }
       }
       if (distance > 0) {
         const scale = Math.min(1, 16.67 / Math.max(now - lastMove, 8));
