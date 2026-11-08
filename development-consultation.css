@@ -1,0 +1,9 @@
+@media (max-width: 47.9375rem) {
+  .development-consultation .production-consultation__form {
+    gap: 1.875rem;
+  }
+
+  .development-consultation .production-consultation__contacts > .production-consultation__field {
+    flex: 0 0 3rem;
+  }
+}

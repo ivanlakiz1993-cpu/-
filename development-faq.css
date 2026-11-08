@@ -9,7 +9,7 @@
 .development-faq__heading {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   height: 4rem;
   margin: 0;
   padding-inline: var(--development-faq-gutter);
@@ -17,7 +17,7 @@
   font-weight: 400;
   line-height: 1;
   letter-spacing: .01em;
-  text-align: center;
+  text-align: left;
 }
 
 .development-faq__list {
