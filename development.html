@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="text-reveal.css?v=20261106-home-hero-text-sequence-2">
   <link rel="stylesheet" href="development-page.css?v=20261107-process-no-vertical-jump-1">
   <link rel="stylesheet" href="development-faq.css?v=20261107-development-faq-1">
-  <link rel="stylesheet" href="production-consultation.css?v=20261106-consultation-states-1">
+  <link rel="stylesheet" href="production-consultation.css?v=20261108-consultation-submit-1">
   <link rel="stylesheet" href="development-consultation.css?v=20261108-development-consultation-1">
   <script src="site-header.js?v=20261105-menu-scroll-lock-1"></script>
   <script src="page-transition.js?v=20261027-unified-entry-reveal-1"></script>
@@ -22,6 +22,7 @@
   <script src="development-image-reveal.js?v=20261107-development-scroll-reveal-1" defer></script>
   <script src="development-software-canvas.js?v=20261107-orange-squares-rollback-1" defer></script>
   <script src="development-process.js?v=20261107-development-process-hover-1" defer></script>
+  <script src="consultation-form.js?v=20261108-consultation-submit-1" defer></script>
 </head>
 <body class="development-page">
   <site-header page="development"></site-header>
@@ -165,7 +166,9 @@
           <p class="production-consultation__description" data-name="p.consultation__description" data-node-id="3601:5147" data-design-node-id-tablet="3652:4152" data-design-node-id-mobile="3676:5192"><span>Отправьте</span> свой вопрос нам и <span>получите</span> индивидуальную консультацию специалиста</p>
         </div>
 
-        <div class="production-consultation__form" role="group" aria-label="Форма консультации" data-name="form.consultation-form" data-node-id="3601:5141" data-design-node-id-tablet="3652:4153" data-design-node-id-mobile="3676:5193">
+        <form class="production-consultation__form" action="https://formsubmit.co/gromf1493@mail.ru" method="POST" aria-label="Форма консультации" data-name="form.consultation-form" data-node-id="3601:5141" data-design-node-id-tablet="3652:4153" data-design-node-id-mobile="3676:5193">
+          <input type="hidden" name="_subject" value="Заявка со страницы Разработка — СпецЭлектроника">
+          <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" hidden>
           <div class="production-consultation__fields">
             <label class="production-consultation__field production-consultation__field--name" data-name="div.form-field.form-field--name" data-node-id="3601:5142" data-design-node-id-tablet="3652:4154" data-design-node-id-mobile="3676:5194">
               <span class="production-consultation__visually-hidden">Как Вам обращаться</span>
@@ -188,12 +191,13 @@
           </div>
 
           <label class="production-consultation__consent" data-name="label.consultation-form__consent" data-node-id="3601:5148" data-design-node-id-tablet="3652:4159" data-design-node-id-mobile="3676:5199">
-            <input class="production-consultation__checkbox" type="checkbox" name="consent" required data-node-id="3601:5149" data-design-node-id-tablet="3652:4160" data-design-node-id-mobile="3676:5200">
+            <input class="production-consultation__checkbox" type="checkbox" name="consent" value="yes" required data-node-id="3601:5149" data-design-node-id-tablet="3652:4160" data-design-node-id-mobile="3676:5200">
             <span class="production-consultation__consent-text" data-node-id="3601:5150" data-design-node-id-tablet="3652:4161" data-design-node-id-mobile="3676:5201">Я соглашаюсь с <a href="privacy-policy.html">политикой конфиденциальности</a> и <a class="production-consultation__processing-link" href="personal-data-processing.html">обработкой персональных данных</a><span class="production-consultation__processing-prefix">обработкой </span><a class="production-consultation__data-link" href="personal-data-processing.html">персональных данных</a></span>
           </label>
 
-          <button class="production-consultation__submit submit" type="button" data-name="button.consultation-form__submit" data-node-id="3601:5151" data-design-node-id-tablet="3652:4162" data-design-node-id-mobile="3676:5202"><span>Отправить</span></button>
-        </div>
+          <button class="production-consultation__submit submit" type="submit" data-name="button.consultation-form__submit" data-node-id="3601:5151" data-design-node-id-tablet="3652:4162" data-design-node-id-mobile="3676:5202"><span>Отправить</span></button>
+          <p class="production-consultation__feedback" aria-live="polite"></p>
+        </form>
       </div>
     </section>
   </main>

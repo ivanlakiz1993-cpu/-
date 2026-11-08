@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#000000">
   <meta name="description" content="Контрактное производство электроники: печатные платы и электронные блоки от разработки до готового изделия.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self'; connect-src 'self'; prefetch-src 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self'; connect-src 'self' https://formsubmit.co; prefetch-src 'self'; form-action 'self' https://formsubmit.co; upgrade-insecure-requests">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Производство — СпецЭлектроника</title>
   <link rel="stylesheet" href="styles.css?v=20261106-benefit-scroll-30percent-1">
@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="production-base-hero.css?v=20261107-production-base-fade-1">
   <link rel="stylesheet" href="production-how-we-work.css?v=20261106-hover-particle-steps-1">
   <link rel="stylesheet" href="production-faq.css?v=20261106-faq-arrow-rotation-1">
-  <link rel="stylesheet" href="production-consultation.css?v=20261106-consultation-states-1">
+  <link rel="stylesheet" href="production-consultation.css?v=20261108-consultation-submit-1">
   <script src="site-header.js?v=20261105-menu-scroll-lock-1"></script>
   <script src="page-transition.js?v=20261027-unified-entry-reveal-1"></script>
   <script src="button-glow.js?v=20261102-shared-button-glow-1" defer></script>
@@ -30,6 +30,7 @@
   <script src="production-industries.js?v=20261104-enable-compact-scroll-motion-1" defer></script>
   <script src="production-base-hero.js?v=20261106-production-base-sequence-2" defer></script>
   <script src="production-how-we-work-particles.js?v=20261106-hover-particle-steps-1" defer></script>
+  <script src="consultation-form.js?v=20261108-consultation-submit-1" defer></script>
 </head>
 <body class="production-page">
   <site-header page="production"></site-header>
@@ -353,7 +354,9 @@
           <p class="production-consultation__description" data-name="p.consultation__description" data-node-id="3438:4548" data-design-node-id-tablet="3696:4185" data-design-node-id-mobile="3696:4172"><span>Отправьте</span> свой вопрос нам и <span>получите</span> индивидуальную консультацию специалиста</p>
         </div>
 
-        <div class="production-consultation__form" role="group" aria-label="Форма консультации" data-name="form.consultation-form" data-node-id="3438:4549" data-design-node-id-tablet="3696:4186" data-design-node-id-mobile="3696:4173">
+        <form class="production-consultation__form" action="https://formsubmit.co/gromf1493@mail.ru" method="POST" aria-label="Форма консультации" data-name="form.consultation-form" data-node-id="3438:4549" data-design-node-id-tablet="3696:4186" data-design-node-id-mobile="3696:4173">
+          <input type="hidden" name="_subject" value="Заявка со страницы Производство — СпецЭлектроника">
+          <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" hidden>
           <div class="production-consultation__fields">
             <label class="production-consultation__field production-consultation__field--name" data-name="div.form-field.form-field--name" data-node-id="3438:4550" data-design-node-id-tablet="3696:4187" data-design-node-id-mobile="3696:4174">
               <span class="production-consultation__visually-hidden">Как Вам обращаться</span>
@@ -376,12 +379,13 @@
           </div>
 
           <label class="production-consultation__consent" data-name="label.consultation-form__consent" data-node-id="3438:4545" data-design-node-id-tablet="3696:4192" data-design-node-id-mobile="3696:4179">
-            <input class="production-consultation__checkbox" type="checkbox" name="consent" required data-node-id="3438:4546" data-design-node-id-tablet="3696:4193" data-design-node-id-mobile="3696:4180">
+            <input class="production-consultation__checkbox" type="checkbox" name="consent" value="yes" required data-node-id="3438:4546" data-design-node-id-tablet="3696:4193" data-design-node-id-mobile="3696:4180">
             <span class="production-consultation__consent-text" data-node-id="3438:4547" data-design-node-id-tablet="3696:4194" data-design-node-id-mobile="3696:4181">Я соглашаюсь с <a href="privacy-policy.html">политикой конфиденциальности</a> и <a class="production-consultation__processing-link" href="personal-data-processing.html">обработкой персональных данных</a><span class="production-consultation__processing-prefix">обработкой </span><a class="production-consultation__data-link" href="personal-data-processing.html">персональных данных</a></span>
           </label>
 
-          <button class="production-consultation__submit submit" type="button" data-name="button.consultation-form__submit" data-node-id="3438:4544" data-design-node-id-tablet="3696:4195" data-design-node-id-mobile="3696:4182"><span>Отправить</span></button>
-        </div>
+          <button class="production-consultation__submit submit" type="submit" data-name="button.consultation-form__submit" data-node-id="3438:4544" data-design-node-id-tablet="3696:4195" data-design-node-id-mobile="3696:4182"><span>Отправить</span></button>
+          <p class="production-consultation__feedback" aria-live="polite"></p>
+        </form>
       </div>
     </section>
   </main>

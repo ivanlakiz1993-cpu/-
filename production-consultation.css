@@ -273,6 +273,16 @@
 
 .production-consultation__submit:disabled::before{opacity:0}
 
+.production-consultation__feedback{
+  margin:0;
+  color:#f3a16d;
+  font-size:.8125rem;
+  line-height:1.4;
+}
+
+.production-consultation__feedback:empty{display:none}
+.production-consultation__form.is-submitted .production-consultation__feedback{color:#a7d7a9}
+
 .production-consultation__visually-hidden{
   position:absolute;
   width:1px;
