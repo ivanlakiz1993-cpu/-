@@ -1,19 +1,16 @@
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  html.has-pointer-trail,
-  html.has-pointer-trail * { cursor: none !important; }
+  html.has-pointer-trail, html.has-pointer-trail * { cursor: none !important; }
 }
-
 .pointer-trail {
   position: fixed;
   inset: 0;
   z-index: 2147483647;
   pointer-events: none;
   overflow: hidden;
-  visibility: hidden;
+  opacity: 0;
+  transition: opacity .3s;
 }
-
-.pointer-trail.is-visible { visibility: visible; }
-
+.pointer-trail.is-visible { opacity: 1; }
 .pointer-trail[popover] {
   width: 100vw;
   height: 100dvh;
@@ -24,7 +21,6 @@
   border: 0;
   background: transparent;
 }
-
 .pointer-trail__canvas {
   position: absolute;
   inset: 0;
@@ -32,52 +28,26 @@
   height: 100%;
   pointer-events: none;
 }
-
-.pointer-trail__dot,
-.pointer-trail__wave {
+.pointer-trail__dot {
+  --pointer-size: 8px;
   position: absolute;
   left: 0;
   top: 0;
-  width: 20px;
-  height: 20px;
+  width: var(--pointer-size);
+  height: var(--pointer-size);
+  margin: calc(var(--pointer-size) / -2) 0 0 calc(var(--pointer-size) / -2);
   border-radius: 50%;
+  background: #f0f2f0;
+  box-shadow: 0 0 10px 2px #f0f2f0;
   pointer-events: none;
-  will-change: transform, opacity;
-}
-
-.pointer-trail__dot { border: 1px solid #8f8f8f; background: #fff; overflow: hidden; }
-
-.pointer-trail__inner {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #111;
-  transform: translate(-50%, -50%);
   will-change: transform;
-  transition: background-color .18s ease;
+  transition: width .3s, height .3s, margin .3s, background-color .3s, box-shadow .3s;
 }
-
-.pointer-trail__dot.is-interactive .pointer-trail__inner { background: #ff730d; }
-
-.pointer-trail__wave {
-  width: 18px;
-  height: 18px;
-  border: 1px solid rgba(255, 255, 255, .8);
+.pointer-trail__dot.is-interactive {
+  --pointer-size: 40px;
   background: transparent;
-  animation: pointer-trail-wave .5s ease-out forwards;
+  box-shadow: inset 0 0 0 1px #f0f2f0;
 }
-
-.pointer-trail__wave--second { animation-delay: .08s; }
-.pointer-trail__wave--interactive { border-color: rgba(255, 115, 13, .9); }
-
-@keyframes pointer-trail-wave {
-  from { transform: translate(-50%, -50%) scale(.35); opacity: .8; }
-  to { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
-}
-
 @media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) {
   .pointer-trail { display: none; }
 }
