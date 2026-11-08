@@ -271,17 +271,10 @@
 .news-card:focus-visible::after{transform:scale(1.06)}
 @media(prefers-reduced-motion:reduce){.news-card::after{transition:none}}
 
-/* The entire service card can advance its image, while the service buttons keep their own actions. */
-.work-card__next{position:absolute;z-index:0;inset:0;width:100%;height:100%;padding:0;border:0;background:transparent;cursor:pointer}
-.card-testing .work-card__next{z-index:2}
-.card-testing .work-card-content{z-index:3;pointer-events:none}
-.card-testing .work-card-mode{pointer-events:auto}
-.work-card__next:focus-visible{outline:0.125rem solid var(--orange);outline-offset:-0.25rem}
-.work-card-bg img{transition:opacity .48s ease-in-out,transform .65s cubic-bezier(.22,1,.36,1)}
-@media(hover:hover){.work-card:hover .work-card-bg img.is-active{transform:scale(1.06)}.card-testing.work-card:hover .work-card-bg img.testing-image--climate.is-active{transform:scaleX(-1) scale(1.06)}}
-.work-card:focus-within .work-card-bg img.is-active{transform:scale(1.06)}
-.card-testing.work-card:focus-within .work-card-bg img.testing-image--climate.is-active{transform:scaleX(-1) scale(1.06)}
-@media(prefers-reduced-motion:reduce){.work-card-bg img{transition:none}}
+/* The home service cards are static across mouse, keyboard and touch input. */
+.work-card-bg img{transition:none}
+.work-card-mode{cursor:default}
+.work-card-mode:hover,.work-card-mode:focus-visible{color:#f4f4f4}
 
 /* Services at the 64rem and 24.4375rem Figma layouts. */
 @media(max-width:74.9375rem){
