@@ -224,6 +224,7 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   revealGroup('.topbar .brand-mark, .topbar .brand > span, .menu-toggle > span, .menu-toggle .menu-icon > i', 75);
   revealGroup('.nav .menu-nav-links a, .nav .menu-social__link', 55);
   revealGroup('.climate-tests__visuals', 120);
+  revealGroup('.climate-tests__pagination button', 100);
   revealGroup('.mechanical-tests__shaker img', 100);
 
   const revealObserver = new IntersectionObserver(entries => {
@@ -251,3 +252,125 @@ document.querySelectorAll('.testing-stage__button').forEach(button => {
   });
 });
 
+// Climate equipment and specifications switch together during scrolling.
+const climateCarousel = document.querySelector('[data-climate-carousel]');
+if (climateCarousel) {
+  const climateTrack = climateCarousel.querySelector('.climate-tests__track');
+  const climateStage = climateCarousel.querySelector('.climate-tests__stage');
+  const climateBody = climateCarousel.querySelector('.climate-tests__body');
+  const climateVisuals = climateCarousel.querySelector('.climate-tests__visuals');
+  const cameraStack = climateCarousel.querySelector('.climate-tests__camera-stack');
+  const cameras = [...climateCarousel.querySelectorAll('[data-climate-camera]')];
+  const pages = [...climateCarousel.querySelectorAll('[data-climate-page]')];
+  const title = climateCarousel.querySelector('[data-climate-camera-title]');
+  const highTemperature = climateCarousel.querySelector('[data-climate-high-temp]');
+  const lowTemperature = climateCarousel.querySelector('[data-climate-low-temp]');
+  const humidityRow = climateCarousel.querySelector('[data-climate-humidity]');
+  const cameraSpecs = [
+    { title: 'Климатическая камера R-T-1000', highTemperature: 'до 210 °C', lowTemperature: 'до −80 °C', humidity: true },
+    { title: 'Климатическая камера THCB-125', highTemperature: 'до 150 °C', lowTemperature: 'до −70 °C', humidity: false }
+  ];
+  let activeCamera = -1;
+  let climateFrame = 0;
+  let manualSelectionScrollY = null;
+  let climateVisualOffset = 0;
+  const clampClimate = value => Math.max(0, Math.min(1, value));
+
+  const showClimateState = index => {
+    if (index === activeCamera) return;
+    const preserveVisualPosition = climateVisuals && activeCamera >= 0;
+    const visualBottom = preserveVisualPosition ? climateVisuals.getBoundingClientRect().bottom : null;
+    activeCamera = index;
+    cameras.forEach((image, imageIndex) => {
+      image.classList.toggle('is-active', imageIndex === index);
+      image.classList.toggle('is-before', imageIndex < index);
+      image.classList.toggle('is-after', imageIndex > index);
+    });
+    pages.forEach((page, pageIndex) => {
+      const active = pageIndex === index;
+      page.classList.toggle('is-active', active);
+      page.setAttribute('aria-pressed', String(active));
+    });
+    const spec = cameraSpecs[index];
+    if (title) title.textContent = spec.title;
+    if (highTemperature) highTemperature.textContent = spec.highTemperature;
+    if (lowTemperature) lowTemperature.textContent = spec.lowTemperature;
+    if (humidityRow) {
+      humidityRow.classList.toggle('is-unavailable', !spec.humidity);
+      humidityRow.setAttribute('aria-hidden', String(!spec.humidity));
+    }
+    if (preserveVisualPosition && visualBottom !== null) {
+      // Keep the camera's bottom edge fixed while specs change the content height.
+      const layoutBottom = climateVisuals.getBoundingClientRect().bottom - climateVisualOffset;
+      climateVisualOffset = visualBottom - layoutBottom;
+      climateVisuals.style.setProperty('--climate-visual-y', `${climateVisualOffset}px`);
+    }
+  };
+
+  const updateClimateState = () => {
+    climateFrame = 0;
+    // Responsive layouts use their paginator/swipes, not an empty scroll runway.
+    if (matchMedia('(max-width: 68.75rem)').matches) {
+      if (activeCamera < 0) showClimateState(0);
+      return;
+    }
+    if (manualSelectionScrollY !== null) {
+      const unlockDistance = Math.max(24, window.innerHeight * .12);
+      if (Math.abs(window.scrollY - manualSelectionScrollY) < unlockDistance) return;
+      manualSelectionScrollY = null;
+    }
+    const trackBounds = climateTrack?.getBoundingClientRect();
+    const pinDistance = climateTrack && climateStage ?
+      climateTrack.offsetHeight - climateStage.offsetHeight : 0;
+    let progress;
+    if (pinDistance > 1 && trackBounds) {
+      progress = clampClimate(-trackBounds.top / pinDistance);
+    } else if (climateVisuals && climateBody && matchMedia('(max-width: 43.75rem)').matches) {
+      const stickyTop = window.innerHeight * 0.2;
+      const bodyTop = climateBody.getBoundingClientRect().top + window.scrollY;
+      const holdStart = bodyTop + climateVisuals.offsetTop - stickyTop;
+      const holdDistance = climateBody.offsetHeight - climateVisuals.offsetTop - climateVisuals.offsetHeight;
+      progress = clampClimate((window.scrollY - holdStart) / Math.max(1, holdDistance));
+    } else {
+      const bounds = climateCarousel.getBoundingClientRect();
+      progress = clampClimate((window.innerHeight - bounds.top) /
+        (window.innerHeight + bounds.height));
+    }
+    showClimateState(progress >= 0.5 ? 1 : 0);
+  };
+  const scheduleClimateUpdate = () => {
+    if (!climateFrame) climateFrame = requestAnimationFrame(updateClimateState);
+  };
+
+  const selectClimateManually = index => {
+    manualSelectionScrollY = window.scrollY;
+    showClimateState(index);
+  };
+  pages.forEach((page, index) => page.addEventListener('click', () => selectClimateManually(index)));
+  let swipeStart = null;
+  cameraStack?.addEventListener('touchstart', event => {
+    if (event.changedTouches.length !== 1) return;
+    const touch = event.changedTouches[0];
+    swipeStart = { x: touch.clientX, y: touch.clientY };
+  }, { passive: true });
+  cameraStack?.addEventListener('touchend', event => {
+    if (!swipeStart || event.changedTouches.length !== 1) return;
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - swipeStart.x;
+    const deltaY = touch.clientY - swipeStart.y;
+    swipeStart = null;
+    if (Math.abs(deltaX) < 36 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+    const current = Math.max(0, activeCamera);
+    const next = Math.max(0, Math.min(cameras.length - 1, current + (deltaX < 0 ? 1 : -1)));
+    if (next !== current) selectClimateManually(next);
+  }, { passive: true });
+  cameraStack?.addEventListener('touchcancel', () => { swipeStart = null; }, { passive: true });
+  addEventListener('scroll', scheduleClimateUpdate, { passive: true });
+  addEventListener('resize', () => {
+    climateVisualOffset = 0;
+    climateVisuals?.style.removeProperty('--climate-visual-y');
+    scheduleClimateUpdate();
+  }, { passive: true });
+  if ('ResizeObserver' in window) new ResizeObserver(scheduleClimateUpdate).observe(climateCarousel);
+  scheduleClimateUpdate();
+}
