@@ -179,6 +179,18 @@
     if (event.pointerType !== 'mouse') return;
     waveAt(event.clientX, event.clientY, Boolean(controlAt(event.target)));
   });
+  document.addEventListener('site:consultation-modal-open', () => {
+    const modal = document.querySelector('.consultation-modal[open]');
+    if (!modal) return;
+    modal.append(overlay);
+    overlay.setAttribute('popover', 'manual');
+    try { overlay.showPopover(); } catch { overlay.removeAttribute('popover'); }
+  });
+  document.addEventListener('site:consultation-modal-close', () => {
+    if (overlay.matches(':popover-open')) overlay.hidePopover();
+    overlay.removeAttribute('popover');
+    document.body.append(overlay);
+  });
   enabled.addEventListener('change', () => {
     if (!enabled.matches) {
       hide();
