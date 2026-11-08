@@ -31,14 +31,22 @@
   };
   const resize = () => {
     const ratio = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(window.innerWidth * ratio);
-    canvas.height = Math.round(window.innerHeight * ratio);
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    // CSS width excludes a classic scrollbar/gutter; innerWidth does not.
+    // Match the actual canvas box so its pixels share the dot's CSS coordinates.
+    const bounds = canvas.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+    const width = Math.round(bounds.width * ratio);
+    const height = Math.round(bounds.height * ratio);
+    canvas.width = width;
+    canvas.height = height;
+    context.setTransform(width / bounds.width, 0, 0, height / bounds.height, 0, 0);
     points.length = 0;
     drawnBounds = null;
   };
   resize();
   window.addEventListener('resize', resize);
+  // Scroll locking and top-layer dialogs can change the box without a window resize.
+  new ResizeObserver(resize).observe(canvas);
 
   const hover = (event) => {
     const control = event.target instanceof Element ? event.target.closest(clickable) : null;
