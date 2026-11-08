@@ -275,6 +275,7 @@
 .work-card-bg img{transition:none}
 .work-card-mode{cursor:default}
 .work-card-mode:hover,.work-card-mode:focus-visible{color:#f4f4f4}
+.work-card:focus-visible{outline:0.125rem solid var(--orange);outline-offset:0.25rem}
 
 /* Services at the 64rem and 24.4375rem Figma layouts. */
 @media(max-width:74.9375rem){
