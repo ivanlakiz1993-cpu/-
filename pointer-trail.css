@@ -27,7 +27,7 @@
   will-change: transform, opacity;
 }
 
-.pointer-trail__dot { background: #fff; }
+.pointer-trail__dot { width: 20px; height: 20px; border: 1px solid #8f8f8f; background: #fff; }
 .pointer-trail__trace { background: #fff; opacity: 0; }
 
 .pointer-trail__wave {

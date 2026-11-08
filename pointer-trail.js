@@ -57,7 +57,7 @@
     y = nextY;
     active = true;
     overlay.classList.add('is-visible');
-    dot.style.transform = `translate(${x - 3}px, ${y - 3}px)`;
+    dot.style.transform = `translate(${x - 10}px, ${y - 10}px)`;
     if (!frame && points.length) frame = requestAnimationFrame(draw);
   };
 
