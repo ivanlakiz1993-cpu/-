@@ -1,0 +1,50 @@
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html.has-pointer-trail,
+  html.has-pointer-trail * { cursor: none !important; }
+}
+
+.pointer-trail {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.pointer-trail.is-visible { visibility: visible; }
+
+.pointer-trail__dot,
+.pointer-trail__trace,
+.pointer-trail__wave {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.pointer-trail__dot { background: #fff; }
+.pointer-trail__trace { background: #fff; opacity: 0; }
+
+.pointer-trail__wave {
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(255, 255, 255, .8);
+  background: transparent;
+  animation: pointer-trail-wave .5s ease-out forwards;
+}
+
+.pointer-trail__wave--second { animation-delay: .08s; }
+
+@keyframes pointer-trail-wave {
+  from { transform: translate(-50%, -50%) scale(.35); opacity: .8; }
+  to { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) {
+  .pointer-trail { display: none; }
+}
