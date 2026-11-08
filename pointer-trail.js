@@ -35,12 +35,19 @@
   let innerTargetY = 0;
   let hoveredControl = null;
   const points = [];
+  let drawnBounds = null;
+  const clearTrail = () => {
+    if (!drawnBounds) return;
+    context.clearRect(drawnBounds.x, drawnBounds.y, drawnBounds.width, drawnBounds.height);
+    drawnBounds = null;
+  };
   const resize = () => {
     const ratio = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(window.innerWidth * ratio);
     canvas.height = Math.round(window.innerHeight * ratio);
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     points.length = 0;
+    drawnBounds = null;
   };
   resize();
   window.addEventListener('resize', resize);
@@ -80,32 +87,49 @@
       innerY = innerY / radius * 5;
     }
     inner.style.transform = `translate(calc(-50% + ${innerX}px), calc(-50% + ${innerY}px))`;
-    context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    clearTrail();
     while (points.length && now - points[0].time > 220) points.shift();
     if (points.length > 1) {
       const tail = points[0];
       const head = points[points.length - 1];
       const fade = Math.max(0, 1 - (now - lastMove) / 220);
-      const stroke = (width, color) => {
+      const distances = [0];
+      for (let i = 1; i < points.length; i++) {
+        distances[i] = distances[i - 1] + Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+      }
+      const length = distances[distances.length - 1];
+      const fillRibbon = (width, color) => {
         const gradient = context.createLinearGradient(tail.x, tail.y, head.x, head.y);
         gradient.addColorStop(0, `rgba(${color}, 0)`);
         gradient.addColorStop(1, `rgba(${color}, ${fade * .42})`);
+        const edges = points.map((point, i) => {
+          const before = points[Math.max(0, i - 1)];
+          const after = points[Math.min(points.length - 1, i + 1)];
+          const dx = after.x - before.x;
+          const dy = after.y - before.y;
+          const magnitude = Math.hypot(dx, dy) || 1;
+          const halfWidth = width * .5 * Math.pow(distances[i] / length, .8);
+          const offsetX = -dy / magnitude * halfWidth;
+          const offsetY = dx / magnitude * halfWidth;
+          return { leftX: point.x + offsetX, leftY: point.y + offsetY, rightX: point.x - offsetX, rightY: point.y - offsetY };
+        });
         context.beginPath();
-        context.moveTo(tail.x, tail.y);
-        for (let i = 1; i < points.length - 1; i++) {
-          const midpointX = (points[i].x + points[i + 1].x) / 2;
-          const midpointY = (points[i].y + points[i + 1].y) / 2;
-          context.quadraticCurveTo(points[i].x, points[i].y, midpointX, midpointY);
-        }
-        context.lineTo(head.x, head.y);
-        context.lineWidth = width;
-        context.lineCap = 'round';
-        context.lineJoin = 'round';
-        context.strokeStyle = gradient;
-        context.stroke();
+        context.moveTo(edges[0].leftX, edges[0].leftY);
+        for (let i = 1; i < edges.length; i++) context.lineTo(edges[i].leftX, edges[i].leftY);
+        for (let i = edges.length - 1; i >= 0; i--) context.lineTo(edges[i].rightX, edges[i].rightY);
+        context.closePath();
+        context.fillStyle = gradient;
+        context.fill();
       };
-      stroke(20, '143, 143, 143');
-      stroke(18, '255, 255, 255');
+      if (length > 0) {
+        fillRibbon(20, '143, 143, 143');
+        fillRibbon(18, '255, 255, 255');
+        const xs = points.map(point => point.x);
+        const ys = points.map(point => point.y);
+        const left = Math.min(...xs) - 12;
+        const top = Math.min(...ys) - 12;
+        drawnBounds = { x: left, y: top, width: Math.max(...xs) - left + 12, height: Math.max(...ys) - top + 12 };
+      }
     }
     if (points.length || Math.abs(innerX) + Math.abs(innerY) + Math.abs(innerVelocityX) + Math.abs(innerVelocityY) + Math.abs(innerTargetX) + Math.abs(innerTargetY) > .03) {
       frame = requestAnimationFrame(draw);
@@ -144,7 +168,15 @@
         for (let i = points.length - 1; i > 0; i--) {
           trailLength += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
           if (trailLength > 70) {
-            points.splice(0, i + 1);
+            const older = points[i];
+            const newer = points[i + 1];
+            const segment = Math.hypot(newer.x - older.x, newer.y - older.y);
+            const fraction = (70 - trailLength + segment) / segment;
+            points.splice(0, i + 1, {
+              x: newer.x + (older.x - newer.x) * fraction,
+              y: newer.y + (older.y - newer.y) * fraction,
+              time: older.time
+            });
             break;
           }
         }
@@ -173,6 +205,7 @@
   const hide = () => {
     active = false;
     points.length = 0;
+    clearTrail();
     lastDirectionX = 0;
     lastDirectionY = 0;
     hoveredControl = null;
