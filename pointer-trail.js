@@ -89,18 +89,55 @@
     inner.style.transform = `translate(calc(-50% + ${innerX}px), calc(-50% + ${innerY}px))`;
     clearTrail();
     while (points.length && now - points[0].time > 220) points.shift();
-    if (points.length > 1) {
-      const tail = points[0];
-      const head = points[points.length - 1];
+    let visiblePoints = points;
+    const directionLength = Math.hypot(lastDirectionX, lastDirectionY);
+    if (directionLength > 0 && points.length > 1) {
+      let firstBehind = points.length - 1;
+      for (let i = points.length - 2; i >= 0; i--) {
+        const behindDistance = (x - points[i].x) * lastDirectionX + (y - points[i].y) * lastDirectionY;
+        if (behindDistance < 0) break;
+        firstBehind = i;
+      }
+      visiblePoints = points.slice(firstBehind);
+    }
+    if (visiblePoints.length > 1) {
+      const fullDistances = [0];
+      for (let i = 1; i < visiblePoints.length; i++) {
+        fullDistances[i] = fullDistances[i - 1] + Math.hypot(visiblePoints[i].x - visiblePoints[i - 1].x, visiblePoints[i].y - visiblePoints[i - 1].y);
+      }
+      const fullLength = fullDistances[fullDistances.length - 1];
+      const drawLength = fullLength - 10;
+      const trailPoints = [visiblePoints[0]];
+      if (drawLength > 0) {
+        for (let i = 1; i < visiblePoints.length; i++) {
+          if (fullDistances[i] < drawLength) {
+            trailPoints.push(visiblePoints[i]);
+            continue;
+          }
+          const from = visiblePoints[i - 1];
+          const to = visiblePoints[i];
+          const segmentLength = fullDistances[i] - fullDistances[i - 1];
+          const fraction = (drawLength - fullDistances[i - 1]) / segmentLength;
+          trailPoints.push({
+            x: from.x + (to.x - from.x) * fraction,
+            y: from.y + (to.y - from.y) * fraction,
+            time: to.time
+          });
+          break;
+        }
+      }
+      if (trailPoints.length > 1) {
+      const tail = trailPoints[0];
+      const head = trailPoints[trailPoints.length - 1];
       const fade = Math.max(0, 1 - (now - lastMove) / 220);
       const distances = [0];
-      for (let i = 1; i < points.length; i++) {
-        distances[i] = distances[i - 1] + Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+      for (let i = 1; i < trailPoints.length; i++) {
+        distances[i] = distances[i - 1] + Math.hypot(trailPoints[i].x - trailPoints[i - 1].x, trailPoints[i].y - trailPoints[i - 1].y);
       }
       const length = distances[distances.length - 1];
       if (length > 0) {
-        const xs = points.map(point => point.x);
-        const ys = points.map(point => point.y);
+        const xs = trailPoints.map(point => point.x);
+        const ys = trailPoints.map(point => point.y);
         const left = Math.min(...xs) - 12;
         const top = Math.min(...ys) - 12;
         drawnBounds = { x: left, y: top, width: Math.max(...xs) - left + 12, height: Math.max(...ys) - top + 12 };
@@ -109,9 +146,9 @@
         context.lineJoin = 'round';
         for (const [width, color] of [[20, '#8f8f8f'], [18, '#fff']]) {
           context.strokeStyle = color;
-          for (let i = 1; i < points.length; i++) {
-            const from = points[i - 1];
-            const to = points[i];
+          for (let i = 1; i < trailPoints.length; i++) {
+            const from = trailPoints[i - 1];
+            const to = trailPoints[i];
             const segmentLength = distances[i] - distances[i - 1];
             const steps = Math.max(1, Math.ceil(segmentLength / 2));
             for (let stepIndex = 0; stepIndex < steps; stepIndex++) {
@@ -133,6 +170,7 @@
         context.fillStyle = mask;
         context.fillRect(drawnBounds.x, drawnBounds.y, drawnBounds.width, drawnBounds.height);
         context.restore();
+      }
       }
     }
     if (points.length || Math.abs(innerX) + Math.abs(innerY) + Math.abs(innerVelocityX) + Math.abs(innerVelocityY) + Math.abs(innerTargetX) + Math.abs(innerTargetY) > .03) {
