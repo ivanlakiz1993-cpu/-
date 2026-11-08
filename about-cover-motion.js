@@ -33,8 +33,9 @@
 
   const motion = gsap.matchMedia();
   motion.add("(min-width: 64.001rem) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)", () => {
-    gsap.set(documentsCard, { left: "-100%", autoAlpha: 1 });
-    gsap.set(licensesCard, { right: "-100%", autoAlpha: 1 });
+    // Start just outside the full-width image frame, keeping the same gutter while it shrinks.
+    gsap.set(documentsCard, { left: "-23.9583%", autoAlpha: 1 });
+    gsap.set(licensesCard, { right: "-23.9583%", autoAlpha: 1 });
 
     const timeline = gsap.timeline({
       scrollTrigger: {
