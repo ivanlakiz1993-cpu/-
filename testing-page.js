@@ -224,7 +224,6 @@ if (!pageMotionPreference.matches && 'IntersectionObserver' in window) {
   revealGroup('.topbar .brand-mark, .topbar .brand > span, .menu-toggle > span, .menu-toggle .menu-icon > i', 75);
   revealGroup('.nav .menu-nav-links a, .nav .menu-social__link', 55);
   revealGroup('.climate-tests__visuals', 120);
-  revealGroup('.climate-tests__pagination button', 100);
   revealGroup('.mechanical-tests__shaker img', 100);
 
   const revealObserver = new IntersectionObserver(entries => {
