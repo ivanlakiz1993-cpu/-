@@ -25,6 +25,8 @@
   let frame = 0;
   let lastFrame = 0;
   let lastMove = 0;
+  let lastDirectionX = 0;
+  let lastDirectionY = 0;
   let innerX = 0;
   let innerY = 0;
   let innerVelocityX = 0;
@@ -126,8 +128,16 @@
       const deltaX = nextX - x;
       const deltaY = nextY - y;
       const distance = Math.hypot(deltaX, deltaY);
-      if (distance > 50) points.length = 0;
-      else if (distance >= 1) {
+      const stale = now - lastMove > 80;
+      if (distance >= 1) {
+        const directionX = deltaX / distance;
+        const directionY = deltaY / distance;
+        const reversed = lastDirectionX * directionX + lastDirectionY * directionY < 0;
+        if (distance > 50 || reversed || stale) points.length = 0;
+        lastDirectionX = directionX;
+        lastDirectionY = directionY;
+      }
+      if (distance >= 1 && distance <= 50 && !stale) {
         if (!points.length) points.push({ x, y, time: now });
         points.push({ x: nextX, y: nextY, time: now });
         let trailLength = 0;
@@ -163,6 +173,8 @@
   const hide = () => {
     active = false;
     points.length = 0;
+    lastDirectionX = 0;
+    lastDirectionY = 0;
     hoveredControl = null;
     dot.classList.remove('is-interactive');
     overlay.classList.remove('is-visible');

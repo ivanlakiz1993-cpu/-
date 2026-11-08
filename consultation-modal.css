@@ -4,7 +4,7 @@
   max-width: none;
   max-height: calc(100dvh - 24px);
   padding: 100px 30px 30px;
-  border: 0;
+  border: 1px solid #6e6e6e;
   border-radius: 10px;
   background: rgba(0, 0, 0, .6);
   color: #fff;
