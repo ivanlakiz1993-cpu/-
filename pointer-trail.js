@@ -72,6 +72,8 @@
 
   const draw = (now) => {
     frame = 0;
+    dot.style.transform = `translate(${x - 10}px, ${y - 10}px)`;
+    if (active) overlay.classList.add('is-visible');
     const step = Math.min((now - (lastFrame || now)) / 16.67, 2);
     lastFrame = now;
     const damping = Math.pow(.72, step);
@@ -88,89 +90,74 @@
     }
     inner.style.transform = `translate(calc(-50% + ${innerX}px), calc(-50% + ${innerY}px))`;
     clearTrail();
-    while (points.length && now - points[0].time > 220) points.shift();
-    let visiblePoints = points;
-    const directionLength = Math.hypot(lastDirectionX, lastDirectionY);
-    if (directionLength > 0 && points.length > 1) {
-      let firstBehind = points.length - 1;
-      for (let i = points.length - 2; i >= 0; i--) {
-        const behindDistance = (x - points[i].x) * lastDirectionX + (y - points[i].y) * lastDirectionY;
-        if (behindDistance < 0) break;
-        firstBehind = i;
+    const lifetime = 220;
+    const cutoff = now - lifetime;
+    while (points.length > 1 && points[1].time <= cutoff) points.shift();
+    if (points.length && points[0].time <= cutoff) {
+      if (points.length === 1) points.length = 0;
+      else {
+        const from = points[0];
+        const to = points[1];
+        const fraction = (cutoff - from.time) / (to.time - from.time);
+        points[0] = { x: from.x + (to.x - from.x) * fraction,
+          y: from.y + (to.y - from.y) * fraction, time: cutoff };
       }
-      visiblePoints = points.slice(firstBehind);
     }
-    if (visiblePoints.length > 1) {
-      const fullDistances = [0];
-      for (let i = 1; i < visiblePoints.length; i++) {
-        fullDistances[i] = fullDistances[i - 1] + Math.hypot(visiblePoints[i].x - visiblePoints[i - 1].x, visiblePoints[i].y - visiblePoints[i - 1].y);
-      }
-      const fullLength = fullDistances[fullDistances.length - 1];
-      const drawLength = fullLength - 10;
-      const trailPoints = [visiblePoints[0]];
-      if (drawLength > 0) {
-        for (let i = 1; i < visiblePoints.length; i++) {
-          if (fullDistances[i] < drawLength) {
-            trailPoints.push(visiblePoints[i]);
-            continue;
-          }
-          const from = visiblePoints[i - 1];
-          const to = visiblePoints[i];
-          const segmentLength = fullDistances[i] - fullDistances[i - 1];
-          const fraction = (drawLength - fullDistances[i - 1]) / segmentLength;
-          trailPoints.push({
-            x: from.x + (to.x - from.x) * fraction,
-            y: from.y + (to.y - from.y) * fraction,
-            time: to.time
-          });
-          break;
-        }
-      }
-      if (trailPoints.length > 1) {
-      const tail = trailPoints[0];
-      const head = trailPoints[trailPoints.length - 1];
-      const fade = Math.max(0, 1 - (now - lastMove) / 220);
+    if (points.length > 1) {
       const distances = [0];
-      for (let i = 1; i < trailPoints.length; i++) {
-        distances[i] = distances[i - 1] + Math.hypot(trailPoints[i].x - trailPoints[i - 1].x, trailPoints[i].y - trailPoints[i - 1].y);
+      for (let i = 1; i < points.length; i++) {
+        distances[i] = distances[i - 1] + Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
       }
       const length = distances[distances.length - 1];
-      if (length > 0) {
-        const xs = trailPoints.map(point => point.x);
-        const ys = trailPoints.map(point => point.y);
-        const left = Math.min(...xs) - 12;
-        const top = Math.min(...ys) - 12;
-        drawnBounds = { x: left, y: top, width: Math.max(...xs) - left + 12, height: Math.max(...ys) - top + 12 };
-        context.save();
-        context.lineCap = 'round';
-        context.lineJoin = 'round';
-        for (const [width, color] of [[20, '#8f8f8f'], [18, '#fff']]) {
-          context.strokeStyle = color;
-          for (let i = 1; i < trailPoints.length; i++) {
-            const from = trailPoints[i - 1];
-            const to = trailPoints[i];
-            const segmentLength = distances[i] - distances[i - 1];
-            const steps = Math.max(1, Math.ceil(segmentLength / 2));
-            for (let stepIndex = 0; stepIndex < steps; stepIndex++) {
-              const start = stepIndex / steps;
-              const end = (stepIndex + 1) / steps;
-              const progress = (distances[i - 1] + segmentLength * end) / length;
-              context.lineWidth = Math.max(.2, width * Math.pow(progress, .8));
-              context.beginPath();
-              context.moveTo(from.x + (to.x - from.x) * start, from.y + (to.y - from.y) * start);
-              context.lineTo(from.x + (to.x - from.x) * end, from.y + (to.y - from.y) * end);
-              context.stroke();
-            }
+      const fade = Math.max(0, 1 - (now - lastMove) / lifetime);
+      if (length > 0 && fade > 0) {
+        // Resample the actual path, including fast moves, without disconnected strokes.
+        const samples = [];
+        for (let i = 1; i < points.length; i++) {
+          const from = points[i - 1];
+          const to = points[i];
+          const segment = distances[i] - distances[i - 1];
+          const steps = Math.max(1, Math.ceil(segment));
+          for (let j = 1; j <= steps; j++) {
+            const t = j / steps;
+            const progress = (distances[i - 1] + segment * t) / length;
+            samples.push({ x: from.x + (to.x - from.x) * t,
+              y: from.y + (to.y - from.y) * t, progress,
+              radius: 9 * Math.pow(progress, .8) });
           }
         }
-        const mask = context.createLinearGradient(tail.x, tail.y, head.x, head.y);
-        mask.addColorStop(0, 'rgba(0, 0, 0, 0)');
-        mask.addColorStop(1, `rgba(0, 0, 0, ${fade * .42})`);
-        context.globalCompositeOperation = 'destination-in';
-        context.fillStyle = mask;
-        context.fillRect(drawnBounds.x, drawnBounds.y, drawnBounds.width, drawnBounds.height);
+        const left = Math.min(...points.map(point => point.x)) - 11;
+        const top = Math.min(...points.map(point => point.y)) - 11;
+        drawnBounds = { x: left, y: top,
+          width: Math.max(...points.map(point => point.x)) - left + 11,
+          height: Math.max(...points.map(point => point.y)) - top + 11 };
+        context.save();
+        // Clip the entire ribbon to the rear half-plane, including its width on turns.
+        const reach = Math.hypot(canvas.width, canvas.height) + 100;
+        const sideX = -lastDirectionY * reach;
+        const sideY = lastDirectionX * reach;
+        context.beginPath();
+        context.moveTo(x + sideX, y + sideY);
+        context.lineTo(x - sideX, y - sideY);
+        context.lineTo(x - sideX - lastDirectionX * reach, y - sideY - lastDirectionY * reach);
+        context.lineTo(x + sideX - lastDirectionX * reach, y + sideY - lastDirectionY * reach);
+        context.closePath();
+        context.clip();
+        // Each layer is one union of disks: overlaps cannot create bright seams.
+        // Nested layers fade along arc length, even on loops and sharp bends.
+        const layers = 32;
+        context.fillStyle = '#fff';
+        context.globalAlpha = 1 - Math.pow(1 - .42 * fade, 1 / layers);
+        for (let layer = 0; layer < layers; layer++) {
+          context.beginPath();
+          for (const sample of samples) {
+            if (sample.progress <= layer / layers) continue;
+            context.moveTo(sample.x + sample.radius, sample.y);
+            context.arc(sample.x, sample.y, sample.radius, 0, Math.PI * 2);
+          }
+          context.fill();
+        }
         context.restore();
-      }
       }
     }
     if (points.length || Math.abs(innerX) + Math.abs(innerY) + Math.abs(innerVelocityX) + Math.abs(innerVelocityY) + Math.abs(innerTargetX) + Math.abs(innerTargetY) > .03) {
@@ -181,6 +168,7 @@
   };
 
   const move = (event) => {
+    if (!enabled.matches) return;
     if (event.pointerType !== 'mouse') {
       hide();
       document.documentElement.classList.remove('has-pointer-trail');
@@ -194,33 +182,43 @@
       const deltaX = nextX - x;
       const deltaY = nextY - y;
       const distance = Math.hypot(deltaX, deltaY);
-      const stale = now - lastMove > 80;
-      if (distance >= 1) {
-        const directionX = deltaX / distance;
-        const directionY = deltaY / distance;
-        const reversed = lastDirectionX * directionX + lastDirectionY * directionY < 0;
-        if (distance > 50 || reversed || stale) points.length = 0;
-        lastDirectionX = directionX;
-        lastDirectionY = directionY;
-      }
-      if (distance >= 1 && distance <= 50 && !stale) {
-        if (!points.length) points.push({ x, y, time: now });
+      if (distance > 0) {
+        lastDirectionX = deltaX / distance;
+        lastDirectionY = deltaY / distance;
+        if (now - lastMove > 220) points.length = 0;
+        if (!points.length) points.push({ x, y, time: Math.max(lastMove, now - 220) });
         points.push({ x: nextX, y: nextY, time: now });
+        // Keep exactly the newest 70px, interpolating inside the boundary segment.
         let trailLength = 0;
         for (let i = points.length - 1; i > 0; i--) {
-          trailLength += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
-          if (trailLength > 70) {
-            const older = points[i];
-            const newer = points[i + 1];
-            const segment = Math.hypot(newer.x - older.x, newer.y - older.y);
-            const fraction = (70 - trailLength + segment) / segment;
-            points.splice(0, i + 1, {
+          const newer = points[i];
+          const older = points[i - 1];
+          const segment = Math.hypot(newer.x - older.x, newer.y - older.y);
+          if (trailLength + segment > 70) {
+            const fraction = (70 - trailLength) / segment;
+            points.splice(0, i, {
               x: newer.x + (older.x - newer.x) * fraction,
               y: newer.y + (older.y - newer.y) * fraction,
-              time: older.time
+              time: newer.time + (older.time - newer.time) * fraction
             });
             break;
           }
+          trailLength += segment;
+        }
+        // Retain only the connected rear section; a loop must not leave detached islands.
+        for (let i = points.length - 2; i >= 0; i--) {
+          const older = points[i];
+          const behind = (nextX - older.x) * lastDirectionX + (nextY - older.y) * lastDirectionY;
+          if (behind >= 0) continue;
+          const newer = points[i + 1];
+          const newerBehind = (nextX - newer.x) * lastDirectionX + (nextY - newer.y) * lastDirectionY;
+          const fraction = newerBehind / (newerBehind - behind);
+          points.splice(0, i + 1, {
+            x: newer.x + (older.x - newer.x) * fraction,
+            y: newer.y + (older.y - newer.y) * fraction,
+            time: newer.time + (older.time - newer.time) * fraction
+          });
+          break;
         }
       }
       if (distance > 0) {
@@ -233,8 +231,6 @@
     y = nextY;
     active = true;
     lastMove = now;
-    overlay.classList.add('is-visible');
-    dot.style.transform = `translate(${x - 10}px, ${y - 10}px)`;
     const control = controlAt(event.target);
     if (control !== hoveredControl) {
       hoveredControl = control;
