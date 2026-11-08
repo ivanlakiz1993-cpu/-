@@ -98,37 +98,41 @@
         distances[i] = distances[i - 1] + Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
       }
       const length = distances[distances.length - 1];
-      const fillRibbon = (width, color) => {
-        const gradient = context.createLinearGradient(tail.x, tail.y, head.x, head.y);
-        gradient.addColorStop(0, `rgba(${color}, 0)`);
-        gradient.addColorStop(1, `rgba(${color}, ${fade * .42})`);
-        const edges = points.map((point, i) => {
-          const before = points[Math.max(0, i - 1)];
-          const after = points[Math.min(points.length - 1, i + 1)];
-          const dx = after.x - before.x;
-          const dy = after.y - before.y;
-          const magnitude = Math.hypot(dx, dy) || 1;
-          const halfWidth = width * .5 * Math.pow(distances[i] / length, .8);
-          const offsetX = -dy / magnitude * halfWidth;
-          const offsetY = dx / magnitude * halfWidth;
-          return { leftX: point.x + offsetX, leftY: point.y + offsetY, rightX: point.x - offsetX, rightY: point.y - offsetY };
-        });
-        context.beginPath();
-        context.moveTo(edges[0].leftX, edges[0].leftY);
-        for (let i = 1; i < edges.length; i++) context.lineTo(edges[i].leftX, edges[i].leftY);
-        for (let i = edges.length - 1; i >= 0; i--) context.lineTo(edges[i].rightX, edges[i].rightY);
-        context.closePath();
-        context.fillStyle = gradient;
-        context.fill();
-      };
       if (length > 0) {
-        fillRibbon(20, '143, 143, 143');
-        fillRibbon(18, '255, 255, 255');
         const xs = points.map(point => point.x);
         const ys = points.map(point => point.y);
         const left = Math.min(...xs) - 12;
         const top = Math.min(...ys) - 12;
         drawnBounds = { x: left, y: top, width: Math.max(...xs) - left + 12, height: Math.max(...ys) - top + 12 };
+        context.save();
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        for (const [width, color] of [[20, '#8f8f8f'], [18, '#fff']]) {
+          context.strokeStyle = color;
+          for (let i = 1; i < points.length; i++) {
+            const from = points[i - 1];
+            const to = points[i];
+            const segmentLength = distances[i] - distances[i - 1];
+            const steps = Math.max(1, Math.ceil(segmentLength / 2));
+            for (let stepIndex = 0; stepIndex < steps; stepIndex++) {
+              const start = stepIndex / steps;
+              const end = (stepIndex + 1) / steps;
+              const progress = (distances[i - 1] + segmentLength * end) / length;
+              context.lineWidth = Math.max(.2, width * Math.pow(progress, .8));
+              context.beginPath();
+              context.moveTo(from.x + (to.x - from.x) * start, from.y + (to.y - from.y) * start);
+              context.lineTo(from.x + (to.x - from.x) * end, from.y + (to.y - from.y) * end);
+              context.stroke();
+            }
+          }
+        }
+        const mask = context.createLinearGradient(tail.x, tail.y, head.x, head.y);
+        mask.addColorStop(0, 'rgba(0, 0, 0, 0)');
+        mask.addColorStop(1, `rgba(0, 0, 0, ${fade * .42})`);
+        context.globalCompositeOperation = 'destination-in';
+        context.fillStyle = mask;
+        context.fillRect(drawnBounds.x, drawnBounds.y, drawnBounds.width, drawnBounds.height);
+        context.restore();
       }
     }
     if (points.length || Math.abs(innerX) + Math.abs(innerY) + Math.abs(innerVelocityX) + Math.abs(innerVelocityY) + Math.abs(innerTargetX) + Math.abs(innerTargetY) > .03) {
