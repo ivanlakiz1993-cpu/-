@@ -33,7 +33,7 @@
   font-size: 24px;
   font-weight: 400;
   line-height: 1;
-  letter-spacing: -.05em;
+  letter-spacing: -1.2px;
 }
 .consultation-modal__form { display: flex; flex-direction: column; }
 .consultation-modal__fields { display: grid; gap: 8px; }
@@ -73,7 +73,7 @@
 .consultation-modal__formats { display: flex; align-items: center; gap: 5px; color: #979797; font-size: 16px; line-height: 1; white-space: nowrap; }
 .consultation-modal__formats img { flex: none; width: 24px; height: 24px; }
 .consultation-modal__file { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.consultation-modal__consent { display: flex; align-items: center; gap: 10px; margin: 30px 0; color: #fff; font-size: 16px; line-height: 1; cursor: pointer; }
+.consultation-modal__consent { display: flex; align-items: center; gap: 10px; margin: 30px 0; color: #fff; font-family: var(--sans, Arial, sans-serif); font-size: 16px; line-height: 1; cursor: pointer; }
 .consultation-modal__consent input { flex: none; width: 22px; height: 22px; margin: 0; appearance: none; border: 1px solid #6e6e6e; border-radius: 5px; background: #fff; cursor: pointer; }
 .consultation-modal__consent input:checked { background: #ff730d; border-color: #ff730d; }
 .consultation-modal__consent input:checked::after { content: '✓'; display: block; color: #fff; text-align: center; line-height: 20px; }
@@ -102,10 +102,10 @@
 @media (max-width: 600px) {
   .consultation-modal { width: min(390px, 100vw); max-height: 100dvh; padding: 100px 30px 30px; }
   .consultation-modal__close { top: 20px; right: 20px; }
-  .consultation-modal__description { max-width: none; font-size: 18px; }
+  .consultation-modal__description { max-width: none; font-size: 18px; letter-spacing: -.9px; }
   .consultation-modal__attachment { align-items: flex-start; flex-direction: column; justify-content: center; gap: 10px; height: 82px; padding: 15px; }
   .consultation-modal__formats { white-space: normal; }
   .consultation-modal__consent { align-items: flex-start; font-size: 14px; }
   .consultation-modal__consent span { flex: 1; }
-  .consultation-modal__submit { height: 52px; font-size: 16px; }
+  .consultation-modal__submit { height: 52px; font-size: 16px; letter-spacing: -.8px; }
 }

@@ -276,7 +276,7 @@
   width: min(62.9375rem, calc(100% - 2.25rem));
   margin: 0;
   font-family: var(--sans);
-  font-size: clamp(1.125rem, 1.875vw, 2.25rem);
+  font-size: 1.5rem;
   font-weight: 400;
   line-height: 1.1;
   text-align: center;
@@ -648,6 +648,7 @@
     color: #979797;
     font-size: 1.125rem;
     line-height: 1.2;
+    letter-spacing: 0;
   }
 
   .development-process__step--active {
@@ -729,5 +730,63 @@
     font-size: 1rem;
     line-height: 1.2;
     letter-spacing: .01em;
+  }
+}
+
+/* Typography for the development page's tablet and mobile Figma frames. */
+.development-page .topbar .brand > span {
+  font-family: var(--display);
+  font-size: 1.125rem;
+  line-height: .9;
+  letter-spacing: 0;
+}
+
+@media (min-width: 37.5625rem) and (max-width: 74.9375rem) {
+  .development-intro__heading {
+    font-size: 2.375rem;
+    line-height: .9;
+    letter-spacing: .01em;
+  }
+
+  .development-intro__description {
+    font-size: 1.125rem;
+    line-height: 1.2;
+  }
+}
+
+@media (max-width: 37.5rem) {
+  .development-intro__heading {
+    font-size: 2.375rem;
+    line-height: .9;
+    letter-spacing: .01em;
+  }
+
+  .development-intro__description {
+    font-size: 1.125rem;
+    line-height: 1.2;
+  }
+
+  .development-software__description {
+    font-size: .875rem;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  .development-page .topbar .brand > span {
+    font-size: .524375rem;
+    line-height: .9;
+  }
+
+  .development-page .menu-toggle {
+    font-size: 1.125rem;
+    line-height: 1.2;
+  }
+}
+
+@media (min-width: 37.5625rem) {
+  .development-page .menu-toggle {
+    font-family: var(--display);
+    font-size: 2.25rem;
+    line-height: 1.2;
   }
 }

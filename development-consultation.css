@@ -1,3 +1,9 @@
+@media (min-width: 109rem) {
+  .development-consultation .production-consultation__consent-text {
+    line-height: 1;
+  }
+}
+
 @media (max-width: 47.9375rem) {
   .development-consultation .production-consultation__form {
     gap: 1.875rem;
