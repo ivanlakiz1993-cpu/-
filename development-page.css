@@ -1,4 +1,9 @@
 .development-page {
+  --development-services-gutter: clamp(.75rem, calc(8.24vw - 2.275rem), 5.208333vw);
+  --development-services-top-space: clamp(1.875rem, calc(3.1546vw + 1.106rem), 3.125rem);
+  --development-header-height: clamp(3rem, calc(7.41325vw + 1.193rem), 5.9375rem);
+  --development-services-overlap: clamp(1.375rem, calc(5.3612vw + .06875rem), 3.5rem);
+  --development-services-next-gap: clamp(3.75rem, calc(6.3091vw + 2.2125rem), 6.25rem);
   overflow-x: hidden;
   background: #000;
   color: #f4f4f4;
@@ -49,7 +54,7 @@
 .development-services__canvas {
   position: relative;
   width: min(100%, 120rem);
-  height: 38rem;
+  height: clamp(38rem, calc(65.166667rem - 22.638889vw), 48.1875rem);
   margin-inline: auto;
 }
 
@@ -190,11 +195,11 @@
 @media (min-width: 37.5625rem) and (max-width: 74.9375rem) {
   .development-services__canvas {
     display: flex;
-    height: 48rem;
+    height: clamp(29.1875rem, calc(47.9495vw + 17.5rem), 48.1875rem);
     flex-direction: column;
     align-items: flex-start;
     gap: 1.875rem;
-    padding: 3.125rem 3rem 0;
+    padding: var(--development-services-top-space) var(--development-services-gutter) 0;
   }
 
   .development-services__heading {
@@ -210,26 +215,44 @@
 
   .development-services__list {
     position: static;
-    width: 28.8125rem;
+    width: min(28.8125rem, 100%);
   }
 
   .development-services__list p {
-    font-size: 1.5rem;
+    font-size: clamp(1.125rem, calc(.9464vw + .8944rem), 1.5rem);
   }
 }
 
 @media (max-width: 37.5rem) {
   .development-services__canvas {
-    height: 24rem;
-    padding: 1.875rem .75rem 0;
+    display: flex;
+    height: clamp(29.1875rem, calc(47.9495vw + 17.5rem), 48.1875rem);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.875rem;
+    padding: var(--development-services-top-space) var(--development-services-gutter);
+  }
+
+  .development-services__heading {
+    position: static;
+    width: auto;
+    font-size: 2.375rem;
+    line-height: .9;
+    white-space: nowrap;
+  }
+
+  .development-services__image-stack {
+    display: none;
   }
 
   .development-services__list {
+    position: static;
     width: 100%;
+    gap: .9375rem;
   }
 
   .development-services__list p {
-    font-size: 1.125rem;
+    font-size: clamp(1.125rem, calc(.9464vw + .8944rem), 1.5rem);
     line-height: 1.2;
     letter-spacing: 0;
   }
@@ -243,7 +266,7 @@
   overflow: hidden;
   width: min(100%, 120rem);
   height: clamp(20rem, 32vw, 39rem);
-  margin: 6.25rem auto;
+  margin: 9.375rem auto 6.25rem;
   background: #000;
   color: #fff;
 }
@@ -788,5 +811,91 @@
     font-family: var(--display);
     font-size: 2.25rem;
     line-height: 1.2;
+  }
+}
+
+/* Keep the responsive introduction, services and following section on the Figma grid. */
+@media (max-width: 74.9375rem) {
+  .development-page site-header {
+    display: block;
+    height: var(--development-header-height);
+  }
+
+  .development-page .topbar {
+    height: var(--development-header-height);
+  }
+
+  .development-intro {
+    height: auto;
+  }
+
+  .development-intro__inner {
+    display: flex;
+    height: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.875rem;
+    padding: var(--development-services-top-space) var(--development-services-gutter);
+  }
+
+  .development-intro__heading,
+  .development-intro__description {
+    position: static;
+    bottom: auto;
+    width: 100%;
+    margin: 0;
+  }
+
+  .development-intro__heading {
+    font-size: 2.375rem;
+    line-height: .9;
+    letter-spacing: .01em;
+  }
+
+  .development-intro__description {
+    font-size: 1.125rem;
+    line-height: 1.2;
+  }
+
+  .development-services {
+    margin-block-start: calc(0px - var(--development-services-overlap));
+  }
+
+  .development-software {
+    margin-block-start: var(--development-services-next-gap);
+  }
+}
+
+@media (min-width: 56.3125rem) and (max-width: 74.9375rem) {
+  .development-intro {
+    height: 21.375rem;
+  }
+
+  .development-intro__inner {
+    height: 100%;
+  }
+
+  .development-intro__heading {
+    width: min(37.3125rem, 100%);
+  }
+
+  .development-intro__description {
+    width: min(30rem, 100%);
+  }
+}
+
+@media (max-width: 37.5rem) {
+  .development-intro {
+    height: 23.75rem;
+  }
+
+  .development-intro__inner {
+    height: 100%;
+  }
+}
+
+@media (min-width: 75rem) and (max-width: 119.9375rem) {
+  .development-software {
+    margin-block-start: clamp(6.25rem, calc(6.94444vw + 1.041667rem), 9.375rem);
   }
 }
