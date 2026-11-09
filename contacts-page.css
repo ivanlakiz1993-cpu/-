@@ -136,7 +136,7 @@
 
 .contacts-page.contacts-page--motion-ready .contacts-page__reveal-item{opacity:0;transition:opacity .45s ease var(--contacts-reveal-delay,0ms)}
 .contacts-page.contacts-page--motion-ready .contacts-page__reveal-item.is-revealed{opacity:1}
-.contacts-page.contacts-page--motion-ready .contacts-page__reveal-divider::before{clip-path:inset(0 100% 0 0);transition:clip-path .65s cubic-bezier(.22,1,.36,1) var(--contacts-reveal-delay,0ms)}
+.contacts-page.contacts-page--motion-ready .contacts-page__reveal-divider::before{clip-path:inset(0 100% 0 0);transition:clip-path .65s cubic-bezier(.22,1,.36,1) calc(var(--contacts-reveal-delay,0ms) + .45s)}
 .contacts-page.contacts-page--motion-ready .contacts-page__reveal-divider.is-revealed::before{clip-path:inset(0)}
 
 @media(prefers-reduced-motion:reduce){
