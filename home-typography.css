@@ -1,11 +1,3 @@
-@font-face {
-  font-family: "Inter";
-  src: url("assets/fonts/inter-variable.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-}
-
 html.home-page {
   --sans: "Inter", Arial, sans-serif;
 }
@@ -24,7 +16,7 @@ html.home-page :is(.hero-services, .hero-description, .benefits-stage h2,
 }
 
 html.home-page .brand > span {
-  font-family: "Science Gothic", "Bicubik", var(--sans);
+  font-family: "Bicubik", var(--sans);
   font-size: 18px;
   line-height: 0.9;
   font-weight: 400;
@@ -177,7 +169,7 @@ html.home-page .footer-bottom {
 }
 
 html.home-page .footer-contacts address {
-  font-family: "Yandex Sans Text", var(--sans);
+  font-family: var(--sans);
   line-height: 1.25;
 }
 
@@ -212,7 +204,7 @@ html.home-page .footer-social h3 {
 
   html.home-page .benefit-copy[data-state="1"] h3,
   html.home-page .benefit-copy[data-state="2"] h3 {
-    font-family: "Yandex Sans Text", var(--sans);
+    font-family: var(--sans);
     font-size: 20px;
     line-height: 1;
     letter-spacing: -0.05em;
@@ -277,7 +269,7 @@ html.home-page .footer-social h3 {
 
   html.home-page .benefit-copy[data-state="1"] h3,
   html.home-page .benefit-copy[data-state="2"] h3 {
-    font-family: "Yandex Sans Text", var(--sans);
+    font-family: var(--sans);
     font-size: 20px;
     line-height: 1;
     letter-spacing: -0.05em;
@@ -297,7 +289,7 @@ html.home-page .footer-social h3 {
   }
 
   html.home-page :is(.benefit-more, .all-news.home-action-link) {
-    font-family: "Yandex Sans Text", var(--sans);
+    font-family: var(--sans);
     font-size: 16px;
     line-height: 1.25;
     letter-spacing: -0.05em;
@@ -340,7 +332,7 @@ html.home-page .footer-social h3 {
   }
 
   html.home-page .footer-social h3 {
-    font-family: "Yandex Sans Text", var(--sans);
+    font-family: var(--sans);
     font-size: 16px;
     line-height: 1.1;
   }

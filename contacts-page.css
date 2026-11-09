@@ -1,8 +1,8 @@
-@font-face{font-family:'Inter';src:url('assets/fonts/inter-variable.ttf') format('truetype');font-style:normal;font-weight:100 900;font-display:swap}
 .contacts-page{--sans:'Inter',Arial,sans-serif;background:var(--bg)}
-.contacts-page .topbar .brand>span,.contacts-page .footer-brand>span{font-family:'Science Gothic','Bicubik',var(--sans)}
+.contacts-page .topbar .brand>span,.contacts-page .footer-brand>span{font-family:'Bicubik',var(--sans)}
 .contacts-page .topbar .brand>span{font-size:1.125rem;line-height:.9;letter-spacing:0}
 .contacts-page .menu-toggle{font-family:var(--display);font-size:2.25rem;font-weight:400;line-height:1.2}
+.contacts-page .footer-social h3{font-family:var(--sans);font-size:1rem;font-weight:400;line-height:1.2;letter-spacing:.01em}
 .contacts-page__main{padding-top:6.9375rem;padding-bottom:9.375rem}
 .contacts-page__breadcrumbs{display:flex;align-items:center;gap:.1875rem;color:#979797;font:400 .75rem/1.3 var(--sans);white-space:nowrap}
 .contacts-page__breadcrumb-link{color:inherit;transition:color .18s ease}
@@ -44,7 +44,7 @@
 .contacts-page__download-card:focus-visible{outline:.125rem solid #fff;outline-offset:.1875rem}
 .contacts-page__download-label{font-size:clamp(1.125rem,1.25vw,1.5rem);font-weight:300;line-height:1.1}
 .contacts-page__download-icon{display:block;width:2.5625rem;height:2.5625rem;flex:none}
-.contacts-page .footer-main address{font-family:'Yandex Sans Text',var(--sans);font-size:.875rem;line-height:1.25}
+.contacts-page .footer-main address{font-family:var(--sans);font-size:.875rem;line-height:1.25}
 .contacts-page .footer-social h3{letter-spacing:.01em}
 
 @media(min-width:75rem){
@@ -69,15 +69,21 @@
   .contacts-page__social-label{font-size:1rem;letter-spacing:.01em}
   .contacts-page__social-links{gap:.625rem}
   .contacts-page__social-link{width:3.125rem;height:3.125rem}
-  .contacts-page .menu-toggle{font-size:clamp(1.75rem,3.515625vw,2.25rem)}
+  .contacts-page .menu-toggle{font-size:2.25rem}
   .contacts-page__company-card-content{gap:1.875rem;margin-top:1.875rem}
   .contacts-page__company-details-list{gap:.9375rem}
   .contacts-page__download-card{min-height:0;padding:.9375rem;border-radius:1.25rem}
-  .contacts-page__download-label{font-family:'Yandex Sans Text',var(--sans);font-size:1rem;font-weight:400;line-height:1.25;letter-spacing:-.05em;text-transform:uppercase}
+  .contacts-page__download-label{font-family:var(--sans);font-size:1rem;font-weight:400;line-height:1.25;letter-spacing:-.05em;text-transform:uppercase}
   .contacts-page__download-icon{width:1.9375rem;height:1.9375rem}
 }
 
 @media(max-width:37.5rem){
+  .contacts-page .topbar .brand>span,.contacts-page .footer-brand>span{font-family:'Bicubik',var(--sans)}
+  .contacts-page .topbar .brand>span{font-size:8.39px;line-height:.9}
+  .contacts-page .footer-brand>span{font-size:7.95px;line-height:.9}
+  .contacts-page .menu-toggle{font-size:1.125rem}
+  .contacts-page .footer-main address{font-family:var(--sans);font-size:.875rem;line-height:1.2}
+  .contacts-page .footer-social h3{font-family:var(--sans);font-size:1rem;font-weight:400;line-height:1.1;letter-spacing:0}
   .contacts-page__main{padding-top:3.5rem;padding-bottom:3.75rem}
   .contacts-page__breadcrumbs.wrap,.contacts-page__content.wrap{width:calc(100% - 1.5rem)}
   .contacts-page__breadcrumbs{font-size:.75rem}
@@ -104,12 +110,12 @@
   .contacts-page .topbar .brand-mark{width:1.544rem;height:1.894rem}
   .contacts-page .topbar .brand>span{width:auto;font-size:.525rem;line-height:.9;letter-spacing:0}
   .contacts-page .menu-toggle{top:1.5rem;right:.75rem;gap:.14rem;transform:translateY(-50%);font-size:1.125rem;line-height:1;letter-spacing:0}
-  .contacts-page .menu-icon{width:1.143rem;height:.75rem}
+  .contacts-page .menu-icon{width:1.143rem;height:.6875rem}
   .contacts-page .menu-icon i{height:.0625rem}
   .contacts-page .menu-icon i:nth-child(1){top:.0625rem}
-  .contacts-page .menu-icon i:nth-child(2){top:.34375rem}
-  .contacts-page .menu-icon i:nth-child(3){top:.625rem}
-  .contacts-page .menu-drawer.is-open .menu-icon i:nth-child(1),.contacts-page .menu-drawer.is-open .menu-icon i:nth-child(3){top:.34375rem}
+  .contacts-page .menu-icon i:nth-child(2){top:.3125rem}
+  .contacts-page .menu-icon i:nth-child(3){top:.5625rem}
+  .contacts-page .menu-drawer.is-open .menu-icon i:nth-child(1),.contacts-page .menu-drawer.is-open .menu-icon i:nth-child(3){top:.3125rem}
 }
 
 @media(prefers-reduced-motion:reduce){

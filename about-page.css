@@ -242,11 +242,12 @@
   .about-history__current{display:none}
 }
 
-@font-face{font-family:"Inter";src:url("assets/fonts/inter-variable.ttf") format("truetype");font-style:normal;font-weight:100 900;font-display:swap}
-
 html.about-page{--sans:"Inter",Arial,sans-serif}
-.about-page .footer-brand{font-family:"Science Gothic",var(--display)}
-.about-page .footer-contacts address{font-family:"Yandex Sans Text",var(--sans)}
+.about-page .topbar .brand>span,.about-page .footer-brand>span{font-family:"Bicubik",var(--sans)}
+.about-page .topbar .brand>span{font-size:18px;line-height:.9;letter-spacing:0}
+.about-page .menu-toggle{font-size:2.25rem}
+.about-page .footer-contacts address{font-family:var(--sans);font-size:.875rem;line-height:1.25}
+.about-page .footer-social h3{font-family:var(--sans);font-size:1rem;font-weight:400;line-height:1.2;letter-spacing:.01em}
 
 @media (min-width:48.001rem) and (max-width:64rem), (min-width:48.001rem) and (hover:none) and (pointer:coarse){
   .about-page .about-team__title{font-size:2.375rem;line-height:.9;letter-spacing:.01em}
@@ -254,5 +255,10 @@ html.about-page{--sans:"Inter",Arial,sans-serif}
 }
 
 @media(max-width:40rem){
-  .about-page .footer-contacts address{font-size:1rem;line-height:1.1}
+  .about-page .topbar .brand>span,.about-page .footer-brand>span{font-family:"Bicubik",var(--sans)}
+  .about-page .topbar .brand>span{font-size:8.39px;line-height:.9}
+  .about-page .footer-brand>span{font-size:7.95px;line-height:.9}
+  .about-page .menu-toggle{font-size:1.125rem}
+  .about-page .footer-contacts address{font-family:var(--sans);font-size:.875rem;line-height:1.2}
+  .about-page .footer-social h3{font-family:var(--sans);font-size:1rem;font-weight:400;line-height:1.1;letter-spacing:0}
 }
