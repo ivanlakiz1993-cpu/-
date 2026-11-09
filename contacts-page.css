@@ -15,14 +15,15 @@
 .contacts-page__section-title{margin:0;color:var(--text);font-size:clamp(1.625rem,1.875vw,2.25rem);font-weight:400;line-height:1.1}
 .contacts-page__contact-list{display:flex;flex-direction:column;gap:1.875rem;margin-top:3rem}
 .contacts-page__contact-row,.contacts-page__company-detail-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;min-width:0;color:var(--text);font-size:clamp(1rem,.9375vw,1.125rem);font-weight:400;line-height:1.2}
+@media(min-width:75rem) and (max-width:87.4375rem){.contacts-page__columns{grid-template-columns:minmax(0,1fr)}}
 .contacts-page__field-label,.contacts-page__field-value{margin:0}
 .contacts-page__field-label{flex:0 1 auto;color:#979797;white-space:nowrap}
 .contacts-page__field-label--small{font-size:clamp(.875rem,.7292vw,.875rem)}
 .contacts-page__field-value{flex:0 1 auto;max-width:52%;color:#fff;text-align:right;overflow-wrap:anywhere}
 .contacts-page__field-value a{color:inherit;transition:color .18s ease}
 .contacts-page__field-value a:hover,.contacts-page__field-value a:focus-visible{color:var(--orange)}
-.contacts-page__contact-row--legal .contacts-page__field-value{max-width:34.7%}
-.contacts-page__contact-row--postal .contacts-page__field-value{max-width:41.1%}
+.contacts-page__contact-row--legal .contacts-page__field-value{width:19.25rem;max-width:100%}
+.contacts-page__contact-row--postal .contacts-page__field-value{width:20.8125rem;max-width:100%}
 .contacts-page__divider{position:relative;width:100%;height:0;flex:none}
 .contacts-page__divider::before{position:absolute;top:-.03125rem;left:0;width:100%;height:.0625rem;background:var(--line);content:""}
 .contacts-page__social-row{display:flex;align-items:center;justify-content:space-between;gap:1.875rem}
@@ -37,12 +38,12 @@
 .contacts-page__company-card-content{display:flex;flex-direction:column;gap:1.875rem;margin-top:3.125rem}
 .contacts-page__company-details-list{display:flex;flex-direction:column;gap:1.875rem}
 .contacts-page__company-detail-row{min-height:1.375rem}
-.contacts-page__company-detail-row--organization .contacts-page__field-value{max-width:51.1%}
-.contacts-page__company-detail-row--legal-address .contacts-page__field-value{max-width:39.8%}
+.contacts-page__company-detail-row--organization .contacts-page__field-value{width:25.875rem;max-width:100%}
+.contacts-page__company-detail-row--legal-address .contacts-page__field-value{width:20.125rem;max-width:100%}
 .contacts-page__company-detail-row .contacts-page__field-label--small{font-size:.875rem}
 .contacts-page__download-card{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;width:100%;min-height:6.4375rem;padding:1.875rem 1.25rem;border:.0625rem solid var(--orange);border-radius:1.25rem;background:transparent;color:#fff;text-align:left;cursor:pointer}
 .contacts-page__download-card:focus-visible{outline:.125rem solid #fff;outline-offset:.1875rem}
-.contacts-page__download-label{font-size:clamp(1.125rem,1.25vw,1.5rem);font-weight:300;line-height:1.1}
+.contacts-page__download-label{font-size:clamp(1.125rem,1.25vw,1.5rem);font-weight:300;line-height:1.1;white-space:nowrap}
 .contacts-page__download-icon{display:block;width:2.5625rem;height:2.5625rem;flex:none}
 .contacts-page .footer-main address{font-family:var(--sans);font-size:.875rem;line-height:1.25}
 .contacts-page .footer-social h3{letter-spacing:.01em}
@@ -72,9 +73,21 @@
   .contacts-page .menu-toggle{font-size:2.25rem}
   .contacts-page__company-card-content{gap:1.875rem;margin-top:1.875rem}
   .contacts-page__company-details-list{gap:.9375rem}
+  .contacts-page__contact-row--legal .contacts-page__field-value{width:17.5625rem}
   .contacts-page__download-card{min-height:0;padding:.9375rem;border-radius:1.25rem}
   .contacts-page__download-label{font-family:var(--sans);font-size:1rem;font-weight:400;line-height:1.25;letter-spacing:-.05em;text-transform:uppercase}
   .contacts-page__download-icon{width:1.9375rem;height:1.9375rem}
+}
+
+@media(min-width:37.5625rem) and (max-width:47.9375rem){
+  .contacts-page__contact-row,.contacts-page__company-detail-row{flex-direction:column;align-items:flex-start;gap:.9375rem;font-size:.875rem;letter-spacing:0}
+  .contacts-page__field-label{white-space:nowrap}
+  .contacts-page__contact-row--postal{padding-block:.9375rem}
+  .contacts-page__contact-row:not(.contacts-page__contact-row--legal):not(.contacts-page__contact-row--postal){min-height:4.25rem;padding-block:.9375rem}
+  .contacts-page__contact-row--legal .contacts-page__field-value{width:17.5625rem;max-width:100%}
+  .contacts-page__contact-row--postal .contacts-page__field-value{width:16.9375rem;max-width:100%}
+  .contacts-page__company-detail-row .contacts-page__field-value{width:100%;max-width:100%;text-align:left}
+  .contacts-page__social-row{align-items:flex-start;flex-direction:column;gap:.9375rem;padding-block:.9375rem}
 }
 
 @media(max-width:37.5rem){
@@ -95,8 +108,11 @@
   .contacts-page__contact-row,.contacts-page__company-detail-row{flex-direction:column;align-items:flex-start;gap:.9375rem;font-size:.875rem;letter-spacing:0}
   .contacts-page__contact-row--postal{padding-block:.9375rem}
   .contacts-page__contact-row:not(.contacts-page__contact-row--legal):not(.contacts-page__contact-row--postal){min-height:4.25rem;padding-block:.9375rem}
-  .contacts-page__field-label{white-space:normal}
+  .contacts-page__field-label{white-space:nowrap}
   .contacts-page__field-value,.contacts-page__contact-row--legal .contacts-page__field-value,.contacts-page__contact-row--postal .contacts-page__field-value,.contacts-page__company-detail-row--organization .contacts-page__field-value,.contacts-page__company-detail-row--legal-address .contacts-page__field-value{max-width:100%;text-align:left}
+  .contacts-page__contact-row--legal .contacts-page__field-value{width:17.5625rem}
+  .contacts-page__contact-row--postal .contacts-page__field-value{width:16.9375rem}
+  .contacts-page__company-detail-row .contacts-page__field-value{width:100%}
   .contacts-page__social-row{align-items:flex-start;flex-direction:column;gap:.9375rem;padding-block:.9375rem}
   .contacts-page__social-label{font-size:.875rem;letter-spacing:0}
   .contacts-page__social-links{gap:.625rem}
@@ -118,6 +134,13 @@
   .contacts-page .menu-drawer.is-open .menu-icon i:nth-child(1),.contacts-page .menu-drawer.is-open .menu-icon i:nth-child(3){top:.3125rem}
 }
 
+.contacts-page.contacts-page--motion-ready .contacts-page__reveal-item{opacity:0;transition:opacity .45s ease var(--contacts-reveal-delay,0ms)}
+.contacts-page.contacts-page--motion-ready .contacts-page__reveal-item.is-revealed{opacity:1}
+.contacts-page.contacts-page--motion-ready .contacts-page__reveal-divider::before{clip-path:inset(0 100% 0 0);transition:clip-path .65s cubic-bezier(.22,1,.36,1) var(--contacts-reveal-delay,0ms)}
+.contacts-page.contacts-page--motion-ready .contacts-page__reveal-divider.is-revealed::before{clip-path:inset(0)}
+
 @media(prefers-reduced-motion:reduce){
+  .contacts-page.contacts-page--motion-ready .contacts-page__reveal-item{opacity:1;transition:none}
+  .contacts-page.contacts-page--motion-ready .contacts-page__reveal-divider::before{clip-path:none;transition:none}
   .contacts-page__breadcrumb-link,.contacts-page__field-value a{transition:none}
 }
