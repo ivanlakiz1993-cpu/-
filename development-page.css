@@ -187,10 +187,10 @@
   height: auto;
 }
 
-@media (max-width: 89.9375rem) {
+@media (min-width: 37.5625rem) and (max-width: 74.9375rem) {
   .development-services__canvas {
     display: flex;
-    height: 48.1875rem;
+    height: 48rem;
     flex-direction: column;
     align-items: flex-start;
     gap: 1.875rem;
@@ -218,9 +218,9 @@
   }
 }
 
-@media (max-width: 47.9375rem) {
+@media (max-width: 37.5rem) {
   .development-services__canvas {
-    height: 29.1875rem;
+    height: 24rem;
     padding: 1.875rem .75rem 0;
   }
 
