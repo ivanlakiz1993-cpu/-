@@ -505,3 +505,18 @@ html.home-page{font-size:clamp(.9375rem,1vw,1rem)}
 }
 
 html.menu-open{overflow:hidden;scrollbar-gutter:stable}
+
+/* Testing service card: responsive Figma layouts 1920 × 720, 1024 × 384, 390 × 384. */
+.card-testing{padding:3.125rem 6.25rem;border-radius:0}
+.card-testing .work-card-bg img.testing-image--climate{inset:0;width:100%;height:100%;object-fit:cover;transform:none}
+.card-testing .work-card-shade{background:rgba(0,0,0,.2)}
+@media (min-width:37.5625rem) and (max-width:74.9375rem){
+  .card-testing{height:37.5vw;padding:3.125rem}
+}
+@media (max-width:37.5rem){
+  .card-testing{height:min(98.461538vw,calc(100svh - 2.5rem));padding:15px}
+  .card-testing h2{font-size:38px;line-height:.9;letter-spacing:.38px}
+  .card-testing .work-card-mode{font-size:18px;line-height:1;letter-spacing:-.9px}
+  .card-testing .work-card-bg img.testing-image--climate{inset:0 auto 0 -102.47%;width:232.09%;height:100%;object-fit:cover;transform:none}
+  .card-testing .work-card-shade{background:rgba(0,0,0,.4)}
+}
