@@ -40,7 +40,7 @@
 .hero{border-bottom:0}.topbar{border-bottom:0;background:rgba(0,0,0,.6);backdrop-filter:blur(0.165625rem)}
 .hero-bg{inset:0;overflow:hidden;background:none;filter:none}.hero-bg img{position:absolute;left:0;top:-14.75%;width:107.08%;height:114.75%;max-width:none;object-fit:cover;object-position:right center}
 .hero-shade{display:none}
-.hero-title{left:7.6563%;right:7.6563%;top:10.875rem;z-index:4;margin:0;font-size:clamp(3.5rem,8.75vw,10.5rem);line-height:.9;letter-spacing:0.105rem;text-shadow:none}.hero-title span+span{margin-top:0.9375rem}
+.hero-title{left:5.2083%;right:7.6563%;top:10.875rem;z-index:4;margin:0;font-size:clamp(3.5rem,8.75vw,10.5rem);line-height:.9;letter-spacing:0.105rem;text-shadow:none}.hero-title span+span{margin-top:0.9375rem}
 .hero-services{left:5.2083%;top:52.9%;display:flex;flex-direction:column;gap:0.625rem;padding:1.875rem;border-radius:0.625rem;font-family:var(--sans);font-size:1.125rem;font-weight:400;line-height:1.2;letter-spacing:0;font-synthesis:none;white-space:nowrap;background:rgba(0,0,0,.4);backdrop-filter:blur(0.125rem)}.hero-services li{margin:0;font:inherit}
 .hero-description-anchor{position:absolute;left:69.21875%;right:5.2083%;bottom:3.375rem;z-index:3}
 .hero-description{position:relative;inset:auto;width:100%;height:auto;min-height:7.8125rem;margin:0;padding:1.875rem;overflow-wrap:break-word;border-left:0;color:#fff;font-family:var(--sans);font-size:1.125rem;font-weight:400;line-height:1.2;letter-spacing:0;font-synthesis:none;background:rgba(0,0,0,.4);backdrop-filter:blur(0.125rem)}
@@ -63,7 +63,7 @@
 /* Desktop homepage hero aligned to Figma frame 1958:7025 (1920 × 900). */
 @media (min-width:75rem){
   .home-page .hero-bg img{inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
-  .home-page .hero-services-anchor{left:7.6563%;top:calc(50% + 4.4375rem)}
+  .home-page .hero-services-anchor{left:5.2083%;top:58%}
   .home-page .hero-description-anchor{bottom:3.125rem}
 }
 
@@ -241,7 +241,7 @@ site-header{--menu-gutter:max(5.2083333333vw,calc((100vw - 107.5rem)/2));display
 /* Final size and placement checks against the Figma header and hero frames. */
 .topbar{background:rgba(0,0,0,.6);backdrop-filter:blur(0.165625rem)}
 @media(min-width:75rem){
-  .home-page .hero-services-anchor{top:53.2222%}
+  .home-page .hero-services-anchor{left:5.2083%;top:58%}
   .hero-description{overflow:clip;border-radius:0.625rem}
 }
 @media(min-width:56.3125rem) and (max-width:74.9375rem){

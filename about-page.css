@@ -241,3 +241,18 @@
   .about-history__route.is-animating{animation-duration:.01ms;filter:none}
   .about-history__current{display:none}
 }
+
+@font-face{font-family:"Inter";src:url("assets/fonts/inter-variable.ttf") format("truetype");font-style:normal;font-weight:100 900;font-display:swap}
+
+html.about-page{--sans:"Inter",Arial,sans-serif}
+.about-page .footer-brand{font-family:"Science Gothic",var(--display)}
+.about-page .footer-contacts address{font-family:"Yandex Sans Text",var(--sans)}
+
+@media (min-width:48.001rem) and (max-width:64rem), (min-width:48.001rem) and (hover:none) and (pointer:coarse){
+  .about-page .about-team__title{font-size:2.375rem;line-height:.9;letter-spacing:.01em}
+  .about-page .about-team__description{font-size:1rem;line-height:1.2;letter-spacing:.01em}
+}
+
+@media(max-width:40rem){
+  .about-page .footer-contacts address{font-size:1rem;line-height:1.1}
+}
