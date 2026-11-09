@@ -1,0 +1,283 @@
+{
+  "environment": {
+    "browser": "Edge headless",
+    "viewport": "1440x900",
+    "delivery": "local HTTP",
+    "note": "CPU throttle 6x is a diagnostic simulation, not a measurement of the user browser"
+  },
+  "normal": [
+    {
+      "selector": ".testing-sequence",
+      "frames": 60,
+      "p95": 16.800000000000182,
+      "max": 16.800000000000182,
+      "callbacks": [
+        [
+          "at onAnimationFrame (http://127.0.0.1:49652/device-demo/vendor/three.module.js:13616:23)",
+          {
+            "count": 60,
+            "total": 54.49999999883585,
+            "max": 1.4000000001396984
+          }
+        ],
+        [
+          "at draw (http://127.0.0.1:49652/pointer-trail.js?v=20261108-canvas-size-1:133:15)",
+          {
+            "count": 59,
+            "total": 5.599999999860302,
+            "max": 0.20000000018626451
+          }
+        ],
+        [
+          "at _rafBugFix (http://127.0.0.1:49652/device-demo/vendor/ScrollTrigger.min.js:10:33925)",
+          {
+            "count": 60,
+            "total": 2.200000001117587,
+            "max": 0.10000000009313226
+          }
+        ]
+      ],
+      "errors": []
+    },
+    {
+      "selector": ".climate-tests",
+      "frames": 60,
+      "p95": 16.799999999999272,
+      "max": 16.800000000000182,
+      "callbacks": [
+        [
+          "at onAnimationFrame (http://127.0.0.1:49652/device-demo/vendor/three.module.js:13616:23)",
+          {
+            "count": 60,
+            "total": 169.30000000144355,
+            "max": 5.300000000046566
+          }
+        ],
+        [
+          "at draw (http://127.0.0.1:49652/pointer-trail.js?v=20261108-canvas-size-1:133:15)",
+          {
+            "count": 59,
+            "total": 5.19999999855645,
+            "max": 0.20000000018626451
+          }
+        ],
+        [
+          "at _rafBugFix (http://127.0.0.1:49652/device-demo/vendor/ScrollTrigger.min.js:10:33925)",
+          {
+            "count": 60,
+            "total": 2.199999999254942,
+            "max": 0.10000000009313226
+          }
+        ]
+      ],
+      "errors": []
+    },
+    {
+      "selector": ".mechanical-tests",
+      "frames": 60,
+      "p95": 16.80000000000109,
+      "max": 16.80000000000109,
+      "callbacks": [
+        [
+          "at onAnimationFrame (http://127.0.0.1:49652/device-demo/vendor/three.module.js:13616:23)",
+          {
+            "count": 60,
+            "total": 61.60000000009313,
+            "max": 1.5
+          }
+        ],
+        [
+          "at draw (http://127.0.0.1:49652/pointer-trail.js?v=20261108-canvas-size-1:133:15)",
+          {
+            "count": 59,
+            "total": 4.599999998928979,
+            "max": 0.19999999995343387
+          }
+        ],
+        [
+          "at _rafBugFix (http://127.0.0.1:49652/device-demo/vendor/ScrollTrigger.min.js:10:33925)",
+          {
+            "count": 60,
+            "total": 2.800000000745058,
+            "max": 0.10000000009313226
+          }
+        ]
+      ],
+      "errors": []
+    },
+    {
+      "selector": ".development-services",
+      "frames": 60,
+      "p95": 16.800000000000182,
+      "max": 16.800000000000182,
+      "callbacks": [
+        [
+          "at draw (http://127.0.0.1:49652/pointer-trail.js?v=20261108-canvas-size-1:133:15)",
+          {
+            "count": 59,
+            "total": 6.699999999953434,
+            "max": 0.20000000018626451
+          }
+        ],
+        [
+          "at HTMLDocument.move (http://127.0.0.1:49652/pointer-trail.js?v=20261108-canvas-size-1:163:25)",
+          {
+            "count": 1,
+            "total": 0,
+            "max": 0
+          }
+        ]
+      ],
+      "errors": []
+    },
+    {
+      "selector": ".development-software",
+      "frames": 60,
+      "p95": 16.800000000000182,
+      "max": 16.800000000000182,
+      "callbacks": [
+        [
+          "at animate (http://127.0.0.1:49652/development-software-canvas.js?v=20261107-orange-squares-rollback-1:291:29)",
+          {
+            "count": 59,
+            "total": 91.1000000005588,
+            "max": 2.300000000046566
+          }
+        ],
+        [
+          "at draw (http://127.0.0.1:49652/pointer-trail.js?v=20261108-canvas-size-1:133:15)",
+          {
+            "count": 59,
+            "total": 4.199999998789281,
+            "max": 0.20000000018626451
+          }
+        ],
+        [
+          "at syncAnimation (http://127.0.0.1:49652/development-software-canvas.js?v=20261107-orange-squares-rollback-1:307:31)",
+          {
+            "count": 1,
+            "total": 1.6000000000931323,
+            "max": 1.6000000000931323
+          }
+        ]
+      ],
+      "errors": []
+    },
+    {
+      "selector": ".development-process",
+      "frames": 60,
+      "p95": 16.800000000000182,
+      "max": 16.800000000000182,
+      "callbacks": [
+        [
+          "at animate (http://127.0.0.1:49652/development-software-canvas.js?v=20261107-orange-squares-rollback-1:291:29)",
+          {
+            "count": 19,
+            "total": 29.600000000558794,
+            "max": 2.5
+          }
+        ],
+        [
+          "at draw (http://127.0.0.1:49652/pointer-trail.js?v=20261108-canvas-size-1:133:15)",
+          {
+            "count": 59,
+            "total": 6.2999999998137355,
+            "max": 0.30000000004656613
+          }
+        ],
+        [
+          "at HTMLDocument.move (http://127.0.0.1:49652/pointer-trail.js?v=20261108-canvas-size-1:163:25)",
+          {
+            "count": 1,
+            "total": 0,
+            "max": 0
+          }
+        ]
+      ],
+      "errors": []
+    }
+  ],
+  "throttled": [
+    {
+      "page": "/contacts.html",
+      "p95": 16.799999999999727,
+      "max": 16.800000000000182,
+      "callbacks": [
+        [
+          "at draw (http://127.0.0.1:49652/pointer-trail.js?v=20261108-canvas-size-1:133:15)",
+          {
+            "count": 59,
+            "total": 49.89999999827705,
+            "max": 1.6000000000931323
+          }
+        ],
+        [
+          "at HTMLDocument.move (http://127.0.0.1:49652/pointer-trail.js?v=20261108-canvas-size-1:163:25)",
+          {
+            "count": 1,
+            "total": 0.9000000001396984,
+            "max": 0.9000000001396984
+          }
+        ]
+      ]
+    },
+    {
+      "page": "/testing.html",
+      "p95": 66.69999999999982,
+      "max": 66.89999999999964,
+      "callbacks": [
+        [
+          "at onAnimationFrame (http://127.0.0.1:49652/device-demo/vendor/three.module.js:13616:23)",
+          {
+            "count": 61,
+            "total": 2254.900000000838,
+            "max": 58.10000000009313
+          }
+        ],
+        [
+          "at draw (http://127.0.0.1:49652/pointer-trail.js?v=20261108-canvas-size-1:133:15)",
+          {
+            "count": 59,
+            "total": 51.00000000023283,
+            "max": 2.1000000000931323
+          }
+        ]
+      ]
+    },
+    {
+      "page": "/development.html",
+      "p95": 33.40000000000009,
+      "max": 33.400000000000546,
+      "callbacks": [
+        [
+          "at animate (http://127.0.0.1:49652/development-software-canvas.js?v=20261107-orange-squares-rollback-1:291:29)",
+          {
+            "count": 59,
+            "total": 860.599999998929,
+            "max": 22.0999999998603
+          }
+        ],
+        [
+          "at draw (http://127.0.0.1:49652/pointer-trail.js?v=20261108-canvas-size-1:133:15)",
+          {
+            "count": 59,
+            "total": 45.49999999930151,
+            "max": 1.8000000000465661
+          }
+        ]
+      ]
+    }
+  ],
+  "effectsDisabled": [
+    {
+      "page": "/testing.html",
+      "p95": 16.800000000000182,
+      "max": 16.800000000000182
+    },
+    {
+      "page": "/development.html",
+      "p95": 16.800000000000182,
+      "max": 16.800000000000182
+    }
+  ]
+}

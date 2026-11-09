@@ -1,0 +1,340 @@
+@font-face {
+  font-family: "Inter";
+  src: url("assets/fonts/inter-variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+html.home-page {
+  --sans: "Inter", Arial, sans-serif;
+}
+
+html.home-page body {
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+html.home-page :is(.hero-services, .hero-description, .benefits-stage h2,
+  .benefit-copy, .benefit-more, .work-card, .project-cta,
+  .news-intro, .news-card, .contact, .footer) {
+  font-family: var(--sans);
+}
+
+html.home-page .brand > span {
+  font-family: "Science Gothic", "Bicubik", var(--sans);
+  font-size: 18px;
+  line-height: 0.9;
+  font-weight: 400;
+}
+
+html.home-page .footer-brand > span { font-size: 18px; }
+
+html.home-page .menu-toggle {
+  font-family: var(--display);
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+html.home-page .hero-title {
+  font-family: var(--display);
+  font-size: clamp(128px, 8.75vw, 168px);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+}
+
+html.home-page :is(.hero-services, .hero-description) {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+html.home-page .benefits-stage h2,
+html.home-page .project-cta__copy h2,
+html.home-page .news-intro h2,
+html.home-page .contact-heading h2 {
+  font-size: 64px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+html.home-page .benefit-copy h3 {
+  font-family: var(--sans);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+html.home-page .benefit-copy p {
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+html.home-page :is(.benefit-more, .all-news.home-action-link) {
+  font-family: var(--sans);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.05em;
+}
+
+html.home-page .work-card h2 {
+  font-family: var(--sans);
+  font-size: 64px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+html.home-page .work-card-mode {
+  font-family: var(--sans);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+html.home-page .project-cta__copy p,
+html.home-page .news-intro p {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+html.home-page .project-cta__button,
+html.home-page .submit {
+  font-family: var(--sans);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.05em;
+}
+
+html.home-page .news-card span {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+html.home-page .contact-heading > p {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+html.home-page .contact-form :is(.form-field, input:not([type="checkbox"]), textarea) {
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+html.home-page .consent {
+  font-family: "Geologica", var(--sans);
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+html.home-page .form-feedback {
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+html.home-page .footer-main :is(a, p, address),
+html.home-page .footer-bottom {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+html.home-page .footer-contacts address {
+  font-family: "Yandex Sans Text", var(--sans);
+  line-height: 1.25;
+}
+
+html.home-page .footer-social h3 {
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+@media (min-width: 37.5625rem) and (max-width: 74.9375rem) {
+  html.home-page .menu-toggle { font-size: 36px; }
+
+  html.home-page .hero-title {
+    font-size: clamp(40px, 7.8125vw, 80px);
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+
+  html.home-page :is(.benefits-stage h2, .project-cta__copy h2,
+    .news-intro h2, .contact-heading h2, .work-card h2) {
+    font-size: clamp(32px, 3.7109375vw, 38px);
+    line-height: 0.9;
+    letter-spacing: 0.01em;
+  }
+
+  html.home-page .benefit-copy h3 {
+    font-size: 18px;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  html.home-page .benefit-copy[data-state="1"] h3,
+  html.home-page .benefit-copy[data-state="2"] h3 {
+    font-family: "Yandex Sans Text", var(--sans);
+    font-size: 20px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  html.home-page .benefit-copy p { font-size: 16px; }
+
+  html.home-page :is(.benefit-more, .all-news.home-action-link) {
+    font-size: 18px;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+
+  html.home-page .work-card-mode {
+    font-size: 18px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  html.home-page .project-cta__copy p,
+  html.home-page .news-intro p { font-size: 16px; letter-spacing: 0.01em; }
+
+  html.home-page .news-card span { font-size: 18px; }
+  html.home-page .contact-heading > p { font-size: 16px; }
+  html.home-page .contact-form :is(.form-field, input:not([type="checkbox"]), textarea) { font-size: 16px; }
+  html.home-page .consent { font-size: 16px; }
+  html.home-page :is(.project-cta__button, .submit) { font-size: 24px; }
+  html.home-page .footer-main :is(a, p, address),
+  html.home-page .footer-bottom { font-size: 14px; }
+
+}
+
+@media (max-width: 37.5rem) {
+  html.home-page .menu-toggle { font-size: 18px; }
+  html.home-page .topbar .brand > span { font-size: 8.39px; }
+  html.home-page .footer-brand > span { font-size: 8px; }
+
+  html.home-page .hero-title {
+    font-size: clamp(32px, 10.25641vw, 40px);
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+
+  html.home-page :is(.hero-services, .hero-description) {
+    font-size: 14px;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  html.home-page :is(.benefits-stage h2, .project-cta__copy h2,
+    .news-intro h2, .contact-heading h2, .work-card h2) {
+    font-size: clamp(32px, 9.74359vw, 38px);
+    line-height: 0.9;
+    letter-spacing: 0.01em;
+  }
+
+  html.home-page .benefit-copy[data-state="0"] h3 {
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  html.home-page .benefit-copy[data-state="1"] h3,
+  html.home-page .benefit-copy[data-state="2"] h3 {
+    font-family: "Yandex Sans Text", var(--sans);
+    font-size: 20px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  html.home-page .benefit-copy[data-state="0"] p {
+    font-size: 14px;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  html.home-page .benefit-copy[data-state="1"] p,
+  html.home-page .benefit-copy[data-state="2"] p {
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+  }
+
+  html.home-page :is(.benefit-more, .all-news.home-action-link) {
+    font-family: "Yandex Sans Text", var(--sans);
+    font-size: 16px;
+    line-height: 1.25;
+    letter-spacing: -0.05em;
+  }
+
+  html.home-page .work-card-mode {
+    font-size: 18px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  html.home-page .project-cta__copy p {
+    font-size: 14px;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  html.home-page .news-intro p {
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+  }
+
+  html.home-page .news-card span {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  html.home-page .contact-heading > p { font-size: 16px; }
+  html.home-page .contact-form :is(.form-field, input:not([type="checkbox"]), textarea) { font-size: 16px; }
+  html.home-page .consent { font-size: 16px; }
+  html.home-page :is(.project-cta__button, .submit) { font-size: 24px; }
+
+  html.home-page .footer-main :is(a, p, address),
+  html.home-page .footer-bottom { font-size: 14px; }
+
+  html.home-page .footer-contacts address {
+    font-family: var(--sans);
+    line-height: 1.2;
+  }
+
+  html.home-page .footer-social h3 {
+    font-family: "Yandex Sans Text", var(--sans);
+    font-size: 16px;
+    line-height: 1.1;
+  }
+}
