@@ -23,10 +23,7 @@
         trigger: gallery,
         start: "top top",
         end: () => `+=${Math.round(Math.min(window.innerHeight * 0.55, container.clientHeight * 0.9))}`,
-        pin: true,
-        pinSpacing: true,
-        scrub: 0.25,
-        anticipatePin: 1,
+        scrub: true,
         invalidateOnRefresh: true
       }
     });
