@@ -191,6 +191,12 @@
   .about-history__year-button>img{display:none}
   .about-history__timeline,.about-history__timeline-marker{display:none}
   .about-history__visual-image{position:absolute;z-index:1;top:28.9888%;left:9.765625%;width:30.859375%;aspect-ratio:1;box-sizing:border-box;margin:0;transform:none;overflow:hidden;border:.0625rem solid var(--orange,#ff730d);border-radius:.375rem}
+  .about-history__visual-picture{position:absolute;inset:0;display:block}
+  .about-history__visual-picture img,.about-history__visual-image>img{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;object-fit:cover;opacity:0}
+  .about-history__visual-picture img[data-history-crop="wide-2021"],.about-history__visual-image>img[data-history-crop="wide-2021"]{top:0;left:-32.43%;width:233.39%;height:100%;object-fit:fill}
+  .about-history__visual-picture img[data-history-crop="zoom-2023"],.about-history__visual-image>img[data-history-crop="zoom-2023"]{top:-31.69%;left:-35.22%;width:152.37%;height:152.37%;object-fit:fill}
+  .about-history__visual-picture img[data-history-crop="zoom-2024"],.about-history__visual-image>img[data-history-crop="zoom-2024"]{top:-12.64%;left:-2.14%;width:145.44%;height:145.44%;object-fit:fill}
+  .about-history__visual-picture img.is-visible,.about-history__visual-image>img.is-visible{opacity:1}
 
   .about-history__event{position:absolute;top:43.3708%;left:49.9023%;display:flex;width:41.015625%;flex-direction:column;gap:clamp(1.25rem,2.92969vw,1.875rem);margin:0;transition:opacity .14s ease}
   .about-history__event-title{margin:0;font-size:clamp(1rem,2.34375vw,1.5rem);line-height:1;letter-spacing:-.05em}
