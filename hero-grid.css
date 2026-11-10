@@ -265,14 +265,16 @@ site-header{--menu-gutter:max(5.2083333333vw,calc((100vw - 107.5rem)/2));display
   .menu-icon i:nth-child(3){top:1.1rem}
 }
 
-/* Compact tablet and mobile menu strokes; keep the close mark on the same center. */
+/* Keep the tablet menu toggle at the Figma topbar size. */
 @media (min-width:37.5625rem) and (max-width:74.9375rem){
-  .menu-icon{height:.9375rem}
-  .menu-icon i:nth-child(1){top:.125rem}
-  .menu-icon i:nth-child(2){top:.4375rem}
-  .menu-icon i:nth-child(3){top:.75rem}
+  .menu-drawer .menu-toggle{font-size:2.25rem}
+  .menu-drawer .menu-icon{width:2.5625rem;height:1.5rem}
+  .menu-drawer .menu-icon i{height:.125rem}
+  .menu-drawer .menu-icon i:nth-child(1){top:.125rem}
+  .menu-drawer .menu-icon i:nth-child(2){top:.6875rem}
+  .menu-drawer .menu-icon i:nth-child(3){top:1.25rem}
   .menu-drawer.is-open .menu-icon i:nth-child(1),
-  .menu-drawer.is-open .menu-icon i:nth-child(3){top:.4375rem}
+  .menu-drawer.is-open .menu-icon i:nth-child(3){top:.6875rem}
 }
 
 @media(max-width:37.5rem){
