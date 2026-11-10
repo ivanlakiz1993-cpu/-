@@ -234,7 +234,7 @@
   }
 
   .development-services__canvas {
-    gap: 0;
+    gap: clamp(0rem, calc(4.5275rem - 7.075vw), 1.875rem);
   }
 
   .development-services__list p {
