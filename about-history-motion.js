@@ -155,42 +155,47 @@
     section.setAttribute('aria-busy', 'true');
     setSelectedYear(year);
     const nextImage = getHistoryImage(nextContent);
-    const imageReady = preloadImage(nextImage).then((loaded) => {
-      if (!loaded) return;
-      if (nextContent.imageCrop) visibleVisual.dataset.historyCrop = nextContent.imageCrop;
-      else visibleVisual.removeAttribute('data-history-crop');
-      if (responsiveSource) responsiveSource.srcset = nextImage;
-      visibleVisual.src = nextImage;
-      visibleVisual.alt = getHistoryAlt(nextContent);
-    });
-    const previousRoute = routes.get(activeYear);
-    const previousFlow = currentFlows.get(activeYear);
-    const nextFlow = currentFlows.get(year);
-    previousRoute?.classList.remove('is-active', 'is-animating');
-    previousFlow?.classList.remove('is-active');
-    nextRoute.classList.remove('is-active', 'is-animating');
-    nextFlow?.classList.remove('is-active');
+    try {
+      const imageReady = preloadImage(nextImage).then((loaded) => {
+        if (!loaded) return;
+        if (nextContent.imageCrop) visibleVisual.dataset.historyCrop = nextContent.imageCrop;
+        else visibleVisual.removeAttribute('data-history-crop');
+        if (responsiveSource) responsiveSource.srcset = nextImage;
+        visibleVisual.src = nextImage;
+        visibleVisual.alt = getHistoryAlt(nextContent);
+      });
+      const previousRoute = routes.get(activeYear);
+      const previousFlow = currentFlows.get(activeYear);
+      const nextFlow = currentFlows.get(year);
+      previousRoute?.classList.remove('is-active', 'is-animating');
+      previousFlow?.classList.remove('is-active');
+      nextRoute.classList.remove('is-active', 'is-animating');
+      nextFlow?.classList.remove('is-active');
 
-    await wait(timing.fade);
-    nextRoute.classList.add('is-animating');
-    await wait(timing.route);
+      await wait(timing.fade);
+      nextRoute.classList.add('is-animating');
+      await wait(timing.route);
 
-    nextRoute.classList.remove('is-animating');
-    nextRoute.classList.add('is-active');
-    nextFlow?.classList.add('is-active');
-    await imageReady;
+      nextRoute.classList.remove('is-animating');
+      nextRoute.classList.add('is-active');
+      nextFlow?.classList.add('is-active');
+      await imageReady;
 
-    title.textContent = nextContent.title;
-    description.textContent = nextContent.description;
+      title.textContent = nextContent.title;
+      description.textContent = nextContent.description;
+      if (timelineMotion) visibleVisual.classList.add('is-flashing');
+      activeYear = year;
+    } finally {
+      // Restore visibility if the image transition fails before completing.
+      visibleVisual.classList.add('is-visible');
+      section.classList.remove('is-switching');
+      section.removeAttribute('aria-busy');
+      switching = false;
+    }
+
     revealCopy();
-    if (timelineMotion) visibleVisual.classList.add('is-flashing');
-    activeYear = year;
-    section.classList.remove('is-switching');
-
     if (timing.image) await wait(timing.image);
     visibleVisual.classList.remove('is-flashing');
-    section.removeAttribute('aria-busy');
-    switching = false;
   };
 
   buttons.forEach((button) => {
