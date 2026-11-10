@@ -276,11 +276,11 @@ site-header{--menu-gutter:max(5.2083333333vw,calc((100vw - 107.5rem)/2));display
 }
 
 @media(max-width:37.5rem){
-  .menu-drawer .menu-icon{height:.6875rem}
+  .menu-drawer .menu-icon{height:.72em}
   .menu-icon i{height:.0625rem}
-  .menu-icon i:nth-child(1){top:.0625rem}
-  .menu-icon i:nth-child(2){top:.3125rem}
-  .menu-icon i:nth-child(3){top:.5625rem}
+  .menu-drawer .menu-icon i:nth-child(1){top:0}
+  .menu-drawer .menu-icon i:nth-child(2){top:calc(50% - .03125rem)}
+  .menu-drawer .menu-icon i:nth-child(3){top:calc(100% - .0625rem)}
   .menu-drawer.is-open .menu-icon i:nth-child(1),
-  .menu-drawer.is-open .menu-icon i:nth-child(3){top:.3125rem}
+  .menu-drawer.is-open .menu-icon i:nth-child(3){top:calc(50% - .03125rem)}
 }
