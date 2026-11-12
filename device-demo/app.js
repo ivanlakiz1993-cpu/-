@@ -479,7 +479,8 @@ try {
       else {
         setFrostProgress(0);
         setTemperatureProgress(0);
-        setRainProgress((rainBuild?.progress || 0) * (1 - (rainClear?.progress || 0)));
+        const rainFade = THREE.MathUtils.smoothstep(rainClear?.progress || 0, 0, 1);
+        setRainProgress((rainBuild?.progress || 0) * (1 - rainFade));
       }
       setVibrationProgress(vibrationMotion?.progress || 0);
     };
@@ -507,9 +508,8 @@ try {
     });
     if (equipment && weatherSection.matches('.testing-about')) rainClear = ScrollTrigger.create({
       trigger: weatherSection,
-      // Clear the rain as section two settles, leaving the next section
-      // transition free to run its own animation.
-      start: 'top 30%', end: 'top top', scrub: .5,
+      // Ease the rain away across the laboratory intro, before climate tests.
+      start: 'top 30%', end: 'bottom top', scrub: .8,
       scroller: scrollContainer,
       onUpdate: syncJourneyEffects
     });
@@ -536,7 +536,7 @@ try {
 
     const setCoverEffects = progress => {
       progress = THREE.MathUtils.clamp(progress, 0, 1);
-      const rain = 1 - THREE.MathUtils.smoothstep(progress, .32, .62);
+      const rain = 1 - THREE.MathUtils.smoothstep(progress, .32, .78);
       const frost = THREE.MathUtils.smoothstep(progress, .12, .92);
       if (rainMaterial) rainMaterial.opacity = rain * .25;
       // Keep rainfall speed independent of scroll; only transition from rain
